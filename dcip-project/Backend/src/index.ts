@@ -8,9 +8,21 @@ import portfolioRoutes from './routes/portfolio'
 
 dotenv.config()
 
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET is not set. Exiting.')
+  process.exit(1)
+}
+
 const app = express()
 
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true }))
+const allowedOrigin = (origin: string | undefined, cb: (err: Error | null, allow?: boolean) => void) => {
+  if (!origin || origin.startsWith('http://localhost:') || origin === process.env.CLIENT_URL) {
+    cb(null, true)
+  } else {
+    cb(new Error(`CORS: origin ${origin} not allowed`))
+  }
+}
+app.use(cors({ origin: allowedOrigin, credentials: true }))
 app.use(express.json({ limit: '10mb' })) // 10mb to handle base64 canvas exports
 
 app.use('/api/auth', authRoutes)

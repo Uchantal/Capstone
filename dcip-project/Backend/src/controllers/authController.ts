@@ -2,7 +2,8 @@ import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import User from '../models/User'
-import School from '../models/School'
+import School, { ISchool } from '../models/School'
+import { AuthRequest } from '../middleware/authMiddleware'
 
 const generateToken = (id: string): string => {
   return jwt.sign({ id }, process.env.JWT_SECRET as string, { expiresIn: '7d' })
@@ -10,9 +11,9 @@ const generateToken = (id: string): string => {
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { fullName, username, password, schoolId } = req.body
+    const { fullName, username, email, password, schoolId } = req.body
 
-    if (!fullName || !username || !password || !schoolId) {
+    if (!fullName || !username || !email || !password || !schoolId) {
       res.status(400).json({ message: 'All fields are required' })
       return
     }
@@ -23,14 +24,20 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return
     }
 
-    const exists = await User.findOne({ username: username.toLowerCase() })
-    if (exists) {
+    const existingUsername = await User.findOne({ username: username.toLowerCase() })
+    if (existingUsername) {
       res.status(400).json({ message: 'Username already taken' })
       return
     }
 
+    const existingEmail = await User.findOne({ email: email.toLowerCase() })
+    if (existingEmail) {
+      res.status(400).json({ message: 'An account with this email already exists' })
+      return
+    }
+
     const hashed = await bcrypt.hash(password, 10)
-    const user = await User.create({ fullName, username, password: hashed, school: schoolId })
+    const user = await User.create({ fullName, username, email, password: hashed, school: schoolId })
 
     res.status(201).json({
       token: generateToken(user._id.toString()),
@@ -38,11 +45,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         id: user._id,
         fullName: user.fullName,
         username: user.username,
+        email: user.email,
         school: { id: school._id, name: school.name, district: school.district },
         discipline: user.discipline,
       },
     })
   } catch (error) {
+    console.error('Registration error:', error)
     res.status(500).json({ message: 'Server error during registration' })
   }
 }
@@ -68,7 +77,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return
     }
 
-    const school = user.school as any
+    const school = user.school as unknown as ISchool
     res.json({
       token: generateToken(user._id.toString()),
       user: {
@@ -80,6 +89,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       },
     })
   } catch (error) {
+    console.error('Login error:', error)
     res.status(500).json({ message: 'Server error during login' })
   }
 }
@@ -89,11 +99,12 @@ export const getSchools = async (_req: Request, res: Response): Promise<void> =>
     const schools = await School.find().sort({ name: 1 })
     res.json(schools)
   } catch (error) {
+    console.error('Get schools error:', error)
     res.status(500).json({ message: 'Could not fetch schools' })
   }
 }
 
-export const updateDiscipline = async (req: any, res: Response): Promise<void> => {
+export const updateDiscipline = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { discipline } = req.body
     const valid = ['music', 'visual-arts', 'graphic-design']
@@ -106,7 +117,7 @@ export const updateDiscipline = async (req: any, res: Response): Promise<void> =
       res.status(404).json({ message: 'User not found' })
       return
     }
-    const school = user.school as any
+    const school = user.school as unknown as ISchool
     res.json({
       id: user._id,
       fullName: user.fullName,
@@ -115,6 +126,7 @@ export const updateDiscipline = async (req: any, res: Response): Promise<void> =
       discipline: user.discipline,
     })
   } catch (error) {
+    console.error('Update discipline error:', error)
     res.status(500).json({ message: 'Could not update discipline' })
   }
 }

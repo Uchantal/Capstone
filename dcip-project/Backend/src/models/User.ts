@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose'
 export interface IUser extends Document {
   fullName: string
   username: string
+  email: string
   password: string
   school: mongoose.Types.ObjectId
   discipline: string | null
@@ -12,6 +13,7 @@ export interface IUser extends Document {
 const userSchema = new Schema<IUser>({
   fullName: { type: String, required: true, trim: true },
   username: { type: String, required: true, unique: true, trim: true, lowercase: true },
+  email: { type: String, required: true, unique: true, trim: true, lowercase: true },
   password: { type: String, required: true },
   school: { type: Schema.Types.ObjectId, ref: 'School', required: true },
   discipline: {
