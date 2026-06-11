@@ -1,0 +1,244 @@
+/* =============================================================================
+   components.css — Reusable component styles using design tokens
+   ============================================================================= */
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-3) var(--space-6);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-3) var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #f9fafb;
+}
+
+.btn-ghost {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+}
+
+.btn-ghost:hover {
+  text-decoration: underline;
+}
+
+/* ── Form inputs ──────────────────────────────────────────────────────────── */
+
+.input {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-card);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.input::placeholder {
+  color: #9ca3af;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+}
+
+.input-label {
+  display: block;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.input-error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: var(--color-accent);
+  font-size: var(--font-size-body);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+}
+
+/* ── Cards ────────────────────────────────────────────────────────────────── */
+
+.card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-card);
+}
+
+.card-hover {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.card-hover:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+/* ── Badges / status pills ────────────────────────────────────────────────── */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+}
+
+.badge-synced {
+  background-color: #d1fae5;
+  color: var(--color-status-synced);
+}
+
+.badge-pending {
+  background-color: #fef3c7;
+  color: var(--color-status-offline);
+}
+
+.badge-error {
+  background-color: #fee2e2;
+  color: var(--color-accent);
+}
+
+.badge-info {
+  background-color: #dbeafe;
+  color: var(--color-status-syncing);
+}
+
+/* ── Status dot ───────────────────────────────────────────────────────────── */
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot-offline  { background-color: var(--color-status-offline); }
+.status-dot-syncing  { background-color: var(--color-status-syncing); animation: pulse 1.5s infinite; }
+.status-dot-synced   { background-color: var(--color-status-synced); }
+.status-dot-error    { background-color: var(--color-status-error); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ── Typography helpers ───────────────────────────────────────────────────── */
+
+.text-h1 {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
+  color: var(--color-text-primary);
+}
+
+.text-h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
+  color: var(--color-text-primary);
+}
+
+.text-h3 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-heading);
+  color: var(--color-text-primary);
+}
+
+.text-body {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  color: var(--color-text-primary);
+}
+
+.text-secondary {
+  font-size: var(--font-size-body);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-body);
+}
+
+.text-caption {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-body);
+}
+
+/* ── Kente stripe — decorative top and bottom bar ────────────────────────── */
+
+.kente-stripe {
+  display: flex;
+  height: 6px;
+}
+
+.kente-stripe-red   { flex: 1; background-color: var(--color-accent); }
+.kente-stripe-gold  { flex: 1; background-color: var(--color-primary); }
+.kente-stripe-green { flex: 1; background-color: var(--color-secondary); }
+
+/* ── Layout helpers ───────────────────────────────────────────────────────── */
+
+.page {
+  min-height: 100vh;
+  background-color: var(--color-bg-page);
+  font-family: var(--font-family-base);
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6);
+}
+
+.container-narrow {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6);
+}

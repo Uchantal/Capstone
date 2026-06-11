@@ -1,0 +1,82 @@
+/* =============================================================================
+   variables.css — Design tokens from Figma Design System
+   File: fFJ9fdoJQUlhkIORqH831d · Page: Design System & Components
+   ============================================================================= */
+
+:root {
+
+  /* ── Colours ─────────────────────────────────────────────────────────────── */
+
+  /* Primary — Gold CTA */
+  --color-primary:        #C8960C;
+  --color-primary-dark:   #8B6508;
+
+  /* Secondary — Deep Green / Nav Active */
+  --color-secondary:      #2D6A4F;
+
+  /* Accent — Kente Red / Alerts */
+  --color-accent:         #D62828;
+
+  /* Surface */
+  --color-bg-page:        #FAFAF7;
+  --color-bg-card:        #FFFFFF;
+
+  /* Border */
+  --color-border:         #E5E7EB;
+
+  /* Text */
+  --color-text-primary:   #1A1A1A;
+  --color-text-secondary: #6B7280;
+
+  /* Status indicators */
+  --color-status-offline: #F59E0B;
+  --color-status-syncing: #3B82F6;
+  --color-status-synced:  #10B981;
+  --color-status-error:   #EF4444;
+
+  /* ── Typography ──────────────────────────────────────────────────────────── */
+
+  /* Font family — Inter loaded via Google Fonts */
+  --font-family-base: 'Inter', sans-serif;
+
+  /* Font sizes — Figma typography scale */
+  --font-size-h1:      2.25rem;   /* 36px — Platform section title */
+  --font-size-h2:      1.5rem;    /* 24px — Screen title           */
+  --font-size-h3:      1.125rem;  /* 18px — Card heading           */
+  --font-size-body:    0.875rem;  /* 14px — Default paragraph text */
+  --font-size-caption: 0.75rem;   /* 12px — Timestamps / metadata  */
+
+  /* Font weights */
+  --font-weight-regular: 400;
+  --font-weight-medium:  500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:    700;
+
+  /* Line heights */
+  --line-height-heading: 1.2;
+  --line-height-body:    1.5;
+
+  /* ── Spacing — 4px base unit ─────────────────────────────────────────────── */
+
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Border radius ───────────────────────────────────────────────────────── */
+
+  --radius-sm:   4px;   /* Inputs, selects          */
+  --radius-md:   8px;   /* Cards, modals            */
+  --radius-lg:  12px;   /* Buttons, containers      */
+  --radius-full: 24px;  /* Pills, badges            */
+
+  /* ── Shadows ─────────────────────────────────────────────────────────────── */
+
+  --shadow-card:  0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
+
+}

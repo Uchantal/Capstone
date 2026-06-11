@@ -1,0 +1,9 @@
+{
+  "name": "Digital Creative Infrastructure Platform",
+  "short_name": "DC Platform",
+  "description": "School-based creative practice platform for Rwandan secondary schools",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAF7",
+  "theme_color": "#C8960C"
+}

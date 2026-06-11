@@ -1,0 +1,50 @@
+/* =============================================================================
+   index.css — Main styles entry point
+   Import this file once in main.tsx to load all styles
+   ============================================================================= */
+
+/* 1. Tailwind base, components, utilities */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 2. Google Fonts — Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* 3. Design tokens — CSS custom properties */
+@import './variables.css';
+
+/* 4. Reusable component styles */
+@import './components.css';
+
+/* ── Global base styles ───────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family-base);
+  background-color: var(--color-bg-page);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: var(--font-family-base);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
