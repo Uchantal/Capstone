@@ -4,7 +4,6 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
 })
 
-// Attach JWT token to every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
   if (token) config.headers.Authorization = `Bearer ${token}`
@@ -50,5 +49,33 @@ export const fetchPortfolio = () => api.get('/portfolio')
 export const fetchPortfolioItem = (id: string) => api.get(`/portfolio/${id}`)
 
 export const deletePortfolioItem = (id: string) => api.delete(`/portfolio/${id}`)
+
+// Admin
+export const getAdminStudents = () => api.get('/admin/students')
+
+export const toggleStudentStatus = (id: string) => api.patch(`/admin/students/${id}/toggle`)
+
+export const getAdminModules = () => api.get('/admin/modules')
+
+export const toggleModule = (id: string) => api.patch(`/admin/modules/${id}/toggle`)
+
+export const getAdminReports = () => api.get('/admin/reports')
+
+export const getAdminSupervisors = () => api.get('/admin/supervisors')
+
+export const createSupervisor = (data: {
+  fullName: string
+  username: string
+  email: string
+  password: string
+  schoolId: string
+}) => api.post('/admin/supervisors', data)
+
+// Supervisor
+export const getSupervisorActiveSessions = () => api.get('/supervisor/sessions/active')
+
+export const getSupervisorStudents = () => api.get('/supervisor/students')
+
+export const getSupervisorProgress = () => api.get('/supervisor/progress')
 
 export default api

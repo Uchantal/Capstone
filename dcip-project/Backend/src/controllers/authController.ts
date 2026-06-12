@@ -5,8 +5,8 @@ import User from '../models/User'
 import School, { ISchool } from '../models/School'
 import { AuthRequest } from '../middleware/authMiddleware'
 
-const generateToken = (id: string): string => {
-  return jwt.sign({ id }, process.env.JWT_SECRET as string, { expiresIn: '7d' })
+const generateToken = (id: string, role: string): string => {
+  return jwt.sign({ id, role }, process.env.JWT_SECRET as string, { expiresIn: '7d' })
 }
 
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -37,15 +37,22 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     const hashed = await bcrypt.hash(password, 10)
-    const user = await User.create({ fullName, username, email, password: hashed, school: schoolId })
+    const user = await User.create({
+      fullName,
+      username,
+      email,
+      password: hashed,
+      school: schoolId,
+      role: 'student',
+    })
 
     res.status(201).json({
-      token: generateToken(user._id.toString()),
+      token: generateToken(user._id.toString(), user.role),
       user: {
         id: user._id,
         fullName: user.fullName,
         username: user.username,
-        email: user.email,
+        role: user.role,
         school: { id: school._id, name: school.name, district: school.district },
         discipline: user.discipline,
       },
@@ -77,14 +84,20 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return
     }
 
-    const school = user.school as unknown as ISchool
+    if (!user.isActive) {
+      res.status(403).json({ message: 'Account is deactivated. Contact your administrator.' })
+      return
+    }
+
+    const school = user.school ? (user.school as unknown as ISchool) : null
     res.json({
-      token: generateToken(user._id.toString()),
+      token: generateToken(user._id.toString(), user.role),
       user: {
         id: user._id,
         fullName: user.fullName,
         username: user.username,
-        school: { id: school._id, name: school.name, district: school.district },
+        role: user.role,
+        school: school ? { id: school._id, name: school.name, district: school.district } : null,
         discipline: user.discipline,
       },
     })
@@ -117,12 +130,13 @@ export const updateDiscipline = async (req: AuthRequest, res: Response): Promise
       res.status(404).json({ message: 'User not found' })
       return
     }
-    const school = user.school as unknown as ISchool
+    const school = user.school ? (user.school as unknown as ISchool) : null
     res.json({
       id: user._id,
       fullName: user.fullName,
       username: user.username,
-      school: { id: school._id, name: school.name, district: school.district },
+      role: user.role,
+      school: school ? { id: school._id, name: school.name, district: school.district } : null,
       discipline: user.discipline,
     })
   } catch (error) {

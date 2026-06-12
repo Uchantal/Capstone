@@ -20,6 +20,8 @@ export default function TopNav() {
 
   const statusLabel = syncing ? 'Syncing' : isOnline ? 'Online' : 'Offline'
 
+  const subtitle = user?.school?.name ?? (user?.role === 'admin' ? 'Administrator' : 'Supervisor')
+
   return (
     <nav className="bg-white border-b border-border h-14 flex items-center px-6 justify-between">
       <div className="flex items-center gap-3">
@@ -30,7 +32,7 @@ export default function TopNav() {
           <p className="text-text-primary font-semibold text-sm leading-tight">Digital Creative Platform</p>
           {user && (
             <p className="text-text-secondary text-xs leading-tight">
-              {user.fullName} · {user.school.name}
+              {user.fullName} · {subtitle}
             </p>
           )}
         </div>

@@ -25,9 +25,16 @@ export default function LoginPage() {
     try {
       const res = await loginUser(form)
       saveAuth(res.data.token, res.data.user)
-      navigate('/dashboard')
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed')
+      const role = res.data.user.role
+      if (role === 'admin') navigate('/admin')
+      else if (role === 'supervisor') navigate('/supervisor')
+      else navigate('/dashboard')
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined
+      setError(message || 'Login failed')
     } finally {
       setLoading(false)
     }

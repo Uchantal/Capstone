@@ -7,19 +7,44 @@ import DisciplineSelectPage from './pages/DisciplineSelectPage'
 import MusicSelectPage from './pages/MusicSelectPage'
 import SessionPage from './pages/SessionPage'
 import PortfolioPage from './pages/PortfolioPage'
+import SupervisorDashboardPage from './pages/supervisor/SupervisorDashboardPage'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+import AdminStudentsPage from './pages/admin/AdminStudentsPage'
+import AdminModulesPage from './pages/admin/AdminModulesPage'
+import AdminReportsPage from './pages/admin/AdminReportsPage'
+import AdminSupervisorsPage from './pages/admin/AdminSupervisorsPage'
 import { useAuth } from './hooks/useAuth'
 
+const roleHome = (role?: string) => {
+  if (role === 'admin') return '/admin'
+  if (role === 'supervisor') return '/supervisor'
+  return '/dashboard'
+}
+
 function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { token, loading } = useAuth()
-  if (loading) return null
-  if (token) return <Navigate to="/dashboard" replace />
+  const { token, user } = useAuth()
+  if (token) return <Navigate to={roleHome(user?.role)} replace />
   return <>{children}</>
 }
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { token, loading } = useAuth()
-  if (loading) return null
+function StudentRoute({ children }: { children: React.ReactNode }) {
+  const { token, user } = useAuth()
   if (!token) return <Navigate to="/login" replace />
+  if (user?.role !== 'student') return <Navigate to={roleHome(user?.role)} replace />
+  return <>{children}</>
+}
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { token, user } = useAuth()
+  if (!token) return <Navigate to="/login" replace />
+  if (user?.role !== 'admin') return <Navigate to={roleHome(user?.role)} replace />
+  return <>{children}</>
+}
+
+function SupervisorRoute({ children }: { children: React.ReactNode }) {
+  const { token, user } = useAuth()
+  if (!token) return <Navigate to="/login" replace />
+  if (user?.role !== 'supervisor') return <Navigate to={roleHome(user?.role)} replace />
   return <>{children}</>
 }
 
@@ -30,11 +55,20 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
         <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-        <Route path="/disciplines" element={<ProtectedRoute><DisciplineSelectPage /></ProtectedRoute>} />
-        <Route path="/session/music" element={<ProtectedRoute><MusicSelectPage /></ProtectedRoute>} />
-        <Route path="/session/:discipline" element={<ProtectedRoute><SessionPage /></ProtectedRoute>} />
-        <Route path="/portfolio" element={<ProtectedRoute><PortfolioPage /></ProtectedRoute>} />
+
+        <Route path="/dashboard" element={<StudentRoute><DashboardPage /></StudentRoute>} />
+        <Route path="/disciplines" element={<StudentRoute><DisciplineSelectPage /></StudentRoute>} />
+        <Route path="/session/music" element={<StudentRoute><MusicSelectPage /></StudentRoute>} />
+        <Route path="/session/:discipline" element={<StudentRoute><SessionPage /></StudentRoute>} />
+        <Route path="/portfolio" element={<StudentRoute><PortfolioPage /></StudentRoute>} />
+
+        <Route path="/supervisor" element={<SupervisorRoute><SupervisorDashboardPage /></SupervisorRoute>} />
+
+        <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
+        <Route path="/admin/students" element={<AdminRoute><AdminStudentsPage /></AdminRoute>} />
+        <Route path="/admin/modules" element={<AdminRoute><AdminModulesPage /></AdminRoute>} />
+        <Route path="/admin/reports" element={<AdminRoute><AdminReportsPage /></AdminRoute>} />
+        <Route path="/admin/supervisors" element={<AdminRoute><AdminSupervisorsPage /></AdminRoute>} />
       </Routes>
     </BrowserRouter>
   )

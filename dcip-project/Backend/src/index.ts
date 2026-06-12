@@ -5,6 +5,8 @@ import { connectDB } from './config/db'
 import authRoutes from './routes/auth'
 import sessionRoutes from './routes/sessions'
 import portfolioRoutes from './routes/portfolio'
+import adminRoutes from './routes/admin'
+import supervisorRoutes from './routes/supervisor'
 
 dotenv.config()
 
@@ -23,11 +25,13 @@ const allowedOrigin = (origin: string | undefined, cb: (err: Error | null, allow
   }
 }
 app.use(cors({ origin: allowedOrigin, credentials: true }))
-app.use(express.json({ limit: '10mb' })) // 10mb to handle base64 canvas exports
+app.use(express.json({ limit: '10mb' }))
 
 app.use('/api/auth', authRoutes)
 app.use('/api/sessions', sessionRoutes)
 app.use('/api/portfolio', portfolioRoutes)
+app.use('/api/admin', adminRoutes)
+app.use('/api/supervisor', supervisorRoutes)
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }))
 

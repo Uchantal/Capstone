@@ -1,10 +1,13 @@
 import { useState } from 'react'
 
+export type UserRole = 'student' | 'supervisor' | 'admin'
+
 export interface AuthUser {
   id: string
   fullName: string
   username: string
-  school: { id: string; name: string; district: string }
+  role: UserRole
+  school: { id: string; name: string; district: string } | null
   discipline: string | null
 }
 
@@ -23,12 +26,10 @@ const loadUser = (): AuthUser | null => {
 
 export const useAuth = () => {
   // Both token and user are read synchronously so they are available on the
-  // very first render. Page components check `user` in useEffect — if user
-  // were null on first render they would immediately navigate('/login').
+  // very first render — prevents redirect loops in route guards.
   const [token, setToken] = useState<string | null>(loadToken)
   const [user, setUser] = useState<AuthUser | null>(loadUser)
 
-  // loading is always false: everything comes from synchronous localStorage reads
   const loading = false
 
   const saveAuth = (newToken: string, userData: AuthUser) => {

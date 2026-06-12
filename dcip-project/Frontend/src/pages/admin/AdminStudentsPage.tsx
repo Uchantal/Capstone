@@ -1,0 +1,130 @@
+import { useEffect, useState } from 'react'
+import AdminNav from '../../components/AdminNav'
+import { getAdminStudents, toggleStudentStatus } from '../../services/api'
+
+interface Student {
+  _id: string
+  fullName: string
+  username: string
+  email: string
+  discipline: string | null
+  isActive: boolean
+  school: { name: string; district: string } | null
+  createdAt: string
+}
+
+const disciplineLabel = (d: string | null) => {
+  if (d === 'music') return 'Music'
+  if (d === 'visual-arts') return 'Visual Arts'
+  if (d === 'graphic-design') return 'Graphic Design'
+  return '—'
+}
+
+export default function AdminStudentsPage() {
+  const [students, setStudents] = useState<Student[]>([])
+  const [filter, setFilter] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [togglingId, setTogglingId] = useState<string | null>(null)
+
+  useEffect(() => {
+    getAdminStudents()
+      .then((res) => setStudents(res.data))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const handleToggle = async (id: string) => {
+    setTogglingId(id)
+    try {
+      const res = await toggleStudentStatus(id)
+      setStudents((prev) => prev.map((s) => (s._id === id ? { ...s, isActive: res.data.isActive } : s)))
+    } catch {
+      // silently fail
+    } finally {
+      setTogglingId(null)
+    }
+  }
+
+  const visible = students.filter((s) => {
+    if (!filter) return true
+    const q = filter.toLowerCase()
+    return (
+      s.fullName.toLowerCase().includes(q) ||
+      s.username.toLowerCase().includes(q) ||
+      (s.school?.name.toLowerCase().includes(q) ?? false)
+    )
+  })
+
+  return (
+    <div className="min-h-screen bg-bg-page">
+      <AdminNav />
+      <main className="max-w-5xl mx-auto px-6 py-8">
+        <div className="flex items-start justify-between mb-6 gap-4">
+          <div>
+            <h1 className="text-text-primary font-bold text-2xl mb-1">Students</h1>
+            <p className="text-text-secondary text-sm">
+              {students.length} registered student{students.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+          <input
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder="Filter by name or school…"
+            className="border border-border rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary w-64 shrink-0"
+          />
+        </div>
+
+        {loading ? (
+          <p className="text-text-secondary text-sm">Loading...</p>
+        ) : visible.length === 0 ? (
+          <p className="text-text-secondary text-sm">No students found.</p>
+        ) : (
+          <div className="bg-white border border-border rounded-2xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="border-b border-border">
+                <tr>
+                  <th className="text-left text-text-secondary font-medium px-6 py-3.5">Name</th>
+                  <th className="text-left text-text-secondary font-medium px-6 py-3.5">Username</th>
+                  <th className="text-left text-text-secondary font-medium px-6 py-3.5">School</th>
+                  <th className="text-left text-text-secondary font-medium px-6 py-3.5">Discipline</th>
+                  <th className="text-left text-text-secondary font-medium px-6 py-3.5">Status</th>
+                  <th className="px-6 py-3.5" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {visible.map((student) => (
+                  <tr key={student._id}>
+                    <td className="px-6 py-4 text-text-primary font-medium">{student.fullName}</td>
+                    <td className="px-6 py-4 text-text-secondary">{student.username}</td>
+                    <td className="px-6 py-4 text-text-secondary">{student.school?.name ?? '—'}</td>
+                    <td className="px-6 py-4 text-text-secondary">{disciplineLabel(student.discipline)}</td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          student.isActive
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-red-100 text-red-600'
+                        }`}
+                      >
+                        {student.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleToggle(student._id)}
+                        disabled={togglingId === student._id}
+                        className="border border-border text-text-secondary text-xs px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                      >
+                        {student.isActive ? 'Deactivate' : 'Activate'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
