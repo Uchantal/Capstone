@@ -8,8 +8,17 @@ import StepIndicator from '../components/StepIndicator'
 import MusicModule from '../components/modules/MusicModule'
 import VisualArtsModule from '../components/modules/VisualArtsModule'
 import GraphicDesignModule from '../components/modules/GraphicDesignModule'
+import GuitarModule from '../components/modules/music/GuitarModule'
+import PianoModule from '../components/modules/music/PianoModule'
+import VoiceModule from '../components/modules/music/VoiceModule'
 
-type Discipline = 'music' | 'visual-arts' | 'graphic-design'
+type Discipline =
+  | 'music'
+  | 'music-guitar'
+  | 'music-piano'
+  | 'music-voice'
+  | 'visual-arts'
+  | 'graphic-design'
 
 const disciplineInfo: Record<Discipline, { name: string; emoji: string; steps: string[] }> = {
   music: {
@@ -21,6 +30,39 @@ const disciplineInfo: Record<Discipline, { name: string; emoji: string; steps: s
       'Play the keyboard — try a simple 5-note sequence',
       'Record a full melody of at least 10 seconds',
       'Save your composition to your portfolio',
+    ],
+  },
+  'music-guitar': {
+    name: 'Guitar',
+    emoji: '🎸',
+    steps: [
+      'Explore the fretboard — tap strings and frets to hear notes',
+      'Play your first chord — try E minor or C major',
+      'Practice a 4-chord progression: Em → Am → G → C',
+      'Record a short melody or chord progression',
+      'Give your session a title and save it to your portfolio',
+    ],
+  },
+  'music-piano': {
+    name: 'Piano',
+    emoji: '🎹',
+    steps: [
+      'Play the C major scale — C D E F G A B C in order',
+      'Try the basic chords: C major, F major, G major',
+      'Find a short melody by ear using the virtual keyboard',
+      'Record your piano session',
+      'Give your session a title and save it to your portfolio',
+    ],
+  },
+  'music-voice': {
+    name: 'Voice & Singing',
+    emoji: '🎤',
+    steps: [
+      'Complete the breathing and warm-up exercises',
+      'Pitch matching — click each tone and sing it back',
+      'Sing the vowel exercise: A – E – I – O – U up and down',
+      'Record a short phrase, melody, or vocal exercise',
+      'Give your session a title and save it to your portfolio',
     ],
   },
   'visual-arts': {
@@ -148,6 +190,24 @@ export default function SessionPage() {
               onAudioReady={(data) => { audioDataRef.current = data }}
             />
           )}
+          {discipline === 'music-guitar' && (
+            <GuitarModule
+              step={step}
+              onAudioReady={(data) => { audioDataRef.current = data }}
+            />
+          )}
+          {discipline === 'music-piano' && (
+            <PianoModule
+              step={step}
+              onAudioReady={(data) => { audioDataRef.current = data }}
+            />
+          )}
+          {discipline === 'music-voice' && (
+            <VoiceModule
+              step={step}
+              onAudioReady={(data) => { audioDataRef.current = data }}
+            />
+          )}
           {discipline === 'visual-arts' && (
             <VisualArtsModule canvasRef={canvasRef} step={step} />
           )}
@@ -191,7 +251,7 @@ export default function SessionPage() {
           ) : (
             <button
               onClick={() => {
-                if (discipline === 'music') {
+                if (discipline === 'music' || discipline === 'music-guitar' || discipline === 'music-piano' || discipline === 'music-voice') {
                   handleSave(audioDataRef.current || 'audio-session', 'audio/wav')
                 } else {
                   const canvas = canvasRef.current

@@ -4,6 +4,7 @@ import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import DisciplineSelectPage from './pages/DisciplineSelectPage'
+import MusicSelectPage from './pages/MusicSelectPage'
 import SessionPage from './pages/SessionPage'
 import PortfolioPage from './pages/PortfolioPage'
 import { useAuth } from './hooks/useAuth'
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
         <Route path="/disciplines" element={<ProtectedRoute><DisciplineSelectPage /></ProtectedRoute>} />
+        <Route path="/session/music" element={<ProtectedRoute><MusicSelectPage /></ProtectedRoute>} />
         <Route path="/session/:discipline" element={<ProtectedRoute><SessionPage /></ProtectedRoute>} />
         <Route path="/portfolio" element={<ProtectedRoute><PortfolioPage /></ProtectedRoute>} />
       </Routes>
