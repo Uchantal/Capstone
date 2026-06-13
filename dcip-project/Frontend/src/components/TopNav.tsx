@@ -26,10 +26,10 @@ export default function TopNav() {
     <nav className="bg-white border-b border-border h-14 flex items-center px-6 justify-between">
       <div className="flex items-center gap-3">
         <div className="bg-primary rounded-lg w-9 h-9 flex items-center justify-center">
-          <span className="text-white font-bold text-sm">DC</span>
+          <span className="text-white font-bold text-sm">DCIP</span>
         </div>
         <div>
-          <p className="text-text-primary font-semibold text-sm leading-tight">Digital Creative Platform</p>
+          <p className="text-text-primary font-semibold text-sm leading-tight">Digital Creative Infrastructure Platform</p>
           {user && (
             <p className="text-text-secondary text-xs leading-tight">
               {user.fullName} · {subtitle}

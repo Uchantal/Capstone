@@ -72,12 +72,12 @@ function DisciplineCard({ name, img, imgAlt, color, paths, description, delay }:
       className="rounded-card overflow-hidden flex flex-col"
       style={{ background: '#161B25', border: '0.5px solid rgba(255,255,255,0.07)' }}
     >
-      <div className="relative h-44 overflow-hidden" style={{ background: '#0d1018' }}>
+      <div className="relative h-44 overflow-hidden">
         {img && (
           <img
             src={img}
             alt={imgAlt}
-            className="w-full h-full object-cover brightness-[32] saturate-[75]"
+            className="w-full h-full object-cover"
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
           />
         )}
@@ -154,10 +154,10 @@ export default function HomePage() {
       >
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 bg-[#C8960C] rounded-lg flex items-center justify-center">
-            <span className="font-display font-extrabold text-sm text-[#0E1117]">DC</span>
+            <span className="font-display font-extrabold text-sm text-[#0E1117]">DCIP</span>
           </div>
           <span className="font-display font-bold text-[15px] text-white tracking-tight">
-            Digital Creative Platform
+            Digital Creative Infrastructure Platform
           </span>
         </div>
 
@@ -242,13 +242,11 @@ export default function HomePage() {
             </a>
           </div>
 
-          <p className="text-[11px] tracking-wider text-white/30">
-            OFFLINE-FIRST &nbsp;·&nbsp; NO INSTALLATION &nbsp;·&nbsp; VERIFIED SCHOOLS ONLY
-          </p>
+         
         </div>
 
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 opacity-35">
-          <span className="text-[10px] tracking-widest text-white">SCROLL</span>
+          
           <div className="w-px h-10" style={{ background: 'linear-gradient(to bottom, #C8960C, transparent)' }} />
         </div>
       </section>
@@ -268,16 +266,9 @@ export default function HomePage() {
             </h2>
             {/* PARAGRAPH 2 — edited */}
             <p className="text-[15px] text-gray-500 leading-relaxed mb-8">
-              Creative talent exists in every district of Rwanda. This platform uses the
-              computer labs already in rural secondary schools to give students a structured
-              space to practise and grow their skills.
+              Creative talent is everywhere in Rwanda. This platform helps students use their school computer labs to learn, practise, and develop their creative skills in a structured and supportive environment.
             </p>
-            <div className="grid grid-cols-2 gap-3">
-              <StatCard value="97.4%" label="of schools already have a computer" />
-              <StatCard value="0" label="platforms built for this purpose — until now" />
-              <StatCard value="3" label="creative disciplines in one platform" />
-              <StatCard value="5" label="guided steps per practice session" />
-            </div>
+           
           </FadeIn>
 
           <FadeIn id="about-img" delay={0.15}
@@ -294,9 +285,7 @@ export default function HomePage() {
               className="absolute bottom-0 left-0 right-0 px-5 py-4"
               style={{ background: 'linear-gradient(to top, rgba(14,17,23,0.88), transparent)' }}
             >
-              <p className="m-0 text-[11px] italic" style={{ color: 'rgba(245,243,238,0.65)' }}>
-                Students at a Rwandan school — the same infrastructure this platform runs on.
-              </p>
+             
             </div>
           </FadeIn>
         </div>
@@ -311,7 +300,7 @@ export default function HomePage() {
             <div>
               <div className="section-label">
                 <div className="section-label-bar" />
-                <span className="section-label-text">Creative Disciplines</span>
+                
               </div>
               <h2 className="font-display font-extrabold text-white leading-[1.1]"
                 style={{ fontSize: 'clamp(28px, 3.5vw, 44px)' }}>
@@ -327,25 +316,25 @@ export default function HomePage() {
 
           <div className="grid grid-cols-3 gap-5">
             <DisciplineCard
-              name="Music" img={IMG_MUSIC}
+              name="Music" img={'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4hrFxBXkVp7G6H45NH-d8U8ZhHPw-kB86KSkHD9DSfA&s=10'}
               imgAlt="Rwandan youth in music session, Ubuntu Music Program Kigali"
-              color="#C8960C"
+              color="#ffff"
               paths={['🎸  Guitar', '🎹  Piano', '🎤  Voice & Singing']}
               description="Play instruments and record your voice using the Web Audio API. Each session takes you from your first note to a saved composition."
               delay={0}
             />
             <DisciplineCard
-              name="Visual Arts"
+              name="Visual Arts" img={'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWuTGPFiUGX2a-Ry0-717R8XMe5XwwN5elmjl_OVIJSw&s=10'}
               imgAlt="Rwandan youth in drawing contest"
-              color="#2D6A4F"
+              color="#ffffff"
               paths={['✏️  Gesture drawing', '🎨  Colour & tone study', '🖼️  Composition']}
               description="Draw and paint on a digital canvas. Learn colour, form, and composition through structured, beginner-friendly exercises."
               delay={0.1}
             />
             <DisciplineCard
-              name="Graphic Design" img={IMG_SCHOOL}
+              name="Graphic Design" img={"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS6onXecRLNIGg4NZdHw_fQMdC73sQ00rZ6dzNk63pEOA&s=10"}
               imgAlt="Students at computers learning digital skills"
-              color="#378ADD"
+              color="#ffffff"
               paths={['🔤  Typography basics', '📐  Layout & grid', '🪧  Poster design']}
               description="Learn layouts, typography, and visual communication. Create posters and graphic works through practical guided sessions."
               delay={0.2}
@@ -537,16 +526,16 @@ export default function HomePage() {
             <div className="max-w-sm">
               <div className="flex items-center gap-2.5 mb-3">
                 <div className="w-8 h-8 bg-[#C8960C] rounded-md flex items-center justify-center">
-                  <span className="font-display font-extrabold text-xs text-[#0E1117]">DC</span>
+                  <span className="font-display font-extrabold text-xs text-[#0E1117]">DCIP</span>
                 </div>
                 <span className="font-display font-bold text-sm text-white">
-                  Digital Creative Platform
+                  Digital Creative Infrastructure Platform
                 </span>
               </div>
               {/* PARAGRAPH 7 — edited */}
               <p className="text-xs leading-relaxed text-white/35">
-                A creative practice platform for talented youth in rural Rwandan secondary schools.
-                Improve your skills inMusic, visual arts, and graphic design.
+                Digital  infrastructure for talented youth in rural Rwandan secondary schools.
+                Improve your skills in Music, visual arts, and graphic design.
               </p>
             </div>
 
@@ -562,14 +551,7 @@ export default function HomePage() {
                   ))}
                 </div>
               </div>
-              <div>
-                <p className="text-[9px] font-semibold tracking-widest text-[#C8960C] mb-4">BUILT WITH</p>
-                <div className="flex flex-col gap-2.5">
-                  {['React + TypeScript', 'Tailwind CSS', 'Web Audio API', 'Node.js + Express', 'MongoDB Atlas'].map((l) => (
-                    <span key={l} className="text-xs text-white/30">{l}</span>
-                  ))}
-                </div>
-              </div>
+              
             </div>
           </div>
 
