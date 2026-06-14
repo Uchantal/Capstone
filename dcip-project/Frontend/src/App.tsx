@@ -8,15 +8,16 @@ import MusicSelectPage from './pages/MusicSelectPage'
 import SessionPage from './pages/SessionPage'
 import PortfolioPage from './pages/PortfolioPage'
 import SupervisorDashboardPage from './pages/supervisor/SupervisorDashboardPage'
-import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+import AdminOverviewPage from './pages/admin/AdminOverviewPage'
 import AdminStudentsPage from './pages/admin/AdminStudentsPage'
 import AdminModulesPage from './pages/admin/AdminModulesPage'
 import AdminReportsPage from './pages/admin/AdminReportsPage'
 import AdminSupervisorsPage from './pages/admin/AdminSupervisorsPage'
+import AdminSchoolsPage from './pages/admin/AdminSchoolsPage'
 import { useAuth } from './hooks/useAuth'
 
 const roleHome = (role?: string) => {
-  if (role === 'admin') return '/admin'
+  if (role === 'admin') return '/admin/overview'
   if (role === 'supervisor') return '/supervisor'
   return '/dashboard'
 }
@@ -64,8 +65,10 @@ export default function App() {
 
         <Route path="/supervisor" element={<SupervisorRoute><SupervisorDashboardPage /></SupervisorRoute>} />
 
-        <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
+        <Route path="/admin" element={<AdminRoute><Navigate to="/admin/overview" replace /></AdminRoute>} />
+        <Route path="/admin/overview" element={<AdminRoute><AdminOverviewPage /></AdminRoute>} />
         <Route path="/admin/students" element={<AdminRoute><AdminStudentsPage /></AdminRoute>} />
+        <Route path="/admin/schools" element={<AdminRoute><AdminSchoolsPage /></AdminRoute>} />
         <Route path="/admin/modules" element={<AdminRoute><AdminModulesPage /></AdminRoute>} />
         <Route path="/admin/reports" element={<AdminRoute><AdminReportsPage /></AdminRoute>} />
         <Route path="/admin/supervisors" element={<AdminRoute><AdminSupervisorsPage /></AdminRoute>} />

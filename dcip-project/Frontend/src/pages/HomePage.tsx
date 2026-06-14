@@ -276,8 +276,8 @@ export default function HomePage() {
             style={{ aspectRatio: '4/3', background: '#1a2030' }}
           >
             <img
-              src={IMG_SCHOOL}
-              alt="Rwandan students using tablets at school"
+              src={"https://pbs.twimg.com/media/EQu0eZTX0AIyQBU.jpg"}
+              alt=""
               className="w-full h-full object-cover"
               onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0' }}
             />

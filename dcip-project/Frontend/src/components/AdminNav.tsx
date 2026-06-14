@@ -2,9 +2,10 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 const NAV_LINKS = [
-  { label: 'Overview', to: '/admin' },
+  { label: 'Overview', to: '/admin/overview' },
   { label: 'Students', to: '/admin/students' },
   { label: 'Supervisors', to: '/admin/supervisors' },
+  { label: 'Schools', to: '/admin/schools' },
   { label: 'Modules', to: '/admin/modules' },
   { label: 'Reports', to: '/admin/reports' },
 ]
@@ -32,7 +33,7 @@ export default function AdminNav() {
             <NavLink
               key={link.to}
               to={link.to}
-              end={link.to === '/admin'}
+              end
               className={({ isActive }) =>
                 `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
