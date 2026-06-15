@@ -90,10 +90,10 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-bg-page flex">
       {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between bg-[#0e1015] w-2/5 p-12">
+      <div className="hidden lg:flex flex-col justify-between bg-[#C8960C] w-2/5 p-12">
         <div className="flex items-center gap-3">
-          <div className="bg-primary rounded-lg w-9 h-9 flex items-center justify-center">
-            <span className="text-white font-bold text-sm">DC</span>
+          <div className="bg-white rounded-lg w-9 h-9 flex items-center justify-center">
+            <span className="text-[#C8960C] font-bold text-sm">DC</span>
           </div>
           <span className="text-white font-semibold text-sm">Digital Creative Platform</span>
         </div>
@@ -101,20 +101,20 @@ export default function RegisterPage() {
           <h2 className="text-white font-bold text-3xl leading-tight mb-4">
             Your creativity<br />starts here.
           </h2>
-          <p className="text-gray-400 text-sm leading-relaxed mb-8">
+          <p className="text-white/80 text-sm leading-relaxed mb-8">
             Register with your school to access structured music, visual arts, and graphic design
             sessions inside the computer lab already at your school.
           </p>
-          <div className="space-y-3 text-sm text-gray-400">
+          <div className="space-y-3 text-sm text-white/80">
             {['No installation required', 'Works offline, syncs when connected', 'Verified schools only'].map((f) => (
               <div key={f} className="flex items-center gap-2">
-                <span className="text-primary">✓</span>
+                <span className="text-white">✓</span>
                 <span>{f}</span>
               </div>
             ))}
           </div>
         </div>
-        <p className="text-gray-600 text-xs">For students at verified participating schools</p>
+        <p className="text-white/60 text-xs">For students at verified participating schools</p>
       </div>
 
       {/* Right panel */}

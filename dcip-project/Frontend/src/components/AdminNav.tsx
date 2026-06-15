@@ -38,7 +38,7 @@ export default function AdminNav() {
                 `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-primary/10 text-primary'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-gray-50'
+                    : 'text-text-secondary hover:text-primary hover:bg-gray-50'
                 }`
               }
             >

@@ -56,7 +56,7 @@ export default function AdminStudentsPage() {
   })
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen bg-[#F9F7F4]">
       <AdminNav />
       <main className="max-w-5xl mx-auto px-6 py-8">
         <div className="flex items-start justify-between mb-6 gap-4">
@@ -81,14 +81,14 @@ export default function AdminStudentsPage() {
         ) : (
           <div className="bg-white border border-border rounded-2xl overflow-hidden overflow-x-auto">
             <table className="w-full text-sm min-w-[640px]">
-              <thead className="border-b border-border">
+              <thead className="bg-[#F9F7F4] border-b border-border">
                 <tr>
-                  <th className="text-left text-text-secondary font-medium px-6 py-3.5">Name</th>
-                  <th className="text-left text-text-secondary font-medium px-6 py-3.5">Username</th>
-                  <th className="text-left text-text-secondary font-medium px-6 py-3.5">School</th>
-                  <th className="text-left text-text-secondary font-medium px-6 py-3.5">Discipline</th>
-                  <th className="text-left text-text-secondary font-medium px-6 py-3.5">Status</th>
-                  <th className="px-6 py-3.5" />
+                  <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Name</th>
+                  <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Username</th>
+                  <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">School</th>
+                  <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Discipline</th>
+                  <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Status</th>
+                  <th className="px-6 py-3" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

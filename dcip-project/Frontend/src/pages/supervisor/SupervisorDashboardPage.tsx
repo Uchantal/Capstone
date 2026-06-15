@@ -159,12 +159,12 @@ export default function SupervisorDashboardPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead>
+                <thead className="bg-[#F9F7F4]">
                   <tr className="border-b border-border">
-                    <th className="text-left text-text-secondary font-medium pb-3 pr-6">Student</th>
-                    <th className="text-left text-text-secondary font-medium pb-3 pr-6">Discipline</th>
-                    <th className="text-left text-text-secondary font-medium pb-3 pr-6">Duration</th>
-                    <th className="text-left text-text-secondary font-medium pb-3">Saved at</th>
+                    <th className="text-left text-text-muted font-medium py-3 pr-6 uppercase text-xs tracking-wide">Student</th>
+                    <th className="text-left text-text-muted font-medium py-3 pr-6 uppercase text-xs tracking-wide">Discipline</th>
+                    <th className="text-left text-text-muted font-medium py-3 pr-6 uppercase text-xs tracking-wide">Duration</th>
+                    <th className="text-left text-text-muted font-medium py-3 uppercase text-xs tracking-wide">Saved at</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -192,15 +192,15 @@ export default function SupervisorDashboardPage() {
           <h2 className="text-text-primary font-bold text-lg mb-5">School Progress Summary</h2>
 
           <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="bg-bg-page rounded-xl p-4">
+            <div className="bg-[#F9F7F4] rounded-xl p-4">
               <p className="text-text-secondary text-xs mb-1">Total Students</p>
               <p className="text-text-primary font-bold text-2xl">{progress.length}</p>
             </div>
-            <div className="bg-bg-page rounded-xl p-4">
+            <div className="bg-[#F9F7F4] rounded-xl p-4">
               <p className="text-text-secondary text-xs mb-1">Total Sessions</p>
               <p className="text-text-primary font-bold text-2xl">{totalSessions}</p>
             </div>
-            <div className="bg-bg-page rounded-xl p-4">
+            <div className="bg-[#F9F7F4] rounded-xl p-4">
               <p className="text-text-secondary text-xs mb-1">Top Discipline</p>
               <p className="text-text-primary font-bold text-xl">{disciplineLabel(topDiscipline)}</p>
             </div>
@@ -213,13 +213,13 @@ export default function SupervisorDashboardPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead>
+                <thead className="bg-[#F9F7F4]">
                   <tr className="border-b border-border">
-                    <th className="text-left text-text-secondary font-medium pb-3 pr-6">Student</th>
-                    <th className="text-left text-text-secondary font-medium pb-3 pr-6">Username</th>
-                    <th className="text-left text-text-secondary font-medium pb-3 pr-6">Discipline</th>
-                    <th className="text-left text-text-secondary font-medium pb-3 pr-6">Sessions</th>
-                    <th className="text-left text-text-secondary font-medium pb-3">Portfolio</th>
+                    <th className="text-left text-text-muted font-medium py-3 pr-6 uppercase text-xs tracking-wide">Student</th>
+                    <th className="text-left text-text-muted font-medium py-3 pr-6 uppercase text-xs tracking-wide">Username</th>
+                    <th className="text-left text-text-muted font-medium py-3 pr-6 uppercase text-xs tracking-wide">Discipline</th>
+                    <th className="text-left text-text-muted font-medium py-3 pr-6 uppercase text-xs tracking-wide">Sessions</th>
+                    <th className="text-left text-text-muted font-medium py-3 uppercase text-xs tracking-wide">Portfolio</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">

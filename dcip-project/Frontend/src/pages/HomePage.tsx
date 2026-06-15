@@ -134,15 +134,15 @@ export default function HomePage() {
 
       {/* NAV */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-6 md:px-8 lg:px-16 transition-all duration-300 ${
-          scrolled ? 'bg-[#0E1117]/95 backdrop-blur-md border-b border-primary/15' : 'bg-transparent'
+        className={`fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-6 md:px-8 lg:px-16 transition-all duration-300 bg-white border-b border-[#E8E4DC] ${
+          scrolled ? 'shadow-sm' : ''
         }`}
       >
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center shrink-0">
-            <span className="text-[#0E1117] font-extrabold text-sm">DCIP</span>
+            <span className="text-white font-extrabold text-sm">DCIP</span>
           </div>
-          <span className="font-sans font-bold text-[15px] text-white tracking-tight hidden lg:inline">
+          <span className="font-sans font-bold text-[15px] text-[#1A1A1A] tracking-tight hidden lg:inline">
             Digital Creative Infrastructure Platform
           </span>
         </div>
@@ -152,20 +152,20 @@ export default function HomePage() {
             <a
               key={label}
               href={`#${label.toLowerCase().replace(/\s+/g, '-')}`}
-              className="text-sm text-white/60 hover:text-primary transition-colors hidden md:inline"
+              className="text-sm text-[#555555] hover:text-primary transition-colors hidden md:inline"
             >
               {label}
             </a>
           ))}
           <Link
             to="/login"
-            className="text-sm font-semibold px-4 py-2 rounded-lg border border-primary text-primary hover:bg-primary/10 transition-colors"
+            className="text-sm font-semibold px-4 py-2 rounded-lg border border-primary text-primary bg-white hover:bg-primary/10 transition-colors"
           >
             Log In
           </Link>
           <Link
             to="/register"
-            className="text-sm font-bold px-5 py-2 rounded-lg bg-primary text-[#0E1117] hover:bg-primary-dark transition-colors"
+            className="text-sm font-bold px-5 py-2 rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors"
           >
             Register
           </Link>
@@ -210,7 +210,7 @@ export default function HomePage() {
           <div className="flex gap-3.5 flex-wrap">
             <Link
               to="/register"
-              className="bg-primary text-[#0E1117] font-bold text-sm px-7 py-3.5 rounded-xl hover:bg-primary-dark transition-colors"
+              className="bg-primary text-white font-bold text-sm px-7 py-3.5 rounded-xl hover:bg-primary-dark transition-colors"
             >
               Create Your Account
             </Link>
@@ -225,17 +225,17 @@ export default function HomePage() {
       </section>
 
       {/* ABOUT */}
-      <section id="about" className="bg-[#F5F3EE] py-16 md:py-12 lg:py-24 px-6 md:px-8 lg:px-20">
+      <section id="about" className="bg-[#F9F7F4] py-16 md:py-12 lg:py-24 px-6 md:px-8 lg:px-20">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
           <FadeIn delay={0}>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-px bg-primary" />
               <span className="text-primary text-xs font-semibold tracking-widest uppercase">About the Platform</span>
             </div>
-            <h2 className="text-[#0E1117] font-extrabold text-3xl lg:text-4xl leading-tight mb-5">
+            <h2 className="text-[#1A1A1A] font-extrabold text-3xl lg:text-4xl leading-tight mb-5">
               The talent is in every district.<br />The studio is now too.
             </h2>
-            <p className="text-gray-500 text-sm leading-relaxed">
+            <p className="text-[#555555] text-sm leading-relaxed">
               Creative talent is everywhere in Rwanda. This platform helps students use their school computer labs to learn,
               practise, and develop their creative skills in a structured and supportive environment.
             </p>
@@ -269,7 +269,7 @@ export default function HomePage() {
             </h2>
             <p
               className="text-sm leading-relaxed mt-4 max-w-sm mx-auto"
-              style={{ color: 'rgba(245,243,238,0.45)' }}
+              style={{ color: 'rgba(245,243,238,0.55)' }}
             >
               Choose a discipline and follow guided sessions at your own pace.
               No prior experience needed.
@@ -314,11 +314,11 @@ export default function HomePage() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how-it-works" className="bg-[#111318] py-16 md:py-12 lg:py-24 px-6 md:px-8 lg:px-20">
+      <section id="how-it-works" className="bg-[#F9F7F4] py-16 md:py-12 lg:py-24 px-6 md:px-8 lg:px-20">
         <div className="max-w-6xl mx-auto">
           <FadeIn delay={0} className="text-center mb-16">
             <p className="text-primary text-xs font-semibold tracking-widest uppercase mb-3">How It Works</p>
-            <h2 className="font-sans font-extrabold text-white text-3xl lg:text-4xl">
+            <h2 className="font-sans font-extrabold text-[#1A1A1A] text-3xl lg:text-4xl">
               School computer to saved portfolio.<br />Four steps.
             </h2>
           </FadeIn>
@@ -326,12 +326,12 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-0.5">
             {steps.map((s, i) => (
               <FadeIn key={s.n} delay={i * 0.1}>
-                <div className={`bg-[#161B25] p-8 border-t-[3px] ${s.borderColor} h-full`}>
-                  <div className="font-sans font-extrabold text-white/5 text-6xl leading-none mb-5 tracking-tighter">
+                <div className={`bg-white border border-[#E8E4DC] p-8 border-t-[3px] ${s.borderColor} h-full`}>
+                  <div className="font-sans font-extrabold text-[#1A1A1A]/5 text-6xl leading-none mb-5 tracking-tighter">
                     {s.n}
                   </div>
-                  <h3 className="font-sans font-bold text-white text-base mb-3 leading-snug">{s.title}</h3>
-                  <p className="text-xs text-white/50 leading-relaxed">{s.desc}</p>
+                  <h3 className="font-sans font-bold text-[#1A1A1A] text-base mb-3 leading-snug">{s.title}</h3>
+                  <p className="text-xs text-[#555555] leading-relaxed">{s.desc}</p>
                 </div>
               </FadeIn>
             ))}
@@ -340,14 +340,14 @@ export default function HomePage() {
       </section>
 
       {/* FEATURES */}
-      <section className="bg-[#F5F3EE] py-16 md:py-12 lg:py-24 px-6 md:px-8 lg:px-20">
+      <section className="bg-[#F9F7F4] py-16 md:py-12 lg:py-24 px-6 md:px-8 lg:px-20">
         <div className="max-w-6xl mx-auto">
           <FadeIn delay={0} className="mb-14">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-px bg-primary" />
               <span className="text-primary text-xs font-semibold tracking-widest uppercase">Built for you at your school</span>
             </div>
-            <h2 className="font-sans font-extrabold text-[#0E1117] text-3xl lg:text-4xl">
+            <h2 className="font-sans font-extrabold text-[#1A1A1A] text-3xl lg:text-4xl">
               Designed for how Rwandan schools actually work to help Creative Sector growth.
             </h2>
           </FadeIn>
@@ -356,10 +356,10 @@ export default function HomePage() {
             {features.map((f) => (
               <div
                 key={f.title}
-                className={`p-6 bg-white border border-gray-200 border-l-[3px] ${f.leftBorder}`}
+                className={`p-6 bg-white border border-[#E8E4DC] border-l-[3px] ${f.leftBorder}`}
               >
-                <h3 className="font-semibold text-sm text-gray-900 mb-2">{f.title}</h3>
-                <p className="text-xs text-gray-500 leading-relaxed">{f.description}</p>
+                <h3 className="font-semibold text-sm text-[#1A1A1A] mb-2">{f.title}</h3>
+                <p className="text-xs text-[#555555] leading-relaxed">{f.description}</p>
               </div>
             ))}
           </div>
@@ -384,7 +384,7 @@ export default function HomePage() {
           <div className="flex gap-3.5 justify-center flex-wrap">
             <Link
               to="/register"
-              className="bg-primary text-[#0E1117] font-bold text-sm px-8 py-3.5 rounded-xl hover:bg-primary-dark transition-colors"
+              className="bg-primary text-white font-bold text-sm px-8 py-3.5 rounded-xl hover:bg-primary-dark transition-colors"
             >
               Create Your Account
             </Link>
@@ -402,19 +402,19 @@ export default function HomePage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-[#080A0E] border-t border-white/5 px-6 md:px-8 lg:px-20 pt-12 pb-8">
+      <footer className="bg-white border-t border-[#E8E4DC] px-6 md:px-8 lg:px-20 pt-12 pb-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-start flex-wrap gap-10 mb-10">
             <div className="max-w-sm">
               <div className="flex items-center gap-2.5 mb-3">
                 <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
-                  <span className="font-sans font-extrabold text-xs text-[#0E1117]">DCIP</span>
+                  <span className="font-sans font-extrabold text-xs text-white">DCIP</span>
                 </div>
-                <span className="font-sans font-bold text-sm text-white">
+                <span className="font-sans font-bold text-sm text-[#1A1A1A]">
                   Digital Creative Infrastructure Platform
                 </span>
               </div>
-              <p className="text-xs text-white/35 leading-relaxed">
+              <p className="text-xs text-[#888888] leading-relaxed">
                 Digital infrastructure for talented youth in rural Rwandan secondary schools.
                 Improve your skills in Music, Visual Arts, and Graphic Design.
               </p>
@@ -424,18 +424,18 @@ export default function HomePage() {
               <div>
                 <p className="text-[9px] font-semibold tracking-widest text-primary mb-4 uppercase">Platform</p>
                 <div className="flex flex-col gap-2.5">
-                  <a href="#about" className="text-xs text-white/40 hover:text-primary transition-colors">About</a>
-                  <a href="#disciplines" className="text-xs text-white/40 hover:text-primary transition-colors">Disciplines</a>
-                  <a href="#how-it-works" className="text-xs text-white/40 hover:text-primary transition-colors">How It Works</a>
-                  <Link to="/register" className="text-xs text-white/40 hover:text-primary transition-colors">Register</Link>
-                  <Link to="/login" className="text-xs text-white/40 hover:text-primary transition-colors">Log In</Link>
+                  <a href="#about" className="text-xs text-[#888888] hover:text-primary transition-colors">About</a>
+                  <a href="#disciplines" className="text-xs text-[#888888] hover:text-primary transition-colors">Disciplines</a>
+                  <a href="#how-it-works" className="text-xs text-[#888888] hover:text-primary transition-colors">How It Works</a>
+                  <Link to="/register" className="text-xs text-[#888888] hover:text-primary transition-colors">Register</Link>
+                  <Link to="/login" className="text-xs text-[#888888] hover:text-primary transition-colors">Log In</Link>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex justify-between items-center flex-wrap gap-3 pt-6 border-t border-white/5">
-            <span className="text-[10px] text-white/20">
+          <div className="flex justify-between items-center flex-wrap gap-3 pt-6 border-t border-[#E8E4DC]">
+            <span className="text-[10px] text-[#888888]">
               © 2025 DCIP By Chantal. All rights reserved.
             </span>
             <div className="flex gap-1">

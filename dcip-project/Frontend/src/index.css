@@ -8,6 +8,16 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  background-color: #ffffff;
+}
+
+html,
+body {
+  border: none;
+  outline: none;
+}
+
 body {
   font-family: 'Inter', sans-serif;
 }

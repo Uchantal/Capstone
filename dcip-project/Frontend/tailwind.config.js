@@ -4,14 +4,38 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#C8960C',
-        'primary-dark': '#8B6508',
+        primary: {
+          DEFAULT: '#C8960C',
+          dark: '#8B6508',
+          light: '#FEF3D0',
+        },
         secondary: '#2D6A4F',
-        accent: '#D62828',
-        'bg-page': '#FAFAF7',
+        accent: {
+          DEFAULT: '#D62828',
+          green: '#2D6A4F',
+          red: '#D62828',
+          blue: '#378ADD',
+        },
+        surface: {
+          white: '#FFFFFF',
+          warm: '#F9F7F4',
+          border: '#E8E4DC',
+        },
+        text: {
+          primary: '#1A1A1A',
+          secondary: '#555555',
+          muted: '#888888',
+        },
+        dark: {
+          base: '#0E1117',
+          mid: '#161B25',
+          footer: '#080A0E',
+        },
+        'bg-page': '#FFFFFF',
+        'bg-card': '#FFFFFF',
         'text-primary': '#1A1A1A',
-        'text-secondary': '#6B7280',
-        border: '#E5E7EB',
+        'text-secondary': '#555555',
+        border: '#E8E4DC',
         'status-offline': '#F59E0B',
         'status-syncing': '#3B82F6',
         'status-synced': '#10B981',

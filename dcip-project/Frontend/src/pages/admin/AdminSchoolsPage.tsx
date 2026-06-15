@@ -84,13 +84,13 @@ export default function AdminSchoolsPage() {
         ) : (
           <div className="bg-white border border-border rounded-2xl overflow-hidden overflow-x-auto">
             <table className="w-full text-sm min-w-[560px]">
-              <thead className="border-b border-border">
+              <thead className="bg-[#F9F7F4] border-b border-border">
                 <tr>
-                  <th className="text-left text-text-secondary font-medium px-6 py-3.5">Name</th>
-                  <th className="text-left text-text-secondary font-medium px-6 py-3.5">District</th>
-                  <th className="text-left text-text-secondary font-medium px-6 py-3.5">Province</th>
-                  <th className="text-left text-text-secondary font-medium px-6 py-3.5">Status</th>
-                  <th className="px-6 py-3.5" />
+                  <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Name</th>
+                  <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">District</th>
+                  <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Province</th>
+                  <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Status</th>
+                  <th className="px-6 py-3" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

@@ -28,7 +28,7 @@ export default function PortfolioItemCard({
 
   return (
     <div className="bg-white border border-border rounded-xl p-4 flex items-start gap-4">
-      <div className="bg-bg-page rounded-xl w-16 h-16 flex items-center justify-center flex-shrink-0 text-2xl">
+      <div className="bg-[#F9F7F4] rounded-xl w-16 h-16 flex items-center justify-center flex-shrink-0 text-2xl">
         {disciplineEmoji[discipline] || '📁'}
       </div>
 

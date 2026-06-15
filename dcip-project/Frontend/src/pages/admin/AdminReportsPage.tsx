@@ -34,7 +34,7 @@ export default function AdminReportsPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen bg-[#F9F7F4]">
       <AdminNav />
       <main className="max-w-3xl mx-auto px-6 py-8 space-y-8">
         <div>

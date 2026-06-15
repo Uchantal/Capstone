@@ -18,15 +18,17 @@
   --color-accent:         #D62828;
 
   /* Surface */
-  --color-bg-page:        #FAFAF7;
+  --color-bg-page:        #FFFFFF;
+  --color-bg-warm:        #F9F7F4;
   --color-bg-card:        #FFFFFF;
 
   /* Border */
-  --color-border:         #E5E7EB;
+  --color-border:         #E8E4DC;
 
   /* Text */
   --color-text-primary:   #1A1A1A;
-  --color-text-secondary: #6B7280;
+  --color-text-secondary: #555555;
+  --color-text-muted:     #888888;
 
   /* Status indicators */
   --color-status-offline: #F59E0B;
@@ -76,7 +78,7 @@
 
   /* Shadows*/
 
-  --shadow-card:  0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-card:  0 1px 3px rgba(99, 168, 173, 0.08);
+  --shadow-hover: 0 4px 12px rgba(76, 129, 118, 0.12);
 
 }
