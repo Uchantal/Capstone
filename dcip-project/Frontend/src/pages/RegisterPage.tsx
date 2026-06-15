@@ -103,10 +103,10 @@ export default function RegisterPage() {
           </h2>
           <p className="text-gray-400 text-sm leading-relaxed mb-8">
             Register with your school to access structured music, visual arts, and graphic design
-            sessions — inside the computer lab already at your school.
+            sessions inside the computer lab already at your school.
           </p>
           <div className="space-y-3 text-sm text-gray-400">
-            {['No installation required', 'Works offline — syncs when connected', 'Verified schools only'].map((f) => (
+            {['No installation required', 'Works offline, syncs when connected', 'Verified schools only'].map((f) => (
               <div key={f} className="flex items-center gap-2">
                 <span className="text-primary">✓</span>
                 <span>{f}</span>
@@ -210,7 +210,7 @@ export default function RegisterPage() {
                 <option value="">Select your school</option>
                 {schools.map((s) => (
                   <option key={s._id} value={s._id}>
-                    {s.name} — {s.district}
+                    {s.name}, {s.district}
                   </option>
                 ))}
               </select>

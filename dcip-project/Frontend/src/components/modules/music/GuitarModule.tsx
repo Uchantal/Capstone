@@ -25,8 +25,8 @@ const CHORD_DATA = [
 
 const HINTS: Record<number, string> = {
   1: 'Tap any position on the fretboard to hear a note.',
-  2: 'Use the chord buttons below — Em (E minor) is a great starting point.',
-  3: 'Try Em → Am → G → C in sequence — one of the most popular progressions in music.',
+  2: 'Use the chord buttons below. Em (E minor) is a great starting point.',
+  3: 'Try Em → Am → G → C in sequence, one of the most popular progressions in music.',
   4: 'Press Start Recording, play freely, then Stop to capture your session.',
   5: 'Give your session a title above and save it to your portfolio.',
 }
@@ -79,7 +79,7 @@ function ChordDiagram({ id, fullName, positions, onPlay }: ChordDiagramProps) {
 
 function motivationMessage(notes: number, chords: number): string {
   if (notes === 0 && chords === 0) return 'Start by tapping the fretboard above.'
-  if (chords >= 4) return 'Excellent — you played the full 4-chord progression!'
+  if (chords >= 4) return 'Excellent! You played the full 4-chord progression!'
   if (chords >= 1) return 'Great session. You are building real guitar feel.'
   if (notes >= 10) return 'Good note exploration. Try one of the chords next.'
   return 'Good start. Keep exploring the strings.'
@@ -242,7 +242,7 @@ export default function GuitarModule({ step, onAudioReady }: Props) {
       {/* Chord library — step 2+ */}
       {step >= 2 && (
         <div>
-          <p className="text-text-primary text-xs font-semibold mb-2">Chord library — click to strum</p>
+          <p className="text-text-primary text-xs font-semibold mb-2">Chord library: click to strum</p>
           <div className="flex gap-3 flex-wrap">
             {CHORD_DATA.map((chord) => (
               <ChordDiagram
@@ -268,7 +268,7 @@ export default function GuitarModule({ step, onAudioReady }: Props) {
         <div className="space-y-3">
           <p className="text-text-primary text-xs font-semibold">Record your session</p>
           <p className="text-text-secondary text-xs">
-            This recording captures the notes you play — not the microphone.
+            This recording captures the notes you play, not the microphone.
           </p>
 
           {!recording && !recordedUrl && (
@@ -284,7 +284,7 @@ export default function GuitarModule({ step, onAudioReady }: Props) {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="inline-block w-2 h-2 rounded-full bg-accent animate-pulse" />
-                <span className="text-accent text-sm font-medium">Recording — play your notes</span>
+                <span className="text-accent text-sm font-medium">Recording: play your notes</span>
               </div>
               <button
                 onClick={stopRecording}

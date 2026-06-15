@@ -56,7 +56,7 @@
   --line-height-heading: 1.2;
   --line-height-body:    1.5;
 
-  /* ── Spacing — 4px base unit ─────────────────────────────────────────────── */
+  /* Spacing — 4px base unit */
 
   --space-1:   4px;
   --space-2:   8px;
@@ -67,14 +67,14 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* ── Border radius ───────────────────────────────────────────────────────── */
+  /* Border radius*/
 
   --radius-sm:   4px;   /* Inputs, selects          */
   --radius-md:   8px;   /* Cards, modals            */
   --radius-lg:  12px;   /* Buttons, containers      */
   --radius-full: 24px;  /* Pills, badges            */
 
-  /* ── Shadows ─────────────────────────────────────────────────────────────── */
+  /* Shadows*/
 
   --shadow-card:  0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.12);

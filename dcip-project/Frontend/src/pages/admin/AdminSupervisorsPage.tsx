@@ -92,7 +92,7 @@ export default function AdminSupervisorsPage() {
           >
             <h2 className="text-text-primary font-semibold">New Supervisor Account</h2>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-1 lg:grid-cols-2">
               <div>
                 <label className="text-text-primary text-sm font-medium block mb-1.5">Full name</label>
                 <input
@@ -148,7 +148,7 @@ export default function AdminSupervisorsPage() {
                 <option value="">Select school…</option>
                 {schools.map((s) => (
                   <option key={s._id} value={s._id}>
-                    {s.name} — {s.district}
+                    {s.name}, {s.district}
                   </option>
                 ))}
               </select>
@@ -173,8 +173,8 @@ export default function AdminSupervisorsPage() {
         ) : supervisors.length === 0 ? (
           <p className="text-text-secondary text-sm">No supervisors yet. Add one above.</p>
         ) : (
-          <div className="bg-white border border-border rounded-2xl overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="bg-white border border-border rounded-2xl overflow-hidden overflow-x-auto">
+            <table className="w-full text-sm min-w-[480px]">
               <thead className="border-b border-border">
                 <tr>
                   <th className="text-left text-text-secondary font-medium px-6 py-3.5">Name</th>
@@ -188,8 +188,8 @@ export default function AdminSupervisorsPage() {
                   <tr key={sup._id}>
                     <td className="px-6 py-4 text-text-primary font-medium">{sup.fullName}</td>
                     <td className="px-6 py-4 text-text-secondary">{sup.username}</td>
-                    <td className="px-6 py-4 text-text-secondary">{sup.school?.name ?? '—'}</td>
-                    <td className="px-6 py-4 text-text-secondary">{sup.school?.district ?? '—'}</td>
+                    <td className="px-6 py-4 text-text-secondary">{sup.school?.name ?? 'N/A'}</td>
+                    <td className="px-6 py-4 text-text-secondary">{sup.school?.district ?? 'N/A'}</td>
                   </tr>
                 ))}
               </tbody>

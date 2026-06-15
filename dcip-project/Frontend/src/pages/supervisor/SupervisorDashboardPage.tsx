@@ -23,7 +23,7 @@ const disciplineLabel = (d: string | null) => {
   if (d === 'music') return 'Music'
   if (d === 'visual-arts') return 'Visual Arts'
   if (d === 'graphic-design') return 'Graphic Design'
-  return d ?? '—'
+  return d ?? 'N/A'
 }
 
 export default function SupervisorDashboardPage() {
@@ -114,7 +114,7 @@ export default function SupervisorDashboardPage() {
         <section className="bg-white border border-border rounded-2xl p-6">
           <h2 className="text-text-primary font-bold text-lg mb-1">Laboratory Session</h2>
           <p className="text-text-secondary text-sm mb-5">
-            {fmtDate(now)} — {fmtTime(now)}
+            {fmtDate(now)}, {fmtTime(now)}
           </p>
 
           {labActive ? (

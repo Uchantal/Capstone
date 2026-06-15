@@ -46,14 +46,14 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-4 mb-8 md:grid-cols-2 lg:grid-cols-3">
           <ProgressStat value={stats.totalSessions} label="Sessions completed" />
           <ProgressStat value={portfolio.length} label="Portfolio items" />
           <ProgressStat value={disciplineLabel} label="Current discipline" />
         </div>
 
         {/* Quick actions */}
-        <div className="grid grid-cols-2 gap-4 mb-10">
+        <div className="grid grid-cols-2 gap-4 mb-10 md:grid-cols-1 lg:grid-cols-2">
           <button
             onClick={() => navigate(user.discipline ? `/session/${user.discipline}` : '/disciplines')}
             className="bg-primary text-white font-semibold text-sm py-4 rounded-xl hover:bg-primary-dark transition-colors text-left px-6"

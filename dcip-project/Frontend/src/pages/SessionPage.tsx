@@ -27,7 +27,7 @@ const disciplineInfo: Record<Discipline, { name: string; emoji: string; steps: s
     steps: [
       'Listen to the example and get familiar with the rhythm',
       'Try recording a short vocal or humming melody',
-      'Play the keyboard — try a simple 5-note sequence',
+      'Play the keyboard, try a simple 5-note sequence',
       'Record a full melody of at least 10 seconds',
       'Save your composition to your portfolio',
     ],
@@ -36,8 +36,8 @@ const disciplineInfo: Record<Discipline, { name: string; emoji: string; steps: s
     name: 'Guitar',
     emoji: '🎸',
     steps: [
-      'Explore the fretboard — tap strings and frets to hear notes',
-      'Play your first chord — try E minor or C major',
+      'Explore the fretboard: tap strings and frets to hear notes',
+      'Play your first chord, try E minor or C major',
       'Practice a 4-chord progression: Em → Am → G → C',
       'Record a short melody or chord progression',
       'Give your session a title and save it to your portfolio',
@@ -47,7 +47,7 @@ const disciplineInfo: Record<Discipline, { name: string; emoji: string; steps: s
     name: 'Piano',
     emoji: '🎹',
     steps: [
-      'Play the C major scale — C D E F G A B C in order',
+      'Play the C major scale: C D E F G A B C in order',
       'Try the basic chords: C major, F major, G major',
       'Find a short melody by ear using the virtual keyboard',
       'Record your piano session',
@@ -59,7 +59,7 @@ const disciplineInfo: Record<Discipline, { name: string; emoji: string; steps: s
     emoji: '🎤',
     steps: [
       'Complete the breathing and warm-up exercises',
-      'Pitch matching — click each tone and sing it back',
+      'Pitch matching: click each tone and sing it back',
       'Sing the vowel exercise: A – E – I – O – U up and down',
       'Record a short phrase, melody, or vocal exercise',
       'Give your session a title and save it to your portfolio',
@@ -69,7 +69,7 @@ const disciplineInfo: Record<Discipline, { name: string; emoji: string; steps: s
     name: 'Visual Arts',
     emoji: '🎨',
     steps: [
-      'Choose a colour palette — warm, cool, or mixed',
+      'Choose a colour palette: warm, cool, or mixed',
       'Draw three basic shapes that represent something real',
       'Explore shading by adding darker tones to one shape',
       'Combine your shapes into a small composition',
@@ -80,8 +80,8 @@ const disciplineInfo: Record<Discipline, { name: string; emoji: string; steps: s
     name: 'Graphic Design',
     emoji: '✏️',
     steps: [
-      'Choose your poster topic — event, announcement, or message',
-      'Sketch a simple layout — where does the title go?',
+      'Choose your poster topic: event, announcement, or message',
+      'Sketch a simple layout: where does the title go?',
       'Add your title text in a large, readable size',
       'Add a supporting image or background colour',
       'Save your poster design to your portfolio',

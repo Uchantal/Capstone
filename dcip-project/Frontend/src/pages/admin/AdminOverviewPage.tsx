@@ -25,7 +25,7 @@ export default function AdminOverviewPage() {
           <p className="text-text-secondary text-sm">Platform overview for the DCIP pilot programme</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-2 lg:grid-cols-4">
           {(
             [
               ['Active Students', stats?.activeStudents],
@@ -36,12 +36,12 @@ export default function AdminOverviewPage() {
           ).map(([label, value]) => (
             <div key={label} className="bg-white border border-border rounded-2xl p-6">
               <p className="text-text-secondary text-xs mb-2">{label}</p>
-              <p className="text-text-primary font-bold text-3xl">{value ?? '—'}</p>
+              <p className="text-text-primary font-bold text-3xl">{value ?? 'N/A'}</p>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3">
           <Link
             to="/admin/students"
             className="bg-white border border-border rounded-2xl p-6 hover:border-primary transition-colors block"

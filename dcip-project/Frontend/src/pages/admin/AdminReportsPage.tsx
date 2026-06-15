@@ -46,7 +46,7 @@ export default function AdminReportsPage() {
           <p className="text-text-secondary text-sm">Loading...</p>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               {(
                 [
                   ['Active Students', reports?.totalStudents],
@@ -57,7 +57,7 @@ export default function AdminReportsPage() {
               ).map(([label, value]) => (
                 <div key={label} className="bg-white border border-border rounded-2xl p-6">
                   <p className="text-text-secondary text-xs mb-2">{label}</p>
-                  <p className="text-text-primary font-bold text-3xl">{value ?? '—'}</p>
+                  <p className="text-text-primary font-bold text-3xl">{value ?? 'N/A'}</p>
                 </div>
               ))}
             </div>

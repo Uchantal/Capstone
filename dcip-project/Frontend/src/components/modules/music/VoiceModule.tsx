@@ -17,7 +17,7 @@ const REFERENCE_TONES = [
 const HINTS: Record<number, string> = {
   1: 'Start with the breathing exercise. Good breath control is the foundation of singing.',
   2: 'Click a reference tone, then sing or hum that note. Watch the pitch meter.',
-  3: 'Sing each vowel on a sustained note — A E I O U — then step up and back down.',
+  3: 'Sing each vowel on a sustained note: A E I O U. Then step up and back down.',
   4: 'Press Start Recording and sing or hum a phrase. The waveform shows your voice in real time.',
   5: 'Happy with a take? Give it a title above and save it to your portfolio.',
 }
@@ -41,7 +41,7 @@ function detectPitch(analyser: AnalyserNode): number | null {
 }
 
 function motivationMessage(count: number): string {
-  if (count === 1) return 'Great first recording. Come back tomorrow — your voice will feel stronger.'
+  if (count === 1) return 'Great first recording. Come back tomorrow, your voice will feel stronger.'
   if (count <= 3) return `Take ${count} done. Listen back and notice what feels different.`
   return 'You are building real vocal confidence. Every session counts.'
 }
@@ -51,7 +51,7 @@ const BREATH_INSTRUCTION: Record<BreathPhase, string> = {
   in: 'Breathe in…',
   hold: 'Hold…',
   out: 'Breathe out…',
-  done: 'Well done — your lungs are ready.',
+  done: 'Well done! Your lungs are ready.',
 }
 
 export default function VoiceModule({ step, onAudioReady }: Props) {
@@ -372,7 +372,7 @@ export default function VoiceModule({ step, onAudioReady }: Props) {
             ))}
           </div>
           <p className="text-text-secondary text-xs">
-            Sing each vowel on a comfortable note — go up one step between each, then back down.
+            Sing each vowel on a comfortable note, going up one step between each, then back down.
           </p>
         </div>
       )}
@@ -418,7 +418,7 @@ export default function VoiceModule({ step, onAudioReady }: Props) {
           {recordings.length > 0 && !recording && (
             <div className="space-y-2">
               <p className="text-text-secondary text-xs font-medium">
-                Your recordings — listen back and compare
+                Your recordings: listen back and compare
               </p>
               {recordings.map((rec) => (
                 <div key={rec.url} className="space-y-1">

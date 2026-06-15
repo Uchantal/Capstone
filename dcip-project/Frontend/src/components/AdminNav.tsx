@@ -20,15 +20,15 @@ export default function AdminNav() {
   }
 
   return (
-    <nav className="bg-white border-b border-border h-14 flex items-center px-6 justify-between">
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-3">
+    <nav className="bg-white border-b border-border h-14 flex items-center px-6 md:px-3 lg:px-6 justify-between">
+      <div className="flex items-center gap-6 md:gap-2 lg:gap-6 min-w-0">
+        <div className="flex items-center gap-3 shrink-0">
           <div className="bg-primary rounded-lg w-9 h-9 flex items-center justify-center">
             <span className="text-white font-bold text-sm">DC</span>
           </div>
           <span className="text-text-secondary text-xs font-medium hidden sm:inline">Admin</span>
         </div>
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-0.5 overflow-x-auto">
           {NAV_LINKS.map((link) => (
             <NavLink
               key={link.to}

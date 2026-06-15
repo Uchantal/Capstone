@@ -29,7 +29,7 @@ export default function TopNav() {
           <span className="text-white font-bold text-sm">DCIP</span>
         </div>
         <div>
-          <p className="text-text-primary font-semibold text-sm leading-tight">Digital Creative Infrastructure Platform</p>
+          <p className="text-text-primary font-semibold text-sm leading-tight hidden lg:block">Digital Creative Infrastructure Platform</p>
           {user && (
             <p className="text-text-secondary text-xs leading-tight">
               {user.fullName} · {subtitle}

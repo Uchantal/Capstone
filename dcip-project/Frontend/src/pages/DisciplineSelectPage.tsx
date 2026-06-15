@@ -61,7 +61,7 @@ export default function DisciplineSelectPage() {
             : 'Select the creative area you want to practise today.'}
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {disciplines.map((d) => (
             <button
               key={d.id}

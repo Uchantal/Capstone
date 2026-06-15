@@ -37,7 +37,7 @@ export default function AdminDashboardPage() {
           ).map(([label, value]) => (
             <div key={label} className="bg-white border border-border rounded-2xl p-6">
               <p className="text-text-secondary text-xs mb-2">{label}</p>
-              <p className="text-text-primary font-bold text-3xl">{value ?? '—'}</p>
+              <p className="text-text-primary font-bold text-3xl">{value ?? 'N/A'}</p>
             </div>
           ))}
         </div>

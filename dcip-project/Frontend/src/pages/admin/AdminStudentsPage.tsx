@@ -17,7 +17,7 @@ const disciplineLabel = (d: string | null) => {
   if (d === 'music') return 'Music'
   if (d === 'visual-arts') return 'Visual Arts'
   if (d === 'graphic-design') return 'Graphic Design'
-  return '—'
+  return 'N/A'
 }
 
 export default function AdminStudentsPage() {
@@ -79,8 +79,8 @@ export default function AdminStudentsPage() {
         ) : visible.length === 0 ? (
           <p className="text-text-secondary text-sm">No students found.</p>
         ) : (
-          <div className="bg-white border border-border rounded-2xl overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="bg-white border border-border rounded-2xl overflow-hidden overflow-x-auto">
+            <table className="w-full text-sm min-w-[640px]">
               <thead className="border-b border-border">
                 <tr>
                   <th className="text-left text-text-secondary font-medium px-6 py-3.5">Name</th>
@@ -96,7 +96,7 @@ export default function AdminStudentsPage() {
                   <tr key={student._id}>
                     <td className="px-6 py-4 text-text-primary font-medium">{student.fullName}</td>
                     <td className="px-6 py-4 text-text-secondary">{student.username}</td>
-                    <td className="px-6 py-4 text-text-secondary">{student.school?.name ?? '—'}</td>
+                    <td className="px-6 py-4 text-text-secondary">{student.school?.name ?? 'N/A'}</td>
                     <td className="px-6 py-4 text-text-secondary">{disciplineLabel(student.discipline)}</td>
                     <td className="px-6 py-4">
                       <span

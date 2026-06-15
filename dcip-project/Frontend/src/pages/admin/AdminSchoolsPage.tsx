@@ -82,8 +82,8 @@ export default function AdminSchoolsPage() {
         ) : visible.length === 0 ? (
           <p className="text-text-secondary text-sm">No schools found.</p>
         ) : (
-          <div className="bg-white border border-border rounded-2xl overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="bg-white border border-border rounded-2xl overflow-hidden overflow-x-auto">
+            <table className="w-full text-sm min-w-[560px]">
               <thead className="border-b border-border">
                 <tr>
                   <th className="text-left text-text-secondary font-medium px-6 py-3.5">Name</th>
@@ -98,7 +98,7 @@ export default function AdminSchoolsPage() {
                   <tr key={school._id}>
                     <td className="px-6 py-4 text-text-primary font-medium">{school.name}</td>
                     <td className="px-6 py-4 text-text-secondary">{school.district}</td>
-                    <td className="px-6 py-4 text-text-secondary">{school.province || '—'}</td>
+                    <td className="px-6 py-4 text-text-secondary">{school.province || 'N/A'}</td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

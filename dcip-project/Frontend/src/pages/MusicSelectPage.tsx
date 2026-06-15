@@ -68,7 +68,7 @@ export default function MusicSelectPage() {
         </button>
 
         <h1 className="text-text-primary font-bold text-2xl mb-1">
-          Music Module — Choose your practice
+          Music Module: Choose your practice
         </h1>
         <p className="text-text-secondary text-sm mb-8">
           Select how you want to practise music today. Each path is guided step by step.

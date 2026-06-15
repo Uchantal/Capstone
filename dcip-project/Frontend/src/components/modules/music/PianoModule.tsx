@@ -43,9 +43,9 @@ const CR_CHORDS = [
 ] as const
 
 const HINTS: Record<number, string> = {
-  1: 'Play C D E F G A B C in order — the highlighted keys form the C major scale.',
+  1: 'Play C D E F G A B C in order. The highlighted keys form the C major scale.',
   2: 'Listen to each chord, then identify it. Train your ear to recognise major chords.',
-  3: 'Explore freely. Try to find a simple melody by ear — start on C.',
+  3: 'Explore freely. Try to find a simple melody by ear, starting on C.',
   4: 'Press Start Recording, play your best melody or exercise, then Stop.',
   5: 'Happy with your recording? Give it a title and save it.',
 }
@@ -251,7 +251,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
 
       {/* Piano keyboard */}
       <div>
-        <p className="text-text-primary text-xs font-semibold mb-2">Virtual keyboard — C4 to B5</p>
+        <p className="text-text-primary text-xs font-semibold mb-2">Virtual keyboard: C4 to B5</p>
         <div className="overflow-x-auto pb-3">
           <div className="flex">
             {WHITE_KEYS.map((key) => (
@@ -325,7 +325,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
             <p className="text-status-synced text-sm font-semibold">✓ Scale complete! Great work.</p>
           )}
           {scaleResult === 'wrong' && (
-            <p className="text-accent text-xs">Wrong note — starting over. Try again!</p>
+            <p className="text-accent text-xs">Wrong note, starting over. Try again!</p>
           )}
         </div>
       )}
@@ -338,7 +338,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
             <span className="text-text-secondary text-xs">Score: {crScore} / 3</span>
           </div>
           <p className="text-text-secondary text-xs">
-            Question {(crIdx % 3) + 1} of 3 — listen to the chord and identify it.
+            Question {(crIdx % 3) + 1} of 3: listen to the chord and identify it.
           </p>
           <button
             onClick={hearChord}
@@ -378,7 +378,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
           {crResult === 'wrong' && (
             <div className="space-y-2">
               <p className="text-accent text-xs">
-                Not quite — that was <span className="font-semibold">{currentCrChord.name}</span>. Try again!
+                Not quite! That was <span className="font-semibold">{currentCrChord.name}</span>. Try again!
               </p>
               <button
                 onClick={() => { setCrHeard(false); setCrResult('idle') }}
@@ -396,7 +396,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
         <div className="bg-gray-50 border border-border rounded-xl p-4">
           <p className="text-text-primary text-xs font-semibold mb-1">Free play mode</p>
           <p className="text-text-secondary text-xs">
-            Explore the keyboard. Try to find a melody by ear — start on C and see where it goes.
+            Explore the keyboard. Try to find a melody by ear, starting on C, and see where it goes.
           </p>
           {notesPlayed > 0 && (
             <p className="text-text-secondary text-xs mt-2">Notes played this session: {notesPlayed}</p>
@@ -409,7 +409,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
         <div className="space-y-3">
           <p className="text-text-primary text-xs font-semibold">Record your session</p>
           <p className="text-text-secondary text-xs">
-            Recording captures what you play — not the microphone.
+            Recording captures what you play, not the microphone.
           </p>
 
           {!recording && !recordedUrl && (
@@ -425,7 +425,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="inline-block w-2 h-2 rounded-full bg-accent animate-pulse" />
-                <span className="text-accent text-sm font-medium">Recording — play your notes</span>
+                <span className="text-accent text-sm font-medium">Recording: play your notes</span>
               </div>
               <button
                 onClick={stopRecording}
@@ -459,7 +459,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
                 )}
                 <p className="text-primary text-xs font-medium mt-1.5">
                   {notesPlayed >= 20
-                    ? 'Excellent session — you are developing a real feel for the keys.'
+                    ? 'Excellent session. You are developing a real feel for the keys.'
                     : notesPlayed >= 8
                     ? 'Good work. Keep coming back and the keys will feel natural.'
                     : 'A solid start. Try the scale or free play more next time.'}
