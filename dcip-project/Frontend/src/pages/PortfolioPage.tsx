@@ -42,7 +42,7 @@ export default function PortfolioPage() {
   return (
     <div className="min-h-screen bg-bg-page">
       <TopNav />
-      <div className="max-w-4xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-10">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-text-primary font-bold text-2xl">My Portfolio</h1>

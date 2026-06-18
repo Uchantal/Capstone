@@ -7,16 +7,20 @@ export interface IProductionResult extends Document {
   correctCount: number
   outcome: 'demonstrated' | 'needs-more-practice'
   attemptDetails: { chordSymbol: string; correct: boolean; timeTakenMs: number }[]
+  noteEvents?: mongoose.Schema.Types.Mixed[]
+  verificationResult?: mongoose.Schema.Types.Mixed
   createdAt: Date
 }
 
 const productionResultSchema = new Schema<IProductionResult>({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   discipline: { type: String, required: true },
-  totalPrompts: { type: Number, required: true },
-  correctCount: { type: Number, required: true },
+  totalPrompts: { type: Number, default: 0 },
+  correctCount: { type: Number, default: 0 },
   outcome: { type: String, enum: ['demonstrated', 'needs-more-practice'], required: true },
   attemptDetails: [{ chordSymbol: String, correct: Boolean, timeTakenMs: Number }],
+  noteEvents: { type: [Schema.Types.Mixed], default: undefined },
+  verificationResult: { type: Schema.Types.Mixed, default: undefined },
   createdAt: { type: Date, default: Date.now },
 })
 

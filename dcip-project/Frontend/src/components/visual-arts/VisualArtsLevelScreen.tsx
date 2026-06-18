@@ -20,6 +20,10 @@ interface Props {
   requires: string[]
 }
 
+// COMPLETION THRESHOLD
+// Increase for production, reduce temporarily for testing
+const MINIMUM_INTERACTIONS = 10
+
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
     <div className="mb-6">
@@ -48,6 +52,16 @@ export default function VisualArtsLevelScreen({
   const { completedStages, loading, markComplete } = useVisualArtsProgress()
   const [checked, setChecked] = useState<Set<string>>(new Set())
   const [completed, setCompleted] = useState(false)
+  const interactionCount = useRef(0)
+  const [thresholdMet, setThresholdMet] = useState(false)
+
+  function recordInteraction() {
+    if (thresholdMet) return
+    interactionCount.current += 1
+    if (interactionCount.current >= MINIMUM_INTERACTIONS) {
+      setThresholdMet(true)
+    }
+  }
 
   // Stage gate: redirect to the first uncompleted prerequisite
   useEffect(() => {
@@ -61,9 +75,10 @@ export default function VisualArtsLevelScreen({
   }, [loading, completedStages, requires, navigate])
 
   const allChecked = checklist.every(item => checked.has(item.id))
+  const canComplete = thresholdMet && allChecked
 
   const handleComplete = async () => {
-    if (!allChecked) return
+    if (!canComplete) return
     await markComplete(stageId)
     setCompleted(true)
   }
@@ -127,7 +142,7 @@ export default function VisualArtsLevelScreen({
 
         {/* Canvas */}
         <div className="mb-5">
-          <VisualArtsModule canvasRef={canvasRef} step={5} />
+          <VisualArtsModule canvasRef={canvasRef} step={5} onInteraction={recordInteraction} />
         </div>
 
         {/* Self-check checklist */}
@@ -160,8 +175,8 @@ export default function VisualArtsLevelScreen({
           <div className="mt-5 flex justify-end">
             <button
               onClick={handleComplete}
-              disabled={!allChecked}
-              className="bg-secondary text-white font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed text-sm"
+              disabled={!canComplete}
+              className="bg-secondary text-white font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
             >
               Mark Level Complete
             </button>

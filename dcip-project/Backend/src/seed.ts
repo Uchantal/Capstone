@@ -7,14 +7,14 @@ import Module from './models/Module'
 
 dotenv.config()
 
-// One supervisor per pilot school.
+// One supervisor per participating school.
 // Username pattern: sup.<short-key>  Password: Supervisor2025
 const SCHOOL_SUPERVISORS = [
-  { name: 'G.S Kigeme-A',                 district: 'Nyamagabe', supUsername: 'sup.kigeme.a',  supFullName: 'Supervisor Kigeme A',  supEmail: 'sup.kigeme.a@dcip.rw' },
-  { name: 'G.S Kigeme-B',                 district: 'Nyamagabe', supUsername: 'sup.kigeme.b',  supFullName: 'Supervisor Kigeme B',  supEmail: 'sup.kigeme.b@dcip.rw' },
-  { name: 'G.S Mushubi',                  district: 'Nyamagabe', supUsername: 'sup.mushubi',   supFullName: 'Supervisor Mushubi',   supEmail: 'sup.mushubi@dcip.rw' },
-  { name: 'E.S Groupe Scolaire Gitarama', district: 'Muhanga',   supUsername: 'sup.gitarama',  supFullName: 'Supervisor Gitarama',  supEmail: 'sup.gitarama@dcip.rw' },
-  { name: 'E.S Groupe Scolaire Ruhango',  district: 'Ruhango',   supUsername: 'sup.ruhango',   supFullName: 'Supervisor Ruhango',   supEmail: 'sup.ruhango@dcip.rw' },
+  { name: 'Participating School A', district: 'Nyamagabe', supUsername: 'sup.school.a', supFullName: 'Supervisor School A', supEmail: 'sup.school.a@dcip.rw' },
+  { name: 'Participating School B', district: 'Muhanga',   supUsername: 'sup.school.b', supFullName: 'Supervisor School B', supEmail: 'sup.school.b@dcip.rw' },
+  { name: 'Participating School C', district: 'Huye',      supUsername: 'sup.school.c', supFullName: 'Supervisor School C', supEmail: 'sup.school.c@dcip.rw' },
+  { name: 'Participating School D', district: 'Ruhango',   supUsername: 'sup.school.d', supFullName: 'Supervisor School D', supEmail: 'sup.school.d@dcip.rw' },
+  { name: 'Participating School E', district: 'Karongi',   supUsername: 'sup.school.e', supFullName: 'Supervisor School E', supEmail: 'sup.school.e@dcip.rw' },
 ]
 
 const seed = async () => {

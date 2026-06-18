@@ -69,12 +69,12 @@ export default function AdminSupervisorsPage() {
   return (
     <div className="min-h-screen bg-[#F9F7F4]">
       <AdminNav />
-      <main className="max-w-4xl mx-auto px-6 py-8">
+      <main className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
         <div className="flex items-start justify-between mb-6 gap-4">
           <div>
             <h1 className="text-text-primary font-bold text-2xl mb-1">Supervisors</h1>
             <p className="text-text-secondary text-sm">
-              One supervisor account per pilot school. Each supervisor only sees their own school's data.
+              One supervisor account per school. Each supervisor only sees their own school's data.
             </p>
           </div>
           <button
@@ -99,7 +99,7 @@ export default function AdminSupervisorsPage() {
                   name="fullName"
                   value={form.fullName}
                   onChange={handleChange}
-                  placeholder="e.g. Supervisor Kigeme A"
+                  placeholder="e.g. Supervisor School A"
                   className="w-full border border-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
                 />
               </div>
@@ -109,7 +109,7 @@ export default function AdminSupervisorsPage() {
                   name="username"
                   value={form.username}
                   onChange={handleChange}
-                  placeholder="e.g. sup.kigeme.a"
+                  placeholder="e.g. sup.school.a"
                   className="w-full border border-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
                 />
               </div>
@@ -120,7 +120,7 @@ export default function AdminSupervisorsPage() {
                   type="email"
                   value={form.email}
                   onChange={handleChange}
-                  placeholder="e.g. sup.kigeme.a@dcip.rw"
+                  placeholder="e.g. sup.school@dcip.rw"
                   className="w-full border border-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
                 />
               </div>

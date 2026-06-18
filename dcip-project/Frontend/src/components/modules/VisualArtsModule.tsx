@@ -3,6 +3,7 @@ import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
 interface Props {
   canvasRef: RefObject<HTMLCanvasElement>
   step: number
+  onInteraction?: () => void
 }
 
 type Tool = 'brush' | 'eraser' | 'line' | 'rect' | 'circle' | 'ruler'
@@ -64,7 +65,7 @@ function ToolGroup({ label, children }: { label: string; children: React.ReactNo
   )
 }
 
-export default function VisualArtsModule({ canvasRef, step }: Props) {
+export default function VisualArtsModule({ canvasRef, step, onInteraction }: Props) {
   const [tool,        setTool]        = useState<Tool>('brush')
   const [colour,      setColour]      = useState('#1A1A1A')
   const [bgColour,    setBgColour]    = useState('#FAFAF7')
@@ -311,6 +312,7 @@ export default function VisualArtsModule({ canvasRef, step }: Props) {
     drawing.current    = false
     previewData.current = null
     saveToHistory()
+    onInteraction?.()
   }
 
   // ── Background colour ─────────────────────────────────────────────────────
@@ -321,6 +323,7 @@ export default function VisualArtsModule({ canvasRef, step }: Props) {
     setBgColour(newBg)
     renderComposite()
     saveToHistory()
+    onInteraction?.()
   }
 
   // ── Clear ─────────────────────────────────────────────────────────────────
@@ -571,11 +574,6 @@ export default function VisualArtsModule({ canvasRef, step }: Props) {
         />
       </div>
 
-      {step >= 3 && (
-        <p className="text-text-secondary text-xs mt-3">
-          Try adding darker shading by using a darker colour on the same shape
-        </p>
-      )}
     </div>
   )
 }

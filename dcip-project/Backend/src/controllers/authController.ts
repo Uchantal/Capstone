@@ -20,7 +20,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     const school = await School.findById(schoolId)
     if (!school) {
-      res.status(400).json({ message: 'School not found or not verified for this pilot' })
+      res.status(400).json({ message: 'School not found or not active on this platform' })
       return
     }
 

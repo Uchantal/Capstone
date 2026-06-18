@@ -6,18 +6,21 @@ const router = Router()
 
 router.post('/result', protect, async (req: AuthRequest, res) => {
   try {
-    const { discipline, totalPrompts, correctCount, outcome, attemptDetails } = req.body
-    if (!discipline || totalPrompts === undefined || correctCount === undefined || !outcome) {
+    const { discipline, totalPrompts, correctCount, outcome, attemptDetails, noteEvents, verificationResult } = req.body
+    if (!discipline || !outcome) {
       return res.status(400).json({ message: 'Missing required fields' })
     }
-    const result = await ProductionResult.create({
+    const doc: Record<string, unknown> = {
       user: req.userId,
       discipline,
-      totalPrompts,
-      correctCount,
+      totalPrompts: totalPrompts ?? 0,
+      correctCount: correctCount ?? 0,
       outcome,
       attemptDetails: attemptDetails ?? [],
-    })
+    }
+    if (noteEvents !== undefined) doc.noteEvents = noteEvents
+    if (verificationResult !== undefined) doc.verificationResult = verificationResult
+    const result = await ProductionResult.create(doc)
     res.status(201).json(result)
   } catch (err) {
     res.status(500).json({ message: 'Server error' })

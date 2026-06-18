@@ -38,6 +38,8 @@ interface GuitarFretboardProps {
   onChordPlay?: (chordId: string) => void
   highlightPositions?: HighlightPosition[]
   showChords?: boolean
+  externalAudioContext?: AudioContext
+  recordingDest?: MediaStreamAudioDestinationNode
 }
 
 function ChordDiagram({
@@ -76,11 +78,12 @@ function ChordDiagram({
 const FRET_LABELS = ['Open', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 const DOT_FRETS = new Set([3, 5, 7, 9, 12])
 
-export default function GuitarFretboard({ onNotePlay, onChordPlay, highlightPositions = [], showChords = true }: GuitarFretboardProps) {
+export default function GuitarFretboard({ onNotePlay, onChordPlay, highlightPositions = [], showChords = true, externalAudioContext, recordingDest }: GuitarFretboardProps) {
   const [activeCell, setActiveCell] = useState<string | null>(null)
   const audioCtxRef = useRef<AudioContext | null>(null)
 
   const ensureCtx = () => {
+    if (externalAudioContext) return externalAudioContext
     if (!audioCtxRef.current) {
       audioCtxRef.current = new AudioContext()
     }
@@ -104,6 +107,7 @@ export default function GuitarFretboard({ onNotePlay, onChordPlay, highlightPosi
     osc.connect(dist)
     dist.connect(gain)
     gain.connect(ctx.destination)
+    if (recordingDest) gain.connect(recordingDest)
 
     gain.gain.setValueAtTime(0.5, now)
     gain.gain.exponentialRampToValueAtTime(0.001, now + 1.4)

@@ -50,7 +50,7 @@ export default function DisciplineSelectPage() {
   return (
     <div className="min-h-screen bg-bg-page">
       <TopNav />
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-12">
         <h1 className="text-text-primary font-bold text-2xl mb-1">Choose your discipline</h1>
         <p className="text-text-secondary text-sm mb-8">
           {user?.discipline

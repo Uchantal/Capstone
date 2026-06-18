@@ -23,7 +23,7 @@ export default function AdminDashboardPage() {
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
         <div>
           <h1 className="text-text-primary font-bold text-2xl mb-1">Administrator Dashboard</h1>
-          <p className="text-text-secondary text-sm">Platform overview for the DCIP pilot programme</p>
+          <p className="text-text-secondary text-sm">Platform overview for DCIP</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -32,7 +32,7 @@ export default function AdminDashboardPage() {
               ['Active Students', reports?.totalStudents],
               ['Total Sessions', reports?.totalSessions],
               ['Portfolio Items', reports?.totalPortfolioItems],
-              ['Pilot Schools', reports?.activeSchools],
+              ['Active Schools', reports?.activeSchools],
             ] as [string, number | undefined][]
           ).map(([label, value]) => (
             <div key={label} className="bg-white border border-border rounded-2xl p-6">
@@ -55,14 +55,14 @@ export default function AdminDashboardPage() {
             className="bg-white border border-border rounded-2xl p-6 hover:border-primary transition-colors block"
           >
             <p className="text-text-primary font-semibold mb-1">Configure Modules</p>
-            <p className="text-text-secondary text-sm">Enable or disable creative disciplines for the pilot</p>
+            <p className="text-text-secondary text-sm">Enable or disable creative disciplines</p>
           </Link>
           <Link
             to="/admin/reports"
             className="bg-white border border-border rounded-2xl p-6 hover:border-primary transition-colors block"
           >
             <p className="text-text-primary font-semibold mb-1">View Reports</p>
-            <p className="text-text-secondary text-sm">Session and portfolio statistics across all pilot schools</p>
+            <p className="text-text-secondary text-sm">Session and portfolio statistics across all schools</p>
           </Link>
         </div>
       </main>

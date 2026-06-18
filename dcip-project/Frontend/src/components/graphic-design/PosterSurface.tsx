@@ -149,7 +149,7 @@ export default function PosterSurface({ value, onChange, canvasRef, showDrawLaye
           <input
             value={value.subtitle}
             onChange={e => set({ subtitle: e.target.value })}
-            placeholder="G.S Kigeme-A  7 December"
+            placeholder="Add a subtitle or date"
             className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
           />
         </div>

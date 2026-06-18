@@ -36,10 +36,10 @@ export default function AdminReportsPage() {
   return (
     <div className="min-h-screen bg-[#F9F7F4]">
       <AdminNav />
-      <main className="max-w-3xl mx-auto px-6 py-8 space-y-8">
+      <main className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8 space-y-8">
         <div>
           <h1 className="text-text-primary font-bold text-2xl mb-1">Reports</h1>
-          <p className="text-text-secondary text-sm">Pilot programme statistics</p>
+          <p className="text-text-secondary text-sm">Programme statistics</p>
         </div>
 
         {loading ? (
@@ -52,7 +52,7 @@ export default function AdminReportsPage() {
                   ['Active Students', reports?.totalStudents],
                   ['Total Sessions', reports?.totalSessions],
                   ['Portfolio Items', reports?.totalPortfolioItems],
-                  ['Pilot Schools', reports?.activeSchools],
+                  ['Active Schools', reports?.activeSchools],
                 ] as [string, number | undefined][]
               ).map(([label, value]) => (
                 <div key={label} className="bg-white border border-border rounded-2xl p-6">

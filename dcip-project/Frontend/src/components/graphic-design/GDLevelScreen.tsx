@@ -5,6 +5,10 @@ import PosterSurface, { DEFAULT_POSTER, PosterState } from './PosterSurface'
 import { useGDProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useGDProgress'
 import { fetchGDLevelPoster, saveGDLevelPoster } from '../../services/api'
 
+// COMPLETION THRESHOLD
+// Increase for production, reduce temporarily for testing
+const MINIMUM_INTERACTIONS = 10
+
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
     <div className="mb-6">
@@ -66,6 +70,16 @@ export default function GDLevelScreen({
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const refCanvasRef = useRef<HTMLCanvasElement>(null)
+  const interactionCount = useRef(0)
+  const [thresholdMet, setThresholdMet] = useState(false)
+
+  function recordInteraction() {
+    if (thresholdMet) return
+    interactionCount.current += 1
+    if (interactionCount.current >= MINIMUM_INTERACTIONS) {
+      setThresholdMet(true)
+    }
+  }
 
   // Gate check
   useEffect(() => {
@@ -147,10 +161,11 @@ export default function GDLevelScreen({
 
   const loading = progressLoading || dataLoading
 
-  const canComplete =
+  const contentReady =
     poster.title.trim().length > 0 &&
     poster.subtitle.trim().length > 0 &&
     reasoning.trim().length > 0
+  const canComplete = thresholdMet && contentReady
 
   const handleComplete = async () => {
     if (!canComplete || saving) return
@@ -241,7 +256,7 @@ export default function GDLevelScreen({
         {/* Design surface */}
         <div className="bg-white border border-border rounded-2xl p-6 mb-5">
           <p className="text-text-muted text-xs uppercase tracking-wide mb-3">Your poster</p>
-          <PosterSurface value={poster} onChange={setPoster} canvasRef={canvasRef} />
+          <PosterSurface value={poster} onChange={(next) => { setPoster(next); recordInteraction() }} canvasRef={canvasRef} />
         </div>
 
         {/* Reasoning field */}
@@ -259,7 +274,7 @@ export default function GDLevelScreen({
             placeholder="Write your reasoning here..."
             className="w-full border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-primary resize-none"
           />
-          {!canComplete && (
+          {!contentReady && (
             <p className="text-text-muted text-xs mt-1.5">
               {!poster.title.trim() ? 'Add a poster title to continue.' :
                !poster.subtitle.trim() ? 'Add a subtitle to continue.' :
@@ -272,7 +287,7 @@ export default function GDLevelScreen({
           <button
             onClick={handleComplete}
             disabled={!canComplete || saving}
-            className="bg-secondary text-white font-semibold px-8 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed text-sm"
+            className="bg-secondary text-white font-semibold px-8 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
             {saving ? 'Saving...' : 'Mark Level Complete'}
           </button>

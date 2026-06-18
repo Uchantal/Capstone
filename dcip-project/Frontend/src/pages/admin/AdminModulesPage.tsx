@@ -75,10 +75,10 @@ export default function AdminModulesPage() {
 
   return (
     <AdminLayout>
-      <main className="max-w-3xl mx-auto px-6 py-8">
+      <main className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
         <h1 className="text-text-primary font-bold text-2xl mb-1">Creative Modules</h1>
         <p className="text-text-secondary text-sm mb-8">
-          Enable or disable disciplines available to students in the pilot programme.
+          Enable or disable disciplines available to students.
         </p>
 
         {loading ? (

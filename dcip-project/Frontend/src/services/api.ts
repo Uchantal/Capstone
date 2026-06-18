@@ -100,6 +100,8 @@ export const saveProductionResult = (data: {
   correctCount: number
   outcome: 'demonstrated' | 'needs-more-practice'
   attemptDetails: { chordSymbol: string; correct: boolean; timeTakenMs: number }[]
+  noteEvents?: object[]
+  verificationResult?: object
 }) => api.post('/production/result', data)
 
 export const fetchMyProductionResults = (discipline?: string) =>

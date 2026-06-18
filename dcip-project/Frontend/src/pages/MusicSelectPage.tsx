@@ -56,7 +56,7 @@ export default function MusicSelectPage() {
     <div className="min-h-screen bg-bg-page">
       <TopNav />
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-10">
         <button
           onClick={() => navigate('/disciplines')}
           className="text-text-secondary text-sm mb-6 hover:text-text-primary transition-colors inline-flex items-center gap-1"

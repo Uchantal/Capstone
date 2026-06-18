@@ -66,7 +66,7 @@ export default function AdminSchoolsPage() {
           <div>
             <h1 className="text-text-primary font-bold text-2xl mb-1">Schools</h1>
             <p className="text-text-secondary text-sm">
-              {activeCount} of {schools.length} school{schools.length !== 1 ? 's' : ''} active in the pilot
+              {activeCount} of {schools.length} school{schools.length !== 1 ? 's' : ''} active
             </p>
           </div>
           <input

@@ -51,9 +51,11 @@ interface Props {
   onNotesChange?: (notes: string[]) => void
   highlightNotes?: string[]
   disabled?: boolean
+  externalAudioContext?: AudioContext
+  recordingDest?: MediaStreamAudioDestinationNode
 }
 
-export default function PianoKeyboard({ onNotesChange, highlightNotes = [], disabled = false }: Props) {
+export default function PianoKeyboard({ onNotesChange, highlightNotes = [], disabled = false, externalAudioContext, recordingDest }: Props) {
   const [pressedNotes, setPressedNotes] = useState<Set<string>>(new Set())
   const pressedRef = useRef<Set<string>>(new Set())
   const audioCtxRef = useRef<AudioContext | null>(null)
@@ -62,6 +64,7 @@ export default function PianoKeyboard({ onNotesChange, highlightNotes = [], disa
   const isMouseDownRef = useRef(false)
 
   const getAudioCtx = () => {
+    if (externalAudioContext) return externalAudioContext
     if (!audioCtxRef.current) audioCtxRef.current = new AudioContext()
     return audioCtxRef.current
   }
@@ -74,6 +77,7 @@ export default function PianoKeyboard({ onNotesChange, highlightNotes = [], disa
     const gain = ctx.createGain()
     osc.connect(gain)
     gain.connect(ctx.destination)
+    if (recordingDest) gain.connect(recordingDest)
     osc.type = 'triangle'
     osc.frequency.value = noteToFrequency(note, octave)
     gain.gain.setValueAtTime(0, ctx.currentTime)
@@ -84,7 +88,7 @@ export default function PianoKeyboard({ onNotesChange, highlightNotes = [], disa
     next.add(noteId)
     pressedRef.current = next
     setPressedNotes(new Set(next))
-  }, [disabled])
+  }, [disabled, externalAudioContext, recordingDest])
 
   const releaseNote = useCallback((noteId: string) => {
     if (!pressedRef.current.has(noteId)) return
@@ -132,8 +136,10 @@ export default function PianoKeyboard({ onNotesChange, highlightNotes = [], disa
   }, [pressNote, releaseNote])
 
   useEffect(() => {
-    return () => { audioCtxRef.current?.close() }
-  }, [])
+    return () => {
+      if (!externalAudioContext) audioCtxRef.current?.close()
+    }
+  }, [externalAudioContext])
 
   const highlightSet = new Set(highlightNotes)
 
