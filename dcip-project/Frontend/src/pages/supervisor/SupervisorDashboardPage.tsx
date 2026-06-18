@@ -1,29 +1,66 @@
 import { useEffect, useRef, useState } from 'react'
 import TopNav from '../../components/TopNav'
-import { getSupervisorActiveSessions, getSupervisorProgress } from '../../services/api'
+import { getSupervisorLiveActivity, getSupervisorSchoolAnalytics } from '../../services/api'
 
-interface ActiveSession {
+interface LiveSession {
   _id: string
-  user: { username: string; fullName: string }
+  studentName: string
   discipline: string
   durationMinutes: number
   createdAt: string
+  currentLevel: number
+  skillLabel: string
 }
 
-interface StudentProgress {
+interface DisciplineStat {
+  discipline: string
+  studentCount: number
+  totalSessions: number
+  avgLevel: number
+}
+
+interface StudentRow {
   id: string
-  username: string
-  fullName: string
-  discipline: string | null
-  sessions: number
-  portfolioItems: number
+  name: string
+  discipline: string
+  currentLevel: number
+  skillLabel: string
+  totalSessions: number
+  lastActive: string | null
+  status: 'Active' | 'Inactive' | 'Dormant'
 }
 
-const disciplineLabel = (d: string | null) => {
-  if (d === 'music') return 'Music'
-  if (d === 'visual-arts') return 'Visual Arts'
-  if (d === 'graphic-design') return 'Graphic Design'
-  return d ?? 'N/A'
+interface SchoolAnalytics {
+  totalStudents: number
+  activeThisWeek: number
+  totalPracticeHours: number
+  avgSessionsPerStudent: number
+  disciplineStats: DisciplineStat[]
+  studentProgress: StudentRow[]
+}
+
+const DISC_EMOJI: Record<string, string> = {
+  music: '🎵',
+  'visual-arts': '🎨',
+  'graphic-design': '✏️',
+}
+
+const DISC_LABEL: Record<string, string> = {
+  music: 'Music',
+  'visual-arts': 'Visual Arts',
+  'graphic-design': 'Graphic Design',
+}
+
+const DISC_BORDER: Record<string, string> = {
+  music: 'border-t-primary',
+  'visual-arts': 'border-t-secondary',
+  'graphic-design': 'border-t-[#3B82F6]',
+}
+
+const STATUS_STYLE: Record<string, string> = {
+  Active: 'bg-green-100 text-green-700',
+  Inactive: 'bg-amber-100 text-amber-700',
+  Dormant: 'bg-red-100 text-red-600',
 }
 
 export default function SupervisorDashboardPage() {
@@ -43,31 +80,32 @@ export default function SupervisorDashboardPage() {
     }
   })
 
-  const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([])
-  const [progress, setProgress] = useState<StudentProgress[]>([])
-  const [progressLoading, setProgressLoading] = useState(true)
+  const [liveActivity, setLiveActivity] = useState<LiveSession[]>([])
+  const [analytics, setAnalytics] = useState<SchoolAnalytics | null>(null)
+  const [analyticsLoading, setAnalyticsLoading] = useState(true)
+  const [studentFilter, setStudentFilter] = useState('')
   const [now, setNow] = useState(new Date())
 
   const refreshRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const clockRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const fetchSessions = async () => {
+  const fetchLive = async () => {
     try {
-      const res = await getSupervisorActiveSessions()
-      setActiveSessions(res.data)
+      const res = await getSupervisorLiveActivity()
+      setLiveActivity(res.data)
     } catch {
-      // network errors are non-critical here
+      // non-critical
     }
   }
 
   useEffect(() => {
-    fetchSessions()
-    getSupervisorProgress()
-      .then((res) => setProgress(res.data))
+    fetchLive()
+    getSupervisorSchoolAnalytics()
+      .then((res) => setAnalytics(res.data))
       .catch(() => {})
-      .finally(() => setProgressLoading(false))
+      .finally(() => setAnalyticsLoading(false))
 
-    refreshRef.current = setInterval(fetchSessions, 30_000)
+    refreshRef.current = setInterval(fetchLive, 30_000)
     clockRef.current = setInterval(() => setNow(new Date()), 1_000)
 
     return () => {
@@ -95,22 +133,25 @@ export default function SupervisorDashboardPage() {
   const fmtDate = (d: Date) =>
     d.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 
-  const totalSessions = progress.reduce((sum, s) => sum + s.sessions, 0)
+  const fmtRelative = (dateStr: string | null) => {
+    if (!dateStr) return 'Never'
+    const d = new Date(dateStr)
+    const diff = Math.floor((Date.now() - d.getTime()) / (1000 * 60 * 60 * 24))
+    if (diff === 0) return 'Today'
+    if (diff === 1) return 'Yesterday'
+    return `${diff} days ago`
+  }
 
-  const topDiscipline = (() => {
-    const counts: Record<string, number> = {}
-    progress.forEach((s) => {
-      if (s.discipline) counts[s.discipline] = (counts[s.discipline] ?? 0) + s.sessions
-    })
-    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
-  })()
+  const filteredStudents = (analytics?.studentProgress ?? []).filter((s) =>
+    studentFilter === '' || s.name.toLowerCase().includes(studentFilter.toLowerCase())
+  )
 
   return (
     <div className="min-h-screen bg-bg-page">
       <TopNav />
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
 
-        {/* Section 1 — Lab Session */}
+        {/* Section 1 — Lab Session Control */}
         <section className="bg-white border border-border rounded-2xl p-6">
           <h2 className="text-text-primary font-bold text-lg mb-1">Laboratory Session</h2>
           <p className="text-text-secondary text-sm mb-5">
@@ -149,32 +190,42 @@ export default function SupervisorDashboardPage() {
           )}
         </section>
 
-        {/* Section 2 — Recent Activity */}
+        {/* Section 2 — Live Activity Feed */}
         <section className="bg-white border border-border rounded-2xl p-6">
-          <h2 className="text-text-primary font-bold text-lg mb-1">Recent Activity</h2>
-          <p className="text-text-secondary text-xs mb-5">Sessions saved in the last 2 hours · refreshes every 30 s</p>
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-text-primary font-bold text-lg">Live Student Activity</h2>
+            <span className="text-text-muted text-xs">Refreshes every 30 s</span>
+          </div>
+          <p className="text-text-secondary text-xs mb-5">Sessions saved in the last 2 hours</p>
 
-          {activeSessions.length === 0 ? (
-            <p className="text-text-secondary text-sm">No activity in the last 2 hours.</p>
+          {liveActivity.length === 0 ? (
+            <p className="text-text-secondary text-sm">No active sessions in the last 2 hours.</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-[#F9F7F4]">
-                  <tr className="border-b border-border">
-                    <th className="text-left text-text-muted font-medium py-3 pr-6 uppercase text-xs tracking-wide">Student</th>
-                    <th className="text-left text-text-muted font-medium py-3 pr-6 uppercase text-xs tracking-wide">Discipline</th>
-                    <th className="text-left text-text-muted font-medium py-3 pr-6 uppercase text-xs tracking-wide">Duration</th>
-                    <th className="text-left text-text-muted font-medium py-3 uppercase text-xs tracking-wide">Saved at</th>
+              <table className="w-full text-sm min-w-[560px]">
+                <thead className="bg-[#F9F7F4] border-b border-border">
+                  <tr>
+                    <th className="text-left text-text-muted font-medium px-4 py-3 uppercase text-xs tracking-wide">Student</th>
+                    <th className="text-left text-text-muted font-medium px-4 py-3 uppercase text-xs tracking-wide">Discipline</th>
+                    <th className="text-left text-text-muted font-medium px-4 py-3 uppercase text-xs tracking-wide">Level</th>
+                    <th className="text-left text-text-muted font-medium px-4 py-3 uppercase text-xs tracking-wide">Duration</th>
+                    <th className="text-left text-text-muted font-medium px-4 py-3 uppercase text-xs tracking-wide">Time</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {activeSessions.map((session) => (
-                    <tr key={session._id}>
-                      <td className="py-3 pr-6 text-text-primary">{session.user.fullName}</td>
-                      <td className="py-3 pr-6 text-text-secondary">{disciplineLabel(session.discipline)}</td>
-                      <td className="py-3 pr-6 text-text-secondary">{session.durationMinutes} min</td>
-                      <td className="py-3 text-text-secondary">
-                        {new Date(session.createdAt).toLocaleTimeString('en-GB', {
+                  {liveActivity.map((s) => (
+                    <tr key={s._id}>
+                      <td className="px-4 py-3 text-text-primary font-medium">{s.studentName}</td>
+                      <td className="px-4 py-3 text-text-secondary">
+                        <span className="mr-1">{DISC_EMOJI[s.discipline] ?? ''}</span>
+                        {DISC_LABEL[s.discipline] ?? s.discipline}
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary">
+                        Level {s.currentLevel} — {s.skillLabel}
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary">{s.durationMinutes} min</td>
+                      <td className="px-4 py-3 text-text-secondary">
+                        {new Date(s.createdAt).toLocaleTimeString('en-GB', {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}
@@ -187,55 +238,117 @@ export default function SupervisorDashboardPage() {
           )}
         </section>
 
-        {/* Section 3 — Progress Summary */}
-        <section className="bg-white border border-border rounded-2xl p-6">
-          <h2 className="text-text-primary font-bold text-lg mb-5">School Progress Summary</h2>
+        {/* Section 3 — School Progress Analytics */}
+        <section className="space-y-6">
+          <h2 className="text-text-primary font-bold text-lg">School Progress Analytics</h2>
 
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="bg-[#F9F7F4] rounded-xl p-4">
-              <p className="text-text-secondary text-xs mb-1">Total Students</p>
-              <p className="text-text-primary font-bold text-2xl">{progress.length}</p>
-            </div>
-            <div className="bg-[#F9F7F4] rounded-xl p-4">
-              <p className="text-text-secondary text-xs mb-1">Total Sessions</p>
-              <p className="text-text-primary font-bold text-2xl">{totalSessions}</p>
-            </div>
-            <div className="bg-[#F9F7F4] rounded-xl p-4">
-              <p className="text-text-secondary text-xs mb-1">Top Discipline</p>
-              <p className="text-text-primary font-bold text-xl">{disciplineLabel(topDiscipline)}</p>
-            </div>
+          {/* Row 1 — Stat cards */}
+          <div className="grid grid-cols-4 gap-4 md:grid-cols-2">
+            {analyticsLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white border border-border rounded-2xl p-5 animate-pulse">
+                  <div className="h-3 bg-gray-100 rounded mb-2 w-2/3" />
+                  <div className="h-8 bg-gray-100 rounded w-1/2" />
+                </div>
+              ))
+            ) : (
+              [
+                { label: 'Registered Students', value: analytics?.totalStudents ?? 0 },
+                { label: 'Active This Week', value: analytics?.activeThisWeek ?? 0 },
+                { label: 'Total Practice Hours', value: `${analytics?.totalPracticeHours ?? 0}h` },
+                { label: 'Avg Sessions / Student', value: analytics?.avgSessionsPerStudent ?? 0 },
+              ].map(({ label, value }) => (
+                <div key={label} className="bg-white border border-border rounded-2xl p-5">
+                  <p className="text-text-muted text-xs uppercase tracking-wide mb-1">{label}</p>
+                  <p className="text-text-primary font-bold text-2xl">{value}</p>
+                </div>
+              ))
+            )}
           </div>
 
-          {progressLoading ? (
-            <p className="text-text-secondary text-sm">Loading...</p>
-          ) : progress.length === 0 ? (
-            <p className="text-text-secondary text-sm">No students registered at this school yet.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-[#F9F7F4]">
-                  <tr className="border-b border-border">
-                    <th className="text-left text-text-muted font-medium py-3 pr-6 uppercase text-xs tracking-wide">Student</th>
-                    <th className="text-left text-text-muted font-medium py-3 pr-6 uppercase text-xs tracking-wide">Username</th>
-                    <th className="text-left text-text-muted font-medium py-3 pr-6 uppercase text-xs tracking-wide">Discipline</th>
-                    <th className="text-left text-text-muted font-medium py-3 pr-6 uppercase text-xs tracking-wide">Sessions</th>
-                    <th className="text-left text-text-muted font-medium py-3 uppercase text-xs tracking-wide">Portfolio</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {progress.map((student) => (
-                    <tr key={student.id}>
-                      <td className="py-3 pr-6 text-text-primary">{student.fullName}</td>
-                      <td className="py-3 pr-6 text-text-secondary">{student.username}</td>
-                      <td className="py-3 pr-6 text-text-secondary">{disciplineLabel(student.discipline)}</td>
-                      <td className="py-3 pr-6 text-text-primary font-medium">{student.sessions}</td>
-                      <td className="py-3 text-text-primary font-medium">{student.portfolioItems}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {/* Row 2 — Discipline Distribution */}
+          <div className="grid grid-cols-3 gap-4 md:grid-cols-1">
+            {['music', 'visual-arts', 'graphic-design'].map((disc) => {
+              const stat = analytics?.disciplineStats.find((d) => d.discipline === disc)
+              return (
+                <div
+                  key={disc}
+                  className={`bg-white border border-border border-t-4 ${DISC_BORDER[disc]} rounded-2xl p-5`}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xl">{DISC_EMOJI[disc]}</span>
+                    <p className="text-text-primary font-semibold text-sm">{DISC_LABEL[disc]}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-text-secondary text-xs">
+                      <span className="font-medium text-text-primary">{stat?.studentCount ?? 0}</span> students
+                    </p>
+                    <p className="text-text-secondary text-xs">
+                      <span className="font-medium text-text-primary">{stat?.totalSessions ?? 0}</span> sessions
+                    </p>
+                    <p className="text-text-secondary text-xs">
+                      Avg level <span className="font-medium text-text-primary">{stat?.avgLevel ?? 1}</span>
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Row 3 — Student Progress Table */}
+          <div className="bg-white border border-border rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-wrap gap-3">
+              <h3 className="text-text-primary font-bold text-base">Student Progress Overview</h3>
+              <input
+                value={studentFilter}
+                onChange={(e) => setStudentFilter(e.target.value)}
+                placeholder="Filter by name…"
+                className="border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary w-48"
+              />
             </div>
-          )}
+
+            {analyticsLoading ? (
+              <p className="text-text-secondary text-sm px-6 py-6">Loading...</p>
+            ) : filteredStudents.length === 0 ? (
+              <p className="text-text-secondary text-sm px-6 py-6">No students found.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm min-w-[640px]">
+                  <thead className="bg-[#F9F7F4] border-b border-border">
+                    <tr>
+                      <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Student</th>
+                      <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Discipline</th>
+                      <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Level</th>
+                      <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Skill</th>
+                      <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Sessions</th>
+                      <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Last Active</th>
+                      <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {filteredStudents.map((s) => (
+                      <tr key={s.id}>
+                        <td className="px-6 py-4 text-text-primary font-medium">{s.name}</td>
+                        <td className="px-6 py-4 text-text-secondary">
+                          <span className="mr-1">{DISC_EMOJI[s.discipline] ?? ''}</span>
+                          {DISC_LABEL[s.discipline] ?? s.discipline}
+                        </td>
+                        <td className="px-6 py-4 text-text-primary">{s.currentLevel}</td>
+                        <td className="px-6 py-4 text-text-secondary">{s.skillLabel}</td>
+                        <td className="px-6 py-4 text-text-primary">{s.totalSessions}</td>
+                        <td className="px-6 py-4 text-text-secondary">{fmtRelative(s.lastActive)}</td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLE[s.status] ?? ''}`}>
+                            {s.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </section>
 
       </main>

@@ -98,6 +98,17 @@ export default function SessionPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [startTime] = useState(Date.now())
+  const [sessionDuration, setSessionDuration] = useState(0)
+  const [progressUpdate, setProgressUpdate] = useState<{
+    currentLevel: number
+    sessionsAtCurrentLevel: number
+    levelJustCompleted: boolean
+    newLevelTitle: string | null
+    skillLabel: string
+    totalSessions: number
+    sessionQuality: 'short' | 'standard' | 'deep'
+    milestones: string[]
+  } | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const audioDataRef = useRef<string>('')
 
@@ -112,10 +123,14 @@ export default function SessionPage() {
   const handleSave = async (fileData: string, fileType: string) => {
     if (!title.trim()) return
     const durationMinutes = Math.round((Date.now() - startTime) / 60000)
+    setSessionDuration(durationMinutes)
     setSaving(true)
     try {
       if (navigator.onLine) {
-        await savePortfolioItem({ discipline: discipline!, title, fileType, fileData, durationMinutes })
+        const res = await savePortfolioItem({ discipline: discipline!, title, fileType, fileData, durationMinutes })
+        if (res.data?.progressUpdate) {
+          setProgressUpdate(res.data.progressUpdate)
+        }
       } else {
         await savePendingItem({ discipline: discipline!, title, fileType, fileData, durationMinutes, createdAt: new Date().toISOString() })
       }
@@ -129,27 +144,109 @@ export default function SessionPage() {
   }
 
   if (saved) {
+    const isOffline = !progressUpdate
+    const quality = progressUpdate?.sessionQuality ?? (sessionDuration < 10 ? 'short' : sessionDuration <= 30 ? 'standard' : 'deep')
+    const qualityConfig = {
+      short: { label: 'Quick Session', icon: '⏱', color: 'bg-amber-100 text-amber-700 border-amber-200' },
+      standard: { label: 'Standard Session', icon: '⭐', color: 'bg-primary/10 text-primary border-primary/20' },
+      deep: { label: 'Deep Practice!', icon: '🔥', color: 'bg-green-100 text-green-700 border-green-200' },
+    }
+    const qc = qualityConfig[quality]
+    const levelPct = progressUpdate
+      ? Math.round((progressUpdate.sessionsAtCurrentLevel / 5) * 100)
+      : 0
+
     return (
       <div className="min-h-screen bg-bg-page">
         <TopNav />
-        <div className="max-w-lg mx-auto px-6 py-24 text-center">
-          <p className="text-5xl mb-4">✅</p>
-          <h2 className="text-text-primary font-bold text-xl mb-2">Work saved!</h2>
-          <p className="text-text-secondary text-sm mb-8">
-            {navigator.onLine
-              ? 'Your work has been saved to your portfolio.'
-              : 'Saved locally. It will sync to your portfolio when you reconnect.'}
-          </p>
-          <div className="flex gap-3 justify-center">
+        <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-10 space-y-4">
+
+          {/* Quality badge */}
+          <div className={`border rounded-2xl p-4 flex items-center gap-3 ${qc.color}`}>
+            <span className="text-2xl">{qc.icon}</span>
+            <div>
+              <p className="font-bold text-sm">{qc.label}</p>
+              <p className="text-xs opacity-80">{sessionDuration} min session</p>
+            </div>
+          </div>
+
+          {/* Level up celebration */}
+          {progressUpdate?.levelJustCompleted && (
+            <div className="bg-primary/10 border border-primary/20 rounded-2xl p-5 text-center">
+              <span className="text-4xl animate-bounce inline-block mb-2">★</span>
+              <p className="text-primary font-bold text-lg">Level Up!</p>
+              <p className="text-text-primary text-sm mt-1">
+                You reached Level {progressUpdate.currentLevel}
+                {progressUpdate.newLevelTitle ? ` — ${progressUpdate.newLevelTitle}` : ''}
+              </p>
+            </div>
+          )}
+
+          {/* Progress update */}
+          {progressUpdate && !isOffline && (
+            <div className="bg-white border border-border rounded-2xl p-5">
+              <p className="text-text-primary font-bold text-sm mb-3">Your Progress</p>
+              <p className="text-text-secondary text-xs mb-2">
+                Sessions at current level: {progressUpdate.sessionsAtCurrentLevel} / 5
+              </p>
+              <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
+                <div
+                  className="bg-primary h-2 rounded-full transition-all"
+                  style={{ width: `${levelPct}%` }}
+                />
+              </div>
+              <p className="text-text-muted text-xs">
+                {progressUpdate.skillLabel} · Level {progressUpdate.currentLevel} · {progressUpdate.totalSessions} sessions total
+              </p>
+            </div>
+          )}
+
+          {/* Milestones */}
+          {progressUpdate && progressUpdate.milestones.length > 0 && (
+            <div className="bg-white border-2 border-primary/30 rounded-2xl p-5 space-y-2">
+              <p className="text-primary font-bold text-sm mb-1">Milestone Reached!</p>
+              {progressUpdate.milestones.map((m, i) => (
+                <p key={i} className="text-text-primary text-sm flex gap-2 items-start">
+                  <span className="text-primary shrink-0">★</span>
+                  {m}
+                </p>
+              ))}
+            </div>
+          )}
+
+          {/* Offline note */}
+          {isOffline && (
+            <div className="bg-white border border-border rounded-2xl p-5 text-center">
+              <p className="text-text-primary font-semibold text-sm mb-1">Work saved!</p>
+              <p className="text-text-secondary text-xs">
+                Saved locally. It will sync to your portfolio when you reconnect.
+              </p>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div className="grid grid-cols-2 gap-3 pt-2">
             <button
-              onClick={() => { setStep(1); setSaved(false); setTitle('') }}
-              className="bg-primary text-white font-semibold text-sm px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors"
+              onClick={() => { setStep(1); setSaved(false); setTitle(''); setProgressUpdate(null) }}
+              className="bg-primary text-white font-semibold text-sm py-3 rounded-xl hover:bg-primary-dark transition-colors"
             >
-              Start another session
+              Continue practicing
             </button>
             <button
               onClick={() => navigate('/dashboard')}
-              className="border border-border text-text-secondary text-sm px-6 py-3 rounded-xl hover:bg-gray-50 transition-colors"
+              className="border border-border text-text-secondary text-sm py-3 rounded-xl hover:bg-gray-50 transition-colors"
+            >
+              View my progress
+            </button>
+            <button
+              onClick={() => navigate('/skill-summary')}
+              className="border border-border text-text-secondary text-sm py-3 rounded-xl hover:bg-gray-50 transition-colors"
+            >
+              View skill summary
+            </button>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="border border-border text-text-secondary text-sm py-3 rounded-xl hover:bg-gray-50 transition-colors"
             >
               Go to dashboard
             </button>
@@ -162,13 +259,13 @@ export default function SessionPage() {
   return (
     <div className="min-h-screen bg-bg-page">
       <TopNav />
-      <div className="max-w-3xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-10">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <span className="text-2xl">{info.emoji}</span>
           <div>
             <h1 className="text-text-primary font-bold text-xl">{info.name} Session</h1>
-            <p className="text-text-secondary text-xs">{user?.school.name}</p>
+            <p className="text-text-secondary text-xs">{user?.school?.name}</p>
           </div>
         </div>
 
@@ -216,8 +313,8 @@ export default function SessionPage() {
           )}
         </div>
 
-        {/* Save form — shown on step 5 */}
-        {step === 5 && (
+        {/* Save form — shown on step 5, not needed for piano intro */}
+        {step === 5 && discipline !== 'music-piano' && (
           <div className="bg-white border border-border rounded-xl p-5 mb-6">
             <label className="text-text-primary text-sm font-medium block mb-2">
               Give your work a title
@@ -248,10 +345,17 @@ export default function SessionPage() {
             >
               Next step →
             </button>
+          ) : discipline === 'music-piano' ? (
+            <button
+              onClick={() => navigate('/piano/understanding-the-piano')}
+              className="bg-primary text-white font-semibold text-sm px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors"
+            >
+              Continue to Door To Know Piano
+            </button>
           ) : (
             <button
               onClick={() => {
-                if (discipline === 'music' || discipline === 'music-guitar' || discipline === 'music-piano' || discipline === 'music-voice') {
+                if (discipline === 'music' || discipline === 'music-guitar' || discipline === 'music-voice') {
                   handleSave(audioDataRef.current || 'audio-session', 'audio/wav')
                 } else {
                   const canvas = canvasRef.current

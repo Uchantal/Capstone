@@ -245,8 +245,14 @@ export default function PianoModule({ step, onAudioReady }: Props) {
     <div className="space-y-5">
       <p className="text-text-secondary text-[11px]">Session {sessionNum} of your piano journey</p>
 
+      <div className="text-center max-w-md mx-auto py-2">
+        <p className="text-text-secondary text-sm">
+          This is a virtual piano. Try it. Play it. Listen to the melody.
+        </p>
+      </div>
+
       <p className="text-text-secondary text-xs bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2.5">
-        💡 {HINTS[step] ?? HINTS[1]}
+        {HINTS[step] ?? HINTS[1]}
       </p>
 
       {/* Piano keyboard */}

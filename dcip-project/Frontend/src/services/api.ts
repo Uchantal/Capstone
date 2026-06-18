@@ -71,11 +71,38 @@ export const createSupervisor = (data: {
   schoolId: string
 }) => api.post('/admin/supervisors', data)
 
+// Sessions — progress and analytics
+export const fetchProgress = () => api.get('/sessions/progress')
+
+export const fetchProgressByDiscipline = (discipline: string) =>
+  api.get(`/sessions/progress/${discipline}`)
+
+export const fetchAnalytics = () => api.get('/sessions/analytics')
+
+export const fetchCurriculum = (discipline: string) =>
+  api.get(`/sessions/curriculum/${discipline}`)
+
 // Supervisor
 export const getSupervisorActiveSessions = () => api.get('/supervisor/sessions/active')
 
 export const getSupervisorStudents = () => api.get('/supervisor/students')
 
 export const getSupervisorProgress = () => api.get('/supervisor/progress')
+
+export const getSupervisorLiveActivity = () => api.get('/supervisor/live-activity')
+
+export const getSupervisorSchoolAnalytics = () => api.get('/supervisor/school-analytics')
+
+// Production
+export const saveProductionResult = (data: {
+  discipline: string
+  totalPrompts: number
+  correctCount: number
+  outcome: 'demonstrated' | 'needs-more-practice'
+  attemptDetails: { chordSymbol: string; correct: boolean; timeTakenMs: number }[]
+}) => api.post('/production/result', data)
+
+export const fetchMyProductionResults = (discipline?: string) =>
+  api.get('/production/result/me', { params: discipline ? { discipline } : {} })
 
 export default api

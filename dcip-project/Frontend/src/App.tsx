@@ -7,6 +7,14 @@ import DisciplineSelectPage from './pages/DisciplineSelectPage'
 import MusicSelectPage from './pages/MusicSelectPage'
 import SessionPage from './pages/SessionPage'
 import PortfolioPage from './pages/PortfolioPage'
+import SkillSummaryPage from './pages/SkillSummaryPage'
+import UnderstandingPianoPage from './pages/piano/UnderstandingPianoPage'
+import NotesBuildChordsPage from './pages/piano/NotesBuildChordsPage'
+import Level1Page from './pages/piano/Level1Page'
+import Level2Page from './pages/piano/Level2Page'
+import Level3Page from './pages/piano/Level3Page'
+import SharpeningMyselfPage from './pages/piano/SharpeningMyselfPage'
+import ProductionPage from './pages/piano/ProductionPage'
 import SupervisorDashboardPage from './pages/supervisor/SupervisorDashboardPage'
 import AdminOverviewPage from './pages/admin/AdminOverviewPage'
 import AdminStudentsPage from './pages/admin/AdminStudentsPage'
@@ -62,6 +70,15 @@ export default function App() {
         <Route path="/session/music" element={<StudentRoute><MusicSelectPage /></StudentRoute>} />
         <Route path="/session/:discipline" element={<StudentRoute><SessionPage /></StudentRoute>} />
         <Route path="/portfolio" element={<StudentRoute><PortfolioPage /></StudentRoute>} />
+        <Route path="/skill-summary" element={<StudentRoute><SkillSummaryPage /></StudentRoute>} />
+
+        <Route path="/piano/understanding-the-piano" element={<StudentRoute><UnderstandingPianoPage /></StudentRoute>} />
+        <Route path="/piano/notes-build-chords" element={<StudentRoute><NotesBuildChordsPage /></StudentRoute>} />
+        <Route path="/piano/level-1" element={<StudentRoute><Level1Page /></StudentRoute>} />
+        <Route path="/piano/level-2" element={<StudentRoute><Level2Page /></StudentRoute>} />
+        <Route path="/piano/level-3" element={<StudentRoute><Level3Page /></StudentRoute>} />
+        <Route path="/piano/sharpening-myself" element={<StudentRoute><SharpeningMyselfPage /></StudentRoute>} />
+        <Route path="/piano/production" element={<StudentRoute><ProductionPage /></StudentRoute>} />
 
         <Route path="/supervisor" element={<SupervisorRoute><SupervisorDashboardPage /></SupervisorRoute>} />
 
