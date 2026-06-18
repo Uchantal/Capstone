@@ -15,7 +15,7 @@ export default function GraphicDesignModule({ canvasRef, step }: Props) {
   const drawing = useRef(false)
   const lastPos = useRef({ x: 0, y: 0 })
   const [drawMode, setDrawMode] = useState(false)
-  const [drawColour, setDrawColour] = useState('#FFFFFF')
+  const drawColour = '#FFFFFF'
 
   const renderPoster = () => {
     const canvas = canvasRef.current
@@ -135,7 +135,7 @@ export default function GraphicDesignModule({ canvasRef, step }: Props) {
               drawMode ? 'bg-primary text-white border-primary' : 'border-border text-text-secondary'
             }`}
           >
-            {drawMode ? '✏️ Drawing on' : '✏️ Draw on poster'}
+            {drawMode ? 'Drawing on' : 'Draw on poster'}
           </button>
         )}
       </div>

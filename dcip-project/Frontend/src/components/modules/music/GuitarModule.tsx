@@ -183,7 +183,7 @@ export default function GuitarModule({ step, onAudioReady }: Props) {
       <p className="text-text-secondary text-[11px]">Session {sessionNum} of your guitar journey</p>
 
       <p className="text-text-secondary text-xs bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5">
-        💡 {HINTS[step] ?? HINTS[1]}
+        {HINTS[step] ?? HINTS[1]}
       </p>
 
       {/* Fretboard */}

@@ -71,7 +71,7 @@ export const createSupervisor = (data: {
   schoolId: string
 }) => api.post('/admin/supervisors', data)
 
-// Sessions — progress and analytics
+// Sessions: progress and analytics
 export const fetchProgress = () => api.get('/sessions/progress')
 
 export const fetchProgressByDiscipline = (discipline: string) =>
@@ -104,5 +104,55 @@ export const saveProductionResult = (data: {
 
 export const fetchMyProductionResults = (discipline?: string) =>
   api.get('/production/result/me', { params: discipline ? { discipline } : {} })
+
+// Journey (Visual Arts structured progression)
+export const fetchJourneyProgress = (discipline: string) =>
+  api.get('/journey/progress', { params: { discipline } })
+
+export const completeJourneyStage = (data: { discipline: string; stageId: string }) =>
+  api.post('/journey/complete-stage', data)
+
+export const saveVAProductionResult = (data: {
+  finalImageData: string
+  checklistConfirmed: {
+    hasThreeShapes: boolean
+    usedColourIntentionally: boolean
+    hasVisibleShading: boolean
+    isOriginalWork: boolean
+  }
+}) => api.post('/journey/va-production', data)
+
+// Journey (Graphic Design structured progression)
+export const fetchGDLevelPoster = (level: number) =>
+  api.get('/journey/gd-level-poster', { params: { level } })
+
+export const saveGDLevelPoster = (data: {
+  level: number
+  title?: string
+  subtitle?: string
+  fontSize?: string
+  alignment?: string
+  bgColour?: string
+  titleColour?: string
+  reasoning: string
+}) => api.post('/journey/gd-level-poster', data)
+
+export const saveGDProductionResult = (data: {
+  posterTitle: string
+  posterSubtitle: string
+  fontSize: string
+  alignment: string
+  bgColour: string
+  titleColour: string
+  finalImageData: string
+  reasoningText: string
+  checklistConfirmed: {
+    hasTitleAndSubtitle: boolean
+    hasStrongContrast: boolean
+    hasIntentionalLayout: boolean
+    hasReasoningText: boolean
+    isOriginalWork: boolean
+  }
+}) => api.post('/journey/gd-production', data)
 
 export default api

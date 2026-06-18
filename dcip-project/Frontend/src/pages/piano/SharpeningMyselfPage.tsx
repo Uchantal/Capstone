@@ -82,7 +82,7 @@ export default function SharpeningMyselfPage() {
           </div>
           {selectedChord && (
             <p className="text-text-muted text-xs mt-3">
-              Highlighted: <span className="text-text-primary font-semibold">{selectedChord}</span> — the keyboard shows which keys to press.
+              Highlighted: <span className="text-text-primary font-semibold">{selectedChord}</span>. The keyboard shows which keys to press.
             </p>
           )}
         </div>

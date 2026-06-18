@@ -14,7 +14,7 @@ export default function Level3Page() {
     <ChordLevelScreen
       levelNumber={3}
       totalLevels={3}
-      levelTitle="Level 3 — Chords with Black Keys"
+      levelTitle="Level 3: Chords with Black Keys"
       description="These chords include black keys as part of the chord. Use the highlighted keys to guide you. Take your time finding the right finger positions."
       chords={LEVEL3_CHORDS}
       nextPath="/piano/sharpening-myself"

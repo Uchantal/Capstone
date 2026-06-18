@@ -39,11 +39,6 @@ interface SchoolAnalytics {
   studentProgress: StudentRow[]
 }
 
-const DISC_EMOJI: Record<string, string> = {
-  music: '🎵',
-  'visual-arts': '🎨',
-  'graphic-design': '✏️',
-}
 
 const DISC_LABEL: Record<string, string> = {
   music: 'Music',
@@ -151,7 +146,7 @@ export default function SupervisorDashboardPage() {
       <TopNav />
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
 
-        {/* Section 1 — Lab Session Control */}
+        {/* Section 1: Lab Session Control */}
         <section className="bg-white border border-border rounded-2xl p-6">
           <h2 className="text-text-primary font-bold text-lg mb-1">Laboratory Session</h2>
           <p className="text-text-secondary text-sm mb-5">
@@ -190,7 +185,7 @@ export default function SupervisorDashboardPage() {
           )}
         </section>
 
-        {/* Section 2 — Live Activity Feed */}
+        {/* Section 2: Live Activity Feed */}
         <section className="bg-white border border-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-1">
             <h2 className="text-text-primary font-bold text-lg">Live Student Activity</h2>
@@ -217,11 +212,10 @@ export default function SupervisorDashboardPage() {
                     <tr key={s._id}>
                       <td className="px-4 py-3 text-text-primary font-medium">{s.studentName}</td>
                       <td className="px-4 py-3 text-text-secondary">
-                        <span className="mr-1">{DISC_EMOJI[s.discipline] ?? ''}</span>
                         {DISC_LABEL[s.discipline] ?? s.discipline}
                       </td>
                       <td className="px-4 py-3 text-text-secondary">
-                        Level {s.currentLevel} — {s.skillLabel}
+                        Level {s.currentLevel}: {s.skillLabel}
                       </td>
                       <td className="px-4 py-3 text-text-secondary">{s.durationMinutes} min</td>
                       <td className="px-4 py-3 text-text-secondary">
@@ -238,11 +232,11 @@ export default function SupervisorDashboardPage() {
           )}
         </section>
 
-        {/* Section 3 — School Progress Analytics */}
+        {/* Section 3: School Progress Analytics */}
         <section className="space-y-6">
           <h2 className="text-text-primary font-bold text-lg">School Progress Analytics</h2>
 
-          {/* Row 1 — Stat cards */}
+          {/* Row 1: Stat cards */}
           <div className="grid grid-cols-4 gap-4 md:grid-cols-2">
             {analyticsLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
@@ -266,7 +260,7 @@ export default function SupervisorDashboardPage() {
             )}
           </div>
 
-          {/* Row 2 — Discipline Distribution */}
+          {/* Row 2: Discipline Distribution */}
           <div className="grid grid-cols-3 gap-4 md:grid-cols-1">
             {['music', 'visual-arts', 'graphic-design'].map((disc) => {
               const stat = analytics?.disciplineStats.find((d) => d.discipline === disc)
@@ -276,7 +270,6 @@ export default function SupervisorDashboardPage() {
                   className={`bg-white border border-border border-t-4 ${DISC_BORDER[disc]} rounded-2xl p-5`}
                 >
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xl">{DISC_EMOJI[disc]}</span>
                     <p className="text-text-primary font-semibold text-sm">{DISC_LABEL[disc]}</p>
                   </div>
                   <div className="space-y-1">
@@ -295,7 +288,7 @@ export default function SupervisorDashboardPage() {
             })}
           </div>
 
-          {/* Row 3 — Student Progress Table */}
+          {/* Row 3: Student Progress Table */}
           <div className="bg-white border border-border rounded-2xl overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-wrap gap-3">
               <h3 className="text-text-primary font-bold text-base">Student Progress Overview</h3>
@@ -330,7 +323,6 @@ export default function SupervisorDashboardPage() {
                       <tr key={s.id}>
                         <td className="px-6 py-4 text-text-primary font-medium">{s.name}</td>
                         <td className="px-6 py-4 text-text-secondary">
-                          <span className="mr-1">{DISC_EMOJI[s.discipline] ?? ''}</span>
                           {DISC_LABEL[s.discipline] ?? s.discipline}
                         </td>
                         <td className="px-6 py-4 text-text-primary">{s.currentLevel}</td>

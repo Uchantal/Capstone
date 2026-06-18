@@ -26,7 +26,7 @@ const loadUser = (): AuthUser | null => {
 
 export const useAuth = () => {
   // Both token and user are read synchronously so they are available on the
-  // very first render — prevents redirect loops in route guards.
+  // very first render; prevents redirect loops in route guards.
   const [token, setToken] = useState<string | null>(loadToken)
   const [user, setUser] = useState<AuthUser | null>(loadUser)
 

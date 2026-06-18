@@ -6,7 +6,6 @@ import { savePendingItem } from '../services/db'
 import TopNav from '../components/TopNav'
 import StepIndicator from '../components/StepIndicator'
 import MusicModule from '../components/modules/MusicModule'
-import VisualArtsModule from '../components/modules/VisualArtsModule'
 import GraphicDesignModule from '../components/modules/GraphicDesignModule'
 import GuitarModule from '../components/modules/music/GuitarModule'
 import PianoModule from '../components/modules/music/PianoModule'
@@ -20,10 +19,9 @@ type Discipline =
   | 'visual-arts'
   | 'graphic-design'
 
-const disciplineInfo: Record<Discipline, { name: string; emoji: string; steps: string[] }> = {
+const disciplineInfo: Record<Discipline, { name: string; steps: string[] }> = {
   music: {
     name: 'Music',
-    emoji: '🎵',
     steps: [
       'Listen to the example and get familiar with the rhythm',
       'Try recording a short vocal or humming melody',
@@ -34,7 +32,6 @@ const disciplineInfo: Record<Discipline, { name: string; emoji: string; steps: s
   },
   'music-guitar': {
     name: 'Guitar',
-    emoji: '🎸',
     steps: [
       'Explore the fretboard: tap strings and frets to hear notes',
       'Play your first chord, try E minor or C major',
@@ -45,7 +42,6 @@ const disciplineInfo: Record<Discipline, { name: string; emoji: string; steps: s
   },
   'music-piano': {
     name: 'Piano',
-    emoji: '🎹',
     steps: [
       'Play the C major scale: C D E F G A B C in order',
       'Try the basic chords: C major, F major, G major',
@@ -56,7 +52,6 @@ const disciplineInfo: Record<Discipline, { name: string; emoji: string; steps: s
   },
   'music-voice': {
     name: 'Voice & Singing',
-    emoji: '🎤',
     steps: [
       'Complete the breathing and warm-up exercises',
       'Pitch matching: click each tone and sing it back',
@@ -67,7 +62,6 @@ const disciplineInfo: Record<Discipline, { name: string; emoji: string; steps: s
   },
   'visual-arts': {
     name: 'Visual Arts',
-    emoji: '🎨',
     steps: [
       'Choose a colour palette: warm, cool, or mixed',
       'Draw three basic shapes that represent something real',
@@ -78,7 +72,6 @@ const disciplineInfo: Record<Discipline, { name: string; emoji: string; steps: s
   },
   'graphic-design': {
     name: 'Graphic Design',
-    emoji: '✏️',
     steps: [
       'Choose your poster topic: event, announcement, or message',
       'Sketch a simple layout: where does the title go?',
@@ -116,7 +109,10 @@ export default function SessionPage() {
 
   useEffect(() => {
     if (!user) navigate('/login')
-  }, [user])
+    if (discipline === 'music-guitar') navigate('/guitar/virtual-instrument', { replace: true })
+    if (discipline === 'visual-arts') navigate('/visual-arts/virtual-canvas', { replace: true })
+    if (discipline === 'graphic-design') navigate('/graphic-design/virtual-studio', { replace: true })
+  }, [user, discipline])
 
   if (!info) return <div className="p-8">Unknown discipline</div>
 
@@ -147,9 +143,9 @@ export default function SessionPage() {
     const isOffline = !progressUpdate
     const quality = progressUpdate?.sessionQuality ?? (sessionDuration < 10 ? 'short' : sessionDuration <= 30 ? 'standard' : 'deep')
     const qualityConfig = {
-      short: { label: 'Quick Session', icon: '⏱', color: 'bg-amber-100 text-amber-700 border-amber-200' },
-      standard: { label: 'Standard Session', icon: '⭐', color: 'bg-primary/10 text-primary border-primary/20' },
-      deep: { label: 'Deep Practice!', icon: '🔥', color: 'bg-green-100 text-green-700 border-green-200' },
+      short: { label: 'Quick Session', color: 'bg-amber-100 text-amber-700 border-amber-200' },
+      standard: { label: 'Standard Session', color: 'bg-primary/10 text-primary border-primary/20' },
+      deep: { label: 'Deep Practice!', color: 'bg-green-100 text-green-700 border-green-200' },
     }
     const qc = qualityConfig[quality]
     const levelPct = progressUpdate
@@ -163,7 +159,6 @@ export default function SessionPage() {
 
           {/* Quality badge */}
           <div className={`border rounded-2xl p-4 flex items-center gap-3 ${qc.color}`}>
-            <span className="text-2xl">{qc.icon}</span>
             <div>
               <p className="font-bold text-sm">{qc.label}</p>
               <p className="text-xs opacity-80">{sessionDuration} min session</p>
@@ -177,7 +172,7 @@ export default function SessionPage() {
               <p className="text-primary font-bold text-lg">Level Up!</p>
               <p className="text-text-primary text-sm mt-1">
                 You reached Level {progressUpdate.currentLevel}
-                {progressUpdate.newLevelTitle ? ` — ${progressUpdate.newLevelTitle}` : ''}
+                {progressUpdate.newLevelTitle ? `: ${progressUpdate.newLevelTitle}` : ''}
               </p>
             </div>
           )}
@@ -262,7 +257,6 @@ export default function SessionPage() {
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-10">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-2xl">{info.emoji}</span>
           <div>
             <h1 className="text-text-primary font-bold text-xl">{info.name} Session</h1>
             <p className="text-text-secondary text-xs">{user?.school?.name}</p>
@@ -305,15 +299,12 @@ export default function SessionPage() {
               onAudioReady={(data) => { audioDataRef.current = data }}
             />
           )}
-          {discipline === 'visual-arts' && (
-            <VisualArtsModule canvasRef={canvasRef} step={step} />
-          )}
           {discipline === 'graphic-design' && (
             <GraphicDesignModule canvasRef={canvasRef} step={step} />
           )}
         </div>
 
-        {/* Save form — shown on step 5, not needed for piano intro */}
+        {/* Save form: shown on step 5, not needed for piano intro */}
         {step === 5 && discipline !== 'music-piano' && (
           <div className="bg-white border border-border rounded-xl p-5 mb-6">
             <label className="text-text-primary text-sm font-medium block mb-2">

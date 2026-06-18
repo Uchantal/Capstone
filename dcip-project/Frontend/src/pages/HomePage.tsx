@@ -29,6 +29,50 @@ function FadeIn({ children, className = '', delay = 0 }: { children: React.React
   )
 }
 
+function StepIcon({ index }: { index: number }) {
+  const svg = {
+    viewBox: '0 0 24 24',
+    fill: 'none' as const,
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    className: 'w-5 h-5',
+  }
+  if (index === 0) return (
+    <svg {...svg}>
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  )
+  if (index === 1) return (
+    <svg {...svg}>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+    </svg>
+  )
+  if (index === 2) return (
+    <svg {...svg}>
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </svg>
+  )
+  if (index === 3) return (
+    <svg {...svg}>
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  )
+  return (
+    <svg {...svg}>
+      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+    </svg>
+  )
+}
+
 const disciplines = [
   {
     name: 'Music',
@@ -61,64 +105,27 @@ const disciplines = [
 
 const steps = [
   {
-    n: '01',
     title: 'Register at your school',
     desc: 'Create an account and select your school from the verified list. Only participating schools are accepted.',
-    borderColor: 'border-accent',
   },
   {
-    n: '02',
-    title: 'Choose your path',
+    title: 'Choose your discipline',
     desc: 'Pick Music, Visual Arts, or Graphic Design. Music splits further into Guitar, Piano, or Voice and Singing.',
-    borderColor: 'border-primary',
   },
   {
-    n: '03',
-    title: 'Follow guided steps',
-    desc: 'Every session has 5 structured steps in plain language. No teacher, no prior experience, no installation needed.',
-    borderColor: 'border-secondary',
+    title: 'Learn the foundations',
+    desc: 'Every discipline starts with short foundation lessons covering the basics, before you move on to guided practice levels.',
   },
   {
-    n: '04',
-    title: 'Save to your portfolio',
-    desc: 'Your work accumulates session by session. Offline? It saves locally and syncs automatically when you reconnect.',
-    borderColor: 'border-[#378ADD]',
+    title: 'Practise and grow',
+    desc: 'Work through three graduated levels, then practise freely, and finish with a production challenge that shows what you have learned.',
+  },
+  {
+    title: 'Build your portfolio',
+    desc: 'Your finished work saves to your portfolio automatically. Offline? It saves locally and syncs when you reconnect.',
   },
 ]
 
-const features = [
-  {
-    title: 'Offline-first',
-    description: 'Full access without internet. Work saves to the device and syncs automatically when connection returns.',
-    leftBorder: 'border-l-primary',
-  },
-  {
-    title: 'No installation',
-    description: 'Opens in any Chromium or Firefox browser on school computers. No setup, no downloads, no IT support needed.',
-    leftBorder: 'border-l-secondary',
-  },
-  {
-    title: 'Step-by-step sessions',
-    description: 'Every session has 5 guided steps in plain language. Built for students with no prior digital creative experience.',
-    leftBorder: 'border-l-accent',
-  },
-  {
-    title: 'Portfolio that grows',
-    description: 'Creative work accumulates across sessions. Nothing is lost between lab visits, even if you were offline.',
-    leftBorder: 'border-l-[#378ADD]',
-  },
-  {
-    title: 'School-verified access',
-    description: 'Registration restricted to verified participating schools, keeping the platform safe and purposeful.',
-    leftBorder: 'border-l-primary',
-  },
-  {
-    
-    title: 'Made for Rwanda',
-    description: 'Designed specifically for the infrastructure, context, and talented youth of rural Rwandan secondary schools.',
-    leftBorder: 'border-l-secondary',
-  },
-]
 
 export default function HomePage() {
   const [scrolled, setScrolled] = useState(false)
@@ -319,48 +326,59 @@ export default function HomePage() {
           <FadeIn delay={0} className="text-center mb-16">
             <p className="text-primary text-xs font-semibold tracking-widest uppercase mb-3">How It Works</p>
             <h2 className="font-sans font-extrabold text-[#1A1A1A] text-3xl lg:text-4xl">
-              School computer to saved portfolio.<br />Four steps.
+              School computer to saved portfolio.<br />Five steps.
             </h2>
           </FadeIn>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-0.5">
-            {steps.map((s, i) => (
-              <FadeIn key={s.n} delay={i * 0.1}>
-                <div className={`bg-white border border-[#E8E4DC] p-8 border-t-[3px] ${s.borderColor} h-full`}>
-                  <div className="font-sans font-extrabold text-[#1A1A1A]/5 text-6xl leading-none mb-5 tracking-tighter">
-                    {s.n}
+          {/* Desktop: horizontal connected flow (lg and above) */}
+          <FadeIn delay={0.05} className="hidden lg:block">
+            {/* Badge row with connector line */}
+            <div className="relative flex mb-6">
+              <div className="absolute left-[10%] right-[10%] top-6 h-px bg-primary/20" />
+              {steps.map((_s, i) => (
+                <div key={i} className="w-1/5 flex flex-col items-center relative z-10">
+                  <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-md">
+                    <StepIcon index={i} />
                   </div>
-                  <h3 className="font-sans font-bold text-[#1A1A1A] text-base mb-3 leading-snug">{s.title}</h3>
+                  <p className="text-[10px] font-semibold tracking-widest text-[#555555] uppercase mt-3">
+                    Step {i + 1}
+                  </p>
+                </div>
+              ))}
+            </div>
+            {/* Card row */}
+            <div className="grid grid-cols-5 gap-3">
+              {steps.map((s, i) => (
+                <div key={i} className="bg-white border border-[#E8E4DC] rounded-xl p-5 shadow-sm">
+                  <h3 className="font-bold text-sm text-[#1A1A1A] mb-2 leading-snug">{s.title}</h3>
                   <p className="text-xs text-[#555555] leading-relaxed">{s.desc}</p>
                 </div>
-              </FadeIn>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURES */}
-      <section className="bg-[#F9F7F4] py-16 md:py-12 lg:py-24 px-6 md:px-8 lg:px-20">
-        <div className="max-w-6xl mx-auto">
-          <FadeIn delay={0} className="mb-14">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-px bg-primary" />
-              <span className="text-primary text-xs font-semibold tracking-widest uppercase">Built for you at your school</span>
+              ))}
             </div>
-            <h2 className="font-sans font-extrabold text-[#1A1A1A] text-3xl lg:text-4xl">
-              Designed for how Rwandan schools actually work to help Creative Sector growth.
-            </h2>
           </FadeIn>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {features.map((f) => (
-              <div
-                key={f.title}
-                className={`p-6 bg-white border border-[#E8E4DC] border-l-[3px] ${f.leftBorder}`}
-              >
-                <h3 className="font-semibold text-sm text-[#1A1A1A] mb-2">{f.title}</h3>
-                <p className="text-xs text-[#555555] leading-relaxed">{f.description}</p>
-              </div>
+          {/* Mobile: vertical timeline (below lg) */}
+          <div className="lg:hidden flex flex-col">
+            {steps.map((s, i) => (
+              <FadeIn key={i} delay={i * 0.08} className="flex gap-4">
+                <div className="flex flex-col items-center flex-shrink-0 w-10">
+                  <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-md">
+                    <StepIcon index={i} />
+                  </div>
+                  {i < steps.length - 1 && (
+                    <div className="w-px bg-primary/20 flex-1 mt-2" />
+                  )}
+                </div>
+                <div className={`flex-1 min-w-0 ${i < steps.length - 1 ? 'pb-6' : ''}`}>
+                  <p className="text-[10px] font-semibold tracking-widest text-[#555555] uppercase mb-2 mt-1.5">
+                    Step {i + 1}
+                  </p>
+                  <div className="bg-white border border-[#E8E4DC] rounded-xl p-5 shadow-sm">
+                    <h3 className="font-bold text-sm text-[#1A1A1A] mb-1.5 leading-snug">{s.title}</h3>
+                    <p className="text-xs text-[#555555] leading-relaxed">{s.desc}</p>
+                  </div>
+                </div>
+              </FadeIn>
             ))}
           </div>
         </div>

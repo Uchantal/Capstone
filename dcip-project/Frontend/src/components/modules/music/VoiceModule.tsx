@@ -248,7 +248,7 @@ export default function VoiceModule({ step, onAudioReady }: Props) {
   return (
     <div className="space-y-5">
       <p className="text-text-secondary text-xs bg-purple-50 border border-purple-200 rounded-lg px-4 py-2.5">
-        💡 {HINTS[step] ?? HINTS[1]}
+        {HINTS[step] ?? HINTS[1]}
       </p>
 
       {/* Breathing warm-up — step 1 */}

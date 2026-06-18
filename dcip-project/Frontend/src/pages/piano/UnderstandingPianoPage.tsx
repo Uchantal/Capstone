@@ -74,12 +74,12 @@ export default function UnderstandingPianoPage() {
             These repeat across the keyboard in groups called octaves.
           </p>
           <p className="text-text-secondary text-sm">
-            The black keys play sharps and flats — raised or lowered versions of the natural notes.
+            The black keys play sharps and flats, raised or lowered versions of the natural notes.
             They always appear in groups of two or three, which makes it easy to find your place on the keyboard.
           </p>
         </div>
 
-        {/* Section 2 — Static diagram */}
+        {/* Section 2: Static diagram */}
         <div className="bg-white border border-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Finding C on the Keyboard</h2>
           <p className="text-text-secondary text-sm mb-5">
@@ -90,7 +90,7 @@ export default function UnderstandingPianoPage() {
             <StaticKeyboard />
           </div>
           <p className="text-text-muted text-xs mt-3">
-            The gold keys (C, E, G) are the notes of a C major chord — you will play this in Level 1.
+            The gold keys (C, E, G) are the notes of a C major chord. You will play this in Level 1.
           </p>
         </div>
 
@@ -99,7 +99,7 @@ export default function UnderstandingPianoPage() {
           <h2 className="text-text-primary font-bold text-base mb-3">Octaves</h2>
           <p className="text-text-secondary text-sm mb-3">
             Each complete set of 12 keys (7 white + 5 black) is called an <span className="font-semibold">octave</span>.
-            The same note name appears in every octave — C4, C5, C6 are all called C, but each one sounds higher than the last.
+            The same note name appears in every octave. C4, C5, C6 are all called C, but each one sounds higher than the last.
           </p>
           <p className="text-text-secondary text-sm">
             On the practice keyboard you will use C4 (middle C) as your home position.

@@ -9,7 +9,7 @@ export interface AuthRequest extends Request {
 export const protect = (req: AuthRequest, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ message: 'Not authorised — no token' })
+    res.status(401).json({ message: 'Not authorised: no token' })
     return
   }
   const token = authHeader.split(' ')[1]

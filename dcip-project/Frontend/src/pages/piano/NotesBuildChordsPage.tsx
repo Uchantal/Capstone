@@ -53,11 +53,11 @@ export default function NotesBuildChordsPage() {
           A chord is three or more notes played at the same time. Every chord is built from a simple mathematical pattern of half steps.
         </p>
 
-        {/* Section 1 — Half steps */}
+        {/* Section 1: Half steps */}
         <div className="bg-white border border-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Half Steps</h2>
           <p className="text-text-secondary text-sm mb-3">
-            A <span className="font-semibold">half step</span> is the distance between any two adjacent keys on the piano — white or black.
+            A <span className="font-semibold">half step</span> is the distance between any two adjacent keys on the piano, white or black.
             Moving from C to C# is one half step. Moving from E to F is also one half step (there is no black key between them).
           </p>
           <div className="bg-[#F9F7F4] rounded-xl p-4">
@@ -71,7 +71,7 @@ export default function NotesBuildChordsPage() {
           </div>
         </div>
 
-        {/* Section 2 — Major chord */}
+        {/* Section 2: Major chord */}
         <div className="bg-white border border-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Building a Major Chord</h2>
           <p className="text-text-secondary text-sm mb-4">
@@ -82,7 +82,7 @@ export default function NotesBuildChordsPage() {
               Root + 4 half steps + 3 more half steps
             </p>
             <p className="text-text-muted text-xs mt-1">
-              Positions: Root (1st) — Major Third (3rd) — Perfect Fifth (5th)
+              Positions: Root (1st), Major Third (3rd), Perfect Fifth (5th)
             </p>
           </div>
           <p className="text-text-muted text-xs uppercase tracking-wide mb-3">Worked example: C major</p>
@@ -98,18 +98,18 @@ export default function NotesBuildChordsPage() {
           </div>
         </div>
 
-        {/* Section 3 — Minor chord */}
+        {/* Section 3: Minor chord */}
         <div className="bg-white border border-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Building a Minor Chord</h2>
           <p className="text-text-secondary text-sm mb-4">
-            A <span className="font-semibold">minor chord</span> swaps the order of the first two intervals — it starts with a smaller step, giving it a darker sound.
+            A <span className="font-semibold">minor chord</span> swaps the order of the first two intervals: it starts with a smaller step, giving it a darker sound.
           </p>
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-5">
             <p className="text-text-primary font-semibold text-sm">
               Root + 3 half steps + 4 more half steps
             </p>
             <p className="text-text-muted text-xs mt-1">
-              Positions: Root (1st) — Minor Third (3rd) — Perfect Fifth (5th)
+              Positions: Root (1st), Minor Third (3rd), Perfect Fifth (5th)
             </p>
           </div>
           <p className="text-text-muted text-xs uppercase tracking-wide mb-3">Worked example: A minor</p>

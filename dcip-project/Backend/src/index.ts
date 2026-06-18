@@ -8,6 +8,7 @@ import portfolioRoutes from './routes/portfolio'
 import adminRoutes from './routes/admin'
 import supervisorRoutes from './routes/supervisor'
 import productionRoutes from './routes/production'
+import journeyRoutes from './routes/journey'
 
 dotenv.config()
 
@@ -34,6 +35,7 @@ app.use('/api/portfolio', portfolioRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/supervisor', supervisorRoutes)
 app.use('/api/production', productionRoutes)
+app.use('/api/journey', journeyRoutes)
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }))
 

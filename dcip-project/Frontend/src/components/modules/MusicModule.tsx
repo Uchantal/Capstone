@@ -109,7 +109,7 @@ export default function MusicModule({ step, onAudioReady }: Props) {
               onClick={startRecording}
               className="bg-accent text-white font-semibold text-sm px-5 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
             >
-              🎙 Start recording
+              Start recording
             </button>
           )}
           {recording && (

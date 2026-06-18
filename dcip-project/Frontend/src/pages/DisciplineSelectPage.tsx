@@ -6,7 +6,6 @@ import TopNav from '../components/TopNav'
 const disciplines = [
   {
     id: 'music',
-    emoji: '🎵',
     name: 'Music',
     sub: 'Guitar · Piano · Voice & Singing',
     desc: 'Play instruments and record your voice. Step-by-step sessions from your first note to a saved composition.',
@@ -16,7 +15,6 @@ const disciplines = [
   },
   {
     id: 'visual-arts',
-    emoji: '🎨',
     name: 'Visual Arts',
     sub: 'Drawing · Colour · Composition',
     desc: 'Create digital artworks on an HTML canvas. Explore colour, form, and composition through guided exercises.',
@@ -26,7 +24,6 @@ const disciplines = [
   },
   {
     id: 'graphic-design',
-    emoji: '✏️',
     name: 'Graphic Design',
     sub: 'Layouts · Typography · Posters',
     desc: 'Learn visual communication fundamentals and create poster designs step by step.',
@@ -70,7 +67,6 @@ export default function DisciplineSelectPage() {
                 user?.discipline === d.id ? d.accent : 'border-border hover:border-gray-300'
               }`}
             >
-              <div className="text-3xl mb-4">{d.emoji}</div>
               <p className="text-text-primary font-bold text-base mb-1">{d.name}</p>
               <p className={`text-xs mb-3 ${d.accentText}`}>{d.sub}</p>
               <p className="text-text-secondary text-xs leading-relaxed">{d.desc}</p>

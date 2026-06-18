@@ -60,7 +60,7 @@ export default function PortfolioPage() {
           <div className="text-center text-text-secondary text-sm py-16">Loading...</div>
         ) : items.length === 0 ? (
           <div className="bg-white border border-border rounded-xl p-12 text-center">
-            <p className="text-4xl mb-3">📂</p>
+            <p className="text-4xl mb-3"></p>
             <p className="text-text-primary font-semibold mb-2">No work yet</p>
             <p className="text-text-secondary text-sm mb-6">Complete a session to save your first piece.</p>
             <button
@@ -117,7 +117,7 @@ export default function PortfolioPage() {
                 )}
                 {(!selected.fileType || selected.fileType === 'audio/wav') && !selected.fileData?.startsWith('data:') && (
                   <div className="bg-bg-page rounded-lg p-4 text-center text-text-secondary text-sm mb-4">
-                    🎵 Audio session recorded
+                    Audio session recorded
                   </div>
                 )}
 

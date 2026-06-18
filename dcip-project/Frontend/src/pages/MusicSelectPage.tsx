@@ -4,7 +4,6 @@ import TopNav from '../components/TopNav'
 const paths = [
   {
     id: 'music-guitar',
-    emoji: '🎸',
     name: 'Guitar',
     description:
       'Learn chords, strumming patterns, and simple melodies using an interactive virtual fretboard powered by the Web Audio API.',
@@ -20,7 +19,6 @@ const paths = [
   },
   {
     id: 'music-piano',
-    emoji: '🎹',
     name: 'Piano',
     description:
       'Learn scales, chords, and melodies using an interactive virtual keyboard. Follow guided exercises at your own pace.',
@@ -36,7 +34,6 @@ const paths = [
   },
   {
     id: 'music-voice',
-    emoji: '🎤',
     name: 'Voice & Singing',
     description:
       'Record your voice, practise pitch, warm up with vocal exercises, and save recordings of your singing using your device microphone.',
@@ -83,7 +80,6 @@ export default function MusicSelectPage() {
               {/* Icon area */}
               <div className="bg-yellow-50 flex items-center justify-center py-10">
                 <div className="bg-yellow-100 rounded-2xl w-24 h-24 flex items-center justify-center">
-                  <span className="text-5xl">{path.emoji}</span>
                 </div>
               </div>
 

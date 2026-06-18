@@ -31,11 +31,6 @@ const DISC_COLORS: Record<string, string> = {
   'graphic-design': '#3B82F6',
 }
 
-const DISC_EMOJI: Record<string, string> = {
-  music: '🎵',
-  'visual-arts': '🎨',
-  'graphic-design': '✏️',
-}
 
 const DISC_LABEL: Record<string, string> = {
   music: 'Music',
@@ -277,7 +272,6 @@ export default function DashboardPage() {
               </div>
             ) : progress.length === 0 ? (
               <div className="bg-white border border-border rounded-2xl p-6 text-center">
-                <p className="text-3xl mb-2">🎯</p>
                 <p className="text-text-primary font-semibold text-sm mb-1">No sessions yet</p>
                 <p className="text-text-secondary text-xs">
                   Complete a session to start tracking your progress.
@@ -291,7 +285,6 @@ export default function DashboardPage() {
                   <div key={p.discipline} className="bg-white border border-border rounded-2xl p-5">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-xl">{DISC_EMOJI[p.discipline] ?? '🎨'}</span>
                         <span className="text-text-primary font-semibold text-sm">
                           {DISC_LABEL[p.discipline] ?? p.discipline}
                         </span>

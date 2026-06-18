@@ -13,7 +13,7 @@ export default function Level1Page() {
     <ChordLevelScreen
       levelNumber={1}
       totalLevels={3}
-      levelTitle="Level 1 — Major Chords"
+      levelTitle="Level 1: Major Chords"
       description="Play each major chord by pressing its three notes at the same time and holding them for a moment. The keyboard highlights which keys to press."
       chords={LEVEL1_CHORDS}
       nextPath="/piano/level-2"

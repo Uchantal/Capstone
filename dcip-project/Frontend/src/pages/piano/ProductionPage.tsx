@@ -252,7 +252,7 @@ export default function ProductionPage() {
         <div className="bg-white border border-border rounded-2xl p-6 mb-5">
           <p className="text-text-muted text-xs uppercase tracking-wide mb-3">Production Test</p>
           <p className="text-text-secondary text-sm mb-4">
-            Play the chord shown below. Hold the notes together for a moment. No hints are shown — this is your chance to demonstrate what you have learned.
+            Play the chord shown below. Hold the notes together for a moment. No hints are shown. This is your chance to demonstrate what you have learned.
           </p>
           <div className="flex items-baseline gap-4 mb-3">
             <span className="text-7xl font-bold text-text-primary leading-none">

@@ -74,7 +74,7 @@ export default function VisualArtsModule({ canvasRef, step }: Props) {
   const [canUndo,     setCanUndo]     = useState(false)
   const [canRedo,     setCanRedo]     = useState(false)
 
-  // Mutable refs for hot-path drawing — avoids stale closures in event handlers
+  // Mutable refs for hot-path drawing; avoids stale closures in event handlers
   const overlayRef   = useRef<HTMLCanvasElement>(null)
   const offscreenRef = useRef<HTMLCanvasElement | null>(null)
   const drawing      = useRef(false)
