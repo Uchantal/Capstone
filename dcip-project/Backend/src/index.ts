@@ -9,6 +9,13 @@ import adminRoutes from './routes/admin'
 import supervisorRoutes from './routes/supervisor'
 import productionRoutes from './routes/production'
 import journeyRoutes from './routes/journey'
+import pianoRoutes from './routes/piano'
+import guitarRoutes from './routes/guitar'
+import visualArtsRoutes from './routes/visualArts'
+import graphicDesignRoutes from './routes/graphicDesign'
+import voiceRoutes from './routes/voice'
+import progressSummaryRoutes from './routes/progressSummary'
+import feedbackRoutes from './routes/feedback'
 
 dotenv.config()
 
@@ -36,6 +43,13 @@ app.use('/api/admin', adminRoutes)
 app.use('/api/supervisor', supervisorRoutes)
 app.use('/api/production', productionRoutes)
 app.use('/api/journey', journeyRoutes)
+app.use('/api/piano', pianoRoutes)
+app.use('/api/guitar', guitarRoutes)
+app.use('/api/visual-arts', visualArtsRoutes)
+app.use('/api/graphic-design', graphicDesignRoutes)
+app.use('/api/voice', voiceRoutes)
+app.use('/api/progress', progressSummaryRoutes)
+app.use('/api/feedback', feedbackRoutes)
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }))
 

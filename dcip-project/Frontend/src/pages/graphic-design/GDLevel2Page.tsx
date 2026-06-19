@@ -1,17 +1,41 @@
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import GDLevelScreen from '../../components/graphic-design/GDLevelScreen'
+import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
 
 export default function GDLevel2Page() {
+  const navigate = useNavigate()
+  const { progress, loading } = useGDDemonstrationProgress()
+
+  useEffect(() => {
+    if (loading) return
+    if (!progress.level1DemonstrationPassed) {
+      navigate('/graphic-design/level-1/demonstrate', {
+        replace: true,
+        state: { lockedMessage: 'Complete the Level 1 demonstration first.' },
+      })
+    }
+  }, [loading, progress.level1DemonstrationPassed, navigate])
+
+  if (loading || !progress.level1DemonstrationPassed) {
+    return (
+      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+        <p className="text-text-muted text-sm">Loading...</p>
+      </div>
+    )
+  }
+
   return (
     <GDLevelScreen
       levelNumber={2}
       totalLevels={3}
       levelTitle="Level 2: Redesign for a Different Audience"
       brief="The same creative talent evening now also needs a version for a formal invitation sent to parents and local community leaders. The tone needs to feel trustworthy and calm rather than loud and exciting. The audience reading this version is adults in a formal context, not teenagers on a noticeboard."
-      task="Starting from your Level 1 poster (your title and subtitle are carried forward), change the colour scheme to suit a calmer and more formal tone. Adjust the contrast so it still reads clearly and feels trustworthy rather than urgent. You may also adjust the alignment if a different one feels more appropriate for this audience."
-      reasoningPrompt="Why did you change the colours for this audience, and how does it feel different from your Level 1 version?"
-      nextPath="/graphic-design/level-3"
+      task="Your Level 1 design is loaded below. Change the colours and arrangement to suit a calmer, more formal tone for an adult audience. Adjust text sizes, element positions, and colours. You may add or remove elements."
+      reasoningPrompt="Why did you change the colours and layout for this audience, and how does it feel different from your Level 1 version?"
+      nextPath="/graphic-design/level-2/practise"
       stageId="gd-level-2"
-      requires={['gd-level-1']}
+      requires={[]}
       initialPosterLevel={1}
     />
   )

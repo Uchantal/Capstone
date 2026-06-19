@@ -5,7 +5,7 @@ import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import DisciplineSelectPage from './pages/DisciplineSelectPage'
 import MusicSelectPage from './pages/MusicSelectPage'
-import SessionPage from './pages/SessionPage'
+import PianoVirtualInstrumentPage from './pages/piano/VirtualInstrumentPage'
 import PortfolioPage from './pages/PortfolioPage'
 import SkillSummaryPage from './pages/SkillSummaryPage'
 import UnderstandingPianoPage from './pages/piano/UnderstandingPianoPage'
@@ -15,15 +15,33 @@ import Level2Page from './pages/piano/Level2Page'
 import Level3Page from './pages/piano/Level3Page'
 import SharpeningMyselfPage from './pages/piano/SharpeningMyselfPage'
 import ProductionPage from './pages/piano/ProductionPage'
+import Level1PractisePage from './pages/piano/Level1PractisePage'
+import Level1DemonstratePage from './pages/piano/Level1DemonstratePage'
+import Level2PractisePage from './pages/piano/Level2PractisePage'
+import Level2DemonstratePage from './pages/piano/Level2DemonstratePage'
+import Level3PractisePage from './pages/piano/Level3PractisePage'
+import Level3DemonstratePage from './pages/piano/Level3DemonstratePage'
 import GDVirtualStudioPage from './pages/graphic-design/VirtualStudioPage'
 import GDCourse1Page from './pages/graphic-design/GDCourse1Page'
 import GDCourse2Page from './pages/graphic-design/GDCourse2Page'
 import GDLevel1Page from './pages/graphic-design/GDLevel1Page'
+import GDLevel1PractisePage from './pages/graphic-design/GDLevel1PractisePage'
+import GDLevel1DemonstratePage from './pages/graphic-design/GDLevel1DemonstratePage'
 import GDLevel2Page from './pages/graphic-design/GDLevel2Page'
+import GDLevel2PractisePage from './pages/graphic-design/GDLevel2PractisePage'
+import GDLevel2DemonstratePage from './pages/graphic-design/GDLevel2DemonstratePage'
 import GDLevel3Page from './pages/graphic-design/GDLevel3Page'
+import GDLevel3PractisePage from './pages/graphic-design/GDLevel3PractisePage'
+import GDLevel3DemonstratePage from './pages/graphic-design/GDLevel3DemonstratePage'
 import GDSharpeningPage from './pages/graphic-design/GDSharpeningPage'
 import GDProductionPage from './pages/graphic-design/GDProductionPage'
 import GuitarVirtualInstrumentPage from './pages/guitar/VirtualInstrumentPage'
+import GuitarLevel1PractisePage from './pages/guitar/Level1PractisePage'
+import GuitarLevel1DemonstratePage from './pages/guitar/Level1DemonstratePage'
+import GuitarLevel2PractisePage from './pages/guitar/Level2PractisePage'
+import GuitarLevel2DemonstratePage from './pages/guitar/Level2DemonstratePage'
+import GuitarLevel3PractisePage from './pages/guitar/Level3PractisePage'
+import GuitarLevel3DemonstratePage from './pages/guitar/Level3DemonstratePage'
 import GuitarReadingFretboardPage from './pages/guitar/ReadingFretboardPage'
 import GuitarNotesAcrossNeckPage from './pages/guitar/NotesAcrossNeckPage'
 import GuitarLevel1Page from './pages/guitar/Level1Page'
@@ -35,10 +53,31 @@ import VirtualCanvasPage from './pages/visual-arts/VirtualCanvasPage'
 import VAcourse1Page from './pages/visual-arts/Course1Page'
 import VAcourse2Page from './pages/visual-arts/Course2Page'
 import VALevel1Page from './pages/visual-arts/Level1Page'
+import VALevel1PractisePage from './pages/visual-arts/Level1PractisePage'
+import VALevel1DemonstratePage from './pages/visual-arts/Level1DemonstratePage'
 import VALevel2Page from './pages/visual-arts/Level2Page'
+import VALevel2PractisePage from './pages/visual-arts/Level2PractisePage'
+import VALevel2DemonstratePage from './pages/visual-arts/Level2DemonstratePage'
 import VALevel3Page from './pages/visual-arts/Level3Page'
+import VALevel3PractisePage from './pages/visual-arts/Level3PractisePage'
+import VALevel3DemonstratePage from './pages/visual-arts/Level3DemonstratePage'
 import VASharpeningPage from './pages/visual-arts/SharpeningPage'
 import VAProductionPage from './pages/visual-arts/VAProductionPage'
+import VoiceStudioPage from './pages/voice/VoiceStudioPage'
+import VoiceCourse1Page from './pages/voice/VoiceCourse1Page'
+import VoiceCourse2Page from './pages/voice/VoiceCourse2Page'
+import VoiceLevel1Page from './pages/voice/VoiceLevel1Page'
+import VoiceLevel1PractisePage from './pages/voice/VoiceLevel1PractisePage'
+import VoiceLevel1DemonstratePage from './pages/voice/VoiceLevel1DemonstratePage'
+import VoiceLevel2Page from './pages/voice/VoiceLevel2Page'
+import VoiceLevel2PractisePage from './pages/voice/VoiceLevel2PractisePage'
+import VoiceLevel2DemonstratePage from './pages/voice/VoiceLevel2DemonstratePage'
+import VoiceLevel3Page from './pages/voice/VoiceLevel3Page'
+import VoiceLevel3PractisePage from './pages/voice/VoiceLevel3PractisePage'
+import VoiceLevel3DemonstratePage from './pages/voice/VoiceLevel3DemonstratePage'
+import VoiceSharpeningPage from './pages/voice/VoiceSharpeningPage'
+import VoiceProductionPage from './pages/voice/VoiceProductionPage'
+import SettingsPage from './pages/student/SettingsPage'
 import SupervisorDashboardPage from './pages/supervisor/SupervisorDashboardPage'
 import AdminOverviewPage from './pages/admin/AdminOverviewPage'
 import AdminStudentsPage from './pages/admin/AdminStudentsPage'
@@ -46,6 +85,8 @@ import AdminModulesPage from './pages/admin/AdminModulesPage'
 import AdminReportsPage from './pages/admin/AdminReportsPage'
 import AdminSupervisorsPage from './pages/admin/AdminSupervisorsPage'
 import AdminSchoolsPage from './pages/admin/AdminSchoolsPage'
+import AdminFeedbackPage from './pages/admin/AdminFeedbackPage'
+import FeedbackPage from './pages/FeedbackPage'
 import { useAuth } from './hooks/useAuth'
 
 const roleHome = (role?: string) => {
@@ -92,10 +133,10 @@ export default function App() {
         <Route path="/dashboard" element={<StudentRoute><DashboardPage /></StudentRoute>} />
         <Route path="/disciplines" element={<StudentRoute><DisciplineSelectPage /></StudentRoute>} />
         <Route path="/session/music" element={<StudentRoute><MusicSelectPage /></StudentRoute>} />
-        <Route path="/session/:discipline" element={<StudentRoute><SessionPage /></StudentRoute>} />
         <Route path="/portfolio" element={<StudentRoute><PortfolioPage /></StudentRoute>} />
         <Route path="/skill-summary" element={<StudentRoute><SkillSummaryPage /></StudentRoute>} />
 
+        <Route path="/piano/virtual-instrument" element={<StudentRoute><PianoVirtualInstrumentPage /></StudentRoute>} />
         <Route path="/piano/understanding-the-piano" element={<StudentRoute><UnderstandingPianoPage /></StudentRoute>} />
         <Route path="/piano/notes-build-chords" element={<StudentRoute><NotesBuildChordsPage /></StudentRoute>} />
         <Route path="/piano/level-1" element={<StudentRoute><Level1Page /></StudentRoute>} />
@@ -103,13 +144,25 @@ export default function App() {
         <Route path="/piano/level-3" element={<StudentRoute><Level3Page /></StudentRoute>} />
         <Route path="/piano/sharpening-myself" element={<StudentRoute><SharpeningMyselfPage /></StudentRoute>} />
         <Route path="/piano/production" element={<StudentRoute><ProductionPage /></StudentRoute>} />
+        <Route path="/piano/level-1/practise" element={<StudentRoute><Level1PractisePage /></StudentRoute>} />
+        <Route path="/piano/level-1/demonstrate" element={<StudentRoute><Level1DemonstratePage /></StudentRoute>} />
+        <Route path="/piano/level-2/practise" element={<StudentRoute><Level2PractisePage /></StudentRoute>} />
+        <Route path="/piano/level-2/demonstrate" element={<StudentRoute><Level2DemonstratePage /></StudentRoute>} />
+        <Route path="/piano/level-3/practise" element={<StudentRoute><Level3PractisePage /></StudentRoute>} />
+        <Route path="/piano/level-3/demonstrate" element={<StudentRoute><Level3DemonstratePage /></StudentRoute>} />
 
         <Route path="/guitar/virtual-instrument" element={<StudentRoute><GuitarVirtualInstrumentPage /></StudentRoute>} />
         <Route path="/guitar/reading-the-fretboard" element={<StudentRoute><GuitarReadingFretboardPage /></StudentRoute>} />
         <Route path="/guitar/notes-across-the-neck" element={<StudentRoute><GuitarNotesAcrossNeckPage /></StudentRoute>} />
         <Route path="/guitar/level-1" element={<StudentRoute><GuitarLevel1Page /></StudentRoute>} />
+        <Route path="/guitar/level-1/practise" element={<StudentRoute><GuitarLevel1PractisePage /></StudentRoute>} />
+        <Route path="/guitar/level-1/demonstrate" element={<StudentRoute><GuitarLevel1DemonstratePage /></StudentRoute>} />
         <Route path="/guitar/level-2" element={<StudentRoute><GuitarLevel2Page /></StudentRoute>} />
+        <Route path="/guitar/level-2/practise" element={<StudentRoute><GuitarLevel2PractisePage /></StudentRoute>} />
+        <Route path="/guitar/level-2/demonstrate" element={<StudentRoute><GuitarLevel2DemonstratePage /></StudentRoute>} />
         <Route path="/guitar/level-3" element={<StudentRoute><GuitarLevel3Page /></StudentRoute>} />
+        <Route path="/guitar/level-3/practise" element={<StudentRoute><GuitarLevel3PractisePage /></StudentRoute>} />
+        <Route path="/guitar/level-3/demonstrate" element={<StudentRoute><GuitarLevel3DemonstratePage /></StudentRoute>} />
         <Route path="/guitar/sharpening-myself" element={<StudentRoute><GuitarSharpeningPage /></StudentRoute>} />
         <Route path="/guitar/production" element={<StudentRoute><GuitarProductionPage /></StudentRoute>} />
 
@@ -117,8 +170,14 @@ export default function App() {
         <Route path="/graphic-design/course-1" element={<StudentRoute><GDCourse1Page /></StudentRoute>} />
         <Route path="/graphic-design/course-2" element={<StudentRoute><GDCourse2Page /></StudentRoute>} />
         <Route path="/graphic-design/level-1" element={<StudentRoute><GDLevel1Page /></StudentRoute>} />
+        <Route path="/graphic-design/level-1/practise" element={<StudentRoute><GDLevel1PractisePage /></StudentRoute>} />
+        <Route path="/graphic-design/level-1/demonstrate" element={<StudentRoute><GDLevel1DemonstratePage /></StudentRoute>} />
         <Route path="/graphic-design/level-2" element={<StudentRoute><GDLevel2Page /></StudentRoute>} />
+        <Route path="/graphic-design/level-2/practise" element={<StudentRoute><GDLevel2PractisePage /></StudentRoute>} />
+        <Route path="/graphic-design/level-2/demonstrate" element={<StudentRoute><GDLevel2DemonstratePage /></StudentRoute>} />
         <Route path="/graphic-design/level-3" element={<StudentRoute><GDLevel3Page /></StudentRoute>} />
+        <Route path="/graphic-design/level-3/practise" element={<StudentRoute><GDLevel3PractisePage /></StudentRoute>} />
+        <Route path="/graphic-design/level-3/demonstrate" element={<StudentRoute><GDLevel3DemonstratePage /></StudentRoute>} />
         <Route path="/graphic-design/sharpening" element={<StudentRoute><GDSharpeningPage /></StudentRoute>} />
         <Route path="/graphic-design/production" element={<StudentRoute><GDProductionPage /></StudentRoute>} />
 
@@ -126,10 +185,32 @@ export default function App() {
         <Route path="/visual-arts/course-1" element={<StudentRoute><VAcourse1Page /></StudentRoute>} />
         <Route path="/visual-arts/course-2" element={<StudentRoute><VAcourse2Page /></StudentRoute>} />
         <Route path="/visual-arts/level-1" element={<StudentRoute><VALevel1Page /></StudentRoute>} />
+        <Route path="/visual-arts/level-1/practise" element={<StudentRoute><VALevel1PractisePage /></StudentRoute>} />
+        <Route path="/visual-arts/level-1/demonstrate" element={<StudentRoute><VALevel1DemonstratePage /></StudentRoute>} />
         <Route path="/visual-arts/level-2" element={<StudentRoute><VALevel2Page /></StudentRoute>} />
+        <Route path="/visual-arts/level-2/practise" element={<StudentRoute><VALevel2PractisePage /></StudentRoute>} />
+        <Route path="/visual-arts/level-2/demonstrate" element={<StudentRoute><VALevel2DemonstratePage /></StudentRoute>} />
         <Route path="/visual-arts/level-3" element={<StudentRoute><VALevel3Page /></StudentRoute>} />
+        <Route path="/visual-arts/level-3/practise" element={<StudentRoute><VALevel3PractisePage /></StudentRoute>} />
+        <Route path="/visual-arts/level-3/demonstrate" element={<StudentRoute><VALevel3DemonstratePage /></StudentRoute>} />
         <Route path="/visual-arts/sharpening" element={<StudentRoute><VASharpeningPage /></StudentRoute>} />
         <Route path="/visual-arts/production" element={<StudentRoute><VAProductionPage /></StudentRoute>} />
+
+        <Route path="/voice/studio" element={<StudentRoute><VoiceStudioPage /></StudentRoute>} />
+        <Route path="/voice/posture-breath-voice" element={<StudentRoute><VoiceCourse1Page /></StudentRoute>} />
+        <Route path="/voice/pitch-and-scale" element={<StudentRoute><VoiceCourse2Page /></StudentRoute>} />
+        <Route path="/voice/level-1" element={<StudentRoute><VoiceLevel1Page /></StudentRoute>} />
+        <Route path="/voice/level-1/practise" element={<StudentRoute><VoiceLevel1PractisePage /></StudentRoute>} />
+        <Route path="/voice/level-1/demonstrate" element={<StudentRoute><VoiceLevel1DemonstratePage /></StudentRoute>} />
+        <Route path="/voice/level-2" element={<StudentRoute><VoiceLevel2Page /></StudentRoute>} />
+        <Route path="/voice/level-2/practise" element={<StudentRoute><VoiceLevel2PractisePage /></StudentRoute>} />
+        <Route path="/voice/level-2/demonstrate" element={<StudentRoute><VoiceLevel2DemonstratePage /></StudentRoute>} />
+        <Route path="/voice/level-3" element={<StudentRoute><VoiceLevel3Page /></StudentRoute>} />
+        <Route path="/voice/level-3/practise" element={<StudentRoute><VoiceLevel3PractisePage /></StudentRoute>} />
+        <Route path="/voice/level-3/demonstrate" element={<StudentRoute><VoiceLevel3DemonstratePage /></StudentRoute>} />
+        <Route path="/voice/sharpening-myself" element={<StudentRoute><VoiceSharpeningPage /></StudentRoute>} />
+        <Route path="/voice/production" element={<StudentRoute><VoiceProductionPage /></StudentRoute>} />
+        <Route path="/settings" element={<StudentRoute><SettingsPage /></StudentRoute>} />
 
         <Route path="/supervisor" element={<SupervisorRoute><SupervisorDashboardPage /></SupervisorRoute>} />
 
@@ -140,6 +221,9 @@ export default function App() {
         <Route path="/admin/modules" element={<AdminRoute><AdminModulesPage /></AdminRoute>} />
         <Route path="/admin/reports" element={<AdminRoute><AdminReportsPage /></AdminRoute>} />
         <Route path="/admin/supervisors" element={<AdminRoute><AdminSupervisorsPage /></AdminRoute>} />
+        <Route path="/admin/feedback" element={<AdminRoute><AdminFeedbackPage /></AdminRoute>} />
+
+        <Route path="/feedback" element={<FeedbackPage />} />
       </Routes>
     </BrowserRouter>
   )

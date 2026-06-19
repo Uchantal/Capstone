@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AdminNav from '../../components/AdminNav'
 import { getAdminReports } from '../../services/api'
+import Footer from '../../components/Footer'
 
 interface Reports {
   totalStudents: number
@@ -18,7 +19,7 @@ export default function AdminDashboardPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#F9F7F4]">
+    <div className="min-h-screen flex flex-col bg-[#F9F7F4]">
       <AdminNav />
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
         <div>
@@ -66,6 +67,7 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
       </main>
+      <Footer />
     </div>
   )
 }

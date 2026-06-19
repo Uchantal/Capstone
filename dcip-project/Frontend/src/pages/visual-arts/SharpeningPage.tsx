@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import TopNav from '../../components/TopNav'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
-import { useVisualArtsProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useVisualArtsProgress'
+import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
+import Footer from '../../components/Footer'
 
 const TOOL_QUICK_REF = [
   { name: 'Brush',      desc: 'Freehand strokes, variable size.' },
@@ -11,7 +12,7 @@ const TOOL_QUICK_REF = [
   { name: 'Rectangle',  desc: 'Square or rectangle, Outline or Fill.' },
   { name: 'Ellipse',    desc: 'Circle or oval, Outline or Fill.' },
   { name: 'Ruler',      desc: 'Pixel-distance guide, disappears on release.' },
-  { name: 'Undo / Redo','desc': 'Ctrl+Z / Ctrl+Shift+Z, up to 30 steps.' },
+  { name: 'Undo / Redo', desc: 'Ctrl+Z / Ctrl+Shift+Z, up to 30 steps.' },
   { name: 'Background', desc: 'Change canvas background without affecting drawing.' },
   { name: 'Clear',      desc: 'Wipe canvas with confirmation. Immediately undoable.' },
 ]
@@ -29,26 +30,26 @@ export default function SharpeningPage() {
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { completedStages, loading, markComplete } = useVisualArtsProgress()
+  const { progress, loading, markStageVisited } = useVisualArtsDemonstrationProgress()
 
-  // Gate check: requires Level 3
   useEffect(() => {
     if (loading) return
-    if (!completedStages.includes('va-level-3')) {
-      navigate(STAGE_PATHS['va-level-3'], {
+    if (!progress.level3DemonstrationPassed) {
+      navigate('/visual-arts/level-3/demonstrate', {
         replace: true,
-        state: { lockedMessage: `Complete ${STAGE_NAMES['va-level-3']} first.` },
+        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
       })
     }
-  }, [loading, completedStages, navigate])
+  }, [loading, progress.level3DemonstrationPassed, navigate])
 
-  // Mark sharpening as visited on mount (once gating passes)
   useEffect(() => {
     if (loading) return
-    if (completedStages.includes('va-level-3')) {
-      markComplete('va-sharpening')
+    if (progress.level3DemonstrationPassed) {
+      markStageVisited('va-sharpening')
     }
-  }, [loading, completedStages, markComplete])
+  // markStageVisited is stable; run once after gate passes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, progress.level3DemonstrationPassed])
 
   if (loading) {
     return (
@@ -59,7 +60,7 @@ export default function SharpeningPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -74,15 +75,12 @@ export default function SharpeningPage() {
           Practice freely. Use everything you have learned. There is no pass or fail here. This is where you build confidence.
         </p>
 
-        {/* Canvas */}
         <div className="mb-6">
           <VisualArtsModule canvasRef={canvasRef} step={5} />
         </div>
 
-        {/* Reference cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
 
-          {/* Tool quick reference */}
           <div className="bg-white border border-border rounded-2xl overflow-hidden">
             <div className="bg-[#F9F7F4] px-5 py-3 border-b border-border">
               <p className="text-text-muted text-xs uppercase tracking-wide font-medium">Tool Reference</p>
@@ -97,7 +95,6 @@ export default function SharpeningPage() {
             </div>
           </div>
 
-          {/* Shading zones reminder */}
           <div className="bg-white border border-border rounded-2xl overflow-hidden">
             <div className="bg-[#F9F7F4] px-5 py-3 border-b border-border">
               <p className="text-text-muted text-xs uppercase tracking-wide font-medium">Five Shading Zones</p>
@@ -126,6 +123,7 @@ export default function SharpeningPage() {
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

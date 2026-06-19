@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import TopNav from '../../components/TopNav'
 import GuitarModule from '../../components/modules/music/GuitarModule'
 import { useGuitarProgress } from '../../hooks/useGuitarProgress'
+import Footer from '../../components/Footer'
 
 export default function VirtualInstrumentPage() {
   const navigate = useNavigate()
@@ -13,7 +14,7 @@ export default function VirtualInstrumentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
         <p className="text-text-secondary text-sm mb-6">
@@ -29,6 +30,7 @@ export default function VirtualInstrumentPage() {
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

@@ -4,9 +4,9 @@ import GuitarFretboard, { STRING_DATA } from '../../components/guitar/GuitarFret
 import { noteAt } from '../../components/guitar/GuitarLevelScreen'
 import { verifyGuitarPerformance } from '../../utils/guitarVerification'
 import type { NoteEvent, GuitarVerificationResult } from '../../utils/guitarVerification'
-import { useGuitarProgress } from '../../hooks/useGuitarProgress'
-import { saveProductionResult } from '../../services/api'
-import { savePortfolioItem } from '../../services/api'
+import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
+import { saveProductionResult, savePortfolioItem, completeGuitarProduction } from '../../services/api'
+import Footer from '../../components/Footer'
 
 type Phase = 'intro' | 'recording' | 'results'
 
@@ -16,17 +16,25 @@ function formatTime(s: number): string {
 
 export default function GuitarProductionPage() {
   const navigate = useNavigate()
-  const { completedStages, loading: progressLoading, markComplete } = useGuitarProgress()
+  const { progress, loading: progressLoading } = useGuitarDemonstrationProgress()
 
+  // Gate: requires Level 3 demonstration AND sharpening visited
   useEffect(() => {
     if (progressLoading) return
-    if (!completedStages.includes('guitar-sharpening')) {
+    if (!progress.level3DemonstrationPassed) {
+      navigate('/guitar/level-3/demonstrate', {
+        replace: true,
+        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
+      })
+      return
+    }
+    if (!progress.completedStages.includes('guitar-sharpening')) {
       navigate('/guitar/sharpening-myself', {
         replace: true,
         state: { lockedMessage: 'Complete Sharpening Myself first.' },
       })
     }
-  }, [completedStages, progressLoading, navigate])
+  }, [progressLoading, progress.level3DemonstrationPassed, progress.completedStages, navigate])
 
   const [phase, setPhase] = useState<Phase>('intro')
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
@@ -35,24 +43,19 @@ export default function GuitarProductionPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  // Audio capture refs
   const audioCtxRef = useRef<AudioContext | null>(null)
   const recordingDestRef = useRef<MediaStreamAudioDestinationNode | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const audioDataUrlRef = useRef<string>('')
 
-  // Note and chord tracking refs
   const noteEventsRef = useRef<NoteEvent[]>([])
   const chordsPlayedRef = useRef<string[]>([])
 
-  // Timer
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const phaseRef = useRef<Phase>('intro')
 
-  useEffect(() => {
-    phaseRef.current = phase
-  }, [phase])
+  useEffect(() => { phaseRef.current = phase }, [phase])
 
   useEffect(() => {
     return () => {
@@ -84,25 +87,24 @@ export default function GuitarProductionPage() {
     setAudioBlobUrl(url)
 
     const reader = new FileReader()
-    reader.onload = () => {
-      audioDataUrlRef.current = reader.result as string
-    }
+    reader.onload = () => { audioDataUrlRef.current = reader.result as string }
     reader.readAsDataURL(blob)
 
     const result = verifyGuitarPerformance(noteEventsRef.current, chordsPlayedRef.current)
     setVerificationResult(result)
+    completeGuitarProduction(result.passed).catch(() => {})
     setPhase('results')
   }, [])
 
   const handleBegin = () => {
-    noteEventsRef.current = []
+    noteEventsRef.current  = []
     chordsPlayedRef.current = []
-    audioChunksRef.current = []
+    audioChunksRef.current  = []
     audioDataUrlRef.current = ''
 
-    const ctx = new AudioContext()
+    const ctx  = new AudioContext()
     const dest = ctx.createMediaStreamDestination()
-    audioCtxRef.current = ctx
+    audioCtxRef.current     = ctx
     recordingDestRef.current = dest
 
     const mr = new MediaRecorder(dest.stream)
@@ -113,7 +115,6 @@ export default function GuitarProductionPage() {
 
     setElapsedSeconds(0)
     timerRef.current = setInterval(() => setElapsedSeconds(s => s + 1), 1000)
-
     setPhase('recording')
   }
 
@@ -142,7 +143,6 @@ export default function GuitarProductionPage() {
         noteEvents: noteEventsRef.current,
         verificationResult,
       })
-      await markComplete('guitar-production')
       setSaved(true)
       navigate('/portfolio')
     } catch {
@@ -161,9 +161,17 @@ export default function GuitarProductionPage() {
     setSaved(false)
     setSaving(false)
     audioCtxRef.current?.close()
-    audioCtxRef.current = null
+    audioCtxRef.current  = null
     recordingDestRef.current = null
     setPhase('intro')
+  }
+
+  if (progressLoading || !progress.level3DemonstrationPassed) {
+    return (
+      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+        <p className="text-text-muted text-sm">Loading...</p>
+      </div>
+    )
   }
 
   // ── Intro ────────────────────────────────────────────────────────────────
@@ -189,6 +197,9 @@ export default function GuitarProductionPage() {
           <p className="text-text-secondary text-base mb-6 max-w-xl leading-relaxed">
             This is your moment to create. Play your own melody on the guitar using what you have learned. Move across the strings, use the chords you know, find your own sound. When you are satisfied, stop recording and submit.
           </p>
+          <p className="text-text-secondary text-sm mb-8 max-w-xl">
+            Passing this production awards the Advanced Guitar badge.
+          </p>
           <button
             onClick={handleBegin}
             className="bg-primary text-white font-semibold px-10 py-4 rounded-xl hover:bg-primary-dark transition-colors text-base"
@@ -196,6 +207,7 @@ export default function GuitarProductionPage() {
             Begin Recording
           </button>
         </div>
+        <Footer />
       </div>
     )
   }
@@ -227,11 +239,16 @@ export default function GuitarProductionPage() {
             <p className={`font-bold text-2xl mb-1 ${passed ? 'text-[#2D6A4F]' : 'text-accent'}`}>
               {passed ? 'Demonstrated' : 'Keep Practising'}
             </p>
-            <p className="text-text-secondary text-sm">
+            <p className="text-text-secondary text-sm mb-3">
               {passed
                 ? 'All five criteria were met. Your production is saved to your portfolio.'
                 : 'Some criteria were not met. Review the breakdown below and try again.'}
             </p>
+            {passed && (
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-2 rounded-full">
+                Advanced Guitar Badge
+              </div>
+            )}
           </div>
 
           <div className="bg-white border border-border rounded-2xl overflow-hidden mb-6">
@@ -288,6 +305,7 @@ export default function GuitarProductionPage() {
             </button>
           </div>
         </div>
+        <Footer />
       </div>
     )
   }
@@ -337,6 +355,7 @@ export default function GuitarProductionPage() {
           </p>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

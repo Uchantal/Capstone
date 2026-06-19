@@ -4,8 +4,9 @@ import PianoKeyboard from '../../components/piano/PianoKeyboard'
 import { noteToFrequency } from '../../utils/pianoTheory'
 import { verifyPianoPerformance } from '../../utils/pianoVerification'
 import type { NoteEvent, PianoVerificationResult } from '../../utils/pianoVerification'
-import { saveProductionResult } from '../../services/api'
-import { savePortfolioItem } from '../../services/api'
+import { saveProductionResult, savePortfolioItem, completePianoProduction } from '../../services/api'
+import { usePianoProgress } from '../../hooks/usePianoProgress'
+import Footer from '../../components/Footer'
 
 type Phase = 'intro' | 'recording' | 'results'
 
@@ -21,6 +22,7 @@ function parseNoteId(id: string): { note: string; octave: number } | null {
 
 export default function PianoProductionPage() {
   const navigate = useNavigate()
+  const { progress, loading } = usePianoProgress()
 
   const [phase, setPhase] = useState<Phase>('intro')
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
@@ -44,6 +46,24 @@ export default function PianoProductionPage() {
   // Timer ref
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const phaseRef = useRef<Phase>('intro')
+
+  // Gate: requires Level 3 demonstration AND sharpening visited
+  useEffect(() => {
+    if (loading) return
+    if (!progress.level3DemonstrationPassed) {
+      navigate('/piano/level-3/demonstrate', {
+        replace: true,
+        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
+      })
+      return
+    }
+    if (!progress.completedStages.includes('piano-sharpening')) {
+      navigate('/piano/sharpening-myself', {
+        replace: true,
+        state: { lockedMessage: 'Complete the Sharpening Myself session first.' },
+      })
+    }
+  }, [loading, progress.level3DemonstrationPassed, progress.completedStages, navigate])
 
   useEffect(() => {
     phaseRef.current = phase
@@ -102,6 +122,8 @@ export default function PianoProductionPage() {
 
     const result = verifyPianoPerformance(noteEventsRef.current)
     setVerificationResult(result)
+    // Mark production passed/failed on the new demonstration-based progress record
+    completePianoProduction(result.passed).catch(() => {})
     setPhase('results')
   }, [])
 
@@ -193,6 +215,14 @@ export default function PianoProductionPage() {
     setPhase('intro')
   }
 
+  if (loading || !progress.level3DemonstrationPassed) {
+    return (
+      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+        <p className="text-text-muted text-sm">Loading...</p>
+      </div>
+    )
+  }
+
   // ── Intro ────────────────────────────────────────────────────────────────
   if (phase === 'intro') {
     return (
@@ -216,6 +246,9 @@ export default function PianoProductionPage() {
           <p className="text-text-secondary text-base mb-6 max-w-xl leading-relaxed">
             This is your moment to create. Play your own melody using everything you have learned across the Door To Know Piano journey. Use different notes, build chords, create something that is yours. When you are satisfied, stop recording and submit.
           </p>
+          <p className="text-text-secondary text-sm mb-8 max-w-xl">
+            Passing this production awards the Advanced Piano badge.
+          </p>
           <button
             onClick={handleBegin}
             className="bg-primary text-white font-semibold px-10 py-4 rounded-xl hover:bg-primary-dark transition-colors text-base"
@@ -223,6 +256,7 @@ export default function PianoProductionPage() {
             Begin Recording
           </button>
         </div>
+        <Footer />
       </div>
     )
   }
@@ -254,11 +288,16 @@ export default function PianoProductionPage() {
             <p className={`font-bold text-2xl mb-1 ${passed ? 'text-[#2D6A4F]' : 'text-accent'}`}>
               {passed ? 'Demonstrated' : 'Keep Practising'}
             </p>
-            <p className="text-text-secondary text-sm">
+            <p className="text-text-secondary text-sm mb-3">
               {passed
                 ? 'All five criteria were met. Your production is saved to your portfolio.'
                 : 'Some criteria were not met. Review the breakdown below and try again.'}
             </p>
+            {passed && (
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-2 rounded-full">
+                Advanced Piano Badge
+              </div>
+            )}
           </div>
 
           <div className="bg-white border border-border rounded-2xl overflow-hidden mb-6">
@@ -315,6 +354,7 @@ export default function PianoProductionPage() {
             </button>
           </div>
         </div>
+        <Footer />
       </div>
     )
   }
@@ -362,6 +402,7 @@ export default function PianoProductionPage() {
           </p>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

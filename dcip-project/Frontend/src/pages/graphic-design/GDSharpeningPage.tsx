@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import TopNav from '../../components/TopNav'
-import PosterSurface, { DEFAULT_POSTER, PosterState } from '../../components/graphic-design/PosterSurface'
-import { useGDProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useGDProgress'
+import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS } from '../../components/graphic-design/PosterSurface'
+import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
+import Footer from '../../components/Footer'
 
 const QUICK_REF = [
   {
@@ -35,26 +36,19 @@ export default function GDSharpeningPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [poster, setPoster] = useState<PosterState>(DEFAULT_POSTER)
-  const { completedStages, loading, markComplete } = useGDProgress()
+  const { progress, loading, markStageVisited } = useGDDemonstrationProgress()
 
   useEffect(() => {
     if (loading) return
-    if (!completedStages.includes('gd-level-3')) {
-      navigate(STAGE_PATHS['gd-level-3'], {
+    if (!progress.level3DemonstrationPassed) {
+      navigate('/graphic-design/level-3/demonstrate', {
         replace: true,
-        state: { lockedMessage: `Complete ${STAGE_NAMES['gd-level-3']} first.` },
+        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
       })
+      return
     }
-  }, [loading, completedStages, navigate])
-
-  useEffect(() => {
-    if (loading) return
-    if (completedStages.includes('gd-level-3')) {
-      markComplete('gd-sharpening')
-    }
-  }, [loading, completedStages, markComplete])
+    markStageVisited('gd-sharpening')
+  }, [loading, progress.level3DemonstrationPassed, navigate, markStageVisited])
 
   if (loading) {
     return (
@@ -65,7 +59,7 @@ export default function GDSharpeningPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -81,7 +75,12 @@ export default function GDSharpeningPage() {
         </p>
 
         <div className="bg-white border border-border rounded-2xl p-6 mb-6">
-          <PosterSurface value={poster} onChange={setPoster} canvasRef={canvasRef} showDrawLayer />
+          <DesignCanvas
+            defaultElements={DEFAULT_ELEMENTS}
+            defaultBgColor={DEFAULT_BG_COLOR}
+            onChange={() => {}}
+            onInteraction={() => {}}
+          />
         </div>
 
         <div className="space-y-4 mb-8">
@@ -111,6 +110,7 @@ export default function GDSharpeningPage() {
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

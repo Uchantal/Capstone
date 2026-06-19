@@ -1,28 +1,30 @@
 import { useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Level2Screen } from '../../components/guitar/GuitarLevelScreen'
+import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
 import { useGuitarProgress } from '../../hooks/useGuitarProgress'
 
 export default function GuitarLevel2Page() {
   const navigate = useNavigate()
-  const location = useLocation()
-  const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
-  const { completedStages, loading, markComplete } = useGuitarProgress()
+  const { progress, loading } = useGuitarDemonstrationProgress()
+  const { markComplete } = useGuitarProgress()
 
   useEffect(() => {
     if (loading) return
-    if (!completedStages.includes('guitar-level-1')) {
-      navigate('/guitar/level-1', {
+    if (!progress.level1DemonstrationPassed) {
+      navigate('/guitar/level-1/demonstrate', {
         replace: true,
-        state: { lockedMessage: 'Complete Level 1 first.' },
+        state: { lockedMessage: 'Complete the Level 1 demonstration first.' },
       })
     }
-  }, [completedStages, loading, navigate])
+  }, [loading, progress.level1DemonstrationPassed, navigate])
+
+  if (loading || !progress.level1DemonstrationPassed) return null
 
   return (
     <Level2Screen
       onComplete={() => markComplete('guitar-level-2')}
-      nextPath="/guitar/level-3"
+      nextPath="/guitar/level-2/practise"
     />
   )
 }

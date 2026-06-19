@@ -11,7 +11,6 @@ type ShapeMode = 'outline' | 'fill'
 
 interface HistoryEntry {
   snapshot: string
-  bg: string
 }
 
 const QUICK_COLOURS = [
@@ -70,25 +69,29 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
   const [colour,      setColour]      = useState('#1A1A1A')
   const [bgColour,    setBgColour]    = useState('#FAFAF7')
   const [size,        setSize]        = useState(6)
-  const [shapeMode,   setShapeMode]   = useState<ShapeMode>('outline')
+  const [shapeMode,   setShapeMode]   = useState<ShapeMode>('fill')
   const [showConfirm, setShowConfirm] = useState(false)
   const [canUndo,     setCanUndo]     = useState(false)
   const [canRedo,     setCanRedo]     = useState(false)
 
+  // Two visible layers: background canvas (bottom) and drawing canvas (top).
+  // The prop canvasRef is kept as a hidden composite used only for toDataURL().
+  const bgCanvasRef   = useRef<HTMLCanvasElement>(null)
+  const drawCanvasRef = useRef<HTMLCanvasElement>(null)
+
   // Mutable refs for hot-path drawing; avoids stale closures in event handlers
-  const overlayRef   = useRef<HTMLCanvasElement>(null)
-  const offscreenRef = useRef<HTMLCanvasElement | null>(null)
-  const drawing      = useRef(false)
-  const lastPos      = useRef({ x: 0, y: 0 })
-  const startPos     = useRef({ x: 0, y: 0 })
-  const previewData  = useRef<ImageData | null>(null)
-  const historyRef   = useRef<HistoryEntry[]>([])
-  const historyIdx   = useRef(-1)
-  const bgRef        = useRef('#FAFAF7')
-  const toolRef      = useRef<Tool>('brush')
-  const colourRef    = useRef('#1A1A1A')
-  const sizeRef      = useRef(6)
-  const shapeModeRef = useRef<ShapeMode>('outline')
+  const overlayRef    = useRef<HTMLCanvasElement>(null)
+  const drawing       = useRef(false)
+  const lastPos       = useRef({ x: 0, y: 0 })
+  const startPos      = useRef({ x: 0, y: 0 })
+  const previewData   = useRef<ImageData | null>(null)
+  const historyRef    = useRef<HistoryEntry[]>([])
+  const historyIdx    = useRef(-1)
+  const bgRef         = useRef('#FAFAF7')
+  const toolRef       = useRef<Tool>('brush')
+  const colourRef     = useRef('#1A1A1A')
+  const sizeRef       = useRef(6)
+  const shapeModeRef  = useRef<ShapeMode>('outline')
 
   useEffect(() => { toolRef.current      = tool      }, [tool])
   useEffect(() => { colourRef.current    = colour    }, [colour])
@@ -96,25 +99,28 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
   useEffect(() => { shapeModeRef.current = shapeMode }, [shapeMode])
 
   // ── Composite render ──────────────────────────────────────────────────────
-  // Paints background fill + offscreen drawing onto the visible canvas (canvasRef).
-  // SessionPage calls canvasRef.current.toDataURL() to save — it always captures
-  // the full composite including background colour and all drawn content.
+  // Composites both visible layers onto canvasRef so the parent can call
+  // canvasRef.current.toDataURL() and receive the full artwork including
+  // background colour. Called after every completed stroke and bg change.
   const renderComposite = useCallback(() => {
-    const canvas = canvasRef.current
-    const off    = offscreenRef.current
-    if (!canvas || !off) return
-    const ctx = canvas.getContext('2d')
+    const bg   = bgCanvasRef.current
+    const draw = drawCanvasRef.current
+    const out  = canvasRef.current
+    if (!bg || !draw || !out) return
+    const ctx = out.getContext('2d')
     if (!ctx) return
-    ctx.fillStyle = bgRef.current
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-    ctx.drawImage(off, 0, 0)
+    ctx.clearRect(0, 0, out.width, out.height)
+    ctx.drawImage(bg, 0, 0)
+    ctx.drawImage(draw, 0, 0)
   }, [canvasRef])
 
   // ── History ───────────────────────────────────────────────────────────────
+  // Only the drawing layer is snapshotted. Background colour changes are
+  // intentional and separate; they are not part of the undo stack.
   const saveToHistory = useCallback(() => {
-    const off = offscreenRef.current
-    if (!off) return
-    const entry: HistoryEntry = { snapshot: off.toDataURL(), bg: bgRef.current }
+    const draw = drawCanvasRef.current
+    if (!draw) return
+    const entry: HistoryEntry = { snapshot: draw.toDataURL() }
     const next = historyRef.current.slice(0, historyIdx.current + 1)
     next.push(entry)
     if (next.length > MAX_HISTORY) next.shift()
@@ -125,15 +131,13 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
   }, [])
 
   const applyHistoryEntry = useCallback((entry: HistoryEntry) => {
-    const off = offscreenRef.current
-    if (!off) return
-    const ctx = off.getContext('2d')
+    const draw = drawCanvasRef.current
+    if (!draw) return
+    const ctx = draw.getContext('2d')
     if (!ctx) return
-    bgRef.current = entry.bg
-    setBgColour(entry.bg)
     const img = new Image()
     img.onload = () => {
-      ctx.clearRect(0, 0, off.width, off.height)
+      ctx.clearRect(0, 0, draw.width, draw.height)
       ctx.drawImage(img, 0, 0)
       renderComposite()
       setCanUndo(historyIdx.current > 0)
@@ -167,14 +171,17 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
 
   // ── Initialise ────────────────────────────────────────────────────────────
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const off = document.createElement('canvas')
-    off.width  = canvas.width
-    off.height = canvas.height
-    offscreenRef.current = off
+    const bg   = bgCanvasRef.current
+    const draw = drawCanvasRef.current
+    if (!bg || !draw) return
+    const bgCtx = bg.getContext('2d')
+    if (bgCtx) {
+      bgCtx.fillStyle = bgRef.current
+      bgCtx.fillRect(0, 0, bg.width, bg.height)
+    }
+    // Drawing canvas starts fully transparent — no fill needed
     renderComposite()
-    const entry: HistoryEntry = { snapshot: off.toDataURL(), bg: bgRef.current }
+    const entry: HistoryEntry = { snapshot: draw.toDataURL() }
     historyRef.current = [entry]
     historyIdx.current = 0
     setCanUndo(false)
@@ -195,116 +202,120 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
 
   // ── Drawing ───────────────────────────────────────────────────────────────
   const startDraw = (e: React.MouseEvent | React.TouchEvent) => {
-    const canvas = canvasRef.current
-    const off    = offscreenRef.current
-    if (!canvas || !off) return
+    const draw = drawCanvasRef.current
+    if (!draw) return
     drawing.current  = true
-    const pos        = getPos(e, canvas)
+    const pos        = getPos(e, draw)
     startPos.current = pos
     lastPos.current  = pos
     const t = toolRef.current
     if (t === 'line' || t === 'rect' || t === 'circle') {
-      const offCtx = off.getContext('2d')
-      if (offCtx) previewData.current = offCtx.getImageData(0, 0, off.width, off.height)
+      const ctx = draw.getContext('2d')
+      if (ctx) previewData.current = ctx.getImageData(0, 0, draw.width, draw.height)
     }
   }
 
   const draw = (e: React.MouseEvent | React.TouchEvent) => {
     if (!drawing.current) return
-    const canvas = canvasRef.current
-    const off    = offscreenRef.current
-    if (!canvas || !off) return
-    const offCtx = off.getContext('2d')
-    if (!offCtx) return
-    const pos = getPos(e, canvas)
+    const drawCanvas = drawCanvasRef.current
+    if (!drawCanvas) return
+    const ctx = drawCanvas.getContext('2d')
+    if (!ctx) return
+    const pos = getPos(e, drawCanvas)
     const t   = toolRef.current
 
     switch (t) {
       case 'brush': {
-        offCtx.save()
-        offCtx.globalCompositeOperation = 'source-over'
-        offCtx.beginPath()
-        offCtx.strokeStyle = colourRef.current
-        offCtx.lineWidth   = sizeRef.current
-        offCtx.lineCap     = 'round'
-        offCtx.lineJoin    = 'round'
-        offCtx.moveTo(lastPos.current.x, lastPos.current.y)
-        offCtx.lineTo(pos.x, pos.y)
-        offCtx.stroke()
-        offCtx.restore()
+        ctx.save()
+        ctx.globalCompositeOperation = 'source-over'
+        ctx.beginPath()
+        ctx.strokeStyle = colourRef.current
+        ctx.lineWidth   = sizeRef.current
+        ctx.lineCap     = 'round'
+        ctx.lineJoin    = 'round'
+        ctx.moveTo(lastPos.current.x, lastPos.current.y)
+        ctx.lineTo(pos.x, pos.y)
+        ctx.stroke()
+        ctx.restore()
         lastPos.current = pos
         break
       }
       case 'eraser': {
-        // destination-out removes offscreen pixels, revealing the background
-        // fill from the composite step rather than painting over it
-        offCtx.save()
-        offCtx.globalCompositeOperation = 'destination-out'
-        offCtx.beginPath()
-        offCtx.lineWidth = sizeRef.current
-        offCtx.lineCap   = 'round'
-        offCtx.lineJoin  = 'round'
-        offCtx.moveTo(lastPos.current.x, lastPos.current.y)
-        offCtx.lineTo(pos.x, pos.y)
-        offCtx.stroke()
-        offCtx.restore()
+        // destination-out removes pixels from the drawing layer, revealing
+        // the background canvas beneath without destroying any drawn content
+        ctx.save()
+        ctx.globalCompositeOperation = 'destination-out'
+        ctx.strokeStyle = 'rgba(0,0,0,1)'
+        ctx.beginPath()
+        ctx.lineWidth = sizeRef.current
+        ctx.lineCap   = 'round'
+        ctx.lineJoin  = 'round'
+        ctx.moveTo(lastPos.current.x, lastPos.current.y)
+        ctx.lineTo(pos.x, pos.y)
+        ctx.stroke()
+        ctx.restore()
         lastPos.current = pos
         break
       }
       case 'line': {
         if (!previewData.current) break
-        offCtx.putImageData(previewData.current, 0, 0)
-        offCtx.save()
-        offCtx.beginPath()
-        offCtx.strokeStyle = colourRef.current
-        offCtx.lineWidth   = sizeRef.current
-        offCtx.lineCap     = 'round'
-        offCtx.moveTo(startPos.current.x, startPos.current.y)
-        offCtx.lineTo(pos.x, pos.y)
-        offCtx.stroke()
-        offCtx.restore()
+        ctx.putImageData(previewData.current, 0, 0)
+        ctx.save()
+        ctx.beginPath()
+        ctx.strokeStyle = colourRef.current
+        ctx.lineWidth   = sizeRef.current
+        ctx.lineCap     = 'round'
+        ctx.moveTo(startPos.current.x, startPos.current.y)
+        ctx.lineTo(pos.x, pos.y)
+        ctx.stroke()
+        ctx.restore()
         break
       }
       case 'rect': {
         if (!previewData.current) break
-        offCtx.putImageData(previewData.current, 0, 0)
+        ctx.putImageData(previewData.current, 0, 0)
         const rw = pos.x - startPos.current.x
         const rh = pos.y - startPos.current.y
-        offCtx.save()
+        ctx.save()
+        ctx.globalCompositeOperation = 'source-over'
+        ctx.globalAlpha = 1
         if (shapeModeRef.current === 'fill') {
-          offCtx.fillStyle = colourRef.current
-          offCtx.fillRect(startPos.current.x, startPos.current.y, rw, rh)
+          ctx.fillStyle = colourRef.current
+          ctx.fillRect(startPos.current.x, startPos.current.y, rw, rh)
         } else {
-          offCtx.strokeStyle = colourRef.current
-          offCtx.lineWidth   = sizeRef.current
-          offCtx.strokeRect(startPos.current.x, startPos.current.y, rw, rh)
+          ctx.strokeStyle = colourRef.current
+          ctx.lineWidth   = sizeRef.current
+          ctx.strokeRect(startPos.current.x, startPos.current.y, rw, rh)
         }
-        offCtx.restore()
+        ctx.restore()
         break
       }
       case 'circle': {
         if (!previewData.current) break
-        offCtx.putImageData(previewData.current, 0, 0)
+        ctx.putImageData(previewData.current, 0, 0)
         const rx = Math.abs(pos.x - startPos.current.x) / 2
         const ry = Math.abs(pos.y - startPos.current.y) / 2
         const cx = (startPos.current.x + pos.x) / 2
         const cy = (startPos.current.y + pos.y) / 2
-        offCtx.save()
-        offCtx.beginPath()
-        offCtx.ellipse(cx, cy, Math.max(rx, 1), Math.max(ry, 1), 0, 0, Math.PI * 2)
+        ctx.save()
+        ctx.globalCompositeOperation = 'source-over'
+        ctx.globalAlpha = 1
+        ctx.beginPath()
+        ctx.ellipse(cx, cy, Math.max(rx, 1), Math.max(ry, 1), 0, 0, Math.PI * 2)
         if (shapeModeRef.current === 'fill') {
-          offCtx.fillStyle = colourRef.current
-          offCtx.fill()
+          ctx.fillStyle = colourRef.current
+          ctx.fill()
         } else {
-          offCtx.strokeStyle = colourRef.current
-          offCtx.lineWidth   = sizeRef.current
-          offCtx.stroke()
+          ctx.strokeStyle = colourRef.current
+          ctx.lineWidth   = sizeRef.current
+          ctx.stroke()
         }
-        offCtx.restore()
+        ctx.restore()
         break
       }
     }
-    renderComposite()
+    // No renderComposite() here — the drawing canvas is visible directly;
+    // visual feedback is immediate without any re-compositing step
   }
 
   const stopDraw = () => {
@@ -312,27 +323,33 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
     drawing.current    = false
     previewData.current = null
     saveToHistory()
+    renderComposite()
     onInteraction?.()
   }
 
   // ── Background colour ─────────────────────────────────────────────────────
-  // Only updates bgRef and re-renders the composite; the offscreen drawing
-  // layer is left untouched so existing strokes are preserved.
+  // Fills only the background canvas. The drawing layer is completely untouched.
+  // Background changes are not added to the undo history.
   const changeBgColour = (newBg: string) => {
     bgRef.current = newBg
     setBgColour(newBg)
+    const bg = bgCanvasRef.current
+    if (!bg) return
+    const ctx = bg.getContext('2d')
+    if (!ctx) return
+    ctx.fillStyle = newBg
+    ctx.fillRect(0, 0, bg.width, bg.height)
     renderComposite()
-    saveToHistory()
     onInteraction?.()
   }
 
   // ── Clear ─────────────────────────────────────────────────────────────────
   const confirmClear = () => {
-    const off = offscreenRef.current
-    if (!off) return
-    const ctx = off.getContext('2d')
+    const draw = drawCanvasRef.current
+    if (!draw) return
+    const ctx = draw.getContext('2d')
     if (!ctx) return
-    ctx.clearRect(0, 0, off.width, off.height)
+    ctx.clearRect(0, 0, draw.width, draw.height)
     renderComposite()
     saveToHistory()
     setShowConfirm(false)
@@ -340,7 +357,7 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
 
   // ── Ruler (overlay canvas) ────────────────────────────────────────────────
   // Temporary dashed guide drawn on the overlay; cleared on mouse-up or
-  // tool switch without touching the artwork canvas.
+  // tool switch without touching the artwork canvases.
   const startRuler = (e: React.MouseEvent) => {
     const ov = overlayRef.current
     if (!ov) return
@@ -436,12 +453,20 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
             </button>
           ))}
           {isShapeTool && (
-            <button
-              onClick={() => setShapeMode(m => m === 'outline' ? 'fill' : 'outline')}
-              className={`${BTN_BASE} border-border text-text-secondary hover:bg-white`}
-            >
-              {shapeMode === 'outline' ? 'Outline' : 'Fill'}
-            </button>
+            <>
+              <button
+                onClick={() => setShapeMode('fill')}
+                className={`${BTN_BASE} ${shapeMode === 'fill' ? BTN_ACTIVE : BTN_INACTIVE}`}
+              >
+                Fill
+              </button>
+              <button
+                onClick={() => setShapeMode('outline')}
+                className={`${BTN_BASE} ${shapeMode === 'outline' ? BTN_ACTIVE : BTN_INACTIVE}`}
+              >
+                Outline
+              </button>
+            </>
           )}
         </ToolGroup>
 
@@ -542,13 +567,26 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
         </ToolGroup>
       </div>
 
-      {/* ── Canvas stack ── */}
-      <div className="relative">
+      {/* ── Canvas stack ────────────────────────────────────────────────────────
+          Border and rounding live on the container so all layers clip together.
+
+          Layer 1 (bgCanvasRef)   — background colour fill, sets container height
+          Layer 2 (drawCanvasRef) — all drawing content, transparent background
+          Layer 3 (overlayRef)    — ruler guide overlay only
+          Layer 4 (canvasRef)     — hidden composite kept for toDataURL() saves
+      ── */}
+      <div className="relative border border-border rounded-xl overflow-hidden">
         <canvas
-          ref={canvasRef}
+          ref={bgCanvasRef}
           width={700}
           height={400}
-          className={`w-full border border-border rounded-xl touch-none block ${
+          className="w-full block"
+        />
+        <canvas
+          ref={drawCanvasRef}
+          width={700}
+          height={400}
+          className={`absolute inset-0 w-full h-full touch-none ${
             tool === 'ruler' ? 'pointer-events-none' : 'cursor-crosshair'
           }`}
           onMouseDown={tool  !== 'ruler' ? startDraw : undefined}
@@ -559,18 +597,23 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
           onTouchMove={tool  !== 'ruler' ? draw      : undefined}
           onTouchEnd={tool   !== 'ruler' ? stopDraw  : undefined}
         />
-        {/* Overlay: ruler guides only — pointer-events toggled by tool selection */}
         <canvas
           ref={overlayRef}
           width={700}
           height={400}
-          className={`absolute inset-0 w-full h-full rounded-xl ${
+          className={`absolute inset-0 w-full h-full ${
             tool === 'ruler' ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'
           }`}
           onMouseDown={tool  === 'ruler' ? startRuler : undefined}
           onMouseMove={tool  === 'ruler' ? drawRuler  : undefined}
           onMouseUp={tool    === 'ruler' ? stopRuler  : undefined}
           onMouseLeave={tool === 'ruler' ? stopRuler  : undefined}
+        />
+        <canvas
+          ref={canvasRef}
+          width={700}
+          height={400}
+          className="hidden"
         />
       </div>
 

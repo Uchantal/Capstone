@@ -1,13 +1,37 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TopNav from '../../components/TopNav'
 import PianoKeyboard from '../../components/piano/PianoKeyboard'
 import { ALL_TWELVE_CHORDS, buildChord } from '../../utils/pianoTheory'
+import { usePianoProgress } from '../../hooks/usePianoProgress'
+import Footer from '../../components/Footer'
 
 export default function SharpeningMyselfPage() {
   const navigate = useNavigate()
+  const { progress, loading, markStageVisited } = usePianoProgress()
   const [pressedNotes, setPressedNotes] = useState<string[]>([])
   const [selectedChord, setSelectedChord] = useState<string | null>(null)
+
+  // Gate: requires Level 3 demonstration passed
+  useEffect(() => {
+    if (loading) return
+    if (!progress.level3DemonstrationPassed) {
+      navigate('/piano/level-3/demonstrate', {
+        replace: true,
+        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
+      })
+    }
+  }, [loading, progress.level3DemonstrationPassed, navigate])
+
+  // Mark sharpening as visited so Production gate can check it
+  useEffect(() => {
+    if (loading) return
+    if (progress.level3DemonstrationPassed) {
+      markStageVisited('piano-sharpening')
+    }
+  // markStageVisited is stable; run once after gating passes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, progress.level3DemonstrationPassed])
 
   const currentChordDef = selectedChord
     ? ALL_TWELVE_CHORDS.find(c => c.symbol === selectedChord)
@@ -17,13 +41,13 @@ export default function SharpeningMyselfPage() {
   if (currentChordDef) {
     const names = buildChord(currentChordDef.root, currentChordDef.type, currentChordDef.useFlats)
     const normalize = (n: string) => {
-      const e = Object.entries({ 'C#':'Db','D#':'Eb','F#':'Gb','G#':'Ab','A#':'Bb' }).find(([,flat]) => flat === n)
+      const e = Object.entries({ 'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb' }).find(([, flat]) => flat === n)
       return e ? e[0] : n
     }
     const normalized = names.map(normalize)
     let oct = 4
     let prevIdx = -1
-    const chromatic = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
+    const chromatic = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
     for (const note of normalized) {
       const idx = chromatic.indexOf(note)
       if (idx <= prevIdx && highlightNotes.length > 0) oct++
@@ -34,12 +58,19 @@ export default function SharpeningMyselfPage() {
 
   const pressedNoteNames = pressedNotes.map(n => n.replace(/\d+$/, ''))
 
+  if (loading || !progress.level3DemonstrationPassed) {
+    return (
+      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+        <p className="text-text-muted text-sm">Loading...</p>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
-        {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
           <button onClick={() => navigate('/session/music-piano')} className="hover:text-text-primary transition-colors">
             Piano
@@ -55,7 +86,6 @@ export default function SharpeningMyselfPage() {
           Free practice time. Explore any chord from the reference below. Click a chord to highlight it on the keyboard, then play it. When you feel ready, move to the production test.
         </p>
 
-        {/* Chord reference grid */}
         <div className="bg-white border border-border rounded-2xl p-6 mb-5">
           <p className="text-text-muted text-xs uppercase tracking-wide mb-4">Chord Reference</p>
           <div className="grid grid-cols-4 gap-2 md:grid-cols-3">
@@ -87,7 +117,6 @@ export default function SharpeningMyselfPage() {
           )}
         </div>
 
-        {/* Live status */}
         {pressedNotes.length > 0 && (
           <div className="bg-white border border-border rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
             <span className="text-text-muted text-xs">Playing:</span>
@@ -99,13 +128,11 @@ export default function SharpeningMyselfPage() {
           </div>
         )}
 
-        {/* Keyboard */}
         <PianoKeyboard
           onNotesChange={setPressedNotes}
           highlightNotes={highlightNotes}
         />
 
-        {/* CTA */}
         <div className="mt-8 flex justify-end">
           <button
             onClick={() => navigate('/piano/production')}
@@ -115,6 +142,7 @@ export default function SharpeningMyselfPage() {
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

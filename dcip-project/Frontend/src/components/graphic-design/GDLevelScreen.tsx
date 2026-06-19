@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import TopNav from '../TopNav'
-import PosterSurface, { DEFAULT_POSTER, PosterState } from './PosterSurface'
+import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, DesignElement, exportDesignToDataUrl } from './PosterSurface'
 import { useGDProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useGDProgress'
 import { fetchGDLevelPoster, saveGDLevelPoster } from '../../services/api'
+import Footer from '../Footer'
 
-// COMPLETION THRESHOLD
-// Increase for production, reduce temporarily for testing
 const MINIMUM_INTERACTIONS = 10
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
@@ -35,16 +34,27 @@ interface Props {
   planningNoteLevel?: number
 }
 
-function posterFromRecord(rec: Record<string, string> | null): PosterState {
-  if (!rec) return DEFAULT_POSTER
-  return {
-    title:       rec.title      ?? '',
-    subtitle:    rec.subtitle   ?? '',
-    fontSize:    (rec.fontSize as PosterState['fontSize']) ?? 'medium',
-    alignment:   (rec.alignment as PosterState['alignment']) ?? 'left',
-    bgColour:    rec.bgColour   ?? '#1A1A1A',
-    titleColour: rec.titleColour ?? '#C8960C',
+function makeLegacyElements(rec: Record<string, string>): DesignElement[] {
+  const els: DesignElement[] = []
+  if (rec.title) {
+    els.push({
+      id: 'legacy-title', type: 'text',
+      x: 30, y: 80, width: 360, height: 90,
+      zIndex: 1,
+      text: rec.title, fontSize: 36, fontWeight: 'bold',
+      textAlign: 'left', color: rec.titleColour ?? '#C8960C',
+    })
   }
+  if (rec.subtitle) {
+    els.push({
+      id: 'legacy-subtitle', type: 'text',
+      x: 30, y: 190, width: 360, height: 60,
+      zIndex: 2,
+      text: rec.subtitle, fontSize: 18, fontWeight: 'normal',
+      textAlign: 'left', color: '#9ca3af',
+    })
+  }
+  return els
 }
 
 export default function GDLevelScreen({
@@ -61,24 +71,22 @@ export default function GDLevelScreen({
   const [dataLoading, setDataLoading] = useState(
     initialPosterLevel !== undefined || referencePosterLevel !== undefined || planningNoteLevel !== undefined
   )
-  const [poster, setPoster] = useState<PosterState>(DEFAULT_POSTER)
-  const [referenceData, setReferenceData] = useState<PosterState | null>(null)
+  const [elements,    setElements]    = useState<DesignElement[]>(DEFAULT_ELEMENTS)
+  const [bgColor,     setBgColor]     = useState(DEFAULT_BG_COLOR)
+  const [canvasKey,   setCanvasKey]   = useState(0)
+  const [refImageUrl, setRefImageUrl] = useState<string | null>(null)
   const [planningNote, setPlanningNote] = useState<string | null>(null)
   const [reasoning, setReasoning] = useState('')
-  const [saving, setSaving] = useState(false)
+  const [saving,    setSaving]    = useState(false)
   const [completed, setCompleted] = useState(false)
 
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const refCanvasRef = useRef<HTMLCanvasElement>(null)
   const interactionCount = useRef(0)
   const [thresholdMet, setThresholdMet] = useState(false)
 
   function recordInteraction() {
     if (thresholdMet) return
     interactionCount.current += 1
-    if (interactionCount.current >= MINIMUM_INTERACTIONS) {
-      setThresholdMet(true)
-    }
+    if (interactionCount.current >= MINIMUM_INTERACTIONS) setThresholdMet(true)
   }
 
   // Gate check
@@ -93,7 +101,7 @@ export default function GDLevelScreen({
     }
   }, [progressLoading, completedStages, requires, navigate])
 
-  // Load prior poster data and planning note
+  // Load prior poster data, reference image, and planning note
   useEffect(() => {
     if (progressLoading) return
     const hasMissing = requires.some(r => !completedStages.includes(r))
@@ -104,7 +112,20 @@ export default function GDLevelScreen({
     if (initialPosterLevel !== undefined) {
       fetches.push(
         fetchGDLevelPoster(initialPosterLevel)
-          .then(res => { if (res.data) setPoster(posterFromRecord(res.data)) })
+          .then(res => {
+            if (!res.data) return
+            if (res.data.elementsJson) {
+              try {
+                const parsed = JSON.parse(res.data.elementsJson)
+                setElements(parsed.elements ?? DEFAULT_ELEMENTS)
+                setBgColor(parsed.bgColor ?? DEFAULT_BG_COLOR)
+              } catch { /* use defaults */ }
+            } else if (res.data.title) {
+              setElements(makeLegacyElements(res.data))
+              setBgColor(res.data.bgColour ?? DEFAULT_BG_COLOR)
+            }
+            setCanvasKey(k => k + 1)
+          })
           .catch(() => {})
       )
     }
@@ -112,7 +133,25 @@ export default function GDLevelScreen({
     if (referencePosterLevel !== undefined) {
       fetches.push(
         fetchGDLevelPoster(referencePosterLevel)
-          .then(res => { if (res.data) setReferenceData(posterFromRecord(res.data)) })
+          .then(async res => {
+            if (!res.data) return
+            let els: DesignElement[]
+            let bg: string
+            if (res.data.elementsJson) {
+              try {
+                const parsed = JSON.parse(res.data.elementsJson)
+                els = parsed.elements ?? DEFAULT_ELEMENTS
+                bg  = parsed.bgColor  ?? DEFAULT_BG_COLOR
+              } catch { els = DEFAULT_ELEMENTS; bg = DEFAULT_BG_COLOR }
+            } else if (res.data.title) {
+              els = makeLegacyElements(res.data)
+              bg  = res.data.bgColour ?? DEFAULT_BG_COLOR
+            } else {
+              return
+            }
+            const url = await exportDesignToDataUrl(els, bg)
+            setRefImageUrl(url)
+          })
           .catch(() => {})
       )
     }
@@ -129,61 +168,25 @@ export default function GDLevelScreen({
     Promise.all(fetches).finally(() => setDataLoading(false))
   }, [progressLoading, completedStages, requires, initialPosterLevel, referencePosterLevel, planningNoteLevel])
 
-  // Render reference poster onto its canvas
-  useEffect(() => {
-    if (!referenceData || !refCanvasRef.current) return
-    const canvas = refCanvasRef.current
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const W = canvas.width, H = canvas.height
-    ctx.fillStyle = referenceData.bgColour
-    ctx.fillRect(0, 0, W, H)
-    ctx.fillStyle = '#C8960C'
-    ctx.fillRect(0, 0, 5, H)
-    const sizes = { small: { t: 18, s: 10 }, medium: { t: 24, s: 12 }, large: { t: 30, s: 14 } }
-    const sz = sizes[referenceData.fontSize] ?? sizes.medium
-    const x = referenceData.alignment === 'center' ? W / 2
-      : referenceData.alignment === 'right' ? W - 20 : 20
-    const ta: CanvasTextAlign = referenceData.alignment === 'center' ? 'center'
-      : referenceData.alignment === 'right' ? 'right' : 'left'
-    ctx.textAlign = ta
-    if (referenceData.title) {
-      ctx.fillStyle = referenceData.titleColour
-      ctx.font = `bold ${sz.t}px Inter, sans-serif`
-      ctx.fillText(referenceData.title, x, H * 0.35, W - 40)
-    }
-    if (referenceData.subtitle) {
-      ctx.fillStyle = '#9ca3af'
-      ctx.font = `${sz.s}px Inter, sans-serif`
-      ctx.fillText(referenceData.subtitle, x, H * 0.35 + sz.t + 6, W - 40)
-    }
-  }, [referenceData])
-
   const loading = progressLoading || dataLoading
 
-  const contentReady =
-    poster.title.trim().length > 0 &&
-    poster.subtitle.trim().length > 0 &&
-    reasoning.trim().length > 0
-  const canComplete = thresholdMet && contentReady
+  const hasTextContent = elements.some(el => el.type === 'text' && (el.text ?? '').trim().length > 0)
+  const contentReady   = hasTextContent && reasoning.trim().length > 0
+  const canComplete    = thresholdMet && contentReady
 
   const handleComplete = async () => {
     if (!canComplete || saving) return
     setSaving(true)
     try {
+      const mainText = elements.find(el => el.type === 'text')?.text ?? ''
       await saveGDLevelPoster({
         level: levelNumber,
-        title: poster.title,
-        subtitle: poster.subtitle,
-        fontSize: poster.fontSize,
-        alignment: poster.alignment,
-        bgColour: poster.bgColour,
-        titleColour: poster.titleColour,
+        title: mainText,
+        subtitle: '',
+        elementsJson: JSON.stringify({ elements, bgColor }),
         reasoning: reasoning.trim(),
       })
-    } catch {
-      // Best-effort
-    }
+    } catch { /* best-effort */ }
     await markComplete(stageId)
     setSaving(false)
     setCompleted(true)
@@ -198,7 +201,7 @@ export default function GDLevelScreen({
   }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -220,7 +223,7 @@ export default function GDLevelScreen({
 
         <ProgressBar value={levelNumber} total={totalLevels} label={`Level ${levelNumber} of ${totalLevels}`} />
 
-        {/* Planning note reminder (Level 1 only) */}
+        {/* Planning note from Course 1 (Level 1 only) */}
         {planningNote && (
           <div className="bg-primary/5 border border-primary/20 rounded-xl px-5 py-4 mb-5">
             <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Your plan from Course 1</p>
@@ -239,24 +242,29 @@ export default function GDLevelScreen({
           </div>
         </div>
 
-        {/* Reference poster (Level 3: Level 1 shown alongside) */}
-        {referenceData && (
+        {/* Level 1 reference image (Level 3 only) */}
+        {refImageUrl && (
           <div className="bg-white border border-border rounded-2xl p-6 mb-5">
             <p className="text-text-muted text-xs uppercase tracking-wide mb-3">Your Level 1 poster for reference</p>
-            <canvas
-              ref={refCanvasRef}
-              width={700}
-              height={420}
-              className="w-full border border-border rounded-xl"
+            <img
+              src={refImageUrl}
+              alt="Your Level 1 design"
+              className="max-w-xs mx-auto block border border-border rounded-xl"
             />
-            <p className="text-text-muted text-xs mt-2">This is read-only. Your editable poster is below.</p>
+            <p className="text-text-muted text-xs mt-2 text-center">This is read-only. Your editable poster is below.</p>
           </div>
         )}
 
         {/* Design surface */}
         <div className="bg-white border border-border rounded-2xl p-6 mb-5">
           <p className="text-text-muted text-xs uppercase tracking-wide mb-3">Your poster</p>
-          <PosterSurface value={poster} onChange={(next) => { setPoster(next); recordInteraction() }} canvasRef={canvasRef} />
+          <DesignCanvas
+            key={canvasKey}
+            defaultElements={elements}
+            defaultBgColor={bgColor}
+            onChange={(els, bg) => { setElements(els); setBgColor(bg) }}
+            onInteraction={recordInteraction}
+          />
         </div>
 
         {/* Reasoning field */}
@@ -265,7 +273,7 @@ export default function GDLevelScreen({
             {reasoningPrompt}
           </label>
           <p className="text-text-secondary text-xs mb-3">
-            Write at least one sentence in your own words. This is what distinguishes a deliberate design decision from just clicking buttons.
+            Write at least one sentence in your own words. This distinguishes a deliberate design decision from just clicking buttons.
           </p>
           <textarea
             value={reasoning}
@@ -276,9 +284,9 @@ export default function GDLevelScreen({
           />
           {!contentReady && (
             <p className="text-text-muted text-xs mt-1.5">
-              {!poster.title.trim() ? 'Add a poster title to continue.' :
-               !poster.subtitle.trim() ? 'Add a subtitle to continue.' :
-               'Write your reasoning to continue.'}
+              {!hasTextContent
+                ? 'Add at least one text element to your poster to continue.'
+                : 'Write your reasoning to continue.'}
             </p>
           )}
         </div>
@@ -299,7 +307,9 @@ export default function GDLevelScreen({
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-primary font-bold text-2xl">*</span>
+              <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
             <h2 className="text-text-primary font-bold text-xl mb-2">Level {levelNumber} Complete</h2>
             <p className="text-text-secondary text-sm mb-6">
@@ -309,13 +319,12 @@ export default function GDLevelScreen({
               onClick={() => navigate(nextPath)}
               className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"
             >
-              {levelNumber < totalLevels
-                ? `Continue to Level ${levelNumber + 1}`
-                : 'Continue to Free Practice'}
+              Continue to Practice
             </button>
           </div>
         </div>
       )}
+      <Footer />
     </div>
   )
 }

@@ -78,11 +78,11 @@ router.get('/gd-level-poster', protect, async (req: AuthRequest, res) => {
 // body: { level, title?, subtitle?, fontSize?, alignment?, bgColour?, titleColour?, reasoning }
 router.post('/gd-level-poster', protect, async (req: AuthRequest, res) => {
   try {
-    const { level, title, subtitle, fontSize, alignment, bgColour, titleColour, reasoning } = req.body
+    const { level, title, subtitle, fontSize, alignment, bgColour, titleColour, reasoning, elementsJson } = req.body
     if (level === undefined) return res.status(400).json({ message: 'level is required' })
     const record = await GDLevelPoster.findOneAndUpdate(
       { user: req.userId, discipline: 'graphic-design', level },
-      { title, subtitle, fontSize, alignment, bgColour, titleColour, reasoning },
+      { title, subtitle, fontSize, alignment, bgColour, titleColour, reasoning, elementsJson },
       { upsert: true, new: true }
     )
     res.json(record)

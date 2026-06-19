@@ -1,13 +1,11 @@
-import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TopNav from '../../components/TopNav'
-import PosterSurface, { DEFAULT_POSTER, PosterState } from '../../components/graphic-design/PosterSurface'
+import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS } from '../../components/graphic-design/PosterSurface'
 import { useGDProgress } from '../../hooks/useGDProgress'
+import Footer from '../../components/Footer'
 
 export default function VirtualStudioPage() {
   const navigate = useNavigate()
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [poster, setPoster] = useState<PosterState>(DEFAULT_POSTER)
   const { markComplete } = useGDProgress()
 
   const handleContinue = async () => {
@@ -16,13 +14,18 @@ export default function VirtualStudioPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
         <p className="text-text-secondary text-sm mb-6">
           This is your design studio. Try adding a title, change the colours, see how it feels. There is no right answer here.
         </p>
-        <PosterSurface value={poster} onChange={setPoster} canvasRef={canvasRef} />
+        <DesignCanvas
+          defaultElements={DEFAULT_ELEMENTS}
+          defaultBgColor={DEFAULT_BG_COLOR}
+          onChange={() => {}}
+          onInteraction={() => {}}
+        />
         <div className="flex justify-end mt-8">
           <button
             onClick={handleContinue}
@@ -32,6 +35,7 @@ export default function VirtualStudioPage() {
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

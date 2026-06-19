@@ -9,6 +9,7 @@ import {
   FLAT_NAMES,
   type ChordType,
 } from '../../utils/pianoTheory'
+import Footer from '../Footer'
 
 interface ChordDef {
   symbol: string
@@ -98,13 +99,13 @@ export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle,
     : 'Find and press the notes below, hold for a moment.'
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
-          <button onClick={() => navigate('/session/music-piano')} className="hover:text-text-primary transition-colors">
+          <button onClick={() => navigate('/piano/understanding-the-piano')} className="hover:text-text-primary transition-colors">
             Piano
           </button>
           <span>/</span>
@@ -174,7 +175,9 @@ export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle,
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-primary font-bold text-2xl">★</span>
+              <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
             <h2 className="text-text-primary font-bold text-xl mb-2">Level {levelNumber} Complete!</h2>
             <p className="text-text-secondary text-sm mb-6">
@@ -184,11 +187,12 @@ export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle,
               onClick={() => navigate(nextPath)}
               className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"
             >
-              {levelNumber < totalLevels ? `Continue to Level ${levelNumber + 1}` : 'Continue to Free Practice'}
+              Continue to Practice
             </button>
           </div>
         </div>
       )}
+      <Footer />
     </div>
   )
 }

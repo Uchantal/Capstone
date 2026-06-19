@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import TopNav from '../../components/TopNav'
 import { useGDProgress } from '../../hooks/useGDProgress'
 import { saveGDLevelPoster } from '../../services/api'
+import Footer from '../../components/Footer'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -39,7 +40,7 @@ export default function GDCourse1Page() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -83,12 +84,12 @@ export default function GDCourse1Page() {
           <div className="mt-4 grid grid-cols-2 gap-4">
             <div className="bg-[#1A1A1A] rounded-xl p-4 flex flex-col gap-2">
               <div className="text-[#C8960C] font-bold text-xl leading-tight">CREATIVE NIGHT</div>
-              <div className="text-gray-400 text-xs">Friday 7 December, Main Hall</div>
+              <div className="text-gray-400 text-xs">Creative Event, School Main Hall</div>
               <p className="text-green-400 text-xs mt-1">Clear hierarchy: title stands out</p>
             </div>
             <div className="bg-[#1A1A1A] rounded-xl p-4 flex flex-col gap-2">
               <div className="text-[#C8960C] font-medium text-sm leading-tight">Creative Night</div>
-              <div className="text-gray-400 text-sm">Friday 7 December, Main Hall</div>
+              <div className="text-gray-400 text-sm">Creative Event, School Main Hall</div>
               <p className="text-accent text-xs mt-1">Weak hierarchy: title and detail look similar</p>
             </div>
           </div>
@@ -196,6 +197,7 @@ export default function GDCourse1Page() {
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

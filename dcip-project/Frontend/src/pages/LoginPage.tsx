@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { loginUser } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
+import Footer from '../components/Footer'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -42,7 +43,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-page flex items-center justify-center px-6">
+    <div className="min-h-screen flex flex-col bg-bg-page">
+      <div className="flex-1 flex items-center justify-center px-6">
       <div className="w-full max-w-md">
         <div className="flex items-center gap-3 mb-8">
           <div className="bg-primary rounded-lg w-9 h-9 flex items-center justify-center">
@@ -117,6 +119,8 @@ export default function LoginPage() {
           </button>
         </form>
       </div>
+      </div>
+      <Footer />
     </div>
   )
 }

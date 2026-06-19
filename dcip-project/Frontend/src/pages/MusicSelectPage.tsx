@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import TopNav from '../components/TopNav'
+import Footer from '../components/Footer'
 
 const paths = [
   {
-    id: 'music-guitar',
+    url: '/guitar/reading-the-fretboard',
     name: 'Guitar',
     description:
       'Learn chords, strumming patterns, and simple melodies using an interactive virtual fretboard powered by the Web Audio API.',
@@ -18,7 +19,7 @@ const paths = [
     label: 'Practise Guitar',
   },
   {
-    id: 'music-piano',
+    url: '/piano/virtual-instrument',
     name: 'Piano',
     description:
       'Learn scales, chords, and melodies using an interactive virtual keyboard. Follow guided exercises at your own pace.',
@@ -33,7 +34,7 @@ const paths = [
     label: 'Practise Piano',
   },
   {
-    id: 'music-voice',
+    url: '/voice/posture-breath-voice',
     name: 'Voice & Singing',
     description:
       'Record your voice, practise pitch, warm up with vocal exercises, and save recordings of your singing using your device microphone.',
@@ -53,7 +54,7 @@ export default function MusicSelectPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
 
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-10">
@@ -74,7 +75,7 @@ export default function MusicSelectPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {paths.map((path) => (
             <div
-              key={path.id}
+              key={path.url}
               className={`bg-white rounded-2xl border-2 border-border border-t-4 ${path.accent} flex flex-col overflow-hidden`}
             >
               {/* Icon area */}
@@ -104,7 +105,7 @@ export default function MusicSelectPage() {
                   </ul>
 
                   <button
-                    onClick={() => navigate(`/session/${path.id}`)}
+                    onClick={() => navigate(path.url)}
                     className={`w-full ${path.btn} text-white font-semibold text-sm py-3.5 rounded-xl transition-colors`}
                   >
                     {path.label}
@@ -119,6 +120,7 @@ export default function MusicSelectPage() {
           All three paths use your browser's built-in Web Audio API. No hardware or downloads required.
         </p>
       </div>
+      <Footer />
     </div>
   )
 }

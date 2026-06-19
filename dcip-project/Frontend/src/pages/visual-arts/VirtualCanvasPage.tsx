@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import TopNav from '../../components/TopNav'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsProgress } from '../../hooks/useVisualArtsProgress'
+import Footer from '../../components/Footer'
 
 export default function VirtualCanvasPage() {
   const navigate = useNavigate()
@@ -15,7 +16,7 @@ export default function VirtualCanvasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
         <p className="text-text-secondary text-sm mb-6">
@@ -31,6 +32,7 @@ export default function VirtualCanvasPage() {
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

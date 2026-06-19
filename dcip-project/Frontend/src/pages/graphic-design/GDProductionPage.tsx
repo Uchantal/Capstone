@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import PosterSurface, { DEFAULT_POSTER, PosterState } from '../../components/graphic-design/PosterSurface'
-import { useGDProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useGDProgress'
-import { saveGDProductionResult, savePortfolioItem } from '../../services/api'
+import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, exportDesignToDataUrl, DesignElement } from '../../components/graphic-design/PosterSurface'
+import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
+import { saveGDProductionResult, savePortfolioItem, completeGDProduction } from '../../services/api'
+import Footer from '../../components/Footer'
 
 const CHECKLIST = [
   { id: 'hierarchy',   text: 'My poster has a title and subtitle with clear visual hierarchy' },
@@ -35,10 +36,11 @@ function MinimalNav({ onExit }: { onExit: () => void }) {
 
 export default function GDProductionPage() {
   const navigate = useNavigate()
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { completedStages, loading, markComplete } = useGDProgress()
+  const { progress, loading, markStageVisited } = useGDDemonstrationProgress()
   const [phase, setPhase] = useState<Phase>('intro')
-  const [poster, setPoster] = useState<PosterState>(DEFAULT_POSTER)
+  const [elements, setElements] = useState<DesignElement[]>(DEFAULT_ELEMENTS)
+  const [bgColor, setBgColor] = useState(DEFAULT_BG_COLOR)
+  const [canvasKey] = useState(0)
   const [reasoning, setReasoning] = useState('')
   const [checked, setChecked] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
@@ -46,13 +48,20 @@ export default function GDProductionPage() {
 
   useEffect(() => {
     if (loading) return
-    if (!completedStages.includes('gd-sharpening')) {
-      navigate(STAGE_PATHS['gd-sharpening'], {
+    if (!progress.level3DemonstrationPassed) {
+      navigate('/graphic-design/level-3/demonstrate', {
         replace: true,
-        state: { lockedMessage: `Complete ${STAGE_NAMES['gd-sharpening']} first.` },
+        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
+      })
+      return
+    }
+    if (!progress.completedStages.includes('gd-sharpening')) {
+      navigate('/graphic-design/sharpening', {
+        replace: true,
+        state: { lockedMessage: 'Complete Sharpening Myself first.' },
       })
     }
-  }, [loading, completedStages, navigate])
+  }, [loading, progress.level3DemonstrationPassed, progress.completedStages, navigate])
 
   const allChecked = CHECKLIST.every(item => checked.has(item.id))
   const canSubmit = allChecked && reasoning.trim().length > 0 && !submitting
@@ -69,15 +78,18 @@ export default function GDProductionPage() {
   const handleSubmit = async () => {
     if (!canSubmit) return
     setSubmitting(true)
-    const imageData = canvasRef.current?.toDataURL('image/png') ?? ''
+    const textEls = elements.filter(el => el.type === 'text')
+    const mainEl  = textEls[0]
+    const subEl   = textEls[1]
+    const imageData = await exportDesignToDataUrl(elements, bgColor)
     try {
       await saveGDProductionResult({
-        posterTitle:    poster.title,
-        posterSubtitle: poster.subtitle,
-        fontSize:       poster.fontSize,
-        alignment:      poster.alignment,
-        bgColour:       poster.bgColour,
-        titleColour:    poster.titleColour,
+        posterTitle:    mainEl?.text ?? '',
+        posterSubtitle: subEl?.text ?? '',
+        fontSize:       String(mainEl?.fontSize ?? 24),
+        alignment:      mainEl?.textAlign ?? 'left',
+        bgColour:       bgColor,
+        titleColour:    mainEl?.color ?? '#ffffff',
         finalImageData: imageData,
         reasoningText:  reasoning.trim(),
         checklistConfirmed: {
@@ -98,7 +110,8 @@ export default function GDProductionPage() {
       })
       setPortfolioId(portfolioRes.data?._id ?? null)
 
-      await markComplete('gd-production')
+      await markStageVisited('gd-production')
+      completeGDProduction(true).catch(() => {})
       setPhase('done')
     } catch {
       setPhase('done')
@@ -122,12 +135,17 @@ export default function GDProductionPage() {
         <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-12 w-full">
           <div className="bg-secondary/5 border-2 border-secondary/30 rounded-2xl p-8 text-center mb-6">
             <div className="w-14 h-14 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-secondary font-bold text-2xl">*</span>
+              <svg className="w-7 h-7 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
             <h1 className="text-text-primary font-bold text-2xl mb-2">Production Complete</h1>
-            <p className="text-text-secondary text-sm leading-relaxed max-w-md mx-auto">
+            <p className="text-text-secondary text-sm leading-relaxed max-w-md mx-auto mb-4">
               Your work has been saved to your portfolio. You have completed the Graphic Design journey.
             </p>
+            <div className="inline-flex items-center bg-[#2D6A4F]/10 text-[#2D6A4F] text-xs font-semibold px-4 py-2 rounded-full">
+              Advanced Graphic Design Badge
+            </div>
           </div>
           <div className="flex flex-col gap-3">
             {portfolioId && (
@@ -146,6 +164,7 @@ export default function GDProductionPage() {
             </button>
           </div>
         </div>
+        <Footer />
       </div>
     )
   }
@@ -181,11 +200,11 @@ export default function GDProductionPage() {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     )
   }
 
-  // working phase
   return (
     <div className="min-h-screen bg-bg-page flex flex-col">
       <MinimalNav onExit={() => navigate('/dashboard')} />
@@ -201,7 +220,13 @@ export default function GDProductionPage() {
         </div>
 
         <div className="bg-white border border-border rounded-2xl p-6 mb-5">
-          <PosterSurface value={poster} onChange={setPoster} canvasRef={canvasRef} showDrawLayer />
+          <DesignCanvas
+            key={canvasKey}
+            defaultElements={DEFAULT_ELEMENTS}
+            defaultBgColor={DEFAULT_BG_COLOR}
+            onChange={(els, bg) => { setElements(els); setBgColor(bg) }}
+            onInteraction={() => {}}
+          />
         </div>
 
         <div className="bg-white border border-border rounded-2xl p-6 mb-5">
@@ -251,6 +276,7 @@ export default function GDProductionPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

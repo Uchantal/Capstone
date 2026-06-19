@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import TopNav from '../../components/TopNav'
 import { getSupervisorLiveActivity, getSupervisorSchoolAnalytics } from '../../services/api'
+import Footer from '../../components/Footer'
 
 interface LiveSession {
   _id: string
@@ -142,7 +143,7 @@ export default function SupervisorDashboardPage() {
   )
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
 
@@ -344,6 +345,7 @@ export default function SupervisorDashboardPage() {
         </section>
 
       </main>
+      <Footer />
     </div>
   )
 }

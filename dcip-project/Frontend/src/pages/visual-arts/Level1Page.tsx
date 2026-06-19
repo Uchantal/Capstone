@@ -14,7 +14,7 @@ export default function VALevel1Page() {
       levelTitle="Level 1: Shapes and Lines in Practice"
       task="Draw at least three different basic shapes, for example a circle, a square, and a triangle, using the Line, Rectangle, and Ellipse tools. Try to keep your shapes clean and intentional. Experiment with both Outline and Fill modes."
       checklist={CHECKLIST}
-      nextPath="/visual-arts/level-2"
+      nextPath="/visual-arts/level-1/practise"
       stageId="va-level-1"
       requires={['va-course-1', 'va-course-2']}
     />

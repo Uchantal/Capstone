@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { updateDiscipline } from '../services/api'
 import TopNav from '../components/TopNav'
+import Footer from '../components/Footer'
 
 const disciplines = [
   {
@@ -37,18 +38,25 @@ export default function DisciplineSelectPage() {
   const navigate = useNavigate()
   const { user, updateUser } = useAuth()
 
+  const DISC_URLS: Record<string, string> = {
+    music: '/session/music',
+    'visual-arts': '/visual-arts/virtual-canvas',
+    'graphic-design': '/graphic-design/virtual-studio',
+  }
+
   const handleSelect = async (id: string) => {
+    const url = DISC_URLS[id] ?? '/dashboard'
     try {
       const res = await updateDiscipline(id)
       updateUser({ discipline: res.data.discipline })
-      navigate(`/session/${id}`)
+      navigate(url)
     } catch {
-      navigate(`/session/${id}`)
+      navigate(url)
     }
   }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-12">
         <h1 className="text-text-primary font-bold text-2xl mb-1">Choose your discipline</h1>
@@ -86,6 +94,7 @@ export default function DisciplineSelectPage() {
           ← Back to dashboard
         </button>
       </div>
+      <Footer />
     </div>
   )
 }

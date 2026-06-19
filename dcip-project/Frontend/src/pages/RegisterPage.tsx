@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { registerUser, fetchSchools } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
+import Footer from '../components/Footer'
 
 interface School {
   _id: string
@@ -90,7 +91,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-page flex">
+    <div className="min-h-screen flex flex-col bg-bg-page">
+      <div className="flex flex-1">
       {/* Left panel */}
       <div className="hidden lg:flex flex-col justify-between bg-[#C8960C] w-2/5 p-12">
         <div className="flex items-center gap-3">
@@ -280,6 +282,8 @@ export default function RegisterPage() {
           </form>
         </div>
       </div>
+      </div>
+      <Footer />
     </div>
   )
 }

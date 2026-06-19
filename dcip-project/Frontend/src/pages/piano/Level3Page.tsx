@@ -1,4 +1,7 @@
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import ChordLevelScreen from '../../components/piano/ChordLevelScreen'
+import { usePianoProgress } from '../../hooks/usePianoProgress'
 
 const LEVEL3_CHORDS = [
   { symbol: 'Cm', root: 'C', type: 'minor' as const, useFlats: true },
@@ -10,6 +13,21 @@ const LEVEL3_CHORDS = [
 ]
 
 export default function Level3Page() {
+  const navigate = useNavigate()
+  const { progress, loading } = usePianoProgress()
+
+  useEffect(() => {
+    if (loading) return
+    if (!progress.level2DemonstrationPassed) {
+      navigate('/piano/level-2/demonstrate', {
+        replace: true,
+        state: { lockedMessage: 'Complete the Level 2 demonstration first.' },
+      })
+    }
+  }, [loading, progress.level2DemonstrationPassed, navigate])
+
+  if (loading || !progress.level2DemonstrationPassed) return null
+
   return (
     <ChordLevelScreen
       levelNumber={3}
@@ -17,7 +35,7 @@ export default function Level3Page() {
       levelTitle="Level 3: Chords with Black Keys"
       description="These chords include black keys as part of the chord. Use the highlighted keys to guide you. Take your time finding the right finger positions."
       chords={LEVEL3_CHORDS}
-      nextPath="/piano/sharpening-myself"
+      nextPath="/piano/level-3/practise"
     />
   )
 }

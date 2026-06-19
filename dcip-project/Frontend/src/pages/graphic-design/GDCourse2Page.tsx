@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import TopNav from '../../components/TopNav'
 import { useGDProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useGDProgress'
+import Footer from '../../components/Footer'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -30,6 +31,13 @@ export default function GDCourse2Page() {
     }
   }, [loading, completedStages, navigate])
 
+  const [canContinue, setCanContinue] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setCanContinue(true), 60_000)
+    return () => clearTimeout(t)
+  }, [])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-bg-page flex items-center justify-center">
@@ -39,12 +47,13 @@ export default function GDCourse2Page() {
   }
 
   const handleContinue = async () => {
+    if (!canContinue) return
     await markComplete('gd-course-2')
     navigate('/graphic-design/level-1')
   }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -83,7 +92,7 @@ export default function GDCourse2Page() {
             <div className="rounded-xl overflow-hidden border border-border">
               <div className="bg-[#1A1A1A] px-5 py-4">
                 <p className="text-[#C8960C] font-bold text-lg leading-tight">CREATIVE NIGHT</p>
-                <p className="text-gray-300 text-sm mt-1">Friday 7 December</p>
+                <p className="text-gray-300 text-sm mt-1">Creative Event, School Main Hall</p>
               </div>
               <div className="bg-[#F9F7F4] px-4 py-2 border-t border-border">
                 <p className="text-green-600 text-xs font-medium">Strong contrast: easy to read</p>
@@ -92,7 +101,7 @@ export default function GDCourse2Page() {
             <div className="rounded-xl overflow-hidden border border-border">
               <div className="bg-[#555555] px-5 py-4">
                 <p className="text-[#888888] font-bold text-lg leading-tight">CREATIVE NIGHT</p>
-                <p className="text-[#666666] text-sm mt-1">Friday 7 December</p>
+                <p className="text-[#666666] text-sm mt-1">Creative Event, School Main Hall</p>
               </div>
               <div className="bg-[#F9F7F4] px-4 py-2 border-t border-border">
                 <p className="text-accent text-xs font-medium">Weak contrast: hard to read</p>
@@ -191,12 +200,14 @@ export default function GDCourse2Page() {
         <div className="flex justify-end">
           <button
             onClick={handleContinue}
-            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors"
+            disabled={!canContinue}
+            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             Continue to Level 1
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

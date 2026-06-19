@@ -2,7 +2,8 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TopNav from '../../components/TopNav'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
-import { useGuitarProgress } from '../../hooks/useGuitarProgress'
+import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
+import Footer from '../../components/Footer'
 
 const NOTE_REFERENCE = [
   {
@@ -49,25 +50,39 @@ const CHORD_REFERENCE = [
 
 export default function GuitarSharpeningPage() {
   const navigate = useNavigate()
-  const { completedStages, loading, markComplete } = useGuitarProgress()
+  const { progress, loading, markStageVisited } = useGuitarDemonstrationProgress()
 
+  // Gate: requires Level 3 demonstration passed
   useEffect(() => {
     if (loading) return
-    if (!completedStages.includes('guitar-level-3')) {
-      navigate('/guitar/level-3', {
+    if (!progress.level3DemonstrationPassed) {
+      navigate('/guitar/level-3/demonstrate', {
         replace: true,
-        state: { lockedMessage: 'Complete Level 3 first.' },
+        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
       })
     }
-  }, [completedStages, loading, navigate])
+  }, [loading, progress.level3DemonstrationPassed, navigate])
 
-  const handleContinue = async () => {
-    await markComplete('guitar-sharpening')
-    navigate('/guitar/production')
+  // Mark sharpening visited on mount so Production gate can check it
+  useEffect(() => {
+    if (loading) return
+    if (progress.level3DemonstrationPassed) {
+      markStageVisited('guitar-sharpening')
+    }
+  // markStageVisited is stable; run once after gate passes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, progress.level3DemonstrationPassed])
+
+  if (loading || !progress.level3DemonstrationPassed) {
+    return (
+      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+        <p className="text-text-muted text-sm">Loading...</p>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -78,7 +93,6 @@ export default function GuitarSharpeningPage() {
 
         <GuitarFretboard showChords={true} />
 
-        {/* Note reference */}
         <div className="mt-8 bg-white border border-border rounded-2xl overflow-hidden">
           <div className="bg-[#F9F7F4] px-6 py-3 border-b border-border">
             <p className="text-text-muted text-xs uppercase tracking-wide font-medium">Note Position Reference</p>
@@ -92,7 +106,7 @@ export default function GuitarSharpeningPage() {
                   {positions.map(p => (
                     <p key={`${p.string}-${p.fret}`} className="text-text-secondary text-sm">
                       <span className="font-medium text-text-primary">{p.string}</span>{' '}
-                      {p.fret === 'open' ? '— open' : `— fret ${p.fret}`}
+                      {p.fret === 'open' ? '(open)' : `fret ${p.fret}`}
                     </p>
                   ))}
                 </div>
@@ -101,7 +115,6 @@ export default function GuitarSharpeningPage() {
           </div>
         </div>
 
-        {/* Chord reference */}
         <div className="mt-4 bg-white border border-border rounded-2xl overflow-hidden">
           <div className="bg-[#F9F7F4] px-6 py-3 border-b border-border">
             <p className="text-text-muted text-xs uppercase tracking-wide font-medium">Chord Reference</p>
@@ -121,13 +134,14 @@ export default function GuitarSharpeningPage() {
 
         <div className="mt-8 flex justify-end">
           <button
-            onClick={handleContinue}
+            onClick={() => navigate('/guitar/production')}
             className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors"
           >
             I am ready. Continue to Production.
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

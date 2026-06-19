@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TopNav from '../TopNav'
 import GuitarFretboard, { STRING_DATA, CHORD_DATA } from './GuitarFretboard'
+import Footer from '../Footer'
 
 // Chromatic sequence for note-name resolution
 const CHROMATIC = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -119,9 +120,9 @@ export function Level1Screen({ onComplete, nextPath }: Level1Props) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-primary font-bold text-2xl">★</span>
+              <span className="text-primary font-bold text-2xl">*</span>
             </div>
-            <h2 className="text-text-primary font-bold text-xl mb-2">Level 1 Complete!</h2>
+            <h2 className="text-text-primary font-bold text-xl mb-2">Level 1 Complete</h2>
             <p className="text-text-secondary text-sm mb-6">
               You found {foundKeys.size} positions of the note E. Well done.
             </p>
@@ -129,7 +130,7 @@ export function Level1Screen({ onComplete, nextPath }: Level1Props) {
               onClick={() => { onComplete(); navigate(nextPath) }}
               className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"
             >
-              Continue to Level 2
+              Continue to Practice
             </button>
           </div>
         </div>
@@ -243,9 +244,9 @@ export function Level2Screen({ onComplete, nextPath }: Level2Props) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-primary font-bold text-2xl">★</span>
+              <span className="text-primary font-bold text-2xl">*</span>
             </div>
-            <h2 className="text-text-primary font-bold text-xl mb-2">Level 2 Complete!</h2>
+            <h2 className="text-text-primary font-bold text-xl mb-2">Level 2 Complete</h2>
             <p className="text-text-secondary text-sm mb-6">
               You played C on three different strings. The note exists in many places.
             </p>
@@ -253,7 +254,7 @@ export function Level2Screen({ onComplete, nextPath }: Level2Props) {
               onClick={() => { onComplete(); navigate(nextPath) }}
               className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"
             >
-              Continue to Level 3
+              Continue to Practice
             </button>
           </div>
         </div>
@@ -341,7 +342,7 @@ export function Level3Screen({ onComplete, nextPath }: Level3Props) {
     'text-text-secondary'
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
         <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
@@ -383,9 +384,9 @@ export function Level3Screen({ onComplete, nextPath }: Level3Props) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-primary font-bold text-2xl">★</span>
+              <span className="text-primary font-bold text-2xl">*</span>
             </div>
-            <h2 className="text-text-primary font-bold text-xl mb-2">Level 3 Complete!</h2>
+            <h2 className="text-text-primary font-bold text-xl mb-2">Level 3 Complete</h2>
             <p className="text-text-secondary text-sm mb-6">
               You combined single notes and a chord shape in sequence.
             </p>
@@ -393,11 +394,12 @@ export function Level3Screen({ onComplete, nextPath }: Level3Props) {
               onClick={() => { onComplete(); navigate(nextPath) }}
               className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"
             >
-              Continue to Sharpening Myself
+              Continue to Practice
             </button>
           </div>
         </div>
       )}
+      <Footer />
     </div>
   )
 }

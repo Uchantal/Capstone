@@ -1,61 +1,232 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
-} from 'recharts'
 import { useAuth } from '../hooks/useAuth'
-import { fetchStats, fetchProgress, fetchAnalytics } from '../services/api'
+import { fetchProgressSummary } from '../services/api'
 import TopNav from '../components/TopNav'
+import Footer from '../components/Footer'
 
-interface ProgressDoc {
-  discipline: string
-  currentLevel: number
-  sessionsAtCurrentLevel: number
+interface DisciplineSummary {
+  key: string
+  label: string
+  completedStages: string[]
+  skillLevel: string
   totalSessions: number
   totalMinutes: number
-  levelBadges: { level: number; discipline: string; earnedAt: string }[]
-  streakDays: number
-  skillLabel: string
 }
 
-interface Analytics {
-  weeklyActivity: { week: string; sessions: number; minutes: number }[]
-  disciplineBreakdown: { discipline: string; sessions: number; percentage: number }[]
-  sessionQuality: { short: number; standard: number; deep: number }
+interface SummaryResponse {
+  disciplines: DisciplineSummary[]
+  totalLevelsCompleted: number
+  activeSince: string | null
 }
 
-const DISC_COLORS: Record<string, string> = {
-  music: '#C8960C',
-  'visual-arts': '#2D6A4F',
-  'graphic-design': '#3B82F6',
+const STAGE_URLS: Record<string, { stageId: string; url: string }[]> = {
+  voice: [
+    { stageId: 'voice-studio',           url: '/voice/studio' },
+    { stageId: 'voice-course-1',         url: '/voice/posture-breath-voice' },
+    { stageId: 'voice-course-2',         url: '/voice/pitch-and-scale' },
+    { stageId: 'voice-level-1',          url: '/voice/level-1' },
+    { stageId: 'voice-level-1-practise', url: '/voice/level-1/practise' },
+    { stageId: 'voice-level-1-demo',     url: '/voice/level-1/demonstrate' },
+    { stageId: 'voice-level-2',          url: '/voice/level-2' },
+    { stageId: 'voice-level-2-practise', url: '/voice/level-2/practise' },
+    { stageId: 'voice-level-2-demo',     url: '/voice/level-2/demonstrate' },
+    { stageId: 'voice-level-3',          url: '/voice/level-3' },
+    { stageId: 'voice-level-3-practise', url: '/voice/level-3/practise' },
+    { stageId: 'voice-level-3-demo',     url: '/voice/level-3/demonstrate' },
+    { stageId: 'voice-sharpening',       url: '/voice/sharpening-myself' },
+    { stageId: 'voice-production-demo',  url: '/voice/production' },
+  ],
+  guitar: [
+    { stageId: 'guitar-intro',            url: '/guitar/virtual-instrument' },
+    { stageId: 'guitar-course-1',         url: '/guitar/reading-the-fretboard' },
+    { stageId: 'guitar-course-2',         url: '/guitar/notes-across-the-neck' },
+    { stageId: 'guitar-level-1',          url: '/guitar/level-1' },
+    { stageId: 'guitar-level-1-practise', url: '/guitar/level-1/practise' },
+    { stageId: 'guitar-level-1-demo',     url: '/guitar/level-1/demonstrate' },
+    { stageId: 'guitar-level-2',          url: '/guitar/level-2' },
+    { stageId: 'guitar-level-2-practise', url: '/guitar/level-2/practise' },
+    { stageId: 'guitar-level-2-demo',     url: '/guitar/level-2/demonstrate' },
+    { stageId: 'guitar-level-3',          url: '/guitar/level-3' },
+    { stageId: 'guitar-level-3-practise', url: '/guitar/level-3/practise' },
+    { stageId: 'guitar-level-3-demo',     url: '/guitar/level-3/demonstrate' },
+    { stageId: 'guitar-sharpening',       url: '/guitar/sharpening-myself' },
+    { stageId: 'guitar-production-demo',  url: '/guitar/production' },
+  ],
+  piano: [
+    { stageId: 'piano-understanding',      url: '/piano/understanding-the-piano' },
+    { stageId: 'piano-notes-chords',       url: '/piano/notes-build-chords' },
+    { stageId: 'piano-level-1',            url: '/piano/level-1' },
+    { stageId: 'piano-level-1-practise',   url: '/piano/level-1/practise' },
+    { stageId: 'piano-level-1-demo',       url: '/piano/level-1/demonstrate' },
+    { stageId: 'piano-level-2',            url: '/piano/level-2' },
+    { stageId: 'piano-level-2-practise',   url: '/piano/level-2/practise' },
+    { stageId: 'piano-level-2-demo',       url: '/piano/level-2/demonstrate' },
+    { stageId: 'piano-level-3',            url: '/piano/level-3' },
+    { stageId: 'piano-level-3-practise',   url: '/piano/level-3/practise' },
+    { stageId: 'piano-level-3-demo',       url: '/piano/level-3/demonstrate' },
+    { stageId: 'piano-sharpening',         url: '/piano/sharpening-myself' },
+    { stageId: 'piano-production-demo',    url: '/piano/production' },
+  ],
+  'visual-arts': [
+    { stageId: 'va-virtual-canvas',      url: '/visual-arts/virtual-canvas' },
+    { stageId: 'va-course-1',            url: '/visual-arts/course-1' },
+    { stageId: 'va-course-2',            url: '/visual-arts/course-2' },
+    { stageId: 'va-level-1',             url: '/visual-arts/level-1' },
+    { stageId: 'va-level-1-practise',    url: '/visual-arts/level-1/practise' },
+    { stageId: 'va-level-1-demo',        url: '/visual-arts/level-1/demonstrate' },
+    { stageId: 'va-level-2',             url: '/visual-arts/level-2' },
+    { stageId: 'va-level-2-practise',    url: '/visual-arts/level-2/practise' },
+    { stageId: 'va-level-2-demo',        url: '/visual-arts/level-2/demonstrate' },
+    { stageId: 'va-level-3',             url: '/visual-arts/level-3' },
+    { stageId: 'va-level-3-practise',    url: '/visual-arts/level-3/practise' },
+    { stageId: 'va-level-3-demo',        url: '/visual-arts/level-3/demonstrate' },
+    { stageId: 'va-sharpening',          url: '/visual-arts/sharpening' },
+    { stageId: 'va-production-demo',     url: '/visual-arts/production' },
+  ],
+  'graphic-design': [
+    { stageId: 'gd-virtual-studio',      url: '/graphic-design/virtual-studio' },
+    { stageId: 'gd-course-1',            url: '/graphic-design/course-1' },
+    { stageId: 'gd-course-2',            url: '/graphic-design/course-2' },
+    { stageId: 'gd-level-1',             url: '/graphic-design/level-1' },
+    { stageId: 'gd-level-1-practise',    url: '/graphic-design/level-1/practise' },
+    { stageId: 'gd-level-1-demo',        url: '/graphic-design/level-1/demonstrate' },
+    { stageId: 'gd-level-2',             url: '/graphic-design/level-2' },
+    { stageId: 'gd-level-2-practise',    url: '/graphic-design/level-2/practise' },
+    { stageId: 'gd-level-2-demo',        url: '/graphic-design/level-2/demonstrate' },
+    { stageId: 'gd-level-3',             url: '/graphic-design/level-3' },
+    { stageId: 'gd-level-3-practise',    url: '/graphic-design/level-3/practise' },
+    { stageId: 'gd-level-3-demo',        url: '/graphic-design/level-3/demonstrate' },
+    { stageId: 'gd-sharpening',          url: '/graphic-design/sharpening' },
+    { stageId: 'gd-production-demo',     url: '/graphic-design/production' },
+  ],
 }
 
-
-const DISC_LABEL: Record<string, string> = {
-  music: 'Music',
-  'visual-arts': 'Visual Arts',
-  'graphic-design': 'Graphic Design',
+const DISC_FIRST_URL: Record<string, string> = {
+  piano: '/piano/virtual-instrument',
+  guitar: '/guitar/virtual-instrument',
+  voice: '/voice/studio',
+  'visual-arts': '/visual-arts/virtual-canvas',
+  'graphic-design': '/graphic-design/virtual-studio',
 }
 
-function LevelDots({ current, total = 5 }: { current: number; total?: number }) {
+const MILESTONES: { label: string; stageIds: string[] }[] = [
+  { label: 'Courses',    stageIds: [] },
+  { label: 'Level 1',   stageIds: [] },
+  { label: 'Level 2',   stageIds: [] },
+  { label: 'Level 3',   stageIds: [] },
+  { label: 'Production', stageIds: [] },
+]
+
+const DISC_MILESTONE_STAGES: Record<string, string[][]> = {
+  piano: [
+    ['piano-understanding', 'piano-notes-chords'],
+    ['piano-level-1-demo'],
+    ['piano-level-2-demo'],
+    ['piano-level-3-demo'],
+    ['piano-production-demo'],
+  ],
+  guitar: [
+    ['guitar-intro', 'guitar-course-1', 'guitar-course-2'],
+    ['guitar-level-1-demo'],
+    ['guitar-level-2-demo'],
+    ['guitar-level-3-demo'],
+    ['guitar-production-demo'],
+  ],
+  voice: [
+    ['voice-studio', 'voice-course-1', 'voice-course-2'],
+    ['voice-level-1-demo'],
+    ['voice-level-2-demo'],
+    ['voice-level-3-demo'],
+    ['voice-production-demo'],
+  ],
+  'visual-arts': [
+    ['va-virtual-canvas', 'va-course-1', 'va-course-2'],
+    ['va-level-1-demo'],
+    ['va-level-2-demo'],
+    ['va-level-3-demo'],
+    ['va-production-demo'],
+  ],
+  'graphic-design': [
+    ['gd-virtual-studio', 'gd-course-1', 'gd-course-2'],
+    ['gd-level-1-demo'],
+    ['gd-level-2-demo'],
+    ['gd-level-3-demo'],
+    ['gd-production-demo'],
+  ],
+}
+
+function computeContinueUrl(disc: DisciplineSummary): string {
+  const stages = STAGE_URLS[disc.key]
+  if (!stages) return DISC_FIRST_URL[disc.key] ?? '/disciplines'
+  let lastIdx = -1
+  for (let i = 0; i < stages.length; i++) {
+    if (disc.completedStages.includes(stages[i].stageId)) lastIdx = i
+  }
+  if (lastIdx === -1) return DISC_FIRST_URL[disc.key] ?? stages[0].url
+  const nextIdx = Math.min(lastIdx + 1, stages.length - 1)
+  return stages[nextIdx].url
+}
+
+function formatSkillLevel(level: string): string {
+  if (level === 'not-started') return 'Not Started'
+  if (level === 'getting-started') return 'Getting Started'
+  return level.charAt(0).toUpperCase() + level.slice(1)
+}
+
+function skillLabelClass(level: string): string {
+  if (level === 'advanced') return 'text-[#2D6A4F] font-bold'
+  if (level === 'intermediate') return 'text-primary font-bold'
+  if (level === 'beginner') return 'text-text-primary font-semibold'
+  return 'text-text-muted'
+}
+
+function MilestoneDots({ discKey, completedStages }: { discKey: string; completedStages: string[] }) {
+  const milestoneStages = DISC_MILESTONE_STAGES[discKey] ?? []
+  const labels = MILESTONES.map(m => m.label)
   return (
-    <span className="flex gap-1 items-center">
-      {Array.from({ length: total }).map((_, i) => (
-        <span key={i} className={`text-base ${i < current ? 'text-primary' : 'text-gray-300'}`}>
-          ●
-        </span>
-      ))}
-    </span>
+    <div className="flex items-start gap-2 flex-wrap">
+      {milestoneStages.map((stageIds, i) => {
+        const done = stageIds.some(id => completedStages.includes(id))
+        return (
+          <div key={labels[i]} className="flex items-center gap-2">
+            {i > 0 && <span className="text-border text-xs">--</span>}
+            <div className="flex flex-col items-center gap-1">
+              <span className={`w-3 h-3 rounded-full border-2 inline-block ${done ? 'bg-primary border-primary' : 'bg-white border-gray-300'}`} />
+              <span className="text-text-muted text-[9px] whitespace-nowrap">{labels[i]}</span>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function DisciplineCard({ disc, onContinue }: { disc: DisciplineSummary; onContinue: (url: string) => void }) {
+  const continueUrl = computeContinueUrl(disc)
+  return (
+    <div className="bg-white border border-border rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-text-primary font-semibold text-sm">{disc.label}</p>
+        <span className={`text-xs ${skillLabelClass(disc.skillLevel)}`}>{formatSkillLevel(disc.skillLevel)}</span>
+      </div>
+      <div className="mb-4">
+        <MilestoneDots discKey={disc.key} completedStages={disc.completedStages} />
+      </div>
+      <button
+        onClick={() => onContinue(continueUrl)}
+        className="w-full border border-primary text-primary text-xs font-semibold py-2 rounded-lg hover:bg-primary/5 transition-colors"
+      >
+        Continue
+      </button>
+    </div>
   )
 }
 
 export default function DashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [stats, setStats] = useState({ totalSessions: 0, totalMinutes: 0 })
-  const [progress, setProgress] = useState<ProgressDoc[]>([])
-  const [analytics, setAnalytics] = useState<Analytics | null>(null)
+  const [summary, setSummary] = useState<SummaryResponse | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -63,33 +234,25 @@ export default function DashboardPage() {
       navigate('/login')
       return
     }
-    Promise.all([fetchStats(), fetchProgress(), fetchAnalytics()])
-      .then(([statsRes, progressRes, analyticsRes]) => {
-        setStats(statsRes.data)
-        setProgress(progressRes.data)
-        setAnalytics(analyticsRes.data)
-      })
+    fetchProgressSummary()
+      .then(res => setSummary(res.data))
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [user])
+  }, [user, navigate])
 
   if (!user) return null
 
-  const totalHours = Math.round((stats.totalMinutes / 60) * 10) / 10
-  const levelsCompleted = progress.reduce((sum, p) => sum + p.levelBadges.length, 0)
-  const maxStreak = progress.reduce((max, p) => Math.max(max, p.streakDays), 0)
-
-  const qualityTotal =
-    (analytics?.sessionQuality.short ?? 0) +
-    (analytics?.sessionQuality.standard ?? 0) +
-    (analytics?.sessionQuality.deep ?? 0) || 1
+  const disciplines = summary?.disciplines ?? []
+  const totalHours = Math.round(
+    (disciplines.reduce((s, d) => s + d.totalMinutes, 0) / 60) * 10
+  ) / 10
+  const levelsCompleted = summary?.totalLevelsCompleted ?? 0
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-6xl mx-auto px-6 py-8">
 
-        {/* Greeting */}
         <div className="mb-8">
           <h1 className="text-text-primary font-bold text-2xl">
             Welcome back, {user.fullName.split(' ')[0]}
@@ -99,7 +262,6 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Stat cards */}
         <div className="grid grid-cols-3 gap-4 mb-8 md:grid-cols-1 lg:grid-cols-3">
           <div className="bg-white border border-border rounded-2xl p-6">
             <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Total Practice</p>
@@ -108,10 +270,8 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="bg-white border border-border rounded-2xl p-6">
-            <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Current Streak</p>
-            <p className="text-primary font-bold text-3xl">
-              {maxStreak}<span className="text-base font-normal text-text-secondary ml-1">days</span>
-            </p>
+            <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Disciplines Active</p>
+            <p className="text-primary font-bold text-3xl">{disciplines.length}</p>
           </div>
           <div className="bg-white border border-border rounded-2xl p-6">
             <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Levels Completed</p>
@@ -121,126 +281,29 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-3 gap-6 lg:grid-cols-1">
 
-          {/* Left — charts (2/3 width) */}
-          <div className="col-span-2 space-y-6 lg:col-span-1">
-
-            {/* Weekly bar chart */}
-            <div className="bg-white border border-border rounded-2xl p-6">
-              <h2 className="text-text-primary font-bold text-base mb-4">Weekly Practice Activity</h2>
-              {loading ? (
-                <div className="h-[220px] flex items-center justify-center text-text-secondary text-sm">
-                  Loading...
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={analytics?.weeklyActivity ?? []} barGap={4}>
-                    <XAxis
-                      dataKey="week"
-                      tick={{ fontSize: 11, fill: '#888888' }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 11, fill: '#888888' }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <Tooltip
-                      contentStyle={{ border: '1px solid #E8E4DC', borderRadius: 8, fontSize: 12 }}
-                      formatter={(value, name) =>
-                        name === 'minutes'
-                          ? [`${Number(value)} min`, 'Minutes' as string]
-                          : [Number(value), 'Sessions' as string]
-                      }
-                    />
-                    <Bar dataKey="sessions" fill="#C8960C" radius={[4, 4, 0, 0]} name="sessions" />
-                    <Bar dataKey="minutes" fill="#2D6A4F" radius={[4, 4, 0, 0]} name="minutes" />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-
-            {/* Pie + session quality side by side */}
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-1">
+          <div className="col-span-2 lg:col-span-1">
+            <h2 className="text-text-primary font-bold text-base mb-4">Your Disciplines</h2>
+            {loading ? (
               <div className="bg-white border border-border rounded-2xl p-6">
-                <h2 className="text-text-primary font-bold text-base mb-4">Time by Discipline</h2>
-                {loading || !analytics?.disciplineBreakdown.length ? (
-                  <div className="h-[220px] flex items-center justify-center text-text-secondary text-sm">
-                    No data yet
-                  </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height={220}>
-                    <PieChart>
-                      <Pie
-                        data={analytics.disciplineBreakdown}
-                        dataKey="sessions"
-                        nameKey="discipline"
-                        cx="50%"
-                        cy="45%"
-                        outerRadius={70}
-                        label={({ percent }) =>
-                          percent !== undefined ? `${Math.round(percent * 100)}%` : ''
-                        }
-                        labelLine={false}
-                      >
-                        {analytics.disciplineBreakdown.map((entry) => (
-                          <Cell
-                            key={entry.discipline}
-                            fill={DISC_COLORS[entry.discipline] ?? '#888888'}
-                          />
-                        ))}
-                      </Pie>
-                      <Legend
-                        formatter={(value: string) => DISC_LABEL[value] ?? value}
-                        iconSize={10}
-                        wrapperStyle={{ fontSize: 11 }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                )}
+                <p className="text-text-secondary text-sm">Loading progress...</p>
               </div>
-
-              {/* Session quality */}
-              <div className="bg-white border border-border rounded-2xl p-6">
-                <h2 className="text-text-primary font-bold text-base mb-4">Session Quality</h2>
-                {loading ? (
-                  <p className="text-text-secondary text-sm">Loading...</p>
-                ) : (
-                  <div className="space-y-5 mt-2">
-                    {([
-                      { label: 'Short (under 10 min)', key: 'short', color: 'bg-gray-300' },
-                      { label: 'Standard (10-30 min)', key: 'standard', color: 'bg-primary' },
-                      { label: 'Deep (over 30 min)', key: 'deep', color: 'bg-secondary' },
-                    ] as { label: string; key: keyof Analytics['sessionQuality']; color: string }[]).map(
-                      ({ label, key, color }) => {
-                        const count = analytics?.sessionQuality[key] ?? 0
-                        const pct = Math.round((count / qualityTotal) * 100)
-                        return (
-                          <div key={key}>
-                            <div className="flex justify-between text-xs text-text-secondary mb-1">
-                              <span>{label}</span>
-                              <span className="font-medium text-text-primary">{count}</span>
-                            </div>
-                            <div className="w-full bg-gray-100 rounded-full h-2">
-                              <div
-                                className={`${color} h-2 rounded-full`}
-                                style={{ width: `${pct}%` }}
-                              />
-                            </div>
-                          </div>
-                        )
-                      }
-                    )}
-                  </div>
-                )}
+            ) : disciplines.length === 0 ? (
+              <div className="bg-white border border-border rounded-2xl p-6 text-center">
+                <p className="text-text-primary font-semibold text-sm mb-1">No activity yet</p>
+                <p className="text-text-secondary text-xs">
+                  Choose a discipline to begin your creative journey.
+                </p>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                {disciplines.map(disc => (
+                  <DisciplineCard key={disc.key} disc={disc} onContinue={navigate} />
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Right — quick actions + level progress cards */}
           <div className="col-span-1 space-y-4 lg:col-span-1">
-
-            {/* Quick actions */}
             <div className="bg-white border border-border rounded-2xl p-6">
               <h2 className="text-text-primary font-bold text-base mb-4">Quick Actions</h2>
               <div className="space-y-3">
@@ -264,80 +327,10 @@ export default function DashboardPage() {
                 </button>
               </div>
             </div>
-
-            {/* Level progress per discipline */}
-            {loading ? (
-              <div className="bg-white border border-border rounded-2xl p-6">
-                <p className="text-text-secondary text-sm">Loading progress...</p>
-              </div>
-            ) : progress.length === 0 ? (
-              <div className="bg-white border border-border rounded-2xl p-6 text-center">
-                <p className="text-text-primary font-semibold text-sm mb-1">No sessions yet</p>
-                <p className="text-text-secondary text-xs">
-                  Complete a session to start tracking your progress.
-                </p>
-              </div>
-            ) : (
-              progress.map((p) => {
-                const pct = Math.round((p.sessionsAtCurrentLevel / 5) * 100)
-                const nextLevel = Math.min(p.currentLevel + 1, 5)
-                return (
-                  <div key={p.discipline} className="bg-white border border-border rounded-2xl p-5">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-text-primary font-semibold text-sm">
-                          {DISC_LABEL[p.discipline] ?? p.discipline}
-                        </span>
-                      </div>
-                      <span className="text-xs text-text-muted">{p.skillLabel}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2 mb-3">
-                      <LevelDots current={p.currentLevel} />
-                      <span className="text-xs text-text-muted">Level {p.currentLevel}/5</span>
-                    </div>
-
-                    {p.currentLevel < 5 && (
-                      <>
-                        <p className="text-xs text-text-secondary mb-1.5">
-                          {p.sessionsAtCurrentLevel} / 5 sessions to Level {nextLevel}
-                        </p>
-                        <div className="w-full bg-gray-100 rounded-full h-1.5 mb-3">
-                          <div
-                            className="bg-primary h-1.5 rounded-full"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                      </>
-                    )}
-
-                    {p.levelBadges.length > 0 && (
-                      <div className="flex gap-1 mb-3">
-                        {p.levelBadges.map((b) => (
-                          <span
-                            key={b.level}
-                            className="text-primary text-sm"
-                            title={`Level ${b.level} badge`}
-                          >
-                            ★
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    <button
-                      onClick={() => navigate(`/session/${p.discipline}`)}
-                      className="w-full border border-primary text-primary text-xs font-semibold py-2 rounded-lg hover:bg-primary/5 transition-colors"
-                    >
-                      Continue →
-                    </button>
-                  </div>
-                )
-              })
-            )}
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

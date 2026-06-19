@@ -1,19 +1,23 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { fetchProgress, fetchPortfolio } from '../services/api'
+import { fetchProgressSummary, fetchPortfolio } from '../services/api'
 import TopNav from '../components/TopNav'
+import Footer from '../components/Footer'
 
-interface ProgressDoc {
-  discipline: string
-  currentLevel: number
-  sessionsAtCurrentLevel: number
+interface DisciplineSummary {
+  key: string
+  label: string
+  completedStages: string[]
+  skillLevel: string
   totalSessions: number
   totalMinutes: number
-  levelBadges: { level: number; discipline: string; earnedAt: string }[]
-  streakDays: number
-  skillLabel: string
-  createdAt: string
+}
+
+interface SummaryResponse {
+  disciplines: DisciplineSummary[]
+  totalLevelsCompleted: number
+  activeSince: string | null
 }
 
 interface PortfolioItem {
@@ -24,34 +28,171 @@ interface PortfolioItem {
   fileType: string
 }
 
-const DISC_LABEL: Record<string, string> = {
-  music: 'Music',
-  'visual-arts': 'Visual Arts',
-  'graphic-design': 'Graphic Design',
+// ── Milestone config ─────────────────────────────────────────────────────────
+
+interface Milestone {
+  label: string
+  stageIds: string[]
 }
 
+const MILESTONES: Record<string, Milestone[]> = {
+  piano: [
+    { label: 'Courses',    stageIds: ['piano-level-1-practise'] },
+    { label: 'Level 1',   stageIds: ['piano-level-1-demo'] },
+    { label: 'Level 2',   stageIds: ['piano-level-2-demo'] },
+    { label: 'Level 3',   stageIds: ['piano-level-3-demo'] },
+    { label: 'Production', stageIds: ['piano-production-demo'] },
+  ],
+  'visual-arts': [
+    { label: 'Courses',    stageIds: ['va-virtual-canvas', 'va-course-1', 'va-course-2'] },
+    { label: 'Level 1',   stageIds: ['va-level-1-demo'] },
+    { label: 'Level 2',   stageIds: ['va-level-2-demo'] },
+    { label: 'Level 3',   stageIds: ['va-level-3-demo'] },
+    { label: 'Production', stageIds: ['va-production-demo'] },
+  ],
+  'graphic-design': [
+    { label: 'Courses',    stageIds: ['gd-virtual-studio', 'gd-course-1', 'gd-course-2'] },
+    { label: 'Level 1',   stageIds: ['gd-level-1-demo'] },
+    { label: 'Level 2',   stageIds: ['gd-level-2-demo'] },
+    { label: 'Level 3',   stageIds: ['gd-level-3-demo'] },
+    { label: 'Production', stageIds: ['gd-production-demo'] },
+  ],
+  guitar: [
+    { label: 'Courses',    stageIds: ['guitar-intro', 'guitar-course-1', 'guitar-course-2'] },
+    { label: 'Level 1',   stageIds: ['guitar-level-1-demo'] },
+    { label: 'Level 2',   stageIds: ['guitar-level-2-demo'] },
+    { label: 'Level 3',   stageIds: ['guitar-level-3-demo'] },
+    { label: 'Production', stageIds: ['guitar-production-demo'] },
+  ],
+  voice: [
+    { label: 'Courses',    stageIds: ['voice-studio', 'voice-course-1', 'voice-course-2'] },
+    { label: 'Level 1',   stageIds: ['voice-level-1-demo'] },
+    { label: 'Level 2',   stageIds: ['voice-level-2-demo'] },
+    { label: 'Level 3',   stageIds: ['voice-level-3-demo'] },
+    { label: 'Production', stageIds: ['voice-production-demo'] },
+  ],
+}
 
-function LevelCircles({ current, total = 5 }: { current: number; total?: number }) {
+function isMilestoneDone(m: Milestone, stages: string[]): boolean {
+  return m.stageIds.some(id => stages.includes(id))
+}
+
+function getLastDoneIdx(milestones: Milestone[], stages: string[]): number {
+  return milestones.reduce((best, m, i) => isMilestoneDone(m, stages) ? i : best, -1)
+}
+
+function nextStepText(lastIdx: number): string {
+  if (lastIdx === -1) return 'Start this discipline to begin your journey.'
+  if (lastIdx === 0)  return 'Complete Level 1 to begin earning skill badges.'
+  if (lastIdx === 1)  return 'Complete Level 2 to progress further.'
+  if (lastIdx === 2)  return 'Complete Level 3 to reach Intermediate.'
+  if (lastIdx === 3)  return 'Complete Production to reach Advanced.'
+  return 'You have reached the highest level in this discipline.'
+}
+
+// ── Skill label display ──────────────────────────────────────────────────────
+
+function formatSkillLevel(level: string): string {
+  if (level === 'not-started')     return 'Not Started'
+  if (level === 'getting-started') return 'Getting Started'
+  return level.charAt(0).toUpperCase() + level.slice(1)
+}
+
+function skillLabelClass(level: string): string {
+  if (level === 'advanced')        return 'text-[#2D6A4F] font-bold'
+  if (level === 'intermediate')    return 'text-primary font-bold'
+  if (level === 'beginner')        return 'text-text-primary font-semibold'
+  if (level === 'getting-started') return 'text-text-secondary font-semibold'
+  return 'text-text-muted font-normal'
+}
+
+// ── Sub-components ───────────────────────────────────────────────────────────
+
+function MilestonePath({ milestones, stages }: { milestones: Milestone[]; stages: string[] }) {
   return (
-    <span className="flex gap-1.5">
-      {Array.from({ length: total }).map((_, i) => (
-        <span
-          key={i}
-          className={`w-4 h-4 rounded-full border-2 inline-block ${
-            i < current
-              ? 'bg-primary border-primary'
-              : 'bg-white border-gray-300'
-          }`}
-        />
-      ))}
-    </span>
+    <div className="flex items-start gap-2 flex-wrap">
+      {milestones.map((m, i) => {
+        const done = isMilestoneDone(m, stages)
+        return (
+          <div key={m.label} className="flex items-center gap-2">
+            {i > 0 && <span className="text-border text-xs">--</span>}
+            <div className="flex flex-col items-center gap-1">
+              <span
+                className={`w-4 h-4 rounded-full border-2 inline-block ${
+                  done ? 'bg-primary border-primary' : 'bg-white border-gray-300'
+                }`}
+              />
+              <span className="text-text-muted text-[9px] leading-tight text-center whitespace-nowrap">
+                {m.label}
+              </span>
+            </div>
+          </div>
+        )
+      })}
+    </div>
   )
+}
+
+function DisciplineCard({ disc }: { disc: DisciplineSummary }) {
+  const milestones = MILESTONES[disc.key] ?? []
+  const lastIdx = getLastDoneIdx(milestones, disc.completedStages)
+  const nextStep = nextStepText(lastIdx)
+  const hours = Math.round((disc.totalMinutes / 60) * 10) / 10
+
+  return (
+    <div className="px-8 py-6 border-b border-border last:border-b-0">
+      <h3 className="text-text-primary font-bold text-base mb-4">{disc.label}</h3>
+
+      <div className="grid grid-cols-3 gap-6 mb-4 md:grid-cols-1">
+        <div>
+          <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Skill Level</p>
+          <p className={`text-sm ${skillLabelClass(disc.skillLevel)}`}>
+            {formatSkillLevel(disc.skillLevel)}
+          </p>
+        </div>
+        <div className="col-span-2">
+          <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Next Step</p>
+          <p className="text-text-secondary text-sm">{nextStep}</p>
+        </div>
+      </div>
+
+      {milestones.length > 0 && (
+        <div className="mb-4">
+          <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Progress Path</p>
+          <MilestonePath milestones={milestones} stages={disc.completedStages} />
+        </div>
+      )}
+
+      {(disc.totalSessions > 0 || disc.totalMinutes > 0) && (
+        <div className="flex gap-6">
+          <div>
+            <p className="text-text-muted text-xs uppercase tracking-wide mb-0.5">Sessions</p>
+            <p className="text-text-primary font-semibold text-sm">{disc.totalSessions}</p>
+          </div>
+          <div>
+            <p className="text-text-muted text-xs uppercase tracking-wide mb-0.5">Hours</p>
+            <p className="text-text-primary font-semibold text-sm">{hours}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
+const DISC_LABEL: Record<string, string> = {
+  piano: 'Piano',
+  'visual-arts': 'Visual Arts',
+  'graphic-design': 'Graphic Design',
+  guitar: 'Guitar',
+  voice: 'Voice and Singing',
 }
 
 export default function SkillSummaryPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [progress, setProgress] = useState<ProgressDoc[]>([])
+  const [summary, setSummary] = useState<SummaryResponse | null>(null)
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -60,28 +201,28 @@ export default function SkillSummaryPage() {
       navigate('/login')
       return
     }
-    Promise.all([fetchProgress(), fetchPortfolio()])
-      .then(([progRes, portRes]) => {
-        setProgress(progRes.data)
+    Promise.all([fetchProgressSummary(), fetchPortfolio()])
+      .then(([sumRes, portRes]) => {
+        setSummary(sumRes.data)
         setPortfolio(portRes.data)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [user])
+  }, [user, navigate])
 
   if (!user) return null
 
+  const disciplines = summary?.disciplines ?? []
   const totalHours = Math.round(
-    (progress.reduce((sum, p) => sum + p.totalMinutes, 0) / 60) * 10
+    (disciplines.reduce((s, d) => s + d.totalMinutes, 0) / 60) * 10
   ) / 10
-
-  const disciplinesPracticed = progress.length
-  const levelsCompleted = progress.reduce((sum, p) => sum + p.levelBadges.length, 0)
-  const activeSince = progress.length > 0
-    ? new Date(
-        Math.min(...progress.map((p) => new Date(p.createdAt).getTime()))
-      ).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })
-    : 'N/A'
+  const disciplinesPracticed = disciplines.length
+  const levelsCompleted = summary?.totalLevelsCompleted ?? 0
+  const activeSince = summary?.activeSince
+    ? new Date(summary.activeSince).toLocaleDateString('en-GB', {
+        year: 'numeric', month: 'long', day: 'numeric',
+      })
+    : 'Not yet'
 
   const today = new Date().toLocaleDateString('en-GB', {
     year: 'numeric', month: 'long', day: 'numeric',
@@ -118,7 +259,7 @@ export default function SkillSummaryPage() {
               </div>
               <div>
                 <p className="text-white font-bold text-sm">Digital Creative Infrastructure Platform</p>
-                <p className="text-white/60 text-xs">Digital Creative Infrastructure Platform</p>
+                <p className="text-sm text-white/70">Skill Development Report</p>
               </div>
             </div>
             <h1 className="text-white font-bold text-2xl">Skill Development Summary</h1>
@@ -134,7 +275,7 @@ export default function SkillSummaryPage() {
               <div>
                 <p className="text-text-muted text-xs uppercase tracking-wide mb-1">School</p>
                 <p className="text-text-primary font-semibold">
-                  {user.school?.name ?? 'N/A'}
+                  {user.school?.name ?? ''}
                   {user.school?.district ? `, ${user.school.district}` : ''}
                 </p>
               </div>
@@ -166,62 +307,12 @@ export default function SkillSummaryPage() {
           {/* Per-discipline sections */}
           {loading ? (
             <div className="px-8 py-8 text-text-secondary text-sm">Loading...</div>
-          ) : progress.length === 0 ? (
+          ) : disciplines.length === 0 ? (
             <div className="px-8 py-8 text-center">
-              <p className="text-text-secondary text-sm">No sessions completed yet.</p>
+              <p className="text-text-secondary text-sm">No activity recorded yet.</p>
             </div>
           ) : (
-            progress.map((p) => (
-              <div key={p.discipline} className="px-8 py-6 border-b border-border last:border-b-0">
-                <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-text-primary font-bold text-base">
-                    {DISC_LABEL[p.discipline] ?? p.discipline}
-                  </h3>
-                </div>
-
-                <div className="grid grid-cols-3 gap-6 mb-4 md:grid-cols-1">
-                  <div>
-                    <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Skill Label</p>
-                    <p className="text-text-primary font-semibold text-sm">{p.skillLabel}</p>
-                  </div>
-                  <div>
-                    <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Level Reached</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <LevelCircles current={p.currentLevel} />
-                      <span className="text-text-secondary text-xs">{p.currentLevel}/5</span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Sessions</p>
-                      <p className="text-text-primary font-bold text-lg">{p.totalSessions}</p>
-                    </div>
-                    <div>
-                      <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Hours</p>
-                      <p className="text-text-primary font-bold text-lg">
-                        {Math.round(p.totalMinutes / 60 * 10) / 10}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {p.levelBadges.length > 0 && (
-                  <div>
-                    <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Badges Earned</p>
-                    <div className="flex flex-wrap gap-2">
-                      {p.levelBadges.map((b) => (
-                        <span
-                          key={b.level}
-                          className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full"
-                        >
-                          ★ Level {b.level} Complete
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))
+            disciplines.map(disc => <DisciplineCard key={disc.key} disc={disc} />)
           )}
 
           {/* Portfolio highlights */}
@@ -234,7 +325,8 @@ export default function SkillSummaryPage() {
                     <div>
                       <p className="text-text-primary font-medium text-sm">{item.title}</p>
                       <p className="text-text-secondary text-xs">
-                        {DISC_LABEL[item.discipline] ?? item.discipline} ·{' '}
+                        {DISC_LABEL[item.discipline] ?? item.discipline}
+                        {' '}
                         {new Date(item.createdAt).toLocaleDateString('en-GB', {
                           year: 'numeric', month: 'short', day: 'numeric',
                         })}
@@ -255,6 +347,7 @@ export default function SkillSummaryPage() {
         </div>
 
       </div>
+      <Footer />
     </div>
   )
 }

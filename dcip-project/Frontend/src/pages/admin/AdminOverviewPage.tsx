@@ -77,6 +77,13 @@ export default function AdminOverviewPage() {
             <p className="text-text-primary font-semibold mb-1">View Reports</p>
             <p className="text-text-secondary text-sm">Session and portfolio statistics across all schools</p>
           </Link>
+          <Link
+            to="/admin/feedback"
+            className="bg-white border border-border rounded-2xl p-6 hover:border-primary transition-colors block"
+          >
+            <p className="text-text-primary font-semibold mb-1">Feedback</p>
+            <p className="text-text-secondary text-sm">View feedback submissions from students and visitors</p>
+          </Link>
         </div>
       </main>
     </AdminLayout>

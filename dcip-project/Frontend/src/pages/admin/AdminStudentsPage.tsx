@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import AdminNav from '../../components/AdminNav'
 import { getAdminStudents, toggleStudentStatus } from '../../services/api'
+import Footer from '../../components/Footer'
 
 interface Student {
   _id: string
@@ -56,7 +57,7 @@ export default function AdminStudentsPage() {
   })
 
   return (
-    <div className="min-h-screen bg-[#F9F7F4]">
+    <div className="min-h-screen flex flex-col bg-[#F9F7F4]">
       <AdminNav />
       <main className="max-w-5xl mx-auto px-6 py-8">
         <div className="flex items-start justify-between mb-6 gap-4">
@@ -125,6 +126,7 @@ export default function AdminStudentsPage() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   )
 }

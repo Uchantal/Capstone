@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
-import { useVisualArtsProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useVisualArtsProgress'
-import { saveVAProductionResult, savePortfolioItem } from '../../services/api'
+import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
+import { saveVAProductionResult, savePortfolioItem, completeVisualArtsProduction } from '../../services/api'
+import Footer from '../../components/Footer'
 
 const PRODUCTION_CHECKLIST = [
   { id: 'three-shapes',    text: 'My composition contains at least three recognisable shapes or elements' },
@@ -16,22 +17,28 @@ type Phase = 'intro' | 'working' | 'done'
 export default function VAProductionPage() {
   const navigate = useNavigate()
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { completedStages, loading, markComplete } = useVisualArtsProgress()
+  const { progress, loading, markStageVisited } = useVisualArtsDemonstrationProgress()
   const [phase, setPhase] = useState<Phase>('intro')
   const [checked, setChecked] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
   const [portfolioId, setPortfolioId] = useState<string | null>(null)
 
-  // Gate check: requires sharpening
   useEffect(() => {
     if (loading) return
-    if (!completedStages.includes('va-sharpening')) {
-      navigate(STAGE_PATHS['va-sharpening'], {
+    if (!progress.level3DemonstrationPassed) {
+      navigate('/visual-arts/level-3/demonstrate', {
         replace: true,
-        state: { lockedMessage: `Complete ${STAGE_NAMES['va-sharpening']} first.` },
+        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
+      })
+      return
+    }
+    if (!progress.completedStages.includes('va-sharpening')) {
+      navigate('/visual-arts/sharpening', {
+        replace: true,
+        state: { lockedMessage: 'Complete Sharpening Myself first.' },
       })
     }
-  }, [loading, completedStages, navigate])
+  }, [loading, progress.level3DemonstrationPassed, progress.completedStages, navigate])
 
   const allChecked = PRODUCTION_CHECKLIST.every(item => checked.has(item.id))
 
@@ -70,7 +77,8 @@ export default function VAProductionPage() {
       })
 
       setPortfolioId(portfolioRes.data?._id ?? null)
-      await markComplete('va-production')
+      await markStageVisited('va-production')
+      completeVisualArtsProduction(true).catch(() => {})
       setPhase('done')
     } catch {
       setPhase('done')
@@ -79,7 +87,7 @@ export default function VAProductionPage() {
     }
   }
 
-  if (loading) {
+  if (loading || !progress.level3DemonstrationPassed) {
     return (
       <div className="min-h-screen bg-bg-page flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
@@ -111,9 +119,12 @@ export default function VAProductionPage() {
               <span className="text-secondary font-bold text-xl">*</span>
             </div>
             <h1 className="text-text-primary font-bold text-2xl mb-2">Production Submitted</h1>
-            <p className="text-text-secondary text-sm leading-relaxed max-w-md mx-auto">
+            <p className="text-text-secondary text-sm leading-relaxed max-w-md mx-auto mb-4">
               Your composition has been saved to your portfolio. You have completed the Visual Arts journey.
             </p>
+            <div className="inline-flex items-center bg-[#2D6A4F]/10 text-[#2D6A4F] text-xs font-semibold px-4 py-2 rounded-full">
+              Advanced Visual Arts Badge
+            </div>
           </div>
 
           <div className="flex flex-col gap-3">
@@ -133,6 +144,7 @@ export default function VAProductionPage() {
             </button>
           </div>
         </div>
+        <Footer />
       </div>
     )
   }
@@ -182,11 +194,11 @@ export default function VAProductionPage() {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     )
   }
 
-  // working phase
   return (
     <div className="min-h-screen bg-bg-page flex flex-col">
       <nav className="border-b border-border bg-white flex items-center justify-between px-6 py-4 flex-shrink-0">
@@ -254,6 +266,7 @@ export default function VAProductionPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

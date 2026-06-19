@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import Footer from '../components/Footer'
 
 function FadeIn({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -419,51 +420,7 @@ export default function HomePage() {
         </FadeIn>
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-white border-t border-[#E8E4DC] px-6 md:px-8 lg:px-20 pt-12 pb-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-start flex-wrap gap-10 mb-10">
-            <div className="max-w-sm">
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
-                  <span className="font-sans font-extrabold text-xs text-white">DCIP</span>
-                </div>
-                <span className="font-sans font-bold text-sm text-[#1A1A1A]">
-                  Digital Creative Infrastructure Platform
-                </span>
-              </div>
-              <p className="text-xs text-[#888888] leading-relaxed">
-                Digital infrastructure for talented youth in rural Rwandan secondary schools.
-                Improve your skills in Music, Visual Arts, and Graphic Design.
-              </p>
-            </div>
-
-            <div className="flex gap-14">
-              <div>
-                <p className="text-[9px] font-semibold tracking-widest text-primary mb-4 uppercase">Platform</p>
-                <div className="flex flex-col gap-2.5">
-                  <a href="#about" className="text-xs text-[#888888] hover:text-primary transition-colors">About</a>
-                  <a href="#disciplines" className="text-xs text-[#888888] hover:text-primary transition-colors">Disciplines</a>
-                  <a href="#how-it-works" className="text-xs text-[#888888] hover:text-primary transition-colors">How It Works</a>
-                  <Link to="/register" className="text-xs text-[#888888] hover:text-primary transition-colors">Register</Link>
-                  <Link to="/login" className="text-xs text-[#888888] hover:text-primary transition-colors">Log In</Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center flex-wrap gap-3 pt-6 border-t border-[#E8E4DC]">
-            <span className="text-[10px] text-[#888888]">
-              © 2025 DCIP By Chantal. All rights reserved.
-            </span>
-            <div className="flex gap-1">
-              <div className="w-5 h-1 rounded-sm bg-accent" />
-              <div className="w-5 h-1 rounded-sm bg-primary" />
-              <div className="w-5 h-1 rounded-sm bg-secondary" />
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
     </div>
   )

@@ -1,4 +1,7 @@
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import VisualArtsLevelScreen from '../../components/visual-arts/VisualArtsLevelScreen'
+import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 
 const CHECKLIST = [
   { id: 'two-elements',   text: 'My composition has at least two distinct elements' },
@@ -8,6 +11,21 @@ const CHECKLIST = [
 ]
 
 export default function VALevel3Page() {
+  const navigate = useNavigate()
+  const { progress, loading } = useVisualArtsDemonstrationProgress()
+
+  useEffect(() => {
+    if (loading) return
+    if (!progress.level2DemonstrationPassed) {
+      navigate('/visual-arts/level-2/demonstrate', {
+        replace: true,
+        state: { lockedMessage: 'Complete the Level 2 demonstration first.' },
+      })
+    }
+  }, [loading, progress.level2DemonstrationPassed, navigate])
+
+  if (loading || !progress.level2DemonstrationPassed) return null
+
   return (
     <VisualArtsLevelScreen
       levelNumber={3}
@@ -15,9 +33,9 @@ export default function VALevel3Page() {
       levelTitle="Level 3: A Small Composition"
       task="Combine shapes, colour, and shading into one small composition. Choose a simple subject, for example a fruit, a house, or a simple object from your surroundings, and draw it using everything you have practised so far. Use at least two distinct elements, intentional colour, and visible shading on at least one element."
       checklist={CHECKLIST}
-      nextPath="/visual-arts/sharpening"
+      nextPath="/visual-arts/level-3/practise"
       stageId="va-level-3"
-      requires={['va-level-2']}
+      requires={[]}
     />
   )
 }

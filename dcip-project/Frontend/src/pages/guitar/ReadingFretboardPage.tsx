@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import TopNav from '../../components/TopNav'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarProgress } from '../../hooks/useGuitarProgress'
+import Footer from '../../components/Footer'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -38,13 +39,21 @@ export default function ReadingFretboardPage() {
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { markComplete } = useGuitarProgress()
 
+  const [canContinue, setCanContinue] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setCanContinue(true), 60_000)
+    return () => clearTimeout(t)
+  }, [])
+
   const handleContinue = async () => {
+    if (!canContinue) return
     await markComplete('guitar-course-1')
     navigate('/guitar/notes-across-the-neck')
   }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -148,12 +157,14 @@ export default function ReadingFretboardPage() {
         <div className="flex justify-end">
           <button
             onClick={handleContinue}
-            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors"
+            disabled={!canContinue}
+            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             Continue to Notes Across the Neck
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

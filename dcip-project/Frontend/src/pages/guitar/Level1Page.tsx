@@ -1,12 +1,10 @@
 import { useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Level1Screen } from '../../components/guitar/GuitarLevelScreen'
 import { useGuitarProgress } from '../../hooks/useGuitarProgress'
 
 export default function GuitarLevel1Page() {
   const navigate = useNavigate()
-  const location = useLocation()
-  const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { completedStages, loading, markComplete } = useGuitarProgress()
 
   useEffect(() => {
@@ -26,7 +24,7 @@ export default function GuitarLevel1Page() {
   return (
     <Level1Screen
       onComplete={() => markComplete('guitar-level-1')}
-      nextPath="/guitar/level-2"
+      nextPath="/guitar/level-1/practise"
     />
   )
 }

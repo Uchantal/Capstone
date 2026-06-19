@@ -11,6 +11,7 @@ export interface IGDLevelPoster extends Document {
   bgColour: string
   titleColour: string
   reasoning: string
+  elementsJson: string
 }
 
 const gdLevelPosterSchema = new Schema<IGDLevelPoster>(
@@ -24,7 +25,8 @@ const gdLevelPosterSchema = new Schema<IGDLevelPoster>(
     alignment:   { type: String, default: 'left' },
     bgColour:    { type: String, default: '#1A1A1A' },
     titleColour: { type: String, default: '#C8960C' },
-    reasoning:   { type: String, default: '' },
+    reasoning:    { type: String, default: '' },
+    elementsJson: { type: String, default: '' },
   },
   { timestamps: true }
 )

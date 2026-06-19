@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import TopNav from '../TopNav'
 import VisualArtsModule from '../modules/VisualArtsModule'
 import { useVisualArtsProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useVisualArtsProgress'
+import Footer from '../Footer'
 
 export interface ChecklistItem {
   id: string
@@ -101,7 +102,7 @@ export default function VisualArtsLevelScreen({
   }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -199,13 +200,12 @@ export default function VisualArtsLevelScreen({
               onClick={() => navigate(nextPath)}
               className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"
             >
-              {levelNumber < totalLevels
-                ? `Continue to Level ${levelNumber + 1}`
-                : 'Continue to Free Practice'}
+              Continue to Practice
             </button>
           </div>
         </div>
       )}
+      <Footer />
     </div>
   )
 }

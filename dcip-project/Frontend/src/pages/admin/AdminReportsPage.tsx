@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import AdminNav from '../../components/AdminNav'
 import { getAdminReports } from '../../services/api'
+import Footer from '../../components/Footer'
 
 interface DisciplineCount {
   _id: string
@@ -34,7 +35,7 @@ export default function AdminReportsPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#F9F7F4]">
+    <div className="min-h-screen flex flex-col bg-[#F9F7F4]">
       <AdminNav />
       <main className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8 space-y-8">
         <div>
@@ -92,6 +93,7 @@ export default function AdminReportsPage() {
           </>
         )}
       </main>
+      <Footer />
     </div>
   )
 }

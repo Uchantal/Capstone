@@ -1,8 +1,9 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import TopNav from '../../components/TopNav'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsProgress } from '../../hooks/useVisualArtsProgress'
+import Footer from '../../components/Footer'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -35,13 +36,21 @@ export default function Course1Page() {
   const practiceCanvasRef = useRef<HTMLCanvasElement>(null)
   const { markComplete } = useVisualArtsProgress()
 
+  const [canContinue, setCanContinue] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setCanContinue(true), 60_000)
+    return () => clearTimeout(t)
+  }, [])
+
   const handleContinue = async () => {
+    if (!canContinue) return
     await markComplete('va-course-1')
     navigate('/visual-arts/course-2')
   }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -139,12 +148,14 @@ export default function Course1Page() {
         <div className="flex justify-end">
           <button
             onClick={handleContinue}
-            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors"
+            disabled={!canContinue}
+            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             Continue to Colour and Light
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

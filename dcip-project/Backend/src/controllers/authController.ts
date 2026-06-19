@@ -107,6 +107,59 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
+export const changePassword = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { currentPassword, newPassword } = req.body
+    if (!currentPassword || !newPassword) {
+      res.status(400).json({ message: 'Both current and new password are required.' })
+      return
+    }
+    if (newPassword.length < 8) {
+      res.status(400).json({ message: 'New password must be at least 8 characters.' })
+      return
+    }
+    const user = await User.findById(req.userId)
+    if (!user) {
+      res.status(404).json({ message: 'User not found.' })
+      return
+    }
+    const match = await bcrypt.compare(currentPassword, user.password)
+    if (!match) {
+      res.status(400).json({ message: 'Current password is incorrect.' })
+      return
+    }
+    user.password = await bcrypt.hash(newPassword, 10)
+    await user.save()
+    res.json({ message: 'Password updated.' })
+  } catch (error) {
+    console.error('Change password error:', error)
+    res.status(500).json({ message: 'Server error.' })
+  }
+}
+
+export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const user = await User.findById(req.userId).populate('school')
+    if (!user) {
+      res.status(404).json({ message: 'User not found.' })
+      return
+    }
+    const school = user.school ? (user.school as unknown as ISchool) : null
+    res.json({
+      id: user._id,
+      fullName: user.fullName,
+      username: user.username,
+      role: user.role,
+      school: school ? { id: school._id, name: school.name, district: school.district } : null,
+      discipline: user.discipline,
+      createdAt: user.createdAt,
+    })
+  } catch (error) {
+    console.error('Get me error:', error)
+    res.status(500).json({ message: 'Server error.' })
+  }
+}
+
 export const getSchools = async (_req: Request, res: Response): Promise<void> => {
   try {
     const schools = await School.find().sort({ name: 1 })

@@ -27,6 +27,11 @@ export const fetchSchools = () => api.get('/auth/schools')
 export const updateDiscipline = (discipline: string) =>
   api.patch('/auth/discipline', { discipline })
 
+export const fetchMe = () => api.get('/auth/me')
+
+export const changePassword = (currentPassword: string, newPassword: string) =>
+  api.put('/auth/change-password', { currentPassword, newPassword })
+
 // Sessions
 export const createSession = (data: { discipline: string; durationMinutes: number }) =>
   api.post('/sessions', data)
@@ -137,6 +142,7 @@ export const saveGDLevelPoster = (data: {
   bgColour?: string
   titleColour?: string
   reasoning: string
+  elementsJson?: string
 }) => api.post('/journey/gd-level-poster', data)
 
 export const saveGDProductionResult = (data: {
@@ -156,5 +162,58 @@ export const saveGDProductionResult = (data: {
     isOriginalWork: boolean
   }
 }) => api.post('/journey/gd-production', data)
+
+// Piano demonstration-based progression
+export const fetchPianoProgress = () =>
+  api.get('/piano/progress')
+
+export const completePianoDemonstration = (level: 1 | 2 | 3, passed: boolean) =>
+  api.post(`/piano/demonstration/${level}/complete`, { passed })
+
+export const completePianoProduction = (passed: boolean) =>
+  api.post('/piano/production/complete', { passed })
+
+// Guitar demonstration-based progression
+export const fetchGuitarProgress = () => api.get('/guitar/progress')
+export const completeGuitarDemonstration = (level: 1 | 2 | 3, passed: boolean) =>
+  api.post(`/guitar/demonstration/${level}/complete`, { passed })
+export const completeGuitarProduction = (passed: boolean) =>
+  api.post('/guitar/production/complete', { passed })
+
+// Visual Arts demonstration-based progression
+export const fetchVisualArtsProgress = () => api.get('/visual-arts/progress')
+export const completeVisualArtsDemonstration = (level: 1 | 2 | 3, passed: boolean, canvasSnapshot: string) =>
+  api.post(`/visual-arts/demonstration/${level}/complete`, { passed, canvasSnapshot })
+export const completeVisualArtsProduction = (passed: boolean) =>
+  api.post('/visual-arts/production/complete', { passed })
+
+// Graphic Design demonstration-based progression
+export const fetchGDProgress = () => api.get('/graphic-design/progress')
+export const completeGDDemonstration = (level: 1 | 2 | 3, passed: boolean, posterSnapshot: string, imageData: string) =>
+  api.post(`/graphic-design/demonstration/${level}/complete`, { passed, posterSnapshot, imageData })
+export const completeGDProduction = (passed: boolean) =>
+  api.post('/graphic-design/production/complete', { passed })
+
+// Voice demonstration-based progression
+export const fetchVoiceProgress = () => api.get('/voice/progress')
+export const completeVoiceDemonstration = (level: 1 | 2 | 3, passed: boolean) =>
+  api.post(`/voice/demonstration/${level}/complete`, { passed })
+export const completeVoiceProduction = (passed: boolean) =>
+  api.post('/voice/production/complete', { passed })
+
+// Unified skill summary — all disciplines, stage-based skill levels
+export const fetchProgressSummary = () => api.get('/progress/summary')
+
+// Feedback
+export const submitFeedback = (data: {
+  name?: string
+  email?: string
+  feedbackType: string
+  discipline?: string
+  message: string
+}) => api.post('/feedback', data)
+
+export const getAdminFeedback = () => api.get('/feedback')
+export const getAdminFeedbackCount = () => api.get('/feedback/count')
 
 export default api

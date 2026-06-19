@@ -1,5 +1,8 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TopNav from '../../components/TopNav'
+import { usePianoProgress } from '../../hooks/usePianoProgress'
+import Footer from '../../components/Footer'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -41,15 +44,28 @@ function StaticKeyboard() {
 
 export default function UnderstandingPianoPage() {
   const navigate = useNavigate()
+  const { markStageVisited } = usePianoProgress()
+  const [canContinue, setCanContinue] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setCanContinue(true), 60_000)
+    return () => clearTimeout(t)
+  }, [])
+
+  const handleContinue = () => {
+    if (!canContinue) return
+    markStageVisited('piano-understanding')
+    navigate('/piano/notes-build-chords')
+  }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-bg-page">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
-          <button onClick={() => navigate('/session/music-piano')} className="hover:text-text-primary transition-colors">
+          <button onClick={() => navigate('/piano/understanding-the-piano')} className="hover:text-text-primary transition-colors">
             Piano
           </button>
           <span>/</span>
@@ -120,13 +136,15 @@ export default function UnderstandingPianoPage() {
         {/* Continue button */}
         <div className="flex justify-end">
           <button
-            onClick={() => navigate('/piano/notes-build-chords')}
-            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors"
+            onClick={handleContinue}
+            disabled={!canContinue}
+            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             Continue: How Notes Build Chords
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }
