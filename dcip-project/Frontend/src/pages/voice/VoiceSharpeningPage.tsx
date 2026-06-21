@@ -81,7 +81,7 @@ export default function VoiceSharpeningPage() {
   if (loading || !progress.level3DemonstrationPassed) return null
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -105,7 +105,7 @@ export default function VoiceSharpeningPage() {
 
         {/* Reference card */}
         <div className="grid md:grid-cols-2 gap-5 mb-5">
-          <div className="bg-white border border-border rounded-2xl p-6">
+          <div className="bg-white border border-surface-border rounded-2xl p-6">
             <p className="text-text-muted text-xs uppercase tracking-wide mb-3">Breathing reminders</p>
             <ul className="text-text-secondary text-sm space-y-2">
               <li>Breathe in slowly for 4 counts using your diaphragm</li>
@@ -116,7 +116,7 @@ export default function VoiceSharpeningPage() {
             </ul>
           </div>
 
-          <div className="bg-white border border-border rounded-2xl p-6">
+          <div className="bg-white border border-surface-border rounded-2xl p-6">
             <p className="text-text-muted text-xs uppercase tracking-wide mb-3">Reference tones (click to hear)</p>
             <div className="flex flex-wrap gap-2">
               {SCALE_NOTES.map(n => (
@@ -126,7 +126,7 @@ export default function VoiceSharpeningPage() {
                   className={`w-12 h-12 rounded-xl border-2 flex flex-col items-center justify-center transition-all text-sm font-bold ${
                     activeNote === n.label
                       ? 'bg-purple-600 border-purple-600 text-white scale-95'
-                      : 'bg-white border-border text-text-primary hover:border-purple-400 hover:bg-purple-50'
+                      : 'bg-white border-surface-border text-text-primary hover:border-purple-400 hover:bg-purple-50'
                   }`}
                 >
                   {n.note}
@@ -138,14 +138,14 @@ export default function VoiceSharpeningPage() {
         </div>
 
         {/* Recording interface */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
           <p className="text-text-muted text-xs uppercase tracking-wide mb-4">Record yourself</p>
 
           <div className="flex gap-3 mb-4">
             {!recording ? (
               <button
                 onClick={startRecording}
-                className="bg-red-600 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-red-700 transition-colors text-sm"
+                className="bg-accent text-white font-semibold px-5 py-2.5 rounded-xl hover:opacity-90 transition-colors text-sm"
               >
                 Start recording
               </button>
@@ -158,15 +158,15 @@ export default function VoiceSharpeningPage() {
               </button>
             )}
             {recording && (
-              <span className="flex items-center gap-2 text-red-600 text-sm font-medium">
-                <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              <span className="flex items-center gap-2 text-accent text-sm font-medium">
+                <span className="w-2 h-2 bg-accent/50 rounded-full animate-pulse" />
                 Recording
               </span>
             )}
           </div>
 
           {micError && (
-            <p className="text-xs text-accent bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">{micError}</p>
+            <p className="text-xs text-accent bg-accent/5 border border-accent/20 rounded-lg px-3 py-2 mb-3">{micError}</p>
           )}
 
           {micReady && (

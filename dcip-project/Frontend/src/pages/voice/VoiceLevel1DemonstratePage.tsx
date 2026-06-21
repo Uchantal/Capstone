@@ -128,7 +128,7 @@ export default function VoiceLevel1DemonstratePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
@@ -136,7 +136,7 @@ export default function VoiceLevel1DemonstratePage() {
 
   if (phase === 'results') {
     return (
-      <div className="min-h-screen bg-bg-page">
+      <div className="min-h-screen bg-white">
         <TopNav />
         <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
           <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
@@ -144,7 +144,7 @@ export default function VoiceLevel1DemonstratePage() {
             <span>/</span><span>Level 1 Demonstration</span>
           </div>
 
-          <div className={`border-2 rounded-2xl p-8 mb-6 ${passed ? 'border-secondary/30 bg-secondary/5' : 'border-border bg-white'}`}>
+          <div className={`border-2 rounded-2xl p-8 mb-6 ${passed ? 'border-secondary/30 bg-secondary/5' : 'border-surface-border bg-white'}`}>
             {passed ? (
               <>
                 <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Level 1 Demonstration</p>
@@ -186,7 +186,7 @@ export default function VoiceLevel1DemonstratePage() {
                 </button>
                 <button
                   onClick={handleTryAgain}
-                  className="w-full border border-border text-text-secondary font-medium py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm"
+                  className="w-full border border-surface-border text-text-secondary font-medium py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm"
                 >
                   Try Demonstration Again
                 </button>
@@ -201,7 +201,7 @@ export default function VoiceLevel1DemonstratePage() {
   const currentNote = DEMO_NOTES[promptIdx]
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -222,7 +222,7 @@ export default function VoiceLevel1DemonstratePage() {
           You need {REQUIRED_CORRECT} of {DEMO_NOTES.length} correct to pass.
         </p>
 
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <div className="flex items-center justify-between mb-4">
             <p className="text-text-muted text-xs uppercase tracking-wide">
               Note {promptIdx + 1} of {DEMO_NOTES.length}
@@ -256,11 +256,11 @@ export default function VoiceLevel1DemonstratePage() {
           )}
 
           {micError && (
-            <p className="text-xs text-accent bg-red-50 border border-red-200 rounded-lg px-3 py-2 mt-3">{micError}</p>
+            <p className="text-xs text-accent bg-accent/5 border border-accent/20 rounded-lg px-3 py-2 mt-3">{micError}</p>
           )}
         </div>
 
-        <div className="bg-white border border-border rounded-2xl p-4 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 mb-5">
           <p className="text-text-muted text-xs mb-2">Live audio input</p>
           <canvas ref={waveformRef} width={800} height={60} className="w-full rounded-lg bg-gray-950" />
         </div>
@@ -269,7 +269,7 @@ export default function VoiceLevel1DemonstratePage() {
           <div className="flex justify-end">
             <button
               onClick={handleSkip}
-              className="border border-border text-text-secondary text-sm font-medium px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors"
+              className="border border-surface-border text-text-secondary text-sm font-medium px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors"
             >
               Skip this note
             </button>

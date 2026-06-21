@@ -12,13 +12,12 @@ export default {
         secondary: '#2D6A4F',
         accent: {
           DEFAULT: '#D62828',
-          green: '#2D6A4F',
           red: '#D62828',
-          blue: '#378ADD',
         },
         surface: {
           white: '#FFFFFF',
           warm: '#F9F7F4',
+          canvas: '#E8E4DC',
           border: '#E8E4DC',
         },
         text: {
@@ -31,15 +30,12 @@ export default {
           mid: '#161B25',
           footer: '#080A0E',
         },
-        'bg-page': '#FFFFFF',
-        'bg-card': '#FFFFFF',
-        'text-primary': '#1A1A1A',
-        'text-secondary': '#555555',
-        border: '#E8E4DC',
-        'status-offline': '#F59E0B',
-        'status-syncing': '#3B82F6',
-        'status-synced': '#10B981',
-        'status-error': '#EF4444',
+        status: {
+          offline: '#888888',
+          syncing: '#C8960C',
+          synced: '#2D6A4F',
+          error: '#D62828',
+        },
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

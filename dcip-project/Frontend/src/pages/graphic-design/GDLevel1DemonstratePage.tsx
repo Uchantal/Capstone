@@ -1,19 +1,52 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
-import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, exportDesignToDataUrl } from '../../components/graphic-design/PosterSurface'
+import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, exportDesignToDataUrl, type DesignElement } from '../../components/graphic-design/PosterSurface'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
 import { completeGDDemonstration } from '../../services/api'
-import Footer from '../../components/Footer'
 
-const MINIMUM_INTERACTIONS = 8
+const PLACEHOLDERS = ['New text', 'Your heading', 'Phone: \nEmail: \nWebsite: ', 'Your contact info']
 
-const CHECKLIST = [
-  { id: 'hierarchy', text: 'My title is at least twice the visual size of my subtitle' },
-  { id: 'alignment', text: 'I used centre alignment on this poster' },
-  { id: 'prominence', text: 'My title is the first thing a viewer would notice' },
-  { id: 'real-text', text: 'My poster announces a real event with meaningful text' },
-]
+function checkGDDemonstration(elements: DesignElement[], level: 1 | 2 | 3): { passed: boolean; feedback: string[] } {
+  const feedback: string[] = []
+  const textEls = elements.filter(e => e.type === 'text')
+  const shapeEls = elements.filter(e => e.type === 'rect' || e.type === 'circle' || e.type === 'shape')
+
+  // Level 1 checks
+  if (textEls.length < 2) feedback.push('Add at least two text elements to your poster.')
+  if (!textEls.some(e => (e.fontSize ?? 0) >= 32)) feedback.push('Make at least one text element large (font size 32 or bigger).')
+  const fontSizes = textEls.map(e => e.fontSize ?? 24)
+  if (fontSizes.length >= 2 && fontSizes.every(s => s === fontSizes[0])) feedback.push('Use different font sizes to create visual hierarchy.')
+  const hasRealText = textEls.some(e => e.text && e.text.trim().length > 0 && !PLACEHOLDERS.includes(e.text.trim()))
+  if (!hasRealText) feedback.push('Replace the placeholder text with your own real content.')
+
+  if (level === 1) return { passed: feedback.length === 0, feedback }
+
+  // Level 2 checks
+  if (shapeEls.length < 1) feedback.push('Add at least one shape to your poster.')
+  const allColors = [
+    ...textEls.map(e => e.color).filter(Boolean),
+    ...shapeEls.map(e => e.fill).filter(Boolean),
+  ] as string[]
+  const uniqueColors = new Set(allColors.map(c => c.toLowerCase()))
+  if (uniqueColors.size < 2) feedback.push('Use at least two different colours in your design.')
+  const textColor = textEls[0]?.color
+  if (textColor && textColor.toLowerCase() === DEFAULT_BG_COLOR.toLowerCase()) {
+    feedback.push('Your text colour must contrast with the background colour.')
+  }
+
+  if (level === 2) return { passed: feedback.length === 0, feedback }
+
+  // Level 3 checks
+  if (elements.length < 4) feedback.push('Add at least four elements to your poster.')
+  const contactPattern = /[@+]|www\.|http|phone|email|contact|tel|\b\d{7,}\b/i
+  const hasContact = textEls.some(e => e.text && contactPattern.test(e.text))
+  if (!hasContact) feedback.push('Include a contact block with an email address, website, or phone number.')
+  if (shapeEls.length < 1 || elements.filter(e => e.type !== 'text').length < 1) {
+    feedback.push('Include at least one non-text element (shape or image).')
+  }
+
+  return { passed: feedback.length === 0, feedback }
+}
 
 export default function GDLevel1DemonstratePage() {
   const navigate = useNavigate()
@@ -24,11 +57,10 @@ export default function GDLevel1DemonstratePage() {
   const [elements, setElements] = useState(DEFAULT_ELEMENTS)
   const [bgColor, setBgColor] = useState(DEFAULT_BG_COLOR)
   const [canvasKey, setCanvasKey] = useState(0)
-  const interactionCount = useRef(0)
-  const [thresholdMet, setThresholdMet] = useState(false)
-  const [checked, setChecked] = useState<Set<string>>(new Set())
+  const [checkResult, setCheckResult] = useState<{ passed: boolean; feedback: string[] } | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [passed, setPassed] = useState(false)
+  const interactionCount = useRef(0)
 
   useEffect(() => {
     if (loading) return
@@ -41,31 +73,21 @@ export default function GDLevel1DemonstratePage() {
   }, [loading, progress.completedStages, navigate])
 
   function recordInteraction() {
-    if (thresholdMet) return
     interactionCount.current += 1
-    if (interactionCount.current >= MINIMUM_INTERACTIONS) setThresholdMet(true)
   }
 
-  const allChecked = CHECKLIST.every(item => checked.has(item.id))
-  const canSubmit = thresholdMet && allChecked && !submitting
-
-  const toggleCheck = (id: string) => {
-    setChecked(prev => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
+  function handleCheck() {
+    const result = checkGDDemonstration(elements, 1)
+    setCheckResult(result)
   }
 
   const handleSubmit = async () => {
-    if (!canSubmit) return
     setSubmitting(true)
     try {
       const snapshot = JSON.stringify({ elements, bgColor })
       const imageData = await exportDesignToDataUrl(elements, bgColor)
       await completeGDDemonstration(1, true, snapshot, imageData)
-      await reload()
+      reload()
       setPassed(true)
     } catch {
       setPassed(true)
@@ -76,9 +98,8 @@ export default function GDLevel1DemonstratePage() {
 
   const handleReset = () => {
     setPassed(false)
-    setChecked(new Set())
+    setCheckResult(null)
     interactionCount.current = 0
-    setThresholdMet(false)
     setElements(DEFAULT_ELEMENTS)
     setBgColor(DEFAULT_BG_COLOR)
     setCanvasKey(k => k + 1)
@@ -86,24 +107,16 @@ export default function GDLevel1DemonstratePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
-
-        {lockedMessage && (
-          <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 mb-5 text-accent text-sm">
-            {lockedMessage}
-          </div>
-        )}
-
-        <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button onClick={() => navigate('/graphic-design/virtual-studio')} className="hover:text-text-primary transition-colors">
             Graphic Design
           </button>
@@ -112,68 +125,61 @@ export default function GDLevel1DemonstratePage() {
           <span>/</span>
           <span className="text-text-primary">Demonstrate</span>
         </div>
+        {!checkResult?.passed ? (
+          <button
+            onClick={handleCheck}
+            className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors text-sm"
+          >
+            {checkResult ? 'Check again' : 'Check my work'}
+          </button>
+        ) : (
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="bg-[#2D6A4F] text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed text-sm"
+          >
+            {submitting ? 'Saving...' : 'Submit and Continue'}
+          </button>
+        )}
+      </div>
 
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
-          <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Level 1 Demonstration</p>
-          <h1 className="text-text-primary font-bold text-xl mb-3">Design a Poster for a Real Announcement</h1>
-          <p className="text-text-secondary text-sm leading-relaxed mb-3">
-            Design a poster title and subtitle for a real announcement of your choice.
-            Apply a clear visual hierarchy so your title is noticeably larger than your subtitle.
-            Use centre alignment so the poster reads well on a noticeboard.
-          </p>
-          <div className="bg-[#F9F7F4] border border-border rounded-xl px-4 py-3">
-            <p className="text-text-primary font-semibold text-xs mb-1">Your task</p>
-            <p className="text-text-secondary text-sm">
-              Create a poster with a large title, a smaller subtitle, and centre alignment.
-              The title must be the dominant element a viewer notices first.
-            </p>
+      <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border px-4 py-3">
+        {lockedMessage && (
+          <div className="bg-accent/10 border border-accent/30 rounded-lg px-3 py-2 mb-2 text-accent text-xs">
+            {lockedMessage}
           </div>
-        </div>
+        )}
+        <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-1">Task</p>
+        <p className="text-text-secondary text-xs leading-relaxed">
+          Design a poster with a large title, a smaller subtitle, and centre alignment. The title must be the dominant element a viewer notices first.
+        </p>
 
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
-          <p className="text-text-muted text-xs uppercase tracking-wide mb-3">Your poster</p>
-          <DesignCanvas
-            key={canvasKey}
-            defaultElements={DEFAULT_ELEMENTS}
-            defaultBgColor={DEFAULT_BG_COLOR}
-            onChange={(els, bg) => { setElements(els); setBgColor(bg) }}
-            onInteraction={recordInteraction}
-          />
-        </div>
-
-        <div className="bg-white border border-border rounded-2xl p-6 mb-6">
-          <p className="text-text-primary font-semibold text-sm mb-1">
-            When you are done, confirm each of the following honestly:
-          </p>
-          <p className="text-text-secondary text-xs mb-5">
-            Tick each item only when it is genuinely true for your poster.
-          </p>
-          <div className="space-y-3 mb-6">
-            {CHECKLIST.map(item => (
-              <label key={item.id} className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={checked.has(item.id)}
-                  onChange={() => toggleCheck(item.id)}
-                  className="mt-0.5 w-4 h-4 accent-primary flex-shrink-0"
-                />
-                <span className={`text-sm leading-relaxed ${checked.has(item.id) ? 'text-text-primary' : 'text-text-secondary'}`}>
-                  {item.text}
-                </span>
-              </label>
+        {checkResult && !checkResult.passed && (
+          <div className="mt-2 space-y-1">
+            <p className="text-xs font-medium text-text-primary">Needs more work:</p>
+            {checkResult.feedback.map((msg, i) => (
+              <p key={i} className="text-xs text-accent flex items-start gap-1">
+                <span className="flex-shrink-0 mt-0.5">&#8226;</span>
+                <span>{msg}</span>
+              </p>
             ))}
           </div>
-          <div className="flex justify-end">
-            <button
-              onClick={handleSubmit}
-              disabled={!canSubmit}
-              className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm"
-            >
-              {submitting ? 'Saving...' : 'Submit Demonstration'}
-            </button>
+        )}
+
+        {checkResult?.passed && (
+          <div className="mt-2 bg-[#2D6A4F]/10 border border-[#2D6A4F]/30 rounded-lg px-3 py-1.5">
+            <p className="text-[#2D6A4F] text-xs font-medium">Your work meets the requirements.</p>
           </div>
-        </div>
+        )}
       </div>
+
+      <DesignCanvas
+        key={canvasKey}
+        defaultElements={DEFAULT_ELEMENTS}
+        defaultBgColor={DEFAULT_BG_COLOR}
+        onChange={(els, bg) => { setElements(els); setBgColor(bg) }}
+        onInteraction={recordInteraction}
+      />
 
       {passed && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -199,7 +205,7 @@ export default function GDLevel1DemonstratePage() {
               </button>
               <button
                 onClick={handleReset}
-                className="border border-border text-text-secondary font-medium px-6 py-3 rounded-xl hover:bg-gray-50 transition-colors w-full text-sm"
+                className="border border-surface-border text-text-secondary font-medium px-6 py-3 rounded-xl hover:bg-gray-50 transition-colors w-full text-sm"
               >
                 Try Again
               </button>
@@ -207,7 +213,6 @@ export default function GDLevel1DemonstratePage() {
           </div>
         </div>
       )}
-      <Footer />
     </div>
   )
 }

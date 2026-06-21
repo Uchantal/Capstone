@@ -1,9 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
-import Footer from '../../components/Footer'
 
 const NOTE_REFERENCE = [
   {
@@ -52,7 +50,6 @@ export default function GuitarSharpeningPage() {
   const navigate = useNavigate()
   const { progress, loading, markStageVisited } = useGuitarDemonstrationProgress()
 
-  // Gate: requires Level 3 demonstration passed
   useEffect(() => {
     if (loading) return
     if (!progress.level3DemonstrationPassed) {
@@ -63,85 +60,90 @@ export default function GuitarSharpeningPage() {
     }
   }, [loading, progress.level3DemonstrationPassed, navigate])
 
-  // Mark sharpening visited on mount so Production gate can check it
   useEffect(() => {
     if (loading) return
     if (progress.level3DemonstrationPassed) {
       markStageVisited('guitar-sharpening')
     }
-  // markStageVisited is stable; run once after gate passes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, progress.level3DemonstrationPassed])
 
   if (loading || !progress.level3DemonstrationPassed) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
+          <button onClick={() => navigate('/guitar/virtual-instrument')} className="hover:text-text-primary transition-colors">Guitar</button>
+          <span>/</span>
+          <span className="text-text-primary">Sharpening Myself</span>
+        </div>
+        <button
+          onClick={() => navigate('/guitar/production')}
+          className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors text-sm"
+        >
+          I am ready. Continue to Production.
+        </button>
+      </div>
 
-        <h1 className="text-text-primary font-bold text-2xl mb-1">Sharpening Myself</h1>
-        <p className="text-text-secondary text-sm mb-8">
-          Practice freely. Play any note or chord you have learned. There is no pass or fail here. This is where you build confidence.
-        </p>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border p-4 overflow-y-auto max-h-64">
+          <h1 className="text-text-primary font-bold text-lg mb-1">Sharpening Myself</h1>
+          <p className="text-text-secondary text-sm mb-4">
+            Practice freely. Play any note or chord you have learned. There is no pass or fail here. This is where you build confidence.
+          </p>
 
-        <GuitarFretboard showChords={true} />
-
-        <div className="mt-8 bg-white border border-border rounded-2xl overflow-hidden">
-          <div className="bg-[#F9F7F4] px-6 py-3 border-b border-border">
-            <p className="text-text-muted text-xs uppercase tracking-wide font-medium">Note Position Reference</p>
-            <p className="text-text-secondary text-xs mt-0.5">Natural notes taught in Door To Know Guitar</p>
-          </div>
-          <div className="divide-y divide-border">
-            {NOTE_REFERENCE.map(({ note, positions }) => (
-              <div key={note} className="flex px-6 py-4 gap-6 flex-wrap">
-                <p className="text-primary font-bold text-2xl w-8 shrink-0">{note}</p>
-                <div className="flex flex-wrap gap-x-6 gap-y-1">
-                  {positions.map(p => (
-                    <p key={`${p.string}-${p.fret}`} className="text-text-secondary text-sm">
-                      <span className="font-medium text-text-primary">{p.string}</span>{' '}
-                      {p.fret === 'open' ? '(open)' : `fret ${p.fret}`}
-                    </p>
-                  ))}
-                </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white border border-surface-border rounded-xl overflow-hidden">
+              <div className="bg-[#F9F7F4] px-3 py-2 border-b border-surface-border">
+                <p className="text-text-muted text-[10px] uppercase tracking-wide font-medium">Note Position Reference</p>
               </div>
-            ))}
+              <div className="divide-y divide-surface-border">
+                {NOTE_REFERENCE.map(({ note, positions }) => (
+                  <div key={note} className="flex px-3 py-2 gap-3 items-start flex-wrap">
+                    <p className="text-primary font-bold text-base w-5 shrink-0">{note}</p>
+                    <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                      {positions.map(p => (
+                        <p key={`${p.string}-${p.fret}`} className="text-text-secondary text-xs">
+                          <span className="font-medium text-text-primary">{p.string}</span>{' '}
+                          {p.fret === 'open' ? '(open)' : `fret ${p.fret}`}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white border border-surface-border rounded-xl overflow-hidden">
+              <div className="bg-[#F9F7F4] px-3 py-2 border-b border-surface-border">
+                <p className="text-text-muted text-[10px] uppercase tracking-wide font-medium">Chord Reference</p>
+              </div>
+              <div className="divide-y divide-surface-border">
+                {CHORD_REFERENCE.map(c => (
+                  <div key={c.id} className="flex px-3 py-2 gap-3">
+                    <p className="text-text-primary font-bold text-sm w-8 shrink-0">{c.id}</p>
+                    <div>
+                      <p className="text-text-primary text-xs font-medium">{c.shape}</p>
+                      <p className="text-text-muted text-[10px]">{c.strings}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mt-4 bg-white border border-border rounded-2xl overflow-hidden">
-          <div className="bg-[#F9F7F4] px-6 py-3 border-b border-border">
-            <p className="text-text-muted text-xs uppercase tracking-wide font-medium">Chord Reference</p>
-          </div>
-          <div className="divide-y divide-border">
-            {CHORD_REFERENCE.map(c => (
-              <div key={c.id} className="flex px-6 py-3 gap-4">
-                <p className="text-text-primary font-bold text-base w-10 shrink-0">{c.id}</p>
-                <div>
-                  <p className="text-text-primary text-sm font-medium">{c.shape}</p>
-                  <p className="text-text-muted text-xs">{c.strings}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-8 flex justify-end">
-          <button
-            onClick={() => navigate('/guitar/production')}
-            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors"
-          >
-            I am ready. Continue to Production.
-          </button>
+        <div className="flex-1 bg-[#E8E4DC] flex flex-col justify-center p-4 overflow-auto">
+          <GuitarFretboard showChords={true} />
         </div>
       </div>
-      <Footer />
     </div>
   )
 }

@@ -182,7 +182,7 @@ export default function TopNav() {
   if (!isStudent) {
     const roleLabel = user?.role === 'admin' ? 'Administrator' : 'Supervisor'
     return (
-      <nav className="bg-white border-b border-border h-14 flex items-center px-6 justify-between">
+      <nav className="bg-white border-b border-surface-border h-14 flex items-center px-6 justify-between">
         <div className="flex items-center gap-3">
           <div className="bg-primary rounded-lg w-9 h-9 flex items-center justify-center">
             <span className="text-white font-bold text-sm">DCIP</span>
@@ -207,7 +207,7 @@ export default function TopNav() {
           {user && (
             <button
               onClick={handleLogout}
-              className="border border-border text-text-secondary text-xs px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+              className="border border-surface-border text-text-secondary text-xs px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Log out
             </button>
@@ -223,7 +223,7 @@ export default function TopNav() {
   const schoolName = user?.school?.name ?? ''
 
   return (
-    <nav className="bg-white border-b border-border h-14 flex items-center px-6 justify-between">
+    <nav className="bg-white border-b border-surface-border h-14 flex items-center px-6 justify-between">
       <div className="flex items-center gap-3">
         <div className="bg-primary rounded-lg w-9 h-9 flex items-center justify-center">
           <span className="text-white font-bold text-sm">DCIP</span>
@@ -256,10 +256,10 @@ export default function TopNav() {
 
             {/* Dropdown */}
             {profileOpen && (
-              <div className="absolute top-full right-0 mt-2 bg-white border border-border rounded-xl shadow-lg min-w-56 z-50 overflow-hidden">
+              <div className="absolute top-full right-0 mt-2 bg-white border border-surface-border rounded-xl shadow-lg min-w-56 z-50 overflow-hidden">
 
                 {/* Identity header */}
-                <div className="px-4 py-3 border-b border-border bg-[#F9F7F4]">
+                <div className="px-4 py-3 border-b border-surface-border bg-[#F9F7F4]">
                   <p className="text-sm font-semibold text-text-primary leading-tight">{user.fullName}</p>
                   {schoolName && (
                     <p className="text-xs text-text-secondary mt-0.5">{schoolName}</p>
@@ -269,7 +269,7 @@ export default function TopNav() {
                 {/* Navigation links */}
                 <div
                   onClick={() => go('/dashboard')}
-                  className="px-4 py-3 flex flex-col gap-0.5 hover:bg-[#F9F7F4] cursor-pointer transition-colors duration-100 border-b border-border"
+                  className="px-4 py-3 flex flex-col gap-0.5 hover:bg-[#F9F7F4] cursor-pointer transition-colors duration-100 border-b border-surface-border"
                 >
                   <span className="text-sm font-medium text-text-primary">My Dashboard</span>
                   <span className="text-xs text-text-secondary">Overview and quick access</span>
@@ -277,7 +277,7 @@ export default function TopNav() {
 
                 <div
                   onClick={() => go('/portfolio')}
-                  className="px-4 py-3 flex flex-col gap-0.5 hover:bg-[#F9F7F4] cursor-pointer transition-colors duration-100 border-b border-border"
+                  className="px-4 py-3 flex flex-col gap-0.5 hover:bg-[#F9F7F4] cursor-pointer transition-colors duration-100 border-b border-surface-border"
                 >
                   <span className="text-sm font-medium text-text-primary">My Portfolio</span>
                   <span className="text-xs text-text-secondary">All your saved creative work</span>
@@ -285,7 +285,7 @@ export default function TopNav() {
 
                 <div
                   onClick={() => go('/skill-summary')}
-                  className="px-4 py-3 flex flex-col gap-0.5 hover:bg-[#F9F7F4] cursor-pointer transition-colors duration-100 border-b border-border"
+                  className="px-4 py-3 flex flex-col gap-0.5 hover:bg-[#F9F7F4] cursor-pointer transition-colors duration-100 border-b border-surface-border"
                 >
                   <span className="text-sm font-medium text-text-primary">Skill Summary</span>
                   <span className="text-xs text-text-secondary">Your progress and badges</span>
@@ -293,7 +293,7 @@ export default function TopNav() {
 
                 <div
                   onClick={() => go(continueUrlRef.current ?? '/dashboard')}
-                  className="px-4 py-3 flex flex-col gap-0.5 hover:bg-[#F9F7F4] cursor-pointer transition-colors duration-100 border-b border-border"
+                  className="px-4 py-3 flex flex-col gap-0.5 hover:bg-[#F9F7F4] cursor-pointer transition-colors duration-100 border-b border-surface-border"
                 >
                   <span className="text-sm font-medium text-text-primary">Continue Learning</span>
                   <span className="text-xs text-text-secondary">Pick up where you left off</span>
@@ -302,7 +302,7 @@ export default function TopNav() {
                 {/* Settings divider */}
                 <div
                   onClick={() => go('/settings')}
-                  className="px-4 py-3 flex flex-col gap-0.5 hover:bg-[#F9F7F4] cursor-pointer transition-colors duration-100 border-b border-border"
+                  className="px-4 py-3 flex flex-col gap-0.5 hover:bg-[#F9F7F4] cursor-pointer transition-colors duration-100 border-b border-surface-border"
                 >
                   <span className="text-sm font-medium text-text-primary">Account Settings</span>
                   <span className="text-xs text-text-secondary">Password and account details</span>

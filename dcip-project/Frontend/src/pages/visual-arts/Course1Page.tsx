@@ -50,7 +50,7 @@ export default function Course1Page() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -79,7 +79,7 @@ export default function Course1Page() {
         </p>
 
         {/* Card 1: Line Control */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Line Control</h2>
           <p className="text-text-secondary text-sm mb-3">
             Controlled lines are the foundation of all drawing. The quality of a line, its weight,
@@ -96,7 +96,7 @@ export default function Course1Page() {
         </div>
 
         {/* Card 2: Shapes Are Built From Lines and Curves */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Shapes Are Built From Lines and Curves</h2>
           <p className="text-text-secondary text-sm mb-5">
             Every complex drawing can be broken down into simple shapes. A face becomes an oval with
@@ -130,12 +130,12 @@ export default function Course1Page() {
         </div>
 
         {/* Card 3: Tool Reference */}
-        <div className="bg-white border border-border rounded-2xl overflow-hidden mb-8">
-          <div className="bg-[#F9F7F4] px-6 py-3 border-b border-border">
+        <div className="bg-white border border-surface-border rounded-2xl overflow-hidden mb-8">
+          <div className="bg-[#F9F7F4] px-6 py-3 border-b border-surface-border">
             <p className="text-text-muted text-xs uppercase tracking-wide font-medium">Knowing Your Tools</p>
             <p className="text-text-secondary text-xs mt-0.5">A reference for each tool in the canvas toolbar</p>
           </div>
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-surface-border">
             {TOOLS.map(t => (
               <div key={t.name} className="flex px-6 py-3 gap-4">
                 <p className="text-text-primary font-semibold text-sm w-28 flex-shrink-0">{t.name}</p>

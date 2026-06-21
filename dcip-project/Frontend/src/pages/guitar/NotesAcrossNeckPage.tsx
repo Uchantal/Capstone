@@ -67,7 +67,7 @@ export default function NotesAcrossNeckPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -96,7 +96,7 @@ export default function NotesAcrossNeckPage() {
         </p>
 
         {/* Card A */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Why One Note Has Many Positions</h2>
           <p className="text-text-secondary text-sm mb-3">
             On a piano, middle C appears once. On a guitar, the note C appears six times across the neck within the first twelve frets, once on each string. This is what makes the guitar fretboard feel confusing at first: there is no single home for each note.
@@ -107,7 +107,7 @@ export default function NotesAcrossNeckPage() {
         </div>
 
         {/* Card B: Finding Every C */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Worked Example: Finding Every C</h2>
           <p className="text-text-secondary text-sm mb-2">
             The note C appears at all six positions highlighted below. Click each highlighted position to hear the C note played at different pitches.
@@ -120,7 +120,7 @@ export default function NotesAcrossNeckPage() {
                   <th className="text-left text-text-muted font-medium pr-6 py-1.5 uppercase text-xs tracking-wide">Fret</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-surface-border">
                 {[
                   { string: 'low E string', fret: 8 },
                   { string: 'A string',     fret: 3 },
@@ -141,7 +141,7 @@ export default function NotesAcrossNeckPage() {
         </div>
 
         {/* Card C: Finding Every D */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Worked Example: Finding Every D</h2>
           <p className="text-text-secondary text-sm mb-2">
             The note D appears at all positions below. Notice that D appears on its own string, the D string, both as the open note and at fret 12. These are the same note name, one octave apart.
@@ -154,7 +154,7 @@ export default function NotesAcrossNeckPage() {
                   <th className="text-left text-text-muted font-medium pr-6 py-1.5 uppercase text-xs tracking-wide">Fret</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-surface-border">
                 {[
                   { string: 'low E string',  fret: 10 },
                   { string: 'A string',      fret: 5 },
@@ -176,7 +176,7 @@ export default function NotesAcrossNeckPage() {
         </div>
 
         {/* Card D: Putting It Together */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
           <h2 className="text-text-primary font-bold text-base mb-3">Putting It Together</h2>
           <p className="text-text-secondary text-sm mb-4">
             The next three levels build on everything you have learned here.

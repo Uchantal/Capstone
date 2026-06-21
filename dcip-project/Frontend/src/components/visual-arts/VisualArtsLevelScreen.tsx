@@ -1,9 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../TopNav'
 import VisualArtsModule from '../modules/VisualArtsModule'
 import { useVisualArtsProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useVisualArtsProgress'
-import Footer from '../Footer'
 
 export interface ChecklistItem {
   id: string
@@ -21,20 +19,7 @@ interface Props {
   requires: string[]
 }
 
-// COMPLETION THRESHOLD
-// Increase for production, reduce temporarily for testing
 const MINIMUM_INTERACTIONS = 10
-
-function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
-  return (
-    <div className="mb-6">
-      <p className="text-text-muted text-xs mb-1.5">{label}</p>
-      <div className="w-full h-1 bg-gray-200 rounded-full">
-        <div className="h-1 bg-primary rounded-full" style={{ width: `${(value / total) * 100}%` }} />
-      </div>
-    </div>
-  )
-}
 
 export default function VisualArtsLevelScreen({
   levelNumber,
@@ -64,7 +49,6 @@ export default function VisualArtsLevelScreen({
     }
   }
 
-  // Stage gate: redirect to the first uncompleted prerequisite
   useEffect(() => {
     if (loading) return
     const firstMissing = requires.find(r => !completedStages.includes(r))
@@ -95,25 +79,68 @@ export default function VisualArtsLevelScreen({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
   }
 
+  const sidebarFooter = (
+    <div className="border-t border-surface-border pt-3">
+      <div className="mb-3">
+        <p className="text-text-muted text-[9px] uppercase tracking-wide mb-1 font-medium">
+          Level {levelNumber} of {totalLevels}
+        </p>
+        <div className="w-full h-1 bg-gray-200 rounded-full">
+          <div
+            className="h-1 bg-primary rounded-full"
+            style={{ width: `${(levelNumber / totalLevels) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      {lockedMessage && (
+        <div className="bg-accent/10 border border-accent/30 rounded-lg px-2.5 py-2 mb-3 text-accent text-xs">
+          {lockedMessage}
+        </div>
+      )}
+
+      <p className="text-text-muted text-[9px] uppercase tracking-wide mb-1 font-medium">Task</p>
+      <p className="text-text-primary font-semibold text-xs mb-1">{levelTitle}</p>
+      <p className="text-text-secondary text-xs leading-relaxed mb-3">{task}</p>
+
+      <div className="space-y-2.5 mb-3">
+        {checklist.map(item => (
+          <label key={item.id} className="flex items-start gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={checked.has(item.id)}
+              onChange={() => toggleCheck(item.id)}
+              className="mt-0.5 w-3.5 h-3.5 accent-primary flex-shrink-0"
+            />
+            <span
+              className={`text-xs leading-snug ${
+                checked.has(item.id) ? 'text-text-primary' : 'text-text-secondary'
+              }`}
+            >
+              {item.text}
+            </span>
+          </label>
+        ))}
+      </div>
+
+      {!thresholdMet && (
+        <p className="text-text-muted text-[10px] leading-snug">
+          Keep drawing to unlock completion. ({interactionCount.current}/{MINIMUM_INTERACTIONS} strokes)
+        </p>
+      )}
+    </div>
+  )
+
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
-
-        {lockedMessage && (
-          <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 mb-5 text-accent text-sm">
-            {lockedMessage}
-          </div>
-        )}
-
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
             onClick={() => navigate('/visual-arts/virtual-canvas')}
             className="hover:text-text-primary transition-colors"
@@ -125,74 +152,31 @@ export default function VisualArtsLevelScreen({
           <span>/</span>
           <span className="text-text-primary">{levelTitle}</span>
         </div>
-
-        <ProgressBar
-          value={levelNumber}
-          total={totalLevels}
-          label={`Level ${levelNumber} of ${totalLevels}`}
-        />
-
-        {/* Task card */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
-          <p className="text-text-muted text-xs uppercase tracking-wide mb-2">
-            Level {levelNumber} Task
-          </p>
-          <h1 className="text-text-primary font-bold text-xl mb-3">{levelTitle}</h1>
-          <p className="text-text-secondary text-sm leading-relaxed">{task}</p>
-        </div>
-
-        {/* Canvas */}
-        <div className="mb-5">
-          <VisualArtsModule canvasRef={canvasRef} step={5} onInteraction={recordInteraction} />
-        </div>
-
-        {/* Self-check checklist */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-6">
-          <p className="text-text-primary font-semibold text-sm mb-1">
-            Before you continue, confirm each of the following:
-          </p>
-          <p className="text-text-secondary text-xs mb-5">
-            Tick each item honestly. These confirm you completed the task, not that it is perfect.
-          </p>
-          <div className="space-y-3">
-            {checklist.map(item => (
-              <label key={item.id} className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={checked.has(item.id)}
-                  onChange={() => toggleCheck(item.id)}
-                  className="mt-0.5 w-4 h-4 accent-primary flex-shrink-0"
-                />
-                <span
-                  className={`text-sm leading-relaxed ${
-                    checked.has(item.id) ? 'text-text-primary' : 'text-text-secondary'
-                  }`}
-                >
-                  {item.text}
-                </span>
-              </label>
-            ))}
-          </div>
-          <div className="mt-5 flex justify-end">
-            <button
-              onClick={handleComplete}
-              disabled={!canComplete}
-              className="bg-secondary text-white font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-            >
-              Mark Level Complete
-            </button>
-          </div>
-        </div>
+        <button
+          onClick={handleComplete}
+          disabled={!canComplete}
+          className="bg-secondary text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+        >
+          Mark Level Complete
+        </button>
       </div>
 
-      {/* Completion overlay */}
+      <VisualArtsModule
+        canvasRef={canvasRef}
+        step={5}
+        onInteraction={recordInteraction}
+        sidebarFooter={sidebarFooter}
+      />
+
       {completed && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-primary font-bold text-2xl">★</span>
+              <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
-            <h2 className="text-text-primary font-bold text-xl mb-2">Level {levelNumber} Complete!</h2>
+            <h2 className="text-text-primary font-bold text-xl mb-2">Level {levelNumber} Complete</h2>
             <p className="text-text-secondary text-sm mb-6">
               Well done. You completed all the tasks for this level.
             </p>
@@ -200,12 +184,11 @@ export default function VisualArtsLevelScreen({
               onClick={() => navigate(nextPath)}
               className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"
             >
-              Continue to Practice
+              Continue to Practise
             </button>
           </div>
         </div>
       )}
-      <Footer />
     </div>
   )
 }

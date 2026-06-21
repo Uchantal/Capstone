@@ -22,7 +22,7 @@ export default function PortfolioItemCard({
   const label = discipline.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())
 
   return (
-    <div className="bg-white border border-border rounded-xl p-4 flex items-start gap-4">
+    <div className="bg-white border border-surface-border rounded-xl p-4 flex items-start gap-4">
       <div className="bg-[#F9F7F4] rounded-xl w-16 h-16 flex items-center justify-center flex-shrink-0">
       </div>
 
@@ -49,8 +49,8 @@ export default function PortfolioItemCard({
           <span
             className={`text-xs px-2 py-0.5 rounded-full font-medium ${
               syncStatus === 'synced'
-                ? 'bg-green-100 text-status-synced'
-                : 'bg-yellow-100 text-status-offline'
+                ? 'bg-secondary/10 text-status-synced'
+                : 'bg-surface-warm text-status-offline'
             }`}
           >
             {syncStatus === 'synced' ? 'Synced' : 'Pending'}

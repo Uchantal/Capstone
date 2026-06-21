@@ -73,7 +73,7 @@ export default function AdminSchoolsPage() {
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Filter by name or district…"
-            className="border border-border rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary w-64 shrink-0"
+            className="border border-surface-border rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary w-64 shrink-0"
           />
         </div>
 
@@ -82,9 +82,9 @@ export default function AdminSchoolsPage() {
         ) : visible.length === 0 ? (
           <p className="text-text-secondary text-sm">No schools found.</p>
         ) : (
-          <div className="bg-white border border-border rounded-2xl overflow-hidden overflow-x-auto">
+          <div className="bg-white border border-surface-border rounded-2xl overflow-hidden overflow-x-auto">
             <table className="w-full text-sm min-w-[560px]">
-              <thead className="bg-[#F9F7F4] border-b border-border">
+              <thead className="bg-[#F9F7F4] border-b border-surface-border">
                 <tr>
                   <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Name</th>
                   <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">District</th>
@@ -93,7 +93,7 @@ export default function AdminSchoolsPage() {
                   <th className="px-6 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-surface-border">
                 {visible.map((school) => (
                   <tr key={school._id}>
                     <td className="px-6 py-4 text-text-primary font-medium">{school.name}</td>
@@ -103,7 +103,7 @@ export default function AdminSchoolsPage() {
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           school.isActive
-                            ? 'bg-green-100 text-green-700'
+                            ? 'bg-secondary/10 text-secondary'
                             : 'bg-gray-100 text-gray-500'
                         }`}
                       >
@@ -115,7 +115,7 @@ export default function AdminSchoolsPage() {
                         <button
                           onClick={() => handleDeactivate(school._id)}
                           disabled={actionId === school._id}
-                          className="border border-accent text-accent text-xs px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                          className="border border-accent text-accent text-xs px-3 py-1.5 rounded-lg hover:bg-accent/5 transition-colors disabled:opacity-50"
                         >
                           Deactivate
                         </button>

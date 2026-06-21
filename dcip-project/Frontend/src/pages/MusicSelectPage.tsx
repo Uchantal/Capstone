@@ -54,7 +54,7 @@ export default function MusicSelectPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
 
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-10">
@@ -76,11 +76,11 @@ export default function MusicSelectPage() {
           {paths.map((path) => (
             <div
               key={path.url}
-              className={`bg-white rounded-2xl border-2 border-border border-t-4 ${path.accent} flex flex-col overflow-hidden`}
+              className={`bg-white rounded-2xl border-2 border-surface-border border-t-4 ${path.accent} flex flex-col overflow-hidden`}
             >
               {/* Icon area */}
-              <div className="bg-yellow-50 flex items-center justify-center py-10">
-                <div className="bg-yellow-100 rounded-2xl w-24 h-24 flex items-center justify-center">
+              <div className="bg-primary/5 flex items-center justify-center py-10">
+                <div className="bg-primary/10 rounded-2xl w-24 h-24 flex items-center justify-center">
                 </div>
               </div>
 

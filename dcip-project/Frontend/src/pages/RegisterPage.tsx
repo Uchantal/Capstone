@@ -91,7 +91,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <div className="flex flex-1">
       {/* Left panel */}
       <div className="hidden lg:flex flex-col justify-between bg-[#C8960C] w-2/5 p-12">
@@ -140,7 +140,7 @@ export default function RegisterPage() {
                 value={form.fullName}
                 onChange={handleChange}
                 placeholder="Your full name"
-                className="w-full border border-border rounded-lg px-4 py-3 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                className="w-full border border-surface-border rounded-lg px-4 py-3 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
               />
               {errors.fullName && (
                 <p className="text-accent text-xs mt-1.5">{errors.fullName}</p>
@@ -154,7 +154,7 @@ export default function RegisterPage() {
                 value={form.username}
                 onChange={handleChange}
                 placeholder="Choose a username"
-                className="w-full border border-border rounded-lg px-4 py-3 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                className="w-full border border-surface-border rounded-lg px-4 py-3 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
               />
             </div>
 
@@ -166,7 +166,7 @@ export default function RegisterPage() {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="your@email.com"
-                className="w-full border border-border rounded-lg px-4 py-3 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                className="w-full border border-surface-border rounded-lg px-4 py-3 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
               />
               {errors.email && (
                 <p className="text-accent text-xs mt-1.5">{errors.email}</p>
@@ -182,7 +182,7 @@ export default function RegisterPage() {
                   value={form.password}
                   onChange={handleChange}
                   placeholder="Create a password"
-                  className="w-full border border-border rounded-lg px-4 py-3 pr-10 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                  className="w-full border border-surface-border rounded-lg px-4 py-3 pr-10 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
                 />
                 <button
                   type="button"
@@ -216,7 +216,7 @@ export default function RegisterPage() {
                   value={form.confirmPassword}
                   onChange={handleChange}
                   placeholder="Re-enter your password"
-                  className="w-full border border-border rounded-lg px-4 py-3 pr-10 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                  className="w-full border border-surface-border rounded-lg px-4 py-3 pr-10 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
                 />
                 <button
                   type="button"
@@ -252,7 +252,7 @@ export default function RegisterPage() {
                 name="schoolId"
                 value={form.schoolId}
                 onChange={handleChange}
-                className="w-full border border-border rounded-lg px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-primary bg-white"
+                className="w-full border border-surface-border rounded-lg px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-primary bg-white"
               >
                 <option value="">Select your school</option>
                 {schools.map((s) => (
@@ -267,7 +267,7 @@ export default function RegisterPage() {
             </div>
 
             {submitError && (
-              <div className="bg-red-50 border border-red-200 text-accent text-sm px-4 py-3 rounded-lg">
+              <div className="bg-accent/5 border border-accent/20 text-accent text-sm px-4 py-3 rounded-lg">
                 {submitError}
               </div>
             )}

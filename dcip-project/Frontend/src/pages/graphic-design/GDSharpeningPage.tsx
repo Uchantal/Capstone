@@ -1,9 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS } from '../../components/graphic-design/PosterSurface'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
-import Footer from '../../components/Footer'
 
 const QUICK_REF = [
   {
@@ -52,65 +50,61 @@ export default function GDSharpeningPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
+          <button onClick={() => navigate('/graphic-design/virtual-studio')} className="hover:text-text-primary transition-colors">
+            Graphic Design
+          </button>
+          <span>/</span>
+          <span className="text-text-primary">Sharpening</span>
+        </div>
+        <button
+          onClick={() => navigate('/graphic-design/production')}
+          className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors text-sm"
+        >
+          I am ready. Continue to Production
+        </button>
+      </div>
 
+      <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border px-4 py-3">
         {lockedMessage && (
-          <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 mb-5 text-accent text-sm">
+          <div className="bg-accent/10 border border-accent/30 rounded-lg px-3 py-2 mb-2 text-accent text-xs">
             {lockedMessage}
           </div>
         )}
-
-        <h1 className="text-text-primary font-bold text-2xl mb-1">Sharpening Myself</h1>
-        <p className="text-text-secondary text-sm mb-6">
-          Practice freely. Use everything you have learned. There is no pass or fail here, this is where you build confidence.
+        <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-1">Sharpening</p>
+        <p className="text-text-secondary text-xs leading-relaxed mb-2">
+          Practice freely. Use everything you have learned. There is no pass or fail here.
         </p>
-
-        <div className="bg-white border border-border rounded-2xl p-6 mb-6">
-          <DesignCanvas
-            defaultElements={DEFAULT_ELEMENTS}
-            defaultBgColor={DEFAULT_BG_COLOR}
-            onChange={() => {}}
-            onInteraction={() => {}}
-          />
-        </div>
-
-        <div className="space-y-4 mb-8">
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
           {QUICK_REF.map(section => (
-            <div key={section.heading} className="bg-white border border-border rounded-2xl overflow-hidden">
-              <div className="bg-[#F9F7F4] px-5 py-3 border-b border-border">
-                <p className="text-text-muted text-xs uppercase tracking-wide font-medium">{section.heading}</p>
-              </div>
-              <div className="divide-y divide-border">
-                {section.items.map(item => (
-                  <div key={item.name} className="flex px-5 py-3 gap-3">
-                    <p className="text-text-primary font-semibold text-xs w-36 flex-shrink-0">{item.name}</p>
-                    <p className="text-text-secondary text-xs">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
+            <div key={section.heading} className="min-w-[160px]">
+              <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-1">{section.heading}</p>
+              {section.items.map(item => (
+                <div key={item.name} className="mb-0.5">
+                  <span className="text-text-primary text-xs font-medium">{item.name}: </span>
+                  <span className="text-text-secondary text-xs">{item.desc}</span>
+                </div>
+              ))}
             </div>
           ))}
         </div>
-
-        <div className="flex justify-end">
-          <button
-            onClick={() => navigate('/graphic-design/production')}
-            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors"
-          >
-            I am ready. Continue to Production
-          </button>
-        </div>
       </div>
-      <Footer />
+
+      <DesignCanvas
+        defaultElements={DEFAULT_ELEMENTS}
+        defaultBgColor={DEFAULT_BG_COLOR}
+        onChange={() => {}}
+        onInteraction={() => {}}
+      />
     </div>
   )
 }

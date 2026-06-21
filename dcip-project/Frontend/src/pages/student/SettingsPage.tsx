@@ -98,14 +98,14 @@ export default function SettingsPage() {
     : ''
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-10">
 
         <h1 className="text-text-primary font-bold text-2xl mb-8">Account Settings</h1>
 
         {/* Personal Information */}
-        <div className="bg-white border border-border rounded-xl p-6 mb-6">
+        <div className="bg-white border border-surface-border rounded-xl p-6 mb-6">
           <h2 className="text-base font-semibold text-text-primary mb-5">Personal Information</h2>
 
           {profileLoading ? (
@@ -135,13 +135,13 @@ export default function SettingsPage() {
             </div>
           )}
 
-          <p className="text-text-muted text-xs mt-5 border-t border-border pt-4">
+          <p className="text-text-muted text-xs mt-5 border-t border-surface-border pt-4">
             To update your name or school, contact your school supervisor.
           </p>
         </div>
 
         {/* Change Password */}
-        <div className="bg-white border border-border rounded-xl p-6">
+        <div className="bg-white border border-surface-border rounded-xl p-6">
           <h2 className="text-base font-semibold text-text-primary mb-5">Change Password</h2>
 
           <form onSubmit={handleChangePassword} className="space-y-5 max-w-sm">
@@ -156,7 +156,7 @@ export default function SettingsPage() {
                   value={currentPw}
                   onChange={e => { setCurrentPw(e.target.value); setPwError(''); setPwSuccess('') }}
                   placeholder="Enter current password"
-                  className="w-full border border-border rounded-lg px-4 py-3 pr-10 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                  className="w-full border border-surface-border rounded-lg px-4 py-3 pr-10 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
                 />
                 <button
                   type="button"
@@ -180,7 +180,7 @@ export default function SettingsPage() {
                   value={newPw}
                   onChange={e => { setNewPw(e.target.value); setPwError(''); setPwSuccess('') }}
                   placeholder="At least 8 characters"
-                  className="w-full border border-border rounded-lg px-4 py-3 pr-10 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                  className="w-full border border-surface-border rounded-lg px-4 py-3 pr-10 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
                 />
                 <button
                   type="button"
@@ -204,7 +204,7 @@ export default function SettingsPage() {
                   value={confirmPw}
                   onChange={e => { setConfirmPw(e.target.value); setPwError(''); setPwSuccess('') }}
                   placeholder="Re-enter new password"
-                  className="w-full border border-border rounded-lg px-4 py-3 pr-10 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                  className="w-full border border-surface-border rounded-lg px-4 py-3 pr-10 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
                 />
                 <button
                   type="button"

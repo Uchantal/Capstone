@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
-import TopNav from '../TopNav'
 import PianoKeyboard from './PianoKeyboard'
 import { useChordValidation } from '../../hooks/useChordValidation'
 import {
@@ -9,7 +9,6 @@ import {
   FLAT_NAMES,
   type ChordType,
 } from '../../utils/pianoTheory'
-import Footer from '../Footer'
 
 interface ChordDef {
   symbol: string
@@ -45,17 +44,6 @@ function noteNamesToIds(noteNames: string[]): string[] {
   return result
 }
 
-function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
-  return (
-    <div className="mb-5">
-      <p className="text-text-muted text-xs mb-1.5">{label}</p>
-      <div className="w-full h-1 bg-gray-200 rounded-full">
-        <div className="h-1 bg-primary rounded-full transition-all" style={{ width: `${(value / total) * 100}%` }} />
-      </div>
-    </div>
-  )
-}
-
 export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle, description, chords, nextPath }: Props) {
   const navigate = useNavigate()
   const [chordIdx, setChordIdx] = useState(0)
@@ -67,9 +55,6 @@ export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle,
   const expectedNoteNames = buildChord(currentChord.root, currentChord.type, currentChord.useFlats)
   const highlightNotes = noteNamesToIds(expectedNoteNames)
   const pressedNoteNames = pressedNotes.map(n => n.replace(/\d+$/, ''))
-
-  const isHolding = pressedNoteNames.length > 0
-    && pressedNoteNames.length === expectedNoteNames.length
 
   const handleMatch = useCallback(() => {
     if (validState === 'correct') return
@@ -88,24 +73,22 @@ export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle,
 
   const feedbackClass = validState === 'correct'
     ? 'text-secondary font-semibold'
-    : isHolding
-    ? 'text-text-muted'
     : 'text-text-muted'
 
   const feedbackText = validState === 'correct'
     ? 'Correct! Hold it there.'
-    : isHolding
+    : pressedNoteNames.length > 0
     ? 'Hold steady...'
     : 'Find and press the notes below, hold for a moment.'
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
-
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
-          <button onClick={() => navigate('/piano/understanding-the-piano')} className="hover:text-text-primary transition-colors">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="flex items-center gap-2 text-xs text-text-muted">
+          <button
+            onClick={() => navigate('/piano/understanding-the-piano')}
+            className="hover:text-text-primary transition-colors"
+          >
             Piano
           </button>
           <span>/</span>
@@ -113,65 +96,77 @@ export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle,
           <span>/</span>
           <span className="text-text-primary">{levelTitle}</span>
         </div>
-
-        <ProgressBar value={levelNumber} total={totalLevels} label={`Level ${levelNumber} of ${totalLevels}`} />
-
-        <div className="mb-6">
-          <h1 className="text-text-primary font-bold text-2xl mb-1">{levelTitle}</h1>
-          <p className="text-text-secondary text-sm">{description}</p>
-        </div>
-
-        {/* Chord to play */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-text-muted text-xs uppercase tracking-wide">
-              Chord {chordIdx + 1} of {chords.length}
-            </p>
-            <div className="flex gap-1.5">
-              {chords.map((_, i) => (
-                <span
-                  key={i}
-                  className={`w-2 h-2 rounded-full ${
-                    i < chordIdx
-                      ? 'bg-secondary'
-                      : i === chordIdx
-                      ? 'bg-primary'
-                      : 'bg-gray-200'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-6 mb-4">
-            <span className="text-6xl font-bold text-text-primary leading-none">
-              {currentChord.symbol}
-            </span>
-            <div>
-              <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Notes to play</p>
-              <p className="text-text-primary font-semibold text-lg">
-                {expectedNoteNames.join(' · ')}
-              </p>
-            </div>
-          </div>
-
-          <p className={`text-sm ${feedbackClass}`}>{feedbackText}</p>
-        </div>
-
-        {/* Keyboard */}
-        <PianoKeyboard
-          onNotesChange={notes => {
-            setPressedNotes(notes)
-            if (validState === 'correct') return
-            setValidState('idle')
-          }}
-          highlightNotes={validState !== 'correct' ? highlightNotes : []}
-          disabled={validState === 'correct'}
-        />
       </div>
 
-      {/* Completion overlay */}
-      {completed && (
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border overflow-y-auto p-4">
+          <div className="mb-4">
+            <p className="text-text-muted text-xs mb-1.5">Level {levelNumber} of {totalLevels}</p>
+            <div className="w-full h-1 bg-gray-200 rounded-full">
+              <div
+                className="h-1 bg-primary rounded-full transition-all"
+                style={{ width: `${(levelNumber / totalLevels) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <h1 className="text-text-primary font-bold text-lg mb-1">{levelTitle}</h1>
+            <p className="text-text-secondary text-sm">{description}</p>
+          </div>
+
+          <div className="bg-white border border-surface-border rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-text-muted text-xs uppercase tracking-wide">
+                Chord {chordIdx + 1} of {chords.length}
+              </p>
+              <div className="flex gap-1.5">
+                {chords.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`w-2 h-2 rounded-full ${
+                      i < chordIdx ? 'bg-secondary' : i === chordIdx ? 'bg-primary' : 'bg-gray-200'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-6 mb-3">
+              <span className="text-5xl font-bold text-text-primary leading-none">
+                {currentChord.symbol}
+              </span>
+              <div>
+                <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Notes to play</p>
+                <p className="text-text-primary font-semibold text-base">
+                  {expectedNoteNames.join(' · ')}
+                </p>
+              </div>
+            </div>
+
+            <p className={`text-sm ${feedbackClass}`}>{feedbackText}</p>
+          </div>
+        </div>
+
+        <div className="flex-1 bg-[#E8E4DC] p-4 flex flex-col overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-xl shadow-sm">
+            <PianoKeyboard
+              onNotesChange={notes => {
+                setPressedNotes(notes)
+                if (validState === 'correct') return
+                setValidState('idle')
+              }}
+              highlightNotes={validState !== 'correct' ? highlightNotes : []}
+              disabled={validState === 'correct'}
+            />
+          </div>
+          <p className="flex-shrink-0 pt-2 text-center text-xs text-text-secondary">
+            Keys A-K + W E T Y U for octave 1 | Use mouse or touch for octave 2
+          </p>
+        </div>
+      </div>
+
+      {completed && createPortal(
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -179,7 +174,7 @@ export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle,
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-text-primary font-bold text-xl mb-2">Level {levelNumber} Complete!</h2>
+            <h2 className="text-text-primary font-bold text-xl mb-2">Level {levelNumber} Complete</h2>
             <p className="text-text-secondary text-sm mb-6">
               You played all {chords.length} chords. Well done.
             </p>
@@ -190,9 +185,9 @@ export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle,
               Continue to Practice
             </button>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
-      <Footer />
     </div>
   )
 }

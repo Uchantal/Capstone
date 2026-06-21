@@ -40,7 +40,7 @@ export default function GDCourse1Page() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -68,7 +68,7 @@ export default function GDCourse1Page() {
         </p>
 
         {/* Card 1: Why Typography Matters */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Why Typography Matters</h2>
           <p className="text-text-secondary text-sm mb-3 leading-relaxed">
             Typography is the art of arranging text so it communicates clearly and feels right for the context.
@@ -85,7 +85,7 @@ export default function GDCourse1Page() {
             <div className="bg-[#1A1A1A] rounded-xl p-4 flex flex-col gap-2">
               <div className="text-[#C8960C] font-bold text-xl leading-tight">CREATIVE NIGHT</div>
               <div className="text-gray-400 text-xs">Creative Event, School Main Hall</div>
-              <p className="text-green-400 text-xs mt-1">Clear hierarchy: title stands out</p>
+              <p className="text-primary text-xs mt-1">Clear hierarchy: title stands out</p>
             </div>
             <div className="bg-[#1A1A1A] rounded-xl p-4 flex flex-col gap-2">
               <div className="text-[#C8960C] font-medium text-sm leading-tight">Creative Night</div>
@@ -96,7 +96,7 @@ export default function GDCourse1Page() {
         </div>
 
         {/* Card 2: Alignment and Placement */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Alignment and Placement</h2>
           <p className="text-text-secondary text-sm mb-5 leading-relaxed">
             Where text sits on a page tells a viewer how to feel about a design. Left alignment feels editorial
@@ -109,7 +109,7 @@ export default function GDCourse1Page() {
               { label: 'Centre', lines: ['center-med', 'center', 'center-short'], desc: 'Symmetrical, ceremonial' },
               { label: 'Right', lines: ['right', 'right-shorter', 'right-short'], desc: 'Dynamic, modern' },
             ].map(({ label, lines, desc }) => (
-              <div key={label} className="flex-1 min-w-32 bg-[#F9F7F4] border border-border rounded-xl p-4">
+              <div key={label} className="flex-1 min-w-32 bg-[#F9F7F4] border border-surface-border rounded-xl p-4">
                 <div className="flex flex-col gap-1.5 mb-2">
                   {lines.map((l, i) => {
                     const w = i === 0 ? 'w-full' : i === 1 ? 'w-3/4' : 'w-1/2'
@@ -127,7 +127,7 @@ export default function GDCourse1Page() {
         </div>
 
         {/* Card 3: Rule of Thirds */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">The Rule of Thirds</h2>
           <p className="text-text-secondary text-sm mb-5 leading-relaxed">
             Divide your design into a 3 by 3 grid. Placing important elements along the grid lines or at the
@@ -160,7 +160,7 @@ export default function GDCourse1Page() {
         </div>
 
         {/* Card 4: Sketch Before You Build */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
           <h2 className="text-text-primary font-bold text-base mb-3">Sketch Before You Build</h2>
           <p className="text-text-secondary text-sm mb-3 leading-relaxed">
             Professional designers plan on paper before opening any software. Where will the title go? What shape
@@ -180,7 +180,7 @@ export default function GDCourse1Page() {
             onChange={e => setPlanningText(e.target.value)}
             placeholder="For example: My title will sit at the top third of the poster in large bold text. The one thing I want people to notice first is the event name."
             rows={4}
-            className="w-full border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-primary resize-none"
+            className="w-full border border-surface-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-primary resize-none"
           />
           {!canContinue && (
             <p className="text-text-muted text-xs mt-2">Write at least one sentence to continue.</p>

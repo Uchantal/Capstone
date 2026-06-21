@@ -20,7 +20,7 @@ export default function AdminNav() {
   }
 
   return (
-    <nav className="bg-white border-b border-border h-14 flex items-center px-6 md:px-3 lg:px-6 justify-between">
+    <nav className="bg-white border-b border-surface-border h-14 flex items-center px-6 md:px-3 lg:px-6 justify-between">
       <div className="flex items-center gap-6 md:gap-2 lg:gap-6 min-w-0">
         <div className="flex items-center gap-3 shrink-0">
           <div className="bg-primary rounded-lg w-9 h-9 flex items-center justify-center">
@@ -54,7 +54,7 @@ export default function AdminNav() {
         )}
         <button
           onClick={handleLogout}
-          className="border border-border text-text-secondary text-xs px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+          className="border border-surface-border text-text-secondary text-xs px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
         >
           Log out
         </button>

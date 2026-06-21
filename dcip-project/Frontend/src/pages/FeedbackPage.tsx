@@ -84,7 +84,7 @@ export default function FeedbackPage() {
         </div>
       </nav>
 
-      <main className="flex-1 max-w-2xl mx-auto w-full px-6 py-12">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-12">
         <div className="mb-8">
           <h1 className="text-[#1A1A1A] font-bold text-3xl">Send Us Feedback</h1>
           <p className="text-[#555555] text-base mt-2">

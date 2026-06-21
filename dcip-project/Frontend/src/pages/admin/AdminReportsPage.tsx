@@ -56,14 +56,14 @@ export default function AdminReportsPage() {
                   ['Active Schools', reports?.activeSchools],
                 ] as [string, number | undefined][]
               ).map(([label, value]) => (
-                <div key={label} className="bg-white border border-border rounded-2xl p-6">
+                <div key={label} className="bg-white border border-surface-border rounded-2xl p-6">
                   <p className="text-text-secondary text-xs mb-2">{label}</p>
                   <p className="text-text-primary font-bold text-3xl">{value ?? 'N/A'}</p>
                 </div>
               ))}
             </div>
 
-            <div className="bg-white border border-border rounded-2xl p-6">
+            <div className="bg-white border border-surface-border rounded-2xl p-6">
               <h2 className="text-text-primary font-semibold mb-5">Sessions by Discipline</h2>
               {!reports?.sessionsByDiscipline.length ? (
                 <p className="text-text-secondary text-sm">No sessions recorded yet.</p>

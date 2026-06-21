@@ -190,7 +190,7 @@ function MilestoneDots({ discKey, completedStages }: { discKey: string; complete
         const done = stageIds.some(id => completedStages.includes(id))
         return (
           <div key={labels[i]} className="flex items-center gap-2">
-            {i > 0 && <span className="text-border text-xs">--</span>}
+            {i > 0 && <span className="text-surface-border text-xs">--</span>}
             <div className="flex flex-col items-center gap-1">
               <span className={`w-3 h-3 rounded-full border-2 inline-block ${done ? 'bg-primary border-primary' : 'bg-white border-gray-300'}`} />
               <span className="text-text-muted text-[9px] whitespace-nowrap">{labels[i]}</span>
@@ -205,7 +205,7 @@ function MilestoneDots({ discKey, completedStages }: { discKey: string; complete
 function DisciplineCard({ disc, onContinue }: { disc: DisciplineSummary; onContinue: (url: string) => void }) {
   const continueUrl = computeContinueUrl(disc)
   return (
-    <div className="bg-white border border-border rounded-2xl p-5">
+    <div className="bg-white border border-surface-border rounded-2xl p-5">
       <div className="flex items-center justify-between mb-3">
         <p className="text-text-primary font-semibold text-sm">{disc.label}</p>
         <span className={`text-xs ${skillLabelClass(disc.skillLevel)}`}>{formatSkillLevel(disc.skillLevel)}</span>
@@ -249,7 +249,7 @@ export default function DashboardPage() {
   const levelsCompleted = summary?.totalLevelsCompleted ?? 0
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-6xl mx-auto px-6 py-8">
 
@@ -263,17 +263,17 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-8 md:grid-cols-1 lg:grid-cols-3">
-          <div className="bg-white border border-border rounded-2xl p-6">
+          <div className="bg-white border border-surface-border rounded-2xl p-6">
             <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Total Practice</p>
             <p className="text-primary font-bold text-3xl">
               {totalHours}<span className="text-base font-normal text-text-secondary ml-1">hrs</span>
             </p>
           </div>
-          <div className="bg-white border border-border rounded-2xl p-6">
+          <div className="bg-white border border-surface-border rounded-2xl p-6">
             <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Disciplines Active</p>
             <p className="text-primary font-bold text-3xl">{disciplines.length}</p>
           </div>
-          <div className="bg-white border border-border rounded-2xl p-6">
+          <div className="bg-white border border-surface-border rounded-2xl p-6">
             <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Levels Completed</p>
             <p className="text-primary font-bold text-3xl">{levelsCompleted}</p>
           </div>
@@ -284,11 +284,11 @@ export default function DashboardPage() {
           <div className="col-span-2 lg:col-span-1">
             <h2 className="text-text-primary font-bold text-base mb-4">Your Disciplines</h2>
             {loading ? (
-              <div className="bg-white border border-border rounded-2xl p-6">
+              <div className="bg-white border border-surface-border rounded-2xl p-6">
                 <p className="text-text-secondary text-sm">Loading progress...</p>
               </div>
             ) : disciplines.length === 0 ? (
-              <div className="bg-white border border-border rounded-2xl p-6 text-center">
+              <div className="bg-white border border-surface-border rounded-2xl p-6 text-center">
                 <p className="text-text-primary font-semibold text-sm mb-1">No activity yet</p>
                 <p className="text-text-secondary text-xs">
                   Choose a discipline to begin your creative journey.
@@ -304,7 +304,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="col-span-1 space-y-4 lg:col-span-1">
-            <div className="bg-white border border-border rounded-2xl p-6">
+            <div className="bg-white border border-surface-border rounded-2xl p-6">
               <h2 className="text-text-primary font-bold text-base mb-4">Quick Actions</h2>
               <div className="space-y-3">
                 <button
@@ -315,13 +315,13 @@ export default function DashboardPage() {
                 </button>
                 <button
                   onClick={() => navigate('/portfolio')}
-                  className="w-full bg-white border border-border text-text-primary font-semibold text-sm py-3 rounded-xl hover:bg-gray-50 transition-colors"
+                  className="w-full bg-white border border-surface-border text-text-primary font-semibold text-sm py-3 rounded-xl hover:bg-gray-50 transition-colors"
                 >
                   View Portfolio
                 </button>
                 <button
                   onClick={() => navigate('/skill-summary')}
-                  className="w-full bg-white border border-border text-text-primary font-semibold text-sm py-3 rounded-xl hover:bg-gray-50 transition-colors"
+                  className="w-full bg-white border border-surface-border text-text-primary font-semibold text-sm py-3 rounded-xl hover:bg-gray-50 transition-colors"
                 >
                   View Skill Summary
                 </button>

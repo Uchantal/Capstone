@@ -113,7 +113,7 @@ export default function VoiceProductionPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
@@ -121,7 +121,7 @@ export default function VoiceProductionPage() {
 
   if (phase === 'results' && result) {
     return (
-      <div className="min-h-screen bg-bg-page">
+      <div className="min-h-screen bg-white">
         <TopNav />
         <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
           <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
@@ -129,7 +129,7 @@ export default function VoiceProductionPage() {
             <span>/</span><span className="text-text-primary">Production</span>
           </div>
 
-          <div className={`border-2 rounded-2xl p-8 mb-6 ${result.passed ? 'border-secondary/30 bg-secondary/5' : 'border-border bg-white'}`}>
+          <div className={`border-2 rounded-2xl p-8 mb-6 ${result.passed ? 'border-secondary/30 bg-secondary/5' : 'border-surface-border bg-white'}`}>
             {result.passed ? (
               <>
                 <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Production Session</p>
@@ -153,7 +153,7 @@ export default function VoiceProductionPage() {
           </div>
 
           {/* Breakdown table */}
-          <div className="bg-white border border-border rounded-2xl p-6 mb-6">
+          <div className="bg-white border border-surface-border rounded-2xl p-6 mb-6">
             <p className="text-text-muted text-xs uppercase tracking-wide mb-4">Performance breakdown</p>
             <div className="space-y-3">
               {result.breakdown.map((item, i) => (
@@ -171,7 +171,7 @@ export default function VoiceProductionPage() {
           </div>
 
           {recordingUrl && (
-            <div className="bg-white border border-border rounded-2xl p-6 mb-6">
+            <div className="bg-white border border-surface-border rounded-2xl p-6 mb-6">
               <p className="text-text-muted text-xs uppercase tracking-wide mb-3">Your recording</p>
               <audio controls src={recordingUrl} className="w-full" />
             </div>
@@ -201,7 +201,7 @@ export default function VoiceProductionPage() {
             )}
             <button
               onClick={() => navigate('/voice/sharpening-myself')}
-              className="w-full border border-border text-text-secondary font-medium py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm"
+              className="w-full border border-surface-border text-text-secondary font-medium py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm"
             >
               Return to Sharpening Myself
             </button>
@@ -213,7 +213,7 @@ export default function VoiceProductionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-page">
+    <div className="min-h-screen bg-white">
       <TopNav />
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -235,7 +235,7 @@ export default function VoiceProductionPage() {
         </p>
 
         {/* Criteria */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <p className="text-text-muted text-xs uppercase tracking-wide mb-3">Passing criteria</p>
           <ul className="text-text-secondary text-sm space-y-2">
             <li>Recording at least 15 seconds long</li>
@@ -246,16 +246,16 @@ export default function VoiceProductionPage() {
         </div>
 
         {phase === 'intro' && (
-          <div className="bg-white border border-border rounded-2xl p-6 mb-8">
+          <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
             <p className="text-text-secondary text-sm mb-4">
               When you are ready, press Start to begin recording. Sing freely, use different notes, and hold some phrases steady.
             </p>
             {micError && (
-              <p className="text-xs text-accent bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">{micError}</p>
+              <p className="text-xs text-accent bg-accent/5 border border-accent/20 rounded-lg px-3 py-2 mb-4">{micError}</p>
             )}
             <button
               onClick={startRecording}
-              className="bg-red-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-red-700 transition-colors"
+              className="bg-accent text-white font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition-colors"
             >
               Start recording
             </button>
@@ -263,11 +263,11 @@ export default function VoiceProductionPage() {
         )}
 
         {phase === 'recording' && (
-          <div className="bg-white border border-border rounded-2xl p-6 mb-8">
+          <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
-                <span className="text-red-600 font-semibold text-sm">Recording</span>
+                <span className="w-2.5 h-2.5 bg-accent/50 rounded-full animate-pulse" />
+                <span className="text-accent font-semibold text-sm">Recording</span>
               </div>
               <span className="text-text-primary font-mono text-lg font-bold">{formatTime(elapsed)}</span>
             </div>
@@ -278,7 +278,7 @@ export default function VoiceProductionPage() {
             </div>
 
             {micError && (
-              <p className="text-xs text-accent bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">{micError}</p>
+              <p className="text-xs text-accent bg-accent/5 border border-accent/20 rounded-lg px-3 py-2 mb-4">{micError}</p>
             )}
 
             <button

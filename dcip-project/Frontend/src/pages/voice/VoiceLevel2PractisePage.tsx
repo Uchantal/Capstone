@@ -81,7 +81,7 @@ export default function VoiceLevel2PractisePage() {
   if (loading || !progress.completedStages.includes('voice-level-2')) return null
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -97,7 +97,7 @@ export default function VoiceLevel2PractisePage() {
           Sing each note back on "la" and watch the pitch indicator. When you feel confident, move to the demonstration.
         </p>
 
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <p className="text-text-muted text-xs uppercase tracking-wide mb-4">Scale notes (click to hear)</p>
           <div className="flex gap-3 flex-wrap mb-4">
             {SCALE.map(n => (
@@ -107,7 +107,7 @@ export default function VoiceLevel2PractisePage() {
                 className={`w-16 h-16 rounded-xl border-2 flex flex-col items-center justify-center transition-all font-bold text-xl ${
                   activeNote?.label === n.label
                     ? 'bg-purple-600 border-purple-600 text-white scale-95'
-                    : 'bg-white border-border text-text-primary hover:border-purple-400 hover:bg-purple-50'
+                    : 'bg-white border-surface-border text-text-primary hover:border-purple-400 hover:bg-purple-50'
                 }`}
               >
                 {n.note}
@@ -124,10 +124,10 @@ export default function VoiceLevel2PractisePage() {
         </div>
 
         {micError && (
-          <p className="text-xs text-accent bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">{micError}</p>
+          <p className="text-xs text-accent bg-accent/5 border border-accent/20 rounded-lg px-3 py-2 mb-4">{micError}</p>
         )}
 
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           {micReady ? (
             <PitchIndicator
               status={pitchStatus}
@@ -143,7 +143,7 @@ export default function VoiceLevel2PractisePage() {
           )}
         </div>
 
-        <div className="bg-white border border-border rounded-2xl p-4 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 mb-8">
           <p className="text-text-muted text-xs mb-2">Live audio input</p>
           <canvas ref={waveformRef} width={800} height={60} className="w-full rounded-lg bg-gray-950" />
         </div>

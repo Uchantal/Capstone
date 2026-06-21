@@ -104,14 +104,14 @@ export default function VoiceCourse2Page() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -139,7 +139,7 @@ export default function VoiceCourse2Page() {
         </p>
 
         {/* Card A: What Is Pitch */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">What Is Pitch</h2>
           <p className="text-text-secondary text-sm mb-4 leading-relaxed">
             Pitch is how high or low a sound is. Every note in music has a specific pitch, measured in Hz
@@ -164,7 +164,7 @@ export default function VoiceCourse2Page() {
         </div>
 
         {/* Card B: The C Major Scale for Voice */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">The C Major Scale for Voice</h2>
           <p className="text-text-secondary text-sm mb-4 leading-relaxed">
             Listen to each note of the C major scale. Hum or sing along on the syllable "la". Try to match
@@ -178,7 +178,7 @@ export default function VoiceCourse2Page() {
                 className={`px-3 py-2 rounded-lg border text-sm font-semibold transition-all ${
                   activeTone === n.label
                     ? 'bg-purple-600 text-white border-purple-600 scale-95'
-                    : 'bg-white border-border text-text-primary hover:border-purple-400 hover:bg-purple-50'
+                    : 'bg-white border-surface-border text-text-primary hover:border-purple-400 hover:bg-purple-50'
                 }`}
               >
                 {n.label}
@@ -202,7 +202,7 @@ export default function VoiceCourse2Page() {
             )}
           </div>
           {micError && (
-            <p className="text-xs text-accent bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">{micError}</p>
+            <p className="text-xs text-accent bg-accent/5 border border-accent/20 rounded-lg px-3 py-2 mb-3">{micError}</p>
           )}
           {micReady && (
             <PitchIndicator status={pitchStatus} label="Live pitch feedback (sing any scale note to test)" />
@@ -210,7 +210,7 @@ export default function VoiceCourse2Page() {
         </div>
 
         {/* Card C: Matching a Pitch */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
           <h2 className="text-text-primary font-bold text-base mb-3">Matching a Pitch</h2>
           <p className="text-text-secondary text-sm mb-4 leading-relaxed">
             Pitch matching is the foundation of singing in tune. The voice needs to find the note, not guess it.
@@ -237,15 +237,15 @@ export default function VoiceCourse2Page() {
             )}
           </div>
           {micError && (
-            <p className="text-xs text-accent bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">{micError}</p>
+            <p className="text-xs text-accent bg-accent/5 border border-accent/20 rounded-lg px-3 py-2 mb-3">{micError}</p>
           )}
           {micReady && (
             <div className="space-y-3">
               <PitchIndicator status={pitchStatus} label="Sing A4 and hold for 2 seconds" />
               {cardCPassed && (
-                <div className="bg-green-50 border border-green-300 rounded-xl px-4 py-3">
-                  <p className="text-green-700 font-semibold text-sm">You matched the pitch.</p>
-                  <p className="text-green-600 text-xs mt-0.5">You can now continue to Level 1.</p>
+                <div className="bg-secondary/5 border border-secondary/30 rounded-xl px-4 py-3">
+                  <p className="text-secondary font-semibold text-sm">You matched the pitch.</p>
+                  <p className="text-secondary text-xs mt-0.5">You can now continue to Level 1.</p>
                 </div>
               )}
             </div>

@@ -28,9 +28,9 @@ const disciplines = [
     name: 'Graphic Design',
     sub: 'Layouts · Typography · Posters',
     desc: 'Learn visual communication fundamentals and create poster designs step by step.',
-    accent: 'border-blue-400',
-    accentText: 'text-blue-500',
-    accentBg: 'bg-blue-400',
+    accent: 'border-surface-border',
+    accentText: 'text-text-primary',
+    accentBg: 'bg-surface-canvas',
   },
 ]
 
@@ -56,7 +56,7 @@ export default function DisciplineSelectPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-12">
         <h1 className="text-text-primary font-bold text-2xl mb-1">Choose your discipline</h1>
@@ -72,7 +72,7 @@ export default function DisciplineSelectPage() {
               key={d.id}
               onClick={() => handleSelect(d.id)}
               className={`text-left bg-white border-2 rounded-2xl p-6 hover:shadow-md transition-all ${
-                user?.discipline === d.id ? d.accent : 'border-border hover:border-gray-300'
+                user?.discipline === d.id ? d.accent : 'border-surface-border hover:border-gray-300'
               }`}
             >
               <p className="text-text-primary font-bold text-base mb-1">{d.name}</p>

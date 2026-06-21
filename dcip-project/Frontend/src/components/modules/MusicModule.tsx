@@ -87,7 +87,7 @@ export default function MusicModule({ step, onAudioReady }: Props) {
             <button
               key={n.label}
               onClick={() => playNote(n.freq, n.label)}
-              className="bg-white border-2 border-border hover:border-primary hover:bg-yellow-50 rounded-lg px-4 py-5 text-text-primary font-semibold text-sm transition-all active:scale-95"
+              className="bg-white border-2 border-surface-border hover:border-primary hover:bg-primary/5 rounded-lg px-4 py-5 text-text-primary font-semibold text-sm transition-all active:scale-95"
             >
               {n.label}
             </button>
@@ -120,7 +120,7 @@ export default function MusicModule({ step, onAudioReady }: Props) {
               </div>
               <button
                 onClick={stopRecording}
-                className="border border-accent text-accent font-semibold text-sm px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
+                className="border border-accent text-accent font-semibold text-sm px-4 py-2 rounded-lg hover:bg-accent/5 transition-colors"
               >
                 Stop
               </button>

@@ -6,7 +6,6 @@ import { verifyPianoPerformance } from '../../utils/pianoVerification'
 import type { NoteEvent, PianoVerificationResult } from '../../utils/pianoVerification'
 import { saveProductionResult, savePortfolioItem, completePianoProduction } from '../../services/api'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
-import Footer from '../../components/Footer'
 
 type Phase = 'intro' | 'recording' | 'results'
 
@@ -122,7 +121,6 @@ export default function PianoProductionPage() {
 
     const result = verifyPianoPerformance(noteEventsRef.current)
     setVerificationResult(result)
-    // Mark production passed/failed on the new demonstration-based progress record
     completePianoProduction(result.passed).catch(() => {})
     setPhase('results')
   }, [])
@@ -168,7 +166,6 @@ export default function PianoProductionPage() {
       }
     }
     pressTimesRef.current.clear()
-
     mediaRecorderRef.current?.stop()
   }
 
@@ -217,192 +214,199 @@ export default function PianoProductionPage() {
 
   if (loading || !progress.level3DemonstrationPassed) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
   }
 
-  // ── Intro ────────────────────────────────────────────────────────────────
   if (phase === 'intro') {
     return (
-      <div className="min-h-screen bg-bg-page flex flex-col">
-        <nav className="border-b border-border bg-white flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary rounded-md w-8 h-8 flex items-center justify-center">
-              <span className="text-white font-bold text-xs">DC</span>
+      <div className="h-screen flex flex-col overflow-hidden">
+        <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+          <div className="flex items-center gap-2 flex-1">
+            <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
+              <span className="text-white font-bold text-[10px]">DC</span>
             </div>
             <span className="text-text-primary font-bold text-sm">DCIP Piano</span>
           </div>
           <button
             onClick={() => navigate('/dashboard')}
-            className="border border-border text-text-secondary text-sm font-medium px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors"
+            className="border border-surface-border text-text-secondary text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Save and Exit
           </button>
-        </nav>
-        <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-16 w-full">
-          <h1 className="text-text-primary font-bold text-3xl mb-5">Production</h1>
-          <p className="text-text-secondary text-base mb-6 max-w-xl leading-relaxed">
-            This is your moment to create. Play your own melody using everything you have learned across the Door To Know Piano journey. Use different notes, build chords, create something that is yours. When you are satisfied, stop recording and submit.
-          </p>
-          <p className="text-text-secondary text-sm mb-8 max-w-xl">
-            Passing this production awards the Advanced Piano badge.
-          </p>
-          <button
-            onClick={handleBegin}
-            className="bg-primary text-white font-semibold px-10 py-4 rounded-xl hover:bg-primary-dark transition-colors text-base"
-          >
-            Begin Recording
-          </button>
         </div>
-        <Footer />
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-lg w-full text-center">
+            <div className="bg-white border border-surface-border rounded-2xl p-10 shadow-sm">
+              <p className="text-text-muted text-xs uppercase tracking-wide mb-3">Piano Production</p>
+              <h1 className="text-text-primary font-bold text-2xl mb-4">Play Your Melody</h1>
+              <p className="text-text-secondary text-sm leading-relaxed mb-6">
+                This is your moment to create. Play your own melody using everything you have learned across the Door To Know Piano journey. Use different notes, build chords, create something that is yours. When you are satisfied, stop recording and submit.
+              </p>
+              <p className="text-text-secondary text-sm mb-8">
+                Passing this production awards the Advanced Piano badge.
+              </p>
+              <button
+                onClick={handleBegin}
+                className="bg-primary text-white font-semibold px-10 py-3 rounded-xl hover:bg-primary-dark transition-colors"
+              >
+                Begin Recording
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
 
-  // ── Results ──────────────────────────────────────────────────────────────
   if (phase === 'results' && verificationResult) {
     const passed = verificationResult.passed
     return (
-      <div className="min-h-screen bg-bg-page flex flex-col">
-        <nav className="border-b border-border bg-white flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary rounded-md w-8 h-8 flex items-center justify-center">
-              <span className="text-white font-bold text-xs">DC</span>
+      <div className="h-screen flex flex-col overflow-hidden">
+        <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+          <div className="flex items-center gap-2 flex-1">
+            <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
+              <span className="text-white font-bold text-[10px]">DC</span>
             </div>
             <span className="text-text-primary font-bold text-sm">DCIP Piano</span>
           </div>
           <button
             onClick={() => navigate('/dashboard')}
-            className="border border-border text-text-secondary text-sm font-medium px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors"
+            className="border border-surface-border text-text-secondary text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Exit
           </button>
-        </nav>
+        </div>
+        <div className="flex-1 overflow-auto p-6 bg-white">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-text-primary font-bold text-2xl mb-6">Your Production Result</h2>
 
-        <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-10 w-full">
-          <h2 className="text-text-primary font-bold text-2xl mb-6">Your Production Result</h2>
-
-          <div className={`border-2 rounded-2xl p-6 mb-6 ${passed ? 'border-secondary/30 bg-secondary/5' : 'border-border bg-white'}`}>
-            <p className={`font-bold text-2xl mb-1 ${passed ? 'text-[#2D6A4F]' : 'text-accent'}`}>
-              {passed ? 'Demonstrated' : 'Keep Practising'}
-            </p>
-            <p className="text-text-secondary text-sm mb-3">
-              {passed
-                ? 'All five criteria were met. Your production is saved to your portfolio.'
-                : 'Some criteria were not met. Review the breakdown below and try again.'}
-            </p>
-            {passed && (
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-2 rounded-full">
-                Advanced Piano Badge
-              </div>
-            )}
-          </div>
-
-          <div className="bg-white border border-border rounded-2xl overflow-hidden mb-6">
-            <div className="bg-[#F9F7F4] px-5 py-3 border-b border-border">
-              <p className="text-text-muted text-xs uppercase tracking-wide font-medium">Breakdown</p>
-            </div>
-            <div className="divide-y divide-border">
-              {verificationResult.breakdown.map((item, i) => (
-                <div key={i} className="px-5 py-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <span className="text-text-primary text-sm font-medium">{item.label}</span>
-                    <span className={`text-sm font-semibold shrink-0 ${item.met ? 'text-[#2D6A4F]' : 'text-accent'}`}>
-                      {item.met ? 'Met' : 'Not met'}
-                    </span>
-                  </div>
-                  <p className="text-text-secondary text-xs mt-1">{item.detail}</p>
+            <div className={`border-2 rounded-2xl p-6 mb-6 ${passed ? 'border-secondary/30 bg-secondary/5' : 'border-surface-border bg-white'}`}>
+              <p className={`font-bold text-2xl mb-1 ${passed ? 'text-[#2D6A4F]' : 'text-accent'}`}>
+                {passed ? 'Demonstrated' : 'Keep Practising'}
+              </p>
+              <p className="text-text-secondary text-sm mb-3">
+                {passed
+                  ? 'All five criteria were met. Your production is saved to your portfolio.'
+                  : 'Some criteria were not met. Review the breakdown below and try again.'}
+              </p>
+              {passed && (
+                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-2 rounded-full">
+                  Advanced Piano Badge
                 </div>
-              ))}
+              )}
             </div>
-          </div>
 
-          {audioBlobUrl && (
-            <div className="bg-white border border-border rounded-2xl p-5 mb-6">
-              <p className="text-text-primary text-sm font-medium mb-3">Listen to your melody</p>
-              <audio controls src={audioBlobUrl} className="w-full" />
+            <div className="bg-white border border-surface-border rounded-2xl overflow-hidden mb-6">
+              <div className="bg-[#F9F7F4] px-5 py-3 border-b border-surface-border">
+                <p className="text-text-muted text-xs uppercase tracking-wide font-medium">Breakdown</p>
+              </div>
+              <div className="divide-y divide-surface-border">
+                {verificationResult.breakdown.map((item, i) => (
+                  <div key={i} className="px-5 py-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="text-text-primary text-sm font-medium">{item.label}</span>
+                      <span className={`text-sm font-semibold shrink-0 ${item.met ? 'text-[#2D6A4F]' : 'text-accent'}`}>
+                        {item.met ? 'Met' : 'Not met'}
+                      </span>
+                    </div>
+                    <p className="text-text-secondary text-xs mt-1">{item.detail}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          )}
 
-          <div className="space-y-3">
-            {!saved ? (
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50 text-sm"
-              >
-                {saving ? 'Saving...' : 'Save to Portfolio'}
-              </button>
-            ) : (
-              <div className="w-full bg-secondary/10 text-[#2D6A4F] font-semibold py-3 rounded-xl text-center text-sm">
-                Saved to portfolio
+            {audioBlobUrl && (
+              <div className="bg-white border border-surface-border rounded-2xl p-5 mb-6">
+                <p className="text-text-primary text-sm font-medium mb-3">Listen to your melody</p>
+                <audio controls src={audioBlobUrl} className="w-full" />
               </div>
             )}
-            <button
-              onClick={handleTryAgain}
-              className="w-full border border-border text-text-secondary font-medium py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm"
-            >
-              Try Again
-            </button>
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="w-full text-text-muted text-sm hover:text-text-secondary transition-colors py-2"
-            >
-              Return to Dashboard
-            </button>
+
+            <div className="space-y-3">
+              {!saved ? (
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50 text-sm"
+                >
+                  {saving ? 'Saving...' : 'Save to Portfolio'}
+                </button>
+              ) : (
+                <div className="w-full bg-secondary/10 text-[#2D6A4F] font-semibold py-3 rounded-xl text-center text-sm">
+                  Saved to portfolio
+                </div>
+              )}
+              <button
+                onClick={handleTryAgain}
+                className="w-full border border-surface-border text-text-secondary font-medium py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm"
+              >
+                Try Again
+              </button>
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="w-full text-text-muted text-sm hover:text-text-secondary transition-colors py-2"
+              >
+                Return to Dashboard
+              </button>
+            </div>
           </div>
         </div>
-        <Footer />
       </div>
     )
   }
 
-  // ── Recording ─────────────────────────────────────────────────────────────
+  // Recording phase
   const canStop = elapsedSeconds >= 10
 
   return (
-    <div className="min-h-screen bg-bg-page flex flex-col">
-      <nav className="border-b border-border bg-white flex items-center justify-between px-6 py-4 flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="bg-primary rounded-md w-8 h-8 flex items-center justify-center">
-            <span className="text-white font-bold text-xs">DC</span>
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="flex items-center gap-2 flex-1">
+          <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
+            <span className="text-white font-bold text-[10px]">DC</span>
           </div>
           <span className="text-text-primary font-bold text-sm">DCIP Piano</span>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-accent animate-pulse" />
-            <span className="text-text-secondary text-sm">Recording in progress</span>
-          </div>
+        <div className="flex items-center gap-3">
+          <span className="inline-block w-2.5 h-2.5 rounded-full bg-accent animate-pulse" />
+          <span className="text-text-secondary text-sm">Recording in progress</span>
           <span className="text-text-primary font-mono font-bold text-sm">{formatTime(elapsedSeconds)}</span>
         </div>
-      </nav>
+      </div>
 
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8 w-full flex-1">
-        <div className="mb-6">
-          <PianoKeyboard
-            onNotesChange={handleNotesChange}
-            externalAudioContext={audioCtxRef.current ?? undefined}
-            recordingDest={recordingDestRef.current ?? undefined}
-          />
-        </div>
-
-        <div className="flex flex-col items-center gap-2">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border p-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-text-secondary text-sm">Play your melody. When you are ready, stop the recording.</p>
+            {!canStop && (
+              <p className="text-text-muted text-xs mt-1">Play for at least 10 seconds before stopping.</p>
+            )}
+          </div>
           <button
             onClick={handleStop}
             disabled={!canStop}
-            className="w-full max-w-xs bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+            className="flex-shrink-0 bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm"
           >
             Stop and Submit
           </button>
-          <p className="text-text-muted text-xs">
-            Play for at least 20 seconds for the best result.
+        </div>
+
+        <div className="flex-1 bg-[#E8E4DC] p-4 flex flex-col overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-xl shadow-sm">
+            <PianoKeyboard
+              onNotesChange={handleNotesChange}
+              externalAudioContext={audioCtxRef.current ?? undefined}
+              recordingDest={recordingDestRef.current ?? undefined}
+            />
+          </div>
+          <p className="flex-shrink-0 pt-2 text-center text-xs text-text-secondary">
+            Keys A-K + W E T Y U for octave 1 | Use mouse or touch for octave 2
           </p>
         </div>
       </div>
-      <Footer />
     </div>
   )
 }

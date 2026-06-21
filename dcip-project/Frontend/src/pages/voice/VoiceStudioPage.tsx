@@ -76,7 +76,7 @@ export default function VoiceStudioPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -87,7 +87,7 @@ export default function VoiceStudioPage() {
         </p>
 
         {/* Breathing warm-up */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-6">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-6">
           <h2 className="text-text-primary font-semibold text-base mb-4">Breathing Warm-Up</h2>
           <div className="flex items-center gap-8 flex-wrap">
             <div className="flex flex-col items-center gap-3">
@@ -122,14 +122,14 @@ export default function VoiceStudioPage() {
         </div>
 
         {/* Recording interface */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
           <h2 className="text-text-primary font-semibold text-base mb-2">Record Your Voice</h2>
           <p className="text-text-secondary text-sm mb-4">
             Hum or sing freely while you do the breathing warm-up. The waveform shows your voice in real time.
           </p>
 
           {micError && (
-            <p className="text-xs text-accent bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">{micError}</p>
+            <p className="text-xs text-accent bg-accent/5 border border-accent/20 rounded-lg px-3 py-2 mb-4">{micError}</p>
           )}
 
           {!recording ? (

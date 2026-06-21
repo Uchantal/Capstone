@@ -251,7 +251,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
         </p>
       </div>
 
-      <p className="text-text-secondary text-xs bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2.5">
+      <p className="text-text-secondary text-xs bg-primary/5 border border-primary/20 rounded-lg px-4 py-2.5">
         {HINTS[step] ?? HINTS[1]}
       </p>
 
@@ -268,9 +268,9 @@ export default function PianoModule({ step, onAudioReady }: Props) {
                   aria-label={`Play ${key.note}`}
                   className={`w-10 h-32 border border-gray-300 rounded-b-lg flex items-end justify-center pb-1.5 select-none transition-colors duration-75 text-[9px] font-medium
                     ${activeKey === key.note
-                      ? 'bg-yellow-100 border-yellow-400'
+                      ? 'bg-primary/10 border-primary'
                       : highlightNotes.has(key.note)
-                      ? 'bg-yellow-50 border-primary ring-1 ring-primary ring-inset hover:bg-yellow-100'
+                      ? 'bg-primary/5 border-primary ring-1 ring-primary ring-inset hover:bg-primary/10'
                       : 'bg-white hover:bg-gray-50'
                     }`}
                 >
@@ -301,7 +301,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
 
       {/* Scale exercise — step 1 */}
       {step === 1 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 space-y-3">
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-3">
           <p className="text-text-primary text-sm font-semibold">C Major Scale exercise</p>
           <p className="text-text-secondary text-xs">
             The highlighted keys show C D E F G A B C. Press{' '}
@@ -338,7 +338,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
 
       {/* Chord recognition — step 2 */}
       {step === 2 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 space-y-3">
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-text-primary text-sm font-semibold">Chord recognition</p>
             <span className="text-text-secondary text-xs">Score: {crScore} / 3</span>
@@ -360,7 +360,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
                   <button
                     key={opt}
                     onClick={() => answerChord(opt)}
-                    className="px-3 py-1.5 rounded-lg border border-border text-text-primary text-xs font-semibold hover:border-primary hover:bg-yellow-50 transition-colors"
+                    className="px-3 py-1.5 rounded-lg border border-surface-border text-text-primary text-xs font-semibold hover:border-primary hover:bg-primary/5 transition-colors"
                   >
                     {opt}
                   </button>
@@ -375,7 +375,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
               </p>
               <button
                 onClick={nextChordQuestion}
-                className="border border-primary text-primary text-xs font-semibold px-4 py-1.5 rounded-lg hover:bg-yellow-50 transition-colors"
+                className="border border-primary text-primary text-xs font-semibold px-4 py-1.5 rounded-lg hover:bg-primary/5 transition-colors"
               >
                 Next chord →
               </button>
@@ -388,7 +388,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
               </p>
               <button
                 onClick={() => { setCrHeard(false); setCrResult('idle') }}
-                className="border border-border text-text-secondary text-xs px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+                className="border border-surface-border text-text-secondary text-xs px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Try this chord again
               </button>
@@ -399,7 +399,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
 
       {/* Free play indicator — step 3+ */}
       {step >= 3 && (
-        <div className="bg-gray-50 border border-border rounded-xl p-4">
+        <div className="bg-gray-50 border border-surface-border rounded-xl p-4">
           <p className="text-text-primary text-xs font-semibold mb-1">Free play mode</p>
           <p className="text-text-secondary text-xs">
             Explore the keyboard. Try to find a melody by ear, starting on C, and see where it goes.
@@ -435,7 +435,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
               </div>
               <button
                 onClick={stopRecording}
-                className="border border-accent text-accent font-semibold text-sm px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
+                className="border border-accent text-accent font-semibold text-sm px-4 py-2 rounded-lg hover:bg-accent/5 transition-colors"
               >
                 Stop
               </button>
@@ -454,7 +454,7 @@ export default function PianoModule({ step, onAudioReady }: Props) {
                 </button>
               </div>
               <audio controls src={recordedUrl} className="w-full h-10" />
-              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 space-y-1">
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-1">
                 <p className="text-text-primary text-xs font-semibold">Session summary</p>
                 <p className="text-text-secondary text-xs">Notes played: {notesPlayed}</p>
                 {scaleResult === 'success' && (

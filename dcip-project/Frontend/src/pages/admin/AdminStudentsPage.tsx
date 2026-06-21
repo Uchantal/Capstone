@@ -71,7 +71,7 @@ export default function AdminStudentsPage() {
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Filter by name or school…"
-            className="border border-border rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary w-64 shrink-0"
+            className="border border-surface-border rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary w-64 shrink-0"
           />
         </div>
 
@@ -80,9 +80,9 @@ export default function AdminStudentsPage() {
         ) : visible.length === 0 ? (
           <p className="text-text-secondary text-sm">No students found.</p>
         ) : (
-          <div className="bg-white border border-border rounded-2xl overflow-hidden overflow-x-auto">
+          <div className="bg-white border border-surface-border rounded-2xl overflow-hidden overflow-x-auto">
             <table className="w-full text-sm min-w-[640px]">
-              <thead className="bg-[#F9F7F4] border-b border-border">
+              <thead className="bg-[#F9F7F4] border-b border-surface-border">
                 <tr>
                   <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Name</th>
                   <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Username</th>
@@ -92,7 +92,7 @@ export default function AdminStudentsPage() {
                   <th className="px-6 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-surface-border">
                 {visible.map((student) => (
                   <tr key={student._id}>
                     <td className="px-6 py-4 text-text-primary font-medium">{student.fullName}</td>
@@ -103,8 +103,8 @@ export default function AdminStudentsPage() {
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           student.isActive
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-600'
+                            ? 'bg-secondary/10 text-secondary'
+                            : 'bg-accent/10 text-accent'
                         }`}
                       >
                         {student.isActive ? 'Active' : 'Inactive'}
@@ -114,7 +114,7 @@ export default function AdminStudentsPage() {
                       <button
                         onClick={() => handleToggle(student._id)}
                         disabled={togglingId === student._id}
-                        className="border border-border text-text-secondary text-xs px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                        className="border border-surface-border text-text-secondary text-xs px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
                       >
                         {student.isActive ? 'Deactivate' : 'Activate'}
                       </button>

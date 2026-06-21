@@ -288,7 +288,7 @@ export default function GuitarModule({ step, onAudioReady }: Props) {
               </div>
               <button
                 onClick={stopRecording}
-                className="border border-accent text-accent font-semibold text-sm px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
+                className="border border-accent text-accent font-semibold text-sm px-4 py-2 rounded-lg hover:bg-accent/5 transition-colors"
               >
                 Stop
               </button>

@@ -53,7 +53,7 @@ export default function ReadingFretboardPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -82,21 +82,21 @@ export default function ReadingFretboardPage() {
         </p>
 
         {/* Card 1: The Six Strings */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">The Six Strings</h2>
           <p className="text-text-secondary text-sm mb-4">
             A standard guitar has six strings, each tuned to a specific open note. From lowest pitch to highest pitch the strings are: E, A, D, G, B, E. Notice that the lowest and highest strings share the same letter name, E, two octaves apart.
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[400px]">
-              <thead className="bg-[#F9F7F4] border-b border-border">
+              <thead className="bg-[#F9F7F4] border-b border-surface-border">
                 <tr>
                   <th className="text-left text-text-muted font-medium px-4 py-2.5 uppercase text-xs tracking-wide">String</th>
                   <th className="text-left text-text-muted font-medium px-4 py-2.5 uppercase text-xs tracking-wide">Open Note</th>
                   <th className="text-left text-text-muted font-medium px-4 py-2.5 uppercase text-xs tracking-wide">Description</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-surface-border">
                 {STRINGS.map(s => (
                   <tr key={s.name}>
                     <td className="px-4 py-2.5 text-text-primary font-mono font-semibold">{s.name}</td>
@@ -116,7 +116,7 @@ export default function ReadingFretboardPage() {
         </div>
 
         {/* Card 2: The Chromatic Sequence */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">The Chromatic Sequence</h2>
           <p className="text-text-secondary text-sm mb-3">
             There are 12 notes in music. Moving one fret up the neck always moves exactly one half step forward in this sequence. After B, the sequence starts again at C.
@@ -126,13 +126,13 @@ export default function ReadingFretboardPage() {
               <div key={i} className={`px-3 py-2 rounded-lg text-sm font-semibold ${
                 note.includes('#')
                   ? 'bg-gray-800 text-white'
-                  : 'bg-white border-2 border-border text-text-primary'
+                  : 'bg-white border-2 border-surface-border text-text-primary'
               }`}>
                 {note}
               </div>
             ))}
           </div>
-          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 space-y-1.5">
+          <div className="bg-surface-warm border border-surface-border rounded-xl px-4 py-3 space-y-1.5">
             <p className="text-text-primary text-sm font-semibold">Important exceptions</p>
             <p className="text-text-secondary text-sm">There is no E# or B#. The note one half step above E is F, and one above B is C.</p>
             <p className="text-text-secondary text-sm">There is no Fb or Cb either. These are simply E and B.</p>
@@ -143,7 +143,7 @@ export default function ReadingFretboardPage() {
         </div>
 
         {/* Card 3: Octaves on the Fretboard */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
           <h2 className="text-text-primary font-bold text-base mb-3">Octaves on the Fretboard</h2>
           <p className="text-text-secondary text-sm mb-3">
             Every string repeats its own open note one octave higher at the 12th fret. The 12th fret is always the same letter name as the open string, just higher in pitch. This pattern holds for every string.

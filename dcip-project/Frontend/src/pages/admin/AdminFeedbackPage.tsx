@@ -40,17 +40,17 @@ export default function AdminFeedbackPage() {
         </div>
 
         {!loading && items.length === 0 && (
-          <div className="bg-white border border-border rounded-2xl p-8 text-center">
+          <div className="bg-white border border-surface-border rounded-2xl p-8 text-center">
             <p className="text-text-secondary text-sm">No feedback submissions yet.</p>
           </div>
         )}
 
         {!loading && items.length > 0 && (
-          <div className="bg-white border border-border rounded-2xl overflow-hidden">
+          <div className="bg-white border border-surface-border rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border bg-[#F9F7F4]">
+                  <tr className="border-b border-surface-border bg-[#F9F7F4]">
                     <th className="text-left px-4 py-3 text-text-muted text-xs font-semibold">Name</th>
                     <th className="text-left px-4 py-3 text-text-muted text-xs font-semibold">Email</th>
                     <th className="text-left px-4 py-3 text-text-muted text-xs font-semibold">Type</th>
@@ -59,7 +59,7 @@ export default function AdminFeedbackPage() {
                     <th className="text-left px-4 py-3 text-text-muted text-xs font-semibold">Date</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
+                <tbody className="divide-y divide-surface-border">
                   {items.map(item => (
                     <tr key={item._id} className="hover:bg-[#F9F7F4] transition-colors">
                       <td className="px-4 py-3 text-text-primary font-medium whitespace-nowrap">

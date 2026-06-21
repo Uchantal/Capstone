@@ -87,7 +87,7 @@ export default function GraphicDesignModule({ canvasRef, step }: Props) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="CREATIVE NIGHT 2025"
-            className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+            className="w-full border border-surface-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
           />
         </div>
         <div>
@@ -96,7 +96,7 @@ export default function GraphicDesignModule({ canvasRef, step }: Props) {
             value={subtitle}
             onChange={(e) => setSubtitle(e.target.value)}
             placeholder="Add a subtitle or date"
-            className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+            className="w-full border border-surface-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
           />
         </div>
       </div>
@@ -132,7 +132,7 @@ export default function GraphicDesignModule({ canvasRef, step }: Props) {
           <button
             onClick={() => setDrawMode(!drawMode)}
             className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
-              drawMode ? 'bg-primary text-white border-primary' : 'border-border text-text-secondary'
+              drawMode ? 'bg-primary text-white border-primary' : 'border-surface-border text-text-secondary'
             }`}
           >
             {drawMode ? 'Drawing on' : 'Draw on poster'}
@@ -144,7 +144,7 @@ export default function GraphicDesignModule({ canvasRef, step }: Props) {
         ref={canvasRef}
         width={700}
         height={420}
-        className="w-full border border-border rounded-xl"
+        className="w-full border border-surface-border rounded-xl"
         style={{ cursor: drawMode ? 'crosshair' : 'default' }}
         onMouseDown={startDraw}
         onMouseMove={draw}

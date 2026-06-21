@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
 import PianoKeyboard from '../../components/piano/PianoKeyboard'
 import { ALL_TWELVE_CHORDS, buildChord } from '../../utils/pianoTheory'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
-import Footer from '../../components/Footer'
 
 export default function SharpeningMyselfPage() {
   const navigate = useNavigate()
@@ -60,35 +58,42 @@ export default function SharpeningMyselfPage() {
 
   if (loading || !progress.level3DemonstrationPassed) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
-
-        <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
-          <button onClick={() => navigate('/session/music-piano')} className="hover:text-text-primary transition-colors">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
+          <button
+            onClick={() => navigate('/session/music-piano')}
+            className="hover:text-text-primary transition-colors"
+          >
             Piano
           </button>
           <span>/</span>
-          <span>Door To Know Piano</span>
-          <span>/</span>
           <span className="text-text-primary">Sharpening Myself</span>
         </div>
+        <button
+          onClick={() => navigate('/piano/production')}
+          className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors text-sm"
+        >
+          I am ready to be tested
+        </button>
+      </div>
 
-        <h1 className="text-text-primary font-bold text-2xl mb-1">Sharpening Myself</h1>
-        <p className="text-text-secondary text-sm mb-6">
-          Free practice time. Explore any chord from the reference below. Click a chord to highlight it on the keyboard, then play it. When you feel ready, move to the production test.
-        </p>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border overflow-y-auto p-4">
+          <h1 className="text-text-primary font-bold text-lg mb-1">Sharpening Myself</h1>
+          <p className="text-text-secondary text-sm mb-4">
+            Free practice time. Explore any chord from the reference below. Click a chord to highlight it on the keyboard, then play it. When you feel ready, move to the production test.
+          </p>
 
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
-          <p className="text-text-muted text-xs uppercase tracking-wide mb-4">Chord Reference</p>
-          <div className="grid grid-cols-4 gap-2 md:grid-cols-3">
+          <p className="text-text-muted text-xs uppercase tracking-wide mb-3">Chord Reference</p>
+          <div className="grid grid-cols-4 gap-2">
             {ALL_TWELVE_CHORDS.map(chord => {
               const notes = buildChord(chord.root, chord.type, chord.useFlats)
               const isSelected = selectedChord === chord.symbol
@@ -96,13 +101,13 @@ export default function SharpeningMyselfPage() {
                 <button
                   key={chord.symbol}
                   onClick={() => setSelectedChord(isSelected ? null : chord.symbol)}
-                  className={`text-left p-3 rounded-xl border transition-colors ${
+                  className={`text-left p-2.5 rounded-xl border transition-colors ${
                     isSelected
                       ? 'bg-primary/10 border-primary/40'
-                      : 'border-border hover:border-primary/30 hover:bg-[#F9F7F4]'
+                      : 'border-surface-border hover:border-primary/30 hover:bg-white'
                   }`}
                 >
-                  <p className={`font-bold text-base mb-0.5 ${isSelected ? 'text-primary' : 'text-text-primary'}`}>
+                  <p className={`font-bold text-sm mb-0.5 ${isSelected ? 'text-primary' : 'text-text-primary'}`}>
                     {chord.symbol}
                   </p>
                   <p className="text-text-muted text-[10px] leading-tight">{notes.join(' · ')}</p>
@@ -110,39 +115,37 @@ export default function SharpeningMyselfPage() {
               )
             })}
           </div>
+
           {selectedChord && (
             <p className="text-text-muted text-xs mt-3">
               Highlighted: <span className="text-text-primary font-semibold">{selectedChord}</span>. The keyboard shows which keys to press.
             </p>
           )}
+
+          {pressedNotes.length > 0 && (
+            <div className="mt-3 flex items-center gap-3">
+              <span className="text-text-muted text-xs">Playing:</span>
+              <div className="flex gap-1.5 flex-wrap">
+                {pressedNoteNames.map(n => (
+                  <span key={n} className="bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-md">{n}</span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {pressedNotes.length > 0 && (
-          <div className="bg-white border border-border rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
-            <span className="text-text-muted text-xs">Playing:</span>
-            <div className="flex gap-1.5 flex-wrap">
-              {pressedNoteNames.map(n => (
-                <span key={n} className="bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-md">{n}</span>
-              ))}
-            </div>
+        <div className="flex-1 bg-[#E8E4DC] p-4 flex flex-col overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-xl shadow-sm">
+            <PianoKeyboard
+              onNotesChange={setPressedNotes}
+              highlightNotes={highlightNotes}
+            />
           </div>
-        )}
-
-        <PianoKeyboard
-          onNotesChange={setPressedNotes}
-          highlightNotes={highlightNotes}
-        />
-
-        <div className="mt-8 flex justify-end">
-          <button
-            onClick={() => navigate('/piano/production')}
-            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors"
-          >
-            I am ready to be tested
-          </button>
+          <p className="flex-shrink-0 pt-2 text-center text-xs text-text-secondary">
+            Keys A-K + W E T Y U for octave 1 | Use mouse or touch for octave 2
+          </p>
         </div>
       </div>
-      <Footer />
     </div>
   )
 }

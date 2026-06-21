@@ -1,22 +1,28 @@
 import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { completeVisualArtsDemonstration } from '../../services/api'
-import Footer from '../../components/Footer'
-
-const MINIMUM_INTERACTIONS = 10
 
 const TASK =
   'Draw one circle and shade it. Your circle must have at least two visible tones: a lighter area ' +
   'and a darker shadow area. Add a cast shadow below the circle.'
 
-const CHECKLIST = [
-  { id: 'circle',  text: 'I drew a circle using the Ellipse tool' },
-  { id: 'tones',   text: 'My circle has a lighter area and a darker shaded area' },
-  { id: 'shadow',  text: 'I added a cast shadow beneath the circle' },
-]
+function checkVADemonstration(
+  interactionCount: number,
+  coloursUsed: string[],
+  isCanvasEmpty: boolean,
+): { passed: boolean; feedback: string[] } {
+  const feedback: string[] = []
+
+  if (isCanvasEmpty) feedback.push('Your canvas is empty. Start drawing before checking.')
+  if (coloursUsed.length < 1) feedback.push('Use at least one colour to draw on the canvas.')
+  if (interactionCount < 5) feedback.push(`Make more marks on the canvas (${interactionCount}/5 strokes).`)
+  if (coloursUsed.length < 2) feedback.push('Use at least two different colours in your drawing.')
+  if (interactionCount < 8) feedback.push(`Make more marks on the canvas (${interactionCount}/8 strokes).`)
+
+  return { passed: feedback.length === 0, feedback }
+}
 
 export default function VALevel2DemonstratePage() {
   const navigate = useNavigate()
@@ -24,8 +30,8 @@ export default function VALevel2DemonstratePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [resetKey, setResetKey] = useState(0)
   const interactionCount = useRef(0)
-  const [thresholdMet, setThresholdMet] = useState(false)
-  const [checked, setChecked] = useState<Set<string>>(new Set())
+  const coloursUsedRef = useRef(new Set<string>())
+  const [checkResult, setCheckResult] = useState<{ passed: boolean; feedback: string[] } | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [passed, setPassed] = useState(false)
 
@@ -40,24 +46,24 @@ export default function VALevel2DemonstratePage() {
   }, [loading, progress.completedStages, navigate])
 
   function recordInteraction() {
-    if (thresholdMet) return
     interactionCount.current += 1
-    if (interactionCount.current >= MINIMUM_INTERACTIONS) setThresholdMet(true)
   }
 
-  const allChecked = CHECKLIST.every(item => checked.has(item.id))
-  const canSubmit = thresholdMet && allChecked && !submitting
+  function handleColourUsed(colour: string) {
+    coloursUsedRef.current.add(colour)
+  }
 
-  const toggleCheck = (id: string) => {
-    setChecked(prev => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id); else next.add(id)
-      return next
-    })
+  function handleCheck() {
+    const isEmpty = coloursUsedRef.current.size === 0
+    const result = checkVADemonstration(
+      interactionCount.current,
+      [...coloursUsedRef.current],
+      isEmpty,
+    )
+    setCheckResult(result)
   }
 
   const handleSubmit = async () => {
-    if (!canSubmit) return
     setSubmitting(true)
     const snapshot = canvasRef.current?.toDataURL('image/png') ?? ''
     try {
@@ -72,26 +78,59 @@ export default function VALevel2DemonstratePage() {
 
   const handleReset = () => {
     setPassed(false)
-    setChecked(new Set())
+    setCheckResult(null)
     interactionCount.current = 0
-    setThresholdMet(false)
+    coloursUsedRef.current = new Set()
     setResetKey(k => k + 1)
   }
 
   if (loading || !progress.completedStages.includes('va-level-2-practise')) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
   }
 
-  return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
+  const sidebarFooter = (
+    <div className="border-t border-surface-border pt-3">
+      <p className="text-text-muted text-[9px] uppercase tracking-wide mb-1 font-medium">Level 2 Task</p>
+      <p className="text-text-primary font-semibold text-xs mb-1">Circle with Light and Shadow</p>
+      <p className="text-text-secondary text-xs leading-relaxed mb-3">{TASK}</p>
 
-        <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
+      {checkResult && !checkResult.passed && (
+        <div className="mb-3">
+          <p className="text-text-primary font-semibold text-xs mb-1.5">Needs work:</p>
+          <ul className="space-y-1.5">
+            {checkResult.feedback.map((msg, i) => (
+              <li key={i} className="text-xs text-accent flex gap-1.5">
+                <span className="mt-0.5 flex-shrink-0">&#8226;</span>
+                <span>{msg}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {checkResult?.passed && (
+        <div className="bg-[#2D6A4F]/10 border border-[#2D6A4F]/30 rounded-lg px-2.5 py-2 mb-3">
+          <p className="text-[#2D6A4F] text-xs font-medium">Your work meets the requirements.</p>
+        </div>
+      )}
+
+      <button
+        onClick={handleReset}
+        className="text-text-muted text-[10px] hover:text-text-secondary transition-colors"
+      >
+        Reset canvas
+      </button>
+    </div>
+  )
+
+  return (
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
             onClick={() => navigate('/visual-arts/virtual-canvas')}
             className="hover:text-text-primary transition-colors"
@@ -103,60 +142,40 @@ export default function VALevel2DemonstratePage() {
           <span>/</span>
           <span className="text-text-primary">Demonstrate</span>
         </div>
-
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
-          <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Level 2 Demonstration Task</p>
-          <h1 className="text-text-primary font-bold text-xl mb-3">Circle with Light and Shadow</h1>
-          <p className="text-text-secondary text-sm leading-relaxed">{TASK}</p>
-        </div>
-
-        <div className="mb-5">
-          <VisualArtsModule key={resetKey} canvasRef={canvasRef} step={5} onInteraction={recordInteraction} />
-        </div>
-
-        <div className="bg-white border border-border rounded-2xl p-6 mb-6">
-          <p className="text-text-primary font-semibold text-sm mb-1">
-            Confirm each of the following before submitting:
-          </p>
-          <p className="text-text-secondary text-xs mb-5">
-            Tick each item honestly. Your canvas will be saved to your portfolio for supervisor review.
-          </p>
-          <div className="space-y-3">
-            {CHECKLIST.map(item => (
-              <label key={item.id} className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={checked.has(item.id)}
-                  onChange={() => toggleCheck(item.id)}
-                  className="mt-0.5 w-4 h-4 accent-primary flex-shrink-0"
-                />
-                <span
-                  className={`text-sm leading-relaxed ${
-                    checked.has(item.id) ? 'text-text-primary' : 'text-text-secondary'
-                  }`}
-                >
-                  {item.text}
-                </span>
-              </label>
-            ))}
-          </div>
-          <div className="mt-5 flex justify-end">
-            <button
-              onClick={handleSubmit}
-              disabled={!canSubmit}
-              className="bg-secondary text-white font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-            >
-              {submitting ? 'Saving...' : 'Submit Demonstration'}
-            </button>
-          </div>
-        </div>
+        {!checkResult?.passed ? (
+          <button
+            onClick={handleCheck}
+            className="bg-secondary text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity text-sm"
+          >
+            {checkResult ? 'Check again' : 'Check my work'}
+          </button>
+        ) : (
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="bg-[#2D6A4F] text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed text-sm"
+          >
+            {submitting ? 'Saving...' : 'Submit and Continue'}
+          </button>
+        )}
       </div>
+
+      <VisualArtsModule
+        key={resetKey}
+        canvasRef={canvasRef}
+        step={5}
+        onInteraction={recordInteraction}
+        onColourUsed={handleColourUsed}
+        sidebarFooter={sidebarFooter}
+      />
 
       {passed && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
             <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-primary font-bold text-xl">2</span>
+              <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
             <h2 className="text-text-primary font-bold text-xl mb-2">Level 2 Demonstration Complete</h2>
             <p className="text-text-secondary text-sm mb-3">
@@ -166,7 +185,7 @@ export default function VALevel2DemonstratePage() {
               Intermediate Visual Arts Badge
             </div>
             <p className="text-text-muted text-xs mb-5">
-              Review your work against the task checklist and try again if you are not satisfied.
+              Review your work against the task and try again if you are not satisfied.
             </p>
             <div className="flex flex-col gap-3">
               <button
@@ -177,7 +196,7 @@ export default function VALevel2DemonstratePage() {
               </button>
               <button
                 onClick={handleReset}
-                className="border border-border text-text-secondary font-medium px-6 py-2.5 rounded-xl hover:bg-gray-50 transition-colors w-full text-sm"
+                className="border border-surface-border text-text-secondary font-medium px-6 py-2.5 rounded-xl hover:bg-gray-50 transition-colors w-full text-sm"
               >
                 Try Again
               </button>
@@ -185,7 +204,6 @@ export default function VALevel2DemonstratePage() {
           </div>
         </div>
       )}
-      <Footer />
     </div>
   )
 }

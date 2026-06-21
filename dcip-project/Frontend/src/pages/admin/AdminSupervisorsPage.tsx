@@ -89,7 +89,7 @@ export default function AdminSupervisorsPage() {
         {showForm && (
           <form
             onSubmit={handleCreate}
-            className="bg-white border border-border rounded-2xl p-6 mb-6 space-y-4"
+            className="bg-white border border-surface-border rounded-2xl p-6 mb-6 space-y-4"
           >
             <h2 className="text-text-primary font-semibold">New Supervisor Account</h2>
 
@@ -101,7 +101,7 @@ export default function AdminSupervisorsPage() {
                   value={form.fullName}
                   onChange={handleChange}
                   placeholder="e.g. Supervisor School A"
-                  className="w-full border border-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                  className="w-full border border-surface-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
                 />
               </div>
               <div>
@@ -111,7 +111,7 @@ export default function AdminSupervisorsPage() {
                   value={form.username}
                   onChange={handleChange}
                   placeholder="e.g. sup.school.a"
-                  className="w-full border border-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                  className="w-full border border-surface-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
                 />
               </div>
               <div>
@@ -122,7 +122,7 @@ export default function AdminSupervisorsPage() {
                   value={form.email}
                   onChange={handleChange}
                   placeholder="e.g. sup.school@dcip.rw"
-                  className="w-full border border-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                  className="w-full border border-surface-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
                 />
               </div>
               <div>
@@ -133,7 +133,7 @@ export default function AdminSupervisorsPage() {
                   value={form.password}
                   onChange={handleChange}
                   placeholder="Initial password"
-                  className="w-full border border-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                  className="w-full border border-surface-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
                 />
               </div>
             </div>
@@ -144,7 +144,7 @@ export default function AdminSupervisorsPage() {
                 name="schoolId"
                 value={form.schoolId}
                 onChange={handleChange}
-                className="w-full border border-border rounded-lg px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:border-primary"
+                className="w-full border border-surface-border rounded-lg px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:border-primary"
               >
                 <option value="">Select school…</option>
                 {schools.map((s) => (
@@ -174,9 +174,9 @@ export default function AdminSupervisorsPage() {
         ) : supervisors.length === 0 ? (
           <p className="text-text-secondary text-sm">No supervisors yet. Add one above.</p>
         ) : (
-          <div className="bg-white border border-border rounded-2xl overflow-hidden overflow-x-auto">
+          <div className="bg-white border border-surface-border rounded-2xl overflow-hidden overflow-x-auto">
             <table className="w-full text-sm min-w-[480px]">
-              <thead className="bg-[#F9F7F4] border-b border-border">
+              <thead className="bg-[#F9F7F4] border-b border-surface-border">
                 <tr>
                   <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Name</th>
                   <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Username</th>
@@ -184,7 +184,7 @@ export default function AdminSupervisorsPage() {
                   <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">District</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-surface-border">
                 {supervisors.map((sup) => (
                   <tr key={sup._id}>
                     <td className="px-6 py-4 text-text-primary font-medium">{sup.fullName}</td>

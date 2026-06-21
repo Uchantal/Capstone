@@ -42,13 +42,9 @@ export default function Footer() {
           <div>
             <p className="text-white/40 text-xs font-semibold tracking-widest mb-3 uppercase">Support</p>
             <div className="flex flex-col gap-2.5">
-              <Link to="/feedback" className="text-white/70 text-sm hover:text-white transition-colors">Send Feedback</Link>
-              {isStudent && (
-                <Link to="/skill-summary" className="text-white/70 text-sm hover:text-white transition-colors">Skill Summary</Link>
-              )}
-              {isStudent && (
-                <Link to="/portfolio" className="text-white/70 text-sm hover:text-white transition-colors">Portfolio</Link>
-              )}
+              <Link to="/feedback" className="text-white/70 text-sm hover:text-white transition-colors">Send us Feedback</Link>
+             
+             
             </div>
           </div>
 
@@ -65,8 +61,8 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/10 mt-8 pt-6 flex flex-col sm:flex-row justify-between gap-2">
-          <span className="text-white/40 text-xs">2025 DCIP By Chantal. All rights reserved.</span>
-          <span className="text-white/40 text-xs">Built for Rwanda's creative youth.</span>
+          <span className="text-white/40 text-xs">2025 DCIP By U.Chantal. All rights reserved.</span>
+          <span className="text-white/40 text-xs">Built for Rwanda's creative Students.</span>
         </div>
       </div>
     </footer>

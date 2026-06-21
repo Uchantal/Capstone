@@ -88,14 +88,14 @@ export default function AdminModulesPage() {
             {modules.map((mod) => (
               <div
                 key={mod._id}
-                className="bg-white border border-border rounded-2xl p-6 flex items-center justify-between gap-6"
+                className="bg-white border border-surface-border rounded-2xl p-6 flex items-center justify-between gap-6"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-1">
                     <p className="text-text-primary font-semibold">{mod.name}</p>
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        mod.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                        mod.isActive ? 'bg-secondary/10 text-secondary' : 'bg-gray-100 text-gray-500'
                       }`}
                     >
                       {mod.isActive ? 'Active' : 'Inactive'}
@@ -108,7 +108,7 @@ export default function AdminModulesPage() {
                   disabled={actionId === mod._id}
                   className={`shrink-0 text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors disabled:opacity-50 ${
                     mod.isActive
-                      ? 'border border-accent text-accent hover:bg-red-50'
+                      ? 'border border-accent text-accent hover:bg-accent/5'
                       : 'bg-primary text-white hover:bg-primary-dark'
                   }`}
                 >
@@ -119,7 +119,7 @@ export default function AdminModulesPage() {
           </div>
         )}
 
-        <div className="bg-white border border-border rounded-2xl p-6">
+        <div className="bg-white border border-surface-border rounded-2xl p-6">
           <h2 className="text-text-primary font-semibold mb-5">Add New Discipline</h2>
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
@@ -129,7 +129,7 @@ export default function AdminModulesPage() {
                 value={form.name}
                 onChange={handleChange}
                 placeholder="e.g. Dance"
-                className="w-full border border-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                className="w-full border border-surface-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
               />
             </div>
             <div>
@@ -139,7 +139,7 @@ export default function AdminModulesPage() {
                 value={form.description}
                 onChange={handleChange}
                 placeholder="Brief description of this discipline"
-                className="w-full border border-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                className="w-full border border-surface-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
               />
             </div>
             {formError && <p className="text-accent text-sm">{formError}</p>}

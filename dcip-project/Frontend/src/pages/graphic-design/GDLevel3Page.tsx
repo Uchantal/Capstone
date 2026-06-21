@@ -19,7 +19,7 @@ export default function GDLevel3Page() {
 
   if (loading || !progress.level2DemonstrationPassed) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )

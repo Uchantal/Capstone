@@ -1,17 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../TopNav'
 import PianoKeyboard from './PianoKeyboard'
 import { useChordValidation } from '../../hooks/useChordValidation'
 import {
   buildChord,
-  CHROMATIC_SCALE,
-  FLAT_NAMES,
   type ChordType,
 } from '../../utils/pianoTheory'
 import { completePianoDemonstration } from '../../services/api'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
-import Footer from '../Footer'
 
 interface ChordDef {
   symbol: string
@@ -34,23 +30,7 @@ interface Props {
   requiresDemoRedirect?: string
 }
 
-function noteNamesToIds(noteNames: string[]): string[] {
-  const normalize = (n: string) => {
-    const e = Object.entries(FLAT_NAMES).find(([, flat]) => flat === n)
-    return e ? e[0] : n
-  }
-  const normalized = noteNames.map(normalize)
-  let oct = 4
-  const result: string[] = []
-  let prevIdx = -1
-  for (const note of normalized) {
-    const idx = CHROMATIC_SCALE.indexOf(note as typeof CHROMATIC_SCALE[number])
-    if (idx <= prevIdx && result.length > 0) oct++
-    result.push(note + oct)
-    prevIdx = idx
-  }
-  return result
-}
+
 
 type Phase = 'testing' | 'results'
 
@@ -72,7 +52,6 @@ export default function LevelDemonstrateScreen({
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { progress, loading } = usePianoProgress()
 
-  // Demonstration state
   const [phase, setPhase] = useState<Phase>('testing')
   const [chordIdx, setChordIdx] = useState(0)
   const [validState, setValidState] = useState<'idle' | 'correct'>('idle')
@@ -80,7 +59,6 @@ export default function LevelDemonstrateScreen({
   const [passed, setPassed] = useState(false)
   const [finalCorrect, setFinalCorrect] = useState(0)
 
-  // Refs for hot-path accumulation — avoid stale closures in advance()
   const correctCountRef = useRef(0)
   const chordIdxRef = useRef(0)
   const submittedRef = useRef(false)
@@ -88,7 +66,6 @@ export default function LevelDemonstrateScreen({
   // Gate checks
   useEffect(() => {
     if (loading) return
-    // Prior demonstration gate
     if (requiresDemoLevel && requiresDemoRedirect) {
       const key = `level${requiresDemoLevel}DemonstrationPassed` as keyof typeof progress
       if (!progress[key]) {
@@ -99,7 +76,6 @@ export default function LevelDemonstrateScreen({
         return
       }
     }
-    // Practise-visited gate
     if (!progress.completedStages.includes(practiseStageId)) {
       navigate(practiseRedirect, {
         replace: true,
@@ -156,28 +132,34 @@ export default function LevelDemonstrateScreen({
   const expectedNoteNames = currentChord
     ? buildChord(currentChord.root, currentChord.type, currentChord.useFlats)
     : []
-  const highlightNotes = noteNamesToIds(expectedNoteNames)
   const pressedNoteNames = pressedNotes.map(n => n.replace(/\d+$/, ''))
 
   useChordValidation(pressedNoteNames, expectedNoteNames, handleMatch)
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
   }
 
-  // Results phase
+  // Synchronous gate guard — prevents flash of content before redirect fires
+  if (requiresDemoLevel && requiresDemoRedirect) {
+    const key = `level${requiresDemoLevel}DemonstrationPassed` as keyof typeof progress
+    if (!progress[key]) return null
+  }
+  if (!progress.completedStages.includes(practiseStageId)) return null
+
   if (phase === 'results') {
     return (
-      <div className="min-h-screen bg-bg-page">
-        <TopNav />
-        <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
-
-          <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
-            <button onClick={() => navigate('/session/music-piano')} className="hover:text-text-primary transition-colors">
+      <div className="h-screen flex flex-col overflow-hidden">
+        <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+          <div className="flex items-center gap-2 text-xs text-text-muted">
+            <button
+              onClick={() => navigate('/session/music-piano')}
+              className="hover:text-text-primary transition-colors"
+            >
               Piano
             </button>
             <span>/</span>
@@ -185,54 +167,58 @@ export default function LevelDemonstrateScreen({
             <span>/</span>
             <span className="text-text-primary">{levelTitle} Demonstration</span>
           </div>
+        </div>
 
-          <div className={`border-2 rounded-2xl p-8 mb-6 ${passed ? 'border-secondary/30 bg-secondary/5' : 'border-border bg-white'}`}>
-            {passed ? (
-              <>
-                <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Level {levelNumber} Demonstration</p>
-                <h1 className="text-text-primary font-bold text-2xl mb-2">Demonstration passed</h1>
-                <p className="text-text-secondary text-sm leading-relaxed mb-4">
-                  You got {finalCorrect} of {testChords.length} chords correct. You have earned the {badgeLabel} Piano badge.
-                </p>
-                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-2 rounded-full">
-                  {badgeLabel} Piano Badge
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Level {levelNumber} Demonstration</p>
-                <h1 className="text-text-primary font-bold text-2xl mb-2">Not quite</h1>
-                <p className="text-text-secondary text-sm leading-relaxed">
-                  You got {finalCorrect} of {testChords.length} chords correct. You need {requiredCorrect} to pass. Go back and practise the chords again, then try the demonstration again.
-                </p>
-              </>
-            )}
-          </div>
+        <div className="flex-1 flex items-center justify-center p-6 bg-white overflow-auto">
+          <div className="max-w-md w-full">
+            <div className={`border-2 rounded-2xl p-8 mb-6 ${passed ? 'border-secondary/30 bg-secondary/5' : 'border-surface-border bg-white'}`}>
+              {passed ? (
+                <>
+                  <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Level {levelNumber} Demonstration</p>
+                  <h1 className="text-text-primary font-bold text-2xl mb-2">Demonstration passed</h1>
+                  <p className="text-text-secondary text-sm leading-relaxed mb-4">
+                    You got {finalCorrect} of {testChords.length} chords correct. You have earned the {badgeLabel} Piano badge.
+                  </p>
+                  <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-2 rounded-full">
+                    {badgeLabel} Piano Badge
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Level {levelNumber} Demonstration</p>
+                  <h1 className="text-text-primary font-bold text-2xl mb-2">Not quite</h1>
+                  <p className="text-text-secondary text-sm leading-relaxed">
+                    You got {finalCorrect} of {testChords.length} chords correct. You need {requiredCorrect} to pass. Go back and practise the chords again, then try the demonstration again.
+                  </p>
+                </>
+              )}
+            </div>
 
-          <div className="space-y-3">
-            {passed ? (
-              <button
-                onClick={() => navigate(nextPath)}
-                className="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-dark transition-colors text-sm"
-              >
-                Continue
-              </button>
-            ) : (
-              <>
+            <div className="space-y-3">
+              {passed ? (
                 <button
-                  onClick={() => navigate(practisePath)}
+                  onClick={() => navigate(nextPath)}
                   className="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-dark transition-colors text-sm"
                 >
-                  Practise Again
+                  Continue
                 </button>
-                <button
-                  onClick={handleTryAgain}
-                  className="w-full border border-border text-text-secondary font-medium py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm"
-                >
-                  Try Demonstration Again
-                </button>
-              </>
-            )}
+              ) : (
+                <>
+                  <button
+                    onClick={() => navigate(practisePath)}
+                    className="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-dark transition-colors text-sm"
+                  >
+                    Practise Again
+                  </button>
+                  <button
+                    onClick={handleTryAgain}
+                    className="w-full border border-surface-border text-text-secondary font-medium py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm"
+                  >
+                    Try Demonstration Again
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -244,25 +230,20 @@ export default function LevelDemonstrateScreen({
     ? 'Correct. Hold steady.'
     : pressedNoteNames.length > 0
     ? 'Hold steady...'
-    : 'Find and press the notes below, hold for a moment.'
+    : 'Find the chord notes from memory and press them together.'
 
   const feedbackClass = validState === 'correct'
     ? 'text-secondary font-semibold'
     : 'text-text-muted'
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
-
-        {lockedMessage && (
-          <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 mb-5 text-accent text-sm">
-            {lockedMessage}
-          </div>
-        )}
-
-        <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
-          <button onClick={() => navigate('/session/music-piano')} className="hover:text-text-primary transition-colors">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
+          <button
+            onClick={() => navigate('/session/music-piano')}
+            className="hover:text-text-primary transition-colors"
+          >
             Piano
           </button>
           <span>/</span>
@@ -270,15 +251,23 @@ export default function LevelDemonstrateScreen({
           <span>/</span>
           <span className="text-text-primary">{levelTitle} Demonstration</span>
         </div>
+        <button
+          onClick={handleSkip}
+          disabled={validState === 'correct'}
+          className="border border-surface-border text-text-secondary text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Skip this chord
+        </button>
+      </div>
 
-        <div className="mb-5">
-          <h1 className="text-text-primary font-bold text-2xl mb-1">{levelTitle}: Demonstration</h1>
-          <p className="text-text-secondary text-sm">
-            Play each chord shown below. You need {requiredCorrect} of {testChords.length} correct to pass.
-          </p>
-        </div>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border p-4">
+          {lockedMessage && (
+            <div className="bg-accent/10 border border-accent/30 rounded-lg px-3 py-2 mb-4 text-accent text-sm">
+              {lockedMessage}
+            </div>
+          )}
 
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
           <div className="flex items-center justify-between mb-4">
             <p className="text-text-muted text-xs uppercase tracking-wide">
               Chord {chordIdx + 1} of {testChords.length}
@@ -288,53 +277,40 @@ export default function LevelDemonstrateScreen({
                 <span
                   key={i}
                   className={`w-2 h-2 rounded-full ${
-                    i < chordIdx
-                      ? 'bg-secondary'
-                      : i === chordIdx
-                      ? 'bg-primary'
-                      : 'bg-gray-200'
+                    i < chordIdx ? 'bg-secondary' : i === chordIdx ? 'bg-primary' : 'bg-gray-200'
                   }`}
                 />
               ))}
             </div>
           </div>
 
-          <div className="flex items-center gap-6 mb-4">
-            <span className="text-6xl font-bold text-text-primary leading-none">
+          <div className="mb-3">
+            <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Play this chord</p>
+            <span className="text-5xl font-bold text-text-primary leading-none">
               {currentChord.symbol}
             </span>
-            <div>
-              <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Notes to play</p>
-              <p className="text-text-primary font-semibold text-lg">
-                {expectedNoteNames.join(' · ')}
-              </p>
-            </div>
           </div>
 
           <p className={`text-sm ${feedbackClass}`}>{feedbackText}</p>
         </div>
 
-        <PianoKeyboard
-          onNotesChange={notes => {
-            setPressedNotes(notes)
-            if (validState === 'correct') return
-            setValidState('idle')
-          }}
-          highlightNotes={validState !== 'correct' ? highlightNotes : []}
-          disabled={validState === 'correct'}
-        />
-
-        <div className="mt-5 flex justify-end">
-          <button
-            onClick={handleSkip}
-            disabled={validState === 'correct'}
-            className="border border-border text-text-secondary text-sm font-medium px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Skip this chord
-          </button>
+        <div className="flex-1 bg-[#E8E4DC] p-4 flex flex-col overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-xl shadow-sm">
+            <PianoKeyboard
+              onNotesChange={notes => {
+                setPressedNotes(notes)
+                if (validState === 'correct') return
+                setValidState('idle')
+              }}
+              highlightNotes={[]}
+              disabled={validState === 'correct'}
+            />
+          </div>
+          <p className="flex-shrink-0 pt-2 text-center text-xs text-text-secondary">
+            Keys A-K + W E T Y U for octave 1 | Use mouse or touch for octave 2
+          </p>
         </div>
       </div>
-      <Footer />
     </div>
   )
 }

@@ -146,7 +146,7 @@ export default function PianoKeyboard({ onNotesChange, highlightNotes = [], disa
   const whiteKeyClass = (id: string) => {
     const pressed = pressedNotes.has(id)
     const highlighted = highlightSet.has(id)
-    const base = 'w-10 h-28 border border-border rounded-b-md flex flex-col items-center justify-end pb-1 cursor-pointer select-none transition-colors duration-150 touch-none'
+    const base = 'absolute inset-0 border border-surface-border rounded-b-md flex flex-col items-center justify-end pb-2 cursor-pointer select-none transition-colors duration-150 touch-none'
     if (pressed) return `${base} bg-primary border-primary-dark`
     if (highlighted) return `${base} bg-primary/20 border-primary/40`
     return `${base} bg-white hover:bg-gray-50`
@@ -155,7 +155,7 @@ export default function PianoKeyboard({ onNotesChange, highlightNotes = [], disa
   const blackKeyClass = (id: string) => {
     const pressed = pressedNotes.has(id)
     const highlighted = highlightSet.has(id)
-    const base = 'absolute z-10 left-7 top-0 w-6 h-16 rounded-b-md cursor-pointer select-none transition-colors duration-150 touch-none'
+    const base = 'absolute z-10 top-0 left-[70%] w-[60%] h-[60%] rounded-b-md cursor-pointer select-none transition-colors duration-150 touch-none'
     if (pressed) return `${base} bg-primary`
     if (highlighted) return `${base} bg-primary/70`
     return `${base} bg-text-primary hover:bg-text-secondary`
@@ -183,10 +183,10 @@ export default function PianoKeyboard({ onNotesChange, highlightNotes = [], disa
   }
 
   return (
-    <div className="bg-white border border-border rounded-xl p-4 shadow-sm overflow-x-auto">
-      <div className="flex select-none">
+    <div className="w-full h-full flex flex-col">
+      <div className="flex-1 flex select-none overflow-hidden">
         {WHITE_KEYS.map(key => (
-          <div key={key.id} className="relative flex-shrink-0">
+          <div key={key.id} className="flex-1 relative min-w-0">
             <div
               className={whiteKeyClass(key.id)}
               onMouseDown={() => { isMouseDownRef.current = true; pressNote(key.id) }}
@@ -222,9 +222,6 @@ export default function PianoKeyboard({ onNotesChange, highlightNotes = [], disa
           </div>
         ))}
       </div>
-      <p className="text-text-muted text-[9px] mt-2">
-        Keys A–K + W E T Y U for octave 1 | Use mouse or touch for octave 2
-      </p>
     </div>
   )
 }

@@ -41,7 +41,7 @@ export default function PortfolioPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-10">
         <div className="flex items-center justify-between mb-6">
@@ -60,7 +60,7 @@ export default function PortfolioPage() {
         {loading ? (
           <div className="text-center text-text-secondary text-sm py-16">Loading...</div>
         ) : items.length === 0 ? (
-          <div className="bg-white border border-border rounded-xl p-12 text-center">
+          <div className="bg-white border border-surface-border rounded-xl p-12 text-center">
             <p className="text-4xl mb-3"></p>
             <p className="text-text-primary font-semibold mb-2">No work yet</p>
             <p className="text-text-secondary text-sm mb-6">Complete a session to save your first piece.</p>
@@ -89,7 +89,7 @@ export default function PortfolioPage() {
 
             {/* Preview panel */}
             {selected && (
-              <div className="bg-white border border-border rounded-xl p-5 sticky top-6 h-fit">
+              <div className="bg-white border border-surface-border rounded-xl p-5 sticky top-6 h-fit">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <p className="text-text-primary font-semibold text-sm">{selected.title}</p>
@@ -110,14 +110,14 @@ export default function PortfolioPage() {
                   <img
                     src={selected.fileData}
                     alt={selected.title}
-                    className="w-full rounded-lg border border-border mb-4"
+                    className="w-full rounded-lg border border-surface-border mb-4"
                   />
                 )}
                 {selected.fileType?.startsWith('audio') && (
                   <audio controls src={selected.fileData} className="w-full mb-4" />
                 )}
                 {(!selected.fileType || selected.fileType === 'audio/wav') && !selected.fileData?.startsWith('data:') && (
-                  <div className="bg-bg-page rounded-lg p-4 text-center text-text-secondary text-sm mb-4">
+                  <div className="bg-white rounded-lg p-4 text-center text-text-secondary text-sm mb-4">
                     Audio session recorded
                   </div>
                 )}

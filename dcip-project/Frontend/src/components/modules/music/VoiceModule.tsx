@@ -311,7 +311,7 @@ export default function VoiceModule({ step, onAudioReady }: Props) {
                 className={`px-4 py-2 rounded-lg border text-sm font-semibold transition-all
                   ${activeTone === t.label
                     ? 'bg-purple-600 text-white border-purple-600 scale-95'
-                    : 'bg-white border-border text-text-primary hover:border-purple-400 hover:bg-purple-50'
+                    : 'bg-white border-surface-border text-text-primary hover:border-purple-400 hover:bg-purple-50'
                   }`}
               >
                 {t.label}
@@ -321,7 +321,7 @@ export default function VoiceModule({ step, onAudioReady }: Props) {
           </div>
 
           {micError && (
-            <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{micError}</p>
+            <p className="text-xs text-accent bg-accent/5 border border-accent/20 rounded-lg px-3 py-2">{micError}</p>
           )}
 
           {!pitchActive ? (
@@ -345,15 +345,15 @@ export default function VoiceModule({ step, onAudioReady }: Props) {
               </p>
               <div className="flex rounded-full overflow-hidden border border-gray-200 h-6">
                 <div className={`flex-1 flex items-center justify-center text-[10px] font-medium transition-colors duration-100
-                  ${pitchStatus === 'low' ? 'bg-blue-400 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                  ${pitchStatus === 'low' ? 'bg-text-muted text-white' : 'bg-gray-100 text-gray-400'}`}>
                   Too low
                 </div>
                 <div className={`flex-1 flex items-center justify-center text-[10px] font-medium transition-colors duration-100
-                  ${pitchStatus === 'on' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                  ${pitchStatus === 'on' ? 'bg-secondary text-white' : 'bg-gray-100 text-gray-400'}`}>
                   On pitch
                 </div>
                 <div className={`flex-1 flex items-center justify-center text-[10px] font-medium transition-colors duration-100
-                  ${pitchStatus === 'high' ? 'bg-red-400 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                  ${pitchStatus === 'high' ? 'bg-accent text-white' : 'bg-gray-100 text-gray-400'}`}>
                   Too high
                 </div>
               </div>
@@ -383,7 +383,7 @@ export default function VoiceModule({ step, onAudioReady }: Props) {
           <p className="text-text-primary text-xs font-semibold">Record your voice</p>
 
           {micError && (
-            <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{micError}</p>
+            <p className="text-xs text-accent bg-accent/5 border border-accent/20 rounded-lg px-3 py-2">{micError}</p>
           )}
 
           {!recording && (

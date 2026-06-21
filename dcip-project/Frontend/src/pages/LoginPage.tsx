@@ -43,7 +43,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <div className="flex-1 flex items-center justify-center px-6">
       <div className="w-full max-w-md">
         <div className="flex items-center gap-3 mb-8">
@@ -69,7 +69,7 @@ export default function LoginPage() {
               value={form.username}
               onChange={handleChange}
               placeholder="Your username"
-              className="w-full border border-border rounded-lg px-4 py-3 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+              className="w-full border border-surface-border rounded-lg px-4 py-3 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
             />
           </div>
 
@@ -82,7 +82,7 @@ export default function LoginPage() {
                 value={form.password}
                 onChange={handleChange}
                 placeholder="Your password"
-                className="w-full border border-border rounded-lg px-4 py-3 pr-10 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
+                className="w-full border border-surface-border rounded-lg px-4 py-3 pr-10 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary"
               />
               <button
                 type="button"
@@ -105,7 +105,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-accent text-sm px-4 py-3 rounded-lg">
+            <div className="bg-accent/5 border border-accent/20 text-accent text-sm px-4 py-3 rounded-lg">
               {error}
             </div>
           )}

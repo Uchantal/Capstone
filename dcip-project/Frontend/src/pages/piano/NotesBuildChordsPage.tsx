@@ -20,9 +20,9 @@ function IntervalStep({ from, to, steps, result }: { from: string; to: string; s
     <div className="flex items-center gap-3 flex-wrap">
       <span className="bg-primary/10 text-primary font-bold px-3 py-1.5 rounded-lg text-sm">{from}</span>
       <div className="flex items-center gap-1">
-        <div className="w-6 h-px bg-border" />
+        <div className="w-6 h-px bg-surface-border" />
         <span className="text-text-muted text-xs whitespace-nowrap">+{steps} half steps</span>
-        <div className="w-6 h-px bg-border" />
+        <div className="w-6 h-px bg-surface-border" />
       </div>
       <span className="bg-primary/10 text-primary font-bold px-3 py-1.5 rounded-lg text-sm">{to}</span>
       {result && <span className="text-text-muted text-xs">= {result}</span>}
@@ -47,7 +47,7 @@ export default function NotesBuildChordsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -70,7 +70,7 @@ export default function NotesBuildChordsPage() {
         </p>
 
         {/* Section 1: Half steps */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Half Steps</h2>
           <p className="text-text-secondary text-sm mb-3">
             A <span className="font-semibold">half step</span> is the distance between any two adjacent keys on the piano, white or black.
@@ -88,7 +88,7 @@ export default function NotesBuildChordsPage() {
         </div>
 
         {/* Section 2: Major chord */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Building a Major Chord</h2>
           <p className="text-text-secondary text-sm mb-4">
             A <span className="font-semibold">major chord</span> is built with this formula:
@@ -115,7 +115,7 @@ export default function NotesBuildChordsPage() {
         </div>
 
         {/* Section 3: Minor chord */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Building a Minor Chord</h2>
           <p className="text-text-secondary text-sm mb-4">
             A <span className="font-semibold">minor chord</span> swaps the order of the first two intervals: it starts with a smaller step, giving it a darker sound.
@@ -142,11 +142,11 @@ export default function NotesBuildChordsPage() {
         </div>
 
         {/* Summary table */}
-        <div className="bg-white border border-border rounded-2xl overflow-hidden mb-8">
-          <div className="bg-[#F9F7F4] px-6 py-3 border-b border-border">
+        <div className="bg-white border border-surface-border rounded-2xl overflow-hidden mb-8">
+          <div className="bg-[#F9F7F4] px-6 py-3 border-b border-surface-border">
             <p className="text-text-muted text-xs uppercase tracking-wide font-medium">Chord Formula Summary</p>
           </div>
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-surface-border">
             <div className="flex px-6 py-4 gap-6">
               <div className="w-24 flex-shrink-0">
                 <p className="text-text-primary font-semibold text-sm">Major</p>

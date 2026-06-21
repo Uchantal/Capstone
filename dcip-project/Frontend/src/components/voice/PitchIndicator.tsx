@@ -16,12 +16,12 @@ export default function PitchIndicator({ status, label }: Props) {
           No voice
         </div>
         <div className={`flex-1 flex items-center justify-center transition-colors duration-100 ${
-          status === 'close' ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-300'
+          status === 'close' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-300'
         }`}>
           Close
         </div>
         <div className={`flex-1 flex items-center justify-center transition-colors duration-100 ${
-          status === 'on' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-300'
+          status === 'on' ? 'bg-secondary text-white' : 'bg-gray-100 text-gray-300'
         }`}>
           On pitch
         </div>

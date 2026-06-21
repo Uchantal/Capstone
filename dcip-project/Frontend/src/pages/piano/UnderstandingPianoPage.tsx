@@ -25,7 +25,7 @@ function StaticKeyboard() {
       {whiteNotes.map((note, i) => (
         <div key={note} className="relative flex-shrink-0">
           <div
-            className={`w-10 h-20 border border-border rounded-b-md flex items-end justify-center pb-1.5 text-xs font-semibold ${
+            className={`w-10 h-20 border border-surface-border rounded-b-md flex items-end justify-center pb-1.5 text-xs font-semibold ${
               highlighted.has(note) ? 'bg-primary/20 border-primary text-primary' : 'bg-white text-text-muted'
             }`}
           >
@@ -59,7 +59,7 @@ export default function UnderstandingPianoPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -78,11 +78,11 @@ export default function UnderstandingPianoPage() {
 
         <h1 className="text-text-primary font-bold text-2xl mb-1">Understanding the Piano</h1>
         <p className="text-text-secondary text-sm mb-8">
-          Before you play chords, learn how the piano keyboard is organised.
+          Before you play chords, learn how the piano keyboard is organised in relation to your computer Keyboard.
         </p>
 
         {/* Section 1 */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">White and Black Keys</h2>
           <p className="text-text-secondary text-sm mb-4">
             A piano has two types of keys. The white keys play the seven natural notes of music:
@@ -96,7 +96,7 @@ export default function UnderstandingPianoPage() {
         </div>
 
         {/* Section 2: Static diagram */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Finding C on the Keyboard</h2>
           <p className="text-text-secondary text-sm mb-5">
             C is always the white key directly to the <span className="font-semibold">left of a group of two black keys</span>.
@@ -111,7 +111,7 @@ export default function UnderstandingPianoPage() {
         </div>
 
         {/* Section 3 */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
           <h2 className="text-text-primary font-bold text-base mb-3">Octaves</h2>
           <p className="text-text-secondary text-sm mb-3">
             Each complete set of 12 keys (7 white + 5 black) is called an <span className="font-semibold">octave</span>.

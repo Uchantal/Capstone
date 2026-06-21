@@ -95,7 +95,7 @@ export default function VoiceCourse1Page() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -123,7 +123,7 @@ export default function VoiceCourse1Page() {
         </p>
 
         {/* Card 1: Posture */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Posture Before You Sing</h2>
           <p className="text-text-secondary text-sm mb-4 leading-relaxed">
             Good posture allows deep breathing and prevents throat tension. When your body is properly aligned,
@@ -172,7 +172,7 @@ export default function VoiceCourse1Page() {
         </div>
 
         {/* Card 2: Diaphragmatic Breathing */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Diaphragmatic Breathing</h2>
           <p className="text-text-secondary text-sm mb-3 leading-relaxed">
             Singing from the chest strains the voice. Singing from the diaphragm gives power, control, and
@@ -190,7 +190,7 @@ export default function VoiceCourse1Page() {
         </div>
 
         {/* Card 3: How Your Voice Works */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
           <h2 className="text-text-primary font-bold text-base mb-3">Your Voice and How It Works</h2>
           <p className="text-text-secondary text-sm mb-3 leading-relaxed">
             Your vocal cords vibrate when air passes through them to create sound. The more controlled

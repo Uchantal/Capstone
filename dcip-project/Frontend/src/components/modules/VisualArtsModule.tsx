@@ -4,6 +4,8 @@ interface Props {
   canvasRef: RefObject<HTMLCanvasElement>
   step: number
   onInteraction?: () => void
+  onColourUsed?: (colour: string) => void
+  sidebarFooter?: React.ReactNode
 }
 
 type Tool = 'brush' | 'eraser' | 'line' | 'rect' | 'circle' | 'ruler'
@@ -37,7 +39,7 @@ const TOOL_LIST: { id: Tool; label: string }[] = [
 const MAX_HISTORY = 30
 const BTN_BASE     = 'text-xs px-2.5 py-1.5 rounded-lg border transition-colors font-medium'
 const BTN_ACTIVE   = 'bg-primary text-white border-primary'
-const BTN_INACTIVE = 'border-border text-text-secondary hover:border-primary/40 hover:bg-white'
+const BTN_INACTIVE = 'border-surface-border text-text-secondary hover:border-primary/40 hover:bg-white'
 
 function getPos(e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) {
   const rect = canvas.getBoundingClientRect()
@@ -57,14 +59,14 @@ function getPos(e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElemen
 
 function ToolGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex-shrink-0">
+    <div>
       <p className="text-text-muted text-[9px] uppercase tracking-wide mb-1.5 font-medium">{label}</p>
       <div className="flex items-center gap-1.5 flex-wrap">{children}</div>
     </div>
   )
 }
 
-export default function VisualArtsModule({ canvasRef, step, onInteraction }: Props) {
+export default function VisualArtsModule({ canvasRef, step: _step, onInteraction, onColourUsed, sidebarFooter }: Props) {
   const [tool,        setTool]        = useState<Tool>('brush')
   const [colour,      setColour]      = useState('#1A1A1A')
   const [bgColour,    setBgColour]    = useState('#FAFAF7')
@@ -99,9 +101,6 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
   useEffect(() => { shapeModeRef.current = shapeMode }, [shapeMode])
 
   // ── Composite render ──────────────────────────────────────────────────────
-  // Composites both visible layers onto canvasRef so the parent can call
-  // canvasRef.current.toDataURL() and receive the full artwork including
-  // background colour. Called after every completed stroke and bg change.
   const renderComposite = useCallback(() => {
     const bg   = bgCanvasRef.current
     const draw = drawCanvasRef.current
@@ -115,8 +114,6 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
   }, [canvasRef])
 
   // ── History ───────────────────────────────────────────────────────────────
-  // Only the drawing layer is snapshotted. Background colour changes are
-  // intentional and separate; they are not part of the undo stack.
   const saveToHistory = useCallback(() => {
     const draw = drawCanvasRef.current
     if (!draw) return
@@ -179,14 +176,12 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
       bgCtx.fillStyle = bgRef.current
       bgCtx.fillRect(0, 0, bg.width, bg.height)
     }
-    // Drawing canvas starts fully transparent — no fill needed
     renderComposite()
     const entry: HistoryEntry = { snapshot: draw.toDataURL() }
     historyRef.current = [entry]
     historyIdx.current = 0
     setCanUndo(false)
     setCanRedo(false)
-  // renderComposite is stable; intentionally run once on mount
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -314,8 +309,6 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
         break
       }
     }
-    // No renderComposite() here — the drawing canvas is visible directly;
-    // visual feedback is immediate without any re-compositing step
   }
 
   const stopDraw = () => {
@@ -325,11 +318,12 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
     saveToHistory()
     renderComposite()
     onInteraction?.()
+    if (toolRef.current !== 'eraser') {
+      onColourUsed?.(colourRef.current)
+    }
   }
 
   // ── Background colour ─────────────────────────────────────────────────────
-  // Fills only the background canvas. The drawing layer is completely untouched.
-  // Background changes are not added to the undo history.
   const changeBgColour = (newBg: string) => {
     bgRef.current = newBg
     setBgColour(newBg)
@@ -356,8 +350,6 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
   }
 
   // ── Ruler (overlay canvas) ────────────────────────────────────────────────
-  // Temporary dashed guide drawn on the overlay; cleared on mouse-up or
-  // tool switch without touching the artwork canvases.
   const startRuler = (e: React.MouseEvent) => {
     const ov = overlayRef.current
     if (!ov) return
@@ -411,11 +403,10 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
   const isShapeTool = tool === 'rect' || tool === 'circle'
 
   return (
-    <div>
-      {/* ── Clear confirmation dialog ── */}
+    <>
       {showConfirm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white border border-border rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
+          <div className="bg-white border border-surface-border rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
             <p className="text-text-primary font-semibold text-sm mb-2">Clear the entire canvas?</p>
             <p className="text-text-secondary text-xs mb-5">
               This removes all drawn content. You can undo it immediately after with Ctrl+Z.
@@ -438,185 +429,180 @@ export default function VisualArtsModule({ canvasRef, step, onInteraction }: Pro
         </div>
       )}
 
-      {/* ── Toolbar ── */}
-      <div className="bg-[#F9F7F4] border border-border rounded-xl p-3 mb-3 flex flex-wrap gap-x-5 gap-y-3 items-start">
+      <div className="flex-1 flex flex-row overflow-hidden">
+        {/* ── Sidebar toolbar ── */}
+        <div className="w-64 flex-shrink-0 bg-[#F9F7F4] border-r border-surface-border overflow-y-auto p-3 space-y-4">
 
-        {/* Tools */}
-        <ToolGroup label="Tool">
-          {TOOL_LIST.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setTool(t.id)}
-              className={`${BTN_BASE} ${tool === t.id ? BTN_ACTIVE : BTN_INACTIVE}`}
-            >
-              {t.label}
-            </button>
-          ))}
-          {isShapeTool && (
-            <>
+          <ToolGroup label="Tool">
+            {TOOL_LIST.map(t => (
               <button
-                onClick={() => setShapeMode('fill')}
-                className={`${BTN_BASE} ${shapeMode === 'fill' ? BTN_ACTIVE : BTN_INACTIVE}`}
+                key={t.id}
+                onClick={() => setTool(t.id)}
+                className={`${BTN_BASE} ${tool === t.id ? BTN_ACTIVE : BTN_INACTIVE}`}
               >
-                Fill
+                {t.label}
               </button>
-              <button
-                onClick={() => setShapeMode('outline')}
-                className={`${BTN_BASE} ${shapeMode === 'outline' ? BTN_ACTIVE : BTN_INACTIVE}`}
-              >
-                Outline
-              </button>
-            </>
-          )}
-        </ToolGroup>
+            ))}
+            {isShapeTool && (
+              <>
+                <button
+                  onClick={() => setShapeMode('fill')}
+                  className={`${BTN_BASE} ${shapeMode === 'fill' ? BTN_ACTIVE : BTN_INACTIVE}`}
+                >
+                  Fill
+                </button>
+                <button
+                  onClick={() => setShapeMode('outline')}
+                  className={`${BTN_BASE} ${shapeMode === 'outline' ? BTN_ACTIVE : BTN_INACTIVE}`}
+                >
+                  Outline
+                </button>
+              </>
+            )}
+          </ToolGroup>
 
-        {/* Colour */}
-        <ToolGroup label="Colour">
-          {QUICK_COLOURS.map(c => (
-            <button
-              key={c}
-              onClick={() => setColour(c)}
-              title={c}
-              className={`w-6 h-6 rounded-full border-2 flex-shrink-0 transition-transform ${
-                colour === c
-                  ? 'border-text-primary scale-110'
-                  : 'border-transparent hover:border-gray-300'
-              }`}
-              style={{ backgroundColor: c }}
+          <ToolGroup label="Colour">
+            {QUICK_COLOURS.map(c => (
+              <button
+                key={c}
+                onClick={() => setColour(c)}
+                title={c}
+                className={`w-6 h-6 rounded-full border-2 flex-shrink-0 transition-transform ${
+                  colour === c
+                    ? 'border-text-primary scale-110'
+                    : 'border-transparent hover:border-gray-300'
+                }`}
+                style={{ backgroundColor: c }}
+              />
+            ))}
+            <input
+              type="color"
+              value={colour}
+              onChange={e => setColour(e.target.value)}
+              title="Custom colour"
+              className="w-6 h-6 cursor-pointer rounded border-0 p-0"
             />
-          ))}
-          <input
-            type="color"
-            value={colour}
-            onChange={e => setColour(e.target.value)}
-            title="Custom colour"
-            className="w-6 h-6 cursor-pointer rounded border-0 p-0"
-          />
-          <span
-            className="w-6 h-6 rounded-full border-2 border-primary flex-shrink-0"
-            style={{ backgroundColor: colour }}
-            title="Active colour"
-          />
-        </ToolGroup>
+            <span
+              className="w-6 h-6 rounded-full border-2 border-primary flex-shrink-0"
+              style={{ backgroundColor: colour }}
+              title="Active colour"
+            />
+          </ToolGroup>
 
-        {/* Background */}
-        <ToolGroup label="Background">
-          {BG_PRESETS.map(p => (
+          <ToolGroup label="Background">
+            {BG_PRESETS.map(p => (
+              <button
+                key={p.value}
+                onClick={() => changeBgColour(p.value)}
+                className={`text-[10px] px-2 py-1 rounded-md border transition-colors ${
+                  bgColour === p.value
+                    ? 'border-primary text-primary bg-primary/5 font-medium'
+                    : 'border-surface-border text-text-muted hover:border-primary/40'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+            <input
+              type="color"
+              value={bgColour}
+              onChange={e => changeBgColour(e.target.value)}
+              title="Custom background"
+              className="w-6 h-6 cursor-pointer rounded border-0 p-0"
+            />
+          </ToolGroup>
+
+          <ToolGroup label="Size">
+            <input
+              type="range"
+              min={2}
+              max={40}
+              value={size}
+              onChange={e => setSize(Number(e.target.value))}
+              className="w-28 accent-primary"
+            />
+            <span className="text-text-secondary text-xs w-8">{size}px</span>
+          </ToolGroup>
+
+          <ToolGroup label="History">
             <button
-              key={p.value}
-              onClick={() => changeBgColour(p.value)}
-              className={`text-[10px] px-2 py-1 rounded-md border transition-colors ${
-                bgColour === p.value
-                  ? 'border-primary text-primary bg-primary/5 font-medium'
-                  : 'border-border text-text-muted hover:border-primary/40'
-              }`}
+              onClick={undo}
+              disabled={!canUndo}
+              title="Undo (Ctrl+Z)"
+              className={`${BTN_BASE} ${BTN_INACTIVE} disabled:opacity-30 disabled:cursor-not-allowed`}
             >
-              {p.label}
+              Undo
             </button>
-          ))}
-          <input
-            type="color"
-            value={bgColour}
-            onChange={e => changeBgColour(e.target.value)}
-            title="Custom background"
-            className="w-6 h-6 cursor-pointer rounded border-0 p-0"
+            <button
+              onClick={redo}
+              disabled={!canRedo}
+              title="Redo (Ctrl+Shift+Z)"
+              className={`${BTN_BASE} ${BTN_INACTIVE} disabled:opacity-30 disabled:cursor-not-allowed`}
+            >
+              Redo
+            </button>
+          </ToolGroup>
+
+          <ToolGroup label="Actions">
+            <button
+              onClick={() => setShowConfirm(true)}
+              className={`${BTN_BASE} border-surface-border text-text-secondary hover:text-accent hover:border-accent`}
+            >
+              Clear
+            </button>
+          </ToolGroup>
+
+          {sidebarFooter}
+        </div>
+
+        {/* ── Canvas area ──
+            Layer 1 (bgCanvasRef)   — background colour fill
+            Layer 2 (drawCanvasRef) — all drawing content, transparent background
+            Layer 3 (overlayRef)    — ruler guide overlay only
+            Layer 4 (canvasRef)     — hidden composite kept for toDataURL() saves
+        ── */}
+        <div className="flex-1 relative bg-[#E8E4DC]">
+          <canvas
+            ref={bgCanvasRef}
+            width={700}
+            height={400}
+            className="absolute inset-0 w-full h-full block"
           />
-        </ToolGroup>
-
-        {/* Size */}
-        <ToolGroup label="Size">
-          <input
-            type="range"
-            min={2}
-            max={40}
-            value={size}
-            onChange={e => setSize(Number(e.target.value))}
-            className="w-20 accent-primary"
+          <canvas
+            ref={drawCanvasRef}
+            width={700}
+            height={400}
+            className={`absolute inset-0 w-full h-full touch-none ${
+              tool === 'ruler' ? 'pointer-events-none' : 'cursor-crosshair'
+            }`}
+            onMouseDown={tool  !== 'ruler' ? startDraw : undefined}
+            onMouseMove={tool  !== 'ruler' ? draw      : undefined}
+            onMouseUp={tool    !== 'ruler' ? stopDraw  : undefined}
+            onMouseLeave={tool !== 'ruler' ? stopDraw  : undefined}
+            onTouchStart={tool !== 'ruler' ? startDraw : undefined}
+            onTouchMove={tool  !== 'ruler' ? draw      : undefined}
+            onTouchEnd={tool   !== 'ruler' ? stopDraw  : undefined}
           />
-          <span className="text-text-secondary text-xs w-8">{size}px</span>
-        </ToolGroup>
-
-        {/* History */}
-        <ToolGroup label="History">
-          <button
-            onClick={undo}
-            disabled={!canUndo}
-            title="Undo (Ctrl+Z)"
-            className={`${BTN_BASE} ${BTN_INACTIVE} disabled:opacity-30 disabled:cursor-not-allowed`}
-          >
-            Undo
-          </button>
-          <button
-            onClick={redo}
-            disabled={!canRedo}
-            title="Redo (Ctrl+Shift+Z)"
-            className={`${BTN_BASE} ${BTN_INACTIVE} disabled:opacity-30 disabled:cursor-not-allowed`}
-          >
-            Redo
-          </button>
-        </ToolGroup>
-
-        {/* Actions */}
-        <ToolGroup label="Actions">
-          <button
-            onClick={() => setShowConfirm(true)}
-            className={`${BTN_BASE} border-border text-text-secondary hover:text-accent hover:border-accent`}
-          >
-            Clear
-          </button>
-        </ToolGroup>
+          <canvas
+            ref={overlayRef}
+            width={700}
+            height={400}
+            className={`absolute inset-0 w-full h-full ${
+              tool === 'ruler' ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'
+            }`}
+            onMouseDown={tool  === 'ruler' ? startRuler : undefined}
+            onMouseMove={tool  === 'ruler' ? drawRuler  : undefined}
+            onMouseUp={tool    === 'ruler' ? stopRuler  : undefined}
+            onMouseLeave={tool === 'ruler' ? stopRuler  : undefined}
+          />
+          <canvas
+            ref={canvasRef}
+            width={700}
+            height={400}
+            className="hidden"
+          />
+        </div>
       </div>
-
-      {/* ── Canvas stack ────────────────────────────────────────────────────────
-          Border and rounding live on the container so all layers clip together.
-
-          Layer 1 (bgCanvasRef)   — background colour fill, sets container height
-          Layer 2 (drawCanvasRef) — all drawing content, transparent background
-          Layer 3 (overlayRef)    — ruler guide overlay only
-          Layer 4 (canvasRef)     — hidden composite kept for toDataURL() saves
-      ── */}
-      <div className="relative border border-border rounded-xl overflow-hidden">
-        <canvas
-          ref={bgCanvasRef}
-          width={700}
-          height={400}
-          className="w-full block"
-        />
-        <canvas
-          ref={drawCanvasRef}
-          width={700}
-          height={400}
-          className={`absolute inset-0 w-full h-full touch-none ${
-            tool === 'ruler' ? 'pointer-events-none' : 'cursor-crosshair'
-          }`}
-          onMouseDown={tool  !== 'ruler' ? startDraw : undefined}
-          onMouseMove={tool  !== 'ruler' ? draw      : undefined}
-          onMouseUp={tool    !== 'ruler' ? stopDraw  : undefined}
-          onMouseLeave={tool !== 'ruler' ? stopDraw  : undefined}
-          onTouchStart={tool !== 'ruler' ? startDraw : undefined}
-          onTouchMove={tool  !== 'ruler' ? draw      : undefined}
-          onTouchEnd={tool   !== 'ruler' ? stopDraw  : undefined}
-        />
-        <canvas
-          ref={overlayRef}
-          width={700}
-          height={400}
-          className={`absolute inset-0 w-full h-full ${
-            tool === 'ruler' ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'
-          }`}
-          onMouseDown={tool  === 'ruler' ? startRuler : undefined}
-          onMouseMove={tool  === 'ruler' ? drawRuler  : undefined}
-          onMouseUp={tool    === 'ruler' ? stopRuler  : undefined}
-          onMouseLeave={tool === 'ruler' ? stopRuler  : undefined}
-        />
-        <canvas
-          ref={canvasRef}
-          width={700}
-          height={400}
-          className="hidden"
-        />
-      </div>
-
-    </div>
+    </>
   )
 }

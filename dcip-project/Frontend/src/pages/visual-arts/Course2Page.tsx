@@ -40,7 +40,7 @@ function ColourSwatch({ name, value, label }: { name: string; value: string; lab
   return (
     <div className="text-center">
       <div
-        className="w-10 h-10 rounded-full mx-auto mb-1 border border-border"
+        className="w-10 h-10 rounded-full mx-auto mb-1 border border-surface-border"
         style={{ backgroundColor: value }}
       />
       <p className="text-text-primary text-xs font-semibold">{name}</p>
@@ -81,14 +81,14 @@ export default function Course2Page() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -117,7 +117,7 @@ export default function Course2Page() {
         </p>
 
         {/* Card A: The Colour Wheel */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">The Colour Wheel</h2>
           <p className="text-text-secondary text-sm mb-5">
             The colour wheel organises colours in a circle by their relationship to one another.
@@ -143,7 +143,7 @@ export default function Course2Page() {
         </div>
 
         {/* Card B: Complementary Colours */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Complementary Colours</h2>
           <p className="text-text-secondary text-sm mb-5">
             Colours directly opposite each other on the wheel are called complementary pairs. Placed
@@ -158,8 +158,8 @@ export default function Course2Page() {
             ].map(pair => (
               <div key={pair.a.name} className="flex items-center gap-3">
                 <div className="flex">
-                  <div className="w-10 h-10 rounded-l-full border border-border" style={{ backgroundColor: pair.a.value }} />
-                  <div className="w-10 h-10 rounded-r-full border border-border border-l-0" style={{ backgroundColor: pair.b.value }} />
+                  <div className="w-10 h-10 rounded-l-full border border-surface-border" style={{ backgroundColor: pair.a.value }} />
+                  <div className="w-10 h-10 rounded-r-full border border-surface-border border-l-0" style={{ backgroundColor: pair.b.value }} />
                 </div>
                 <p className="text-text-secondary text-xs">{pair.a.name} + {pair.b.name}</p>
               </div>
@@ -168,7 +168,7 @@ export default function Course2Page() {
         </div>
 
         {/* Card C: Warm and Cool Colours */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Warm and Cool Colours</h2>
           <p className="text-text-secondary text-sm mb-5">
             Colours can be grouped into warm and cool families based on the feeling they create.
@@ -194,7 +194,7 @@ export default function Course2Page() {
         </div>
 
         {/* Card D: Light and Shading */}
-        <div className="bg-white border border-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
           <h2 className="text-text-primary font-bold text-base mb-3">Light and Shading: The Sphere Exercise</h2>
           <p className="text-text-secondary text-sm mb-4">
             Shading is what transforms a flat shape into something that looks three-dimensional.

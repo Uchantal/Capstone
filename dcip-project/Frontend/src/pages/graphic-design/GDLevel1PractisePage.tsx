@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS } from '../../components/graphic-design/PosterSurface'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
-import Footer from '../../components/Footer'
 
 const MINIMUM_INTERACTIONS = 8
 
@@ -36,24 +34,16 @@ export default function GDLevel1PractisePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
-
-        {lockedMessage && (
-          <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 mb-5 text-accent text-sm">
-            {lockedMessage}
-          </div>
-        )}
-
-        <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button onClick={() => navigate('/graphic-design/virtual-studio')} className="hover:text-text-primary transition-colors">
             Graphic Design
           </button>
@@ -62,36 +52,37 @@ export default function GDLevel1PractisePage() {
           <span>/</span>
           <span className="text-text-primary">Practise</span>
         </div>
-
-        <div className="bg-white border border-border rounded-2xl p-6 mb-5">
-          <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Level 1 Practice</p>
-          <h1 className="text-text-primary font-bold text-xl mb-3">Practise Hierarchy and Alignment</h1>
-          <p className="text-text-secondary text-sm leading-relaxed">
-            Practise adjusting your title and subtitle until the hierarchy feels clear.
-            Try different title sizes and alignments. There is no pass or fail here. This is where you build confidence before your demonstration.
-          </p>
-        </div>
-
-        <div className="bg-white border border-border rounded-2xl p-6 mb-6">
-          <DesignCanvas
-            defaultElements={DEFAULT_ELEMENTS}
-            defaultBgColor={DEFAULT_BG_COLOR}
-            onChange={() => {}}
-            onInteraction={recordInteraction}
-          />
-        </div>
-
-        <div className="flex justify-end">
-          <button
-            onClick={() => navigate('/graphic-design/level-1/demonstrate')}
-            disabled={!thresholdMet}
-            className="bg-secondary text-white font-semibold px-8 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-          >
-            I am ready to demonstrate
-          </button>
-        </div>
+        <button
+          onClick={() => navigate('/graphic-design/level-1/demonstrate')}
+          disabled={!thresholdMet}
+          className="bg-secondary text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+        >
+          I am ready to demonstrate
+        </button>
       </div>
-      <Footer />
+
+      <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border px-4 py-3">
+        {lockedMessage && (
+          <div className="bg-accent/10 border border-accent/30 rounded-lg px-3 py-2 mb-2 text-accent text-xs">
+            {lockedMessage}
+          </div>
+        )}
+        <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-1">Level 1 Practice</p>
+        <p className="text-text-secondary text-xs leading-relaxed">
+          Practise adjusting your title and subtitle until the hierarchy feels clear. Try different title sizes and alignments.
+          There is no pass or fail here.
+        </p>
+        {!thresholdMet && (
+          <p className="text-text-muted text-xs mt-1.5">Make at least {MINIMUM_INTERACTIONS} design changes to unlock the demonstration.</p>
+        )}
+      </div>
+
+      <DesignCanvas
+        defaultElements={DEFAULT_ELEMENTS}
+        defaultBgColor={DEFAULT_BG_COLOR}
+        onChange={() => {}}
+        onInteraction={recordInteraction}
+      />
     </div>
   )
 }

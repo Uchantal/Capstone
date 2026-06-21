@@ -190,7 +190,7 @@ export default function VoiceLevel3Page() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-page flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
@@ -199,7 +199,7 @@ export default function VoiceLevel3Page() {
   const exNumber = phase.startsWith('ex1') ? 1 : phase.startsWith('ex2') ? 2 : phase.startsWith('ex3') ? 3 : 0
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
@@ -226,9 +226,9 @@ export default function VoiceLevel3Page() {
         <div className="flex gap-3 mb-6">
           {[1, 2, 3].map(n => (
             <div key={n} className={`flex-1 rounded-xl border p-3 text-center text-xs font-semibold ${
-              n < exNumber ? 'bg-green-50 border-green-400 text-green-700'
+              n < exNumber ? 'bg-secondary/10 border-secondary text-secondary'
               : n === exNumber && phase !== 'complete' ? 'bg-primary/10 border-primary text-primary'
-              : 'bg-white border-border text-text-muted'
+              : 'bg-white border-surface-border text-text-muted'
             }`}>
               Exercise {n}
             </div>
@@ -250,7 +250,7 @@ export default function VoiceLevel3Page() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="bg-white border border-border rounded-2xl p-6">
+            <div className="bg-white border border-surface-border rounded-2xl p-6">
               {/* Exercise 1 */}
               {phase.startsWith('ex1') && (
                 <div>
@@ -295,7 +295,7 @@ export default function VoiceLevel3Page() {
                   )}
                   <div className="flex gap-2 mt-4">
                     {Array.from({ length: 3 }, (_, i) => (
-                      <div key={i} className={`h-1.5 flex-1 rounded-full ${i < ex2Rep ? 'bg-green-500' : 'bg-gray-200'}`} />
+                      <div key={i} className={`h-1.5 flex-1 rounded-full ${i < ex2Rep ? 'bg-secondary' : 'bg-gray-200'}`} />
                     ))}
                   </div>
                 </div>
@@ -323,7 +323,7 @@ export default function VoiceLevel3Page() {
                   <div className="flex gap-1.5 mt-4">
                     {VOWELS.map((v, i) => (
                       <div key={v} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border ${
-                        i < ex3Vowel ? 'bg-green-100 border-green-400 text-green-700' : 'bg-white border-border text-text-muted'
+                        i < ex3Vowel ? 'bg-secondary/10 border-secondary text-secondary' : 'bg-white border-surface-border text-text-muted'
                       }`}>
                         {v}
                       </div>
@@ -333,13 +333,13 @@ export default function VoiceLevel3Page() {
               )}
             </div>
 
-            <div className="bg-white border border-border rounded-2xl p-4">
+            <div className="bg-white border border-surface-border rounded-2xl p-4">
               <p className="text-text-muted text-xs mb-2">Live audio input</p>
               <canvas ref={waveformRef} width={800} height={60} className="w-full rounded-lg bg-gray-950" />
             </div>
 
             {micError && (
-              <p className="text-xs text-accent bg-red-50 border border-red-200 rounded-lg px-3 py-2">{micError}</p>
+              <p className="text-xs text-accent bg-accent/5 border border-accent/20 rounded-lg px-3 py-2">{micError}</p>
             )}
           </div>
         )}

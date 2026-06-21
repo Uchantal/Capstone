@@ -50,13 +50,13 @@ const DISC_LABEL: Record<string, string> = {
 const DISC_BORDER: Record<string, string> = {
   music: 'border-t-primary',
   'visual-arts': 'border-t-secondary',
-  'graphic-design': 'border-t-[#3B82F6]',
+  'graphic-design': 'border-t-surface-border',
 }
 
 const STATUS_STYLE: Record<string, string> = {
-  Active: 'bg-green-100 text-green-700',
-  Inactive: 'bg-amber-100 text-amber-700',
-  Dormant: 'bg-red-100 text-red-600',
+  Active: 'bg-secondary/10 text-secondary',
+  Inactive: 'bg-surface-warm text-text-secondary',
+  Dormant: 'bg-accent/10 text-accent',
 }
 
 export default function SupervisorDashboardPage() {
@@ -143,12 +143,12 @@ export default function SupervisorDashboardPage() {
   )
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-page">
+    <div className="min-h-screen flex flex-col bg-white">
       <TopNav />
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
 
         {/* Section 1: Lab Session Control */}
-        <section className="bg-white border border-border rounded-2xl p-6">
+        <section className="bg-white border border-surface-border rounded-2xl p-6">
           <h2 className="text-text-primary font-bold text-lg mb-1">Laboratory Session</h2>
           <p className="text-text-secondary text-sm mb-5">
             {fmtDate(now)}, {fmtTime(now)}
@@ -165,7 +165,7 @@ export default function SupervisorDashboardPage() {
               )}
               <button
                 onClick={closeLab}
-                className="border border-accent text-accent text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-red-50 transition-colors"
+                className="border border-accent text-accent text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-accent/5 transition-colors"
               >
                 Close Session
               </button>
@@ -187,7 +187,7 @@ export default function SupervisorDashboardPage() {
         </section>
 
         {/* Section 2: Live Activity Feed */}
-        <section className="bg-white border border-border rounded-2xl p-6">
+        <section className="bg-white border border-surface-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-1">
             <h2 className="text-text-primary font-bold text-lg">Live Student Activity</h2>
             <span className="text-text-muted text-xs">Refreshes every 30 s</span>
@@ -199,7 +199,7 @@ export default function SupervisorDashboardPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm min-w-[560px]">
-                <thead className="bg-[#F9F7F4] border-b border-border">
+                <thead className="bg-[#F9F7F4] border-b border-surface-border">
                   <tr>
                     <th className="text-left text-text-muted font-medium px-4 py-3 uppercase text-xs tracking-wide">Student</th>
                     <th className="text-left text-text-muted font-medium px-4 py-3 uppercase text-xs tracking-wide">Discipline</th>
@@ -208,7 +208,7 @@ export default function SupervisorDashboardPage() {
                     <th className="text-left text-text-muted font-medium px-4 py-3 uppercase text-xs tracking-wide">Time</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
+                <tbody className="divide-y divide-surface-border">
                   {liveActivity.map((s) => (
                     <tr key={s._id}>
                       <td className="px-4 py-3 text-text-primary font-medium">{s.studentName}</td>
@@ -241,7 +241,7 @@ export default function SupervisorDashboardPage() {
           <div className="grid grid-cols-4 gap-4 md:grid-cols-2">
             {analyticsLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="bg-white border border-border rounded-2xl p-5 animate-pulse">
+                <div key={i} className="bg-white border border-surface-border rounded-2xl p-5 animate-pulse">
                   <div className="h-3 bg-gray-100 rounded mb-2 w-2/3" />
                   <div className="h-8 bg-gray-100 rounded w-1/2" />
                 </div>
@@ -253,7 +253,7 @@ export default function SupervisorDashboardPage() {
                 { label: 'Total Practice Hours', value: `${analytics?.totalPracticeHours ?? 0}h` },
                 { label: 'Avg Sessions / Student', value: analytics?.avgSessionsPerStudent ?? 0 },
               ].map(({ label, value }) => (
-                <div key={label} className="bg-white border border-border rounded-2xl p-5">
+                <div key={label} className="bg-white border border-surface-border rounded-2xl p-5">
                   <p className="text-text-muted text-xs uppercase tracking-wide mb-1">{label}</p>
                   <p className="text-text-primary font-bold text-2xl">{value}</p>
                 </div>
@@ -268,7 +268,7 @@ export default function SupervisorDashboardPage() {
               return (
                 <div
                   key={disc}
-                  className={`bg-white border border-border border-t-4 ${DISC_BORDER[disc]} rounded-2xl p-5`}
+                  className={`bg-white border border-surface-border border-t-4 ${DISC_BORDER[disc]} rounded-2xl p-5`}
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <p className="text-text-primary font-semibold text-sm">{DISC_LABEL[disc]}</p>
@@ -290,14 +290,14 @@ export default function SupervisorDashboardPage() {
           </div>
 
           {/* Row 3: Student Progress Table */}
-          <div className="bg-white border border-border rounded-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-wrap gap-3">
+          <div className="bg-white border border-surface-border rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-surface-border flex-wrap gap-3">
               <h3 className="text-text-primary font-bold text-base">Student Progress Overview</h3>
               <input
                 value={studentFilter}
                 onChange={(e) => setStudentFilter(e.target.value)}
                 placeholder="Filter by name…"
-                className="border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary w-48"
+                className="border border-surface-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary w-48"
               />
             </div>
 
@@ -308,7 +308,7 @@ export default function SupervisorDashboardPage() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm min-w-[640px]">
-                  <thead className="bg-[#F9F7F4] border-b border-border">
+                  <thead className="bg-[#F9F7F4] border-b border-surface-border">
                     <tr>
                       <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Student</th>
                       <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Discipline</th>
@@ -319,7 +319,7 @@ export default function SupervisorDashboardPage() {
                       <th className="text-left text-text-muted font-medium px-6 py-3 uppercase text-xs tracking-wide">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody className="divide-y divide-surface-border">
                     {filteredStudents.map((s) => (
                       <tr key={s.id}>
                         <td className="px-6 py-4 text-text-primary font-medium">{s.name}</td>
