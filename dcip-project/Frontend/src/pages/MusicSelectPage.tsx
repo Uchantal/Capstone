@@ -44,8 +44,8 @@ const paths = [
       'Sing a short melody',
       'Record & save your voice',
     ],
-    accent: 'border-t-purple-600',
-    btn: 'bg-purple-700 hover:bg-purple-800',
+    accent: 'border-t-primary',
+    btn: 'bg-primary hover:bg-primary-dark',
     label: 'Practise Singing',
   },
 ]
