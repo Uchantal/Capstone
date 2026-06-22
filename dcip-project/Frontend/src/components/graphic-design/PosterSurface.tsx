@@ -1,4 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react'
+import GraphicDesignToolbar from '../canvas/GraphicDesignToolbar'
+import SessionNotepad from '../canvas/SessionNotepad'
+
+// ── Canvas templates ──────────────────────────────────────────────────────────
+
+export interface CanvasTemplate {
+  id: string
+  label: string
+  realW: number
+  realH: number
+}
+
+export const CANVAS_TEMPLATES: CanvasTemplate[] = [
+  { id: 'a4-poster',       label: 'A4 Poster',       realW: 595,  realH: 842  },
+  { id: 'instagram-post',  label: 'Instagram Post',  realW: 1080, realH: 1080 },
+  { id: 'instagram-story', label: 'Instagram Story', realW: 1080, realH: 1920 },
+  { id: 'facebook-cover',  label: 'Facebook Cover',  realW: 820,  realH: 312  },
+  { id: 'a5-flyer',        label: 'A5 Flyer',        realW: 420,  realH: 595  },
+  { id: 'free',            label: 'Free Canvas',     realW: 1200, realH: 800  },
+]
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -39,7 +59,7 @@ type HandleId = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
 
 // ── Shape SVG renderers ───────────────────────────────────────────────────────
 
-const SHAPE_SVG: Record<ShapeType, (fill: string) => React.ReactNode> = {
+export const SHAPE_SVG: Record<ShapeType, (fill: string) => React.ReactNode> = {
   triangle:        fill => <polygon points="50,5 95,95 5,95" fill={fill} />,
   diamond:         fill => <polygon points="50,5 95,50 50,95 5,50" fill={fill} />,
   pentagon:        fill => <polygon points="50,5 95,35 78,90 22,90 5,35" fill={fill} />,
@@ -56,12 +76,12 @@ const SHAPE_SVG: Record<ShapeType, (fill: string) => React.ReactNode> = {
 
 // ── Shape picker items ────────────────────────────────────────────────────────
 
-type PickerItem =
+export type PickerItem =
   | { kind: 'rect';   label: string }
   | { kind: 'circle'; label: string }
   | { kind: 'shape';  type: ShapeType; label: string }
 
-const PICKER_ITEMS: PickerItem[] = [
+export const PICKER_ITEMS: PickerItem[] = [
   { kind: 'rect',   label: 'Rectangle' },
   { kind: 'circle', label: 'Circle' },
   { kind: 'shape', type: 'triangle',      label: 'Triangle' },
@@ -155,9 +175,11 @@ function drawShapeOnCanvas(ctx: CanvasRenderingContext2D, shapeType: ShapeType):
 export async function exportDesignToDataUrl(
   elements: DesignElement[],
   bgColor: string,
+  canvasW = 595,
+  canvasH = 842,
 ): Promise<string> {
-  const W = 420
-  const H = 594
+  const W = canvasW
+  const H = canvasH
   const canvas = document.createElement('canvas')
   canvas.width = W
   canvas.height = H
@@ -279,18 +301,6 @@ const RESIZE_HANDLES: Array<{ id: HandleId; pos: React.CSSProperties; cursor: st
   { id: 'w',  pos: { left: -5, top: 'calc(50% - 5px)' },        cursor: 'ew-resize'   },
 ]
 
-// ── Colour palettes ───────────────────────────────────────────────────────────
-
-const BG_COLORS      = ['#FFFFFF', '#1A1A1A', '#C8960C', '#2D6A4F', '#D62828', '#1e3a5f', '#F9F7F4', '#f59e0b']
-const ELEMENT_COLORS = ['#1A1A1A', '#ffffff', '#C8960C', '#D62828', '#2D6A4F', '#10B981', '#60A5FA', '#9ca3af', '#f59e0b', '#1e3a5f']
-
-const BTN     = 'text-sm rounded-lg py-1.5 px-2 border transition-colors'
-const BTN_ON  = 'bg-primary text-white border-primary'
-const BTN_OFF = 'bg-white border-surface-border text-text-secondary hover:bg-[#F9F7F4]'
-const BTN_ACT = 'bg-white border-surface-border text-text-primary hover:bg-[#F9F7F4]'
-const BTN_DEL = 'bg-white border-accent/20 text-accent hover:bg-accent/5'
-const SECTION_HDR = 'text-xs font-semibold text-text-secondary uppercase tracking-widest mb-2'
-
 // ── Component ─────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -298,56 +308,65 @@ interface Props {
   defaultBgColor: string
   onChange: (elements: DesignElement[], bgColor: string) => void
   onInteraction: () => void
+  onDimensionsChange?: (w: number, h: number) => void
+  defaultTemplateId?: string
 }
 
-const CANVAS_W = 420
-const CANVAS_H = 594
+export default function DesignCanvas({ defaultElements, defaultBgColor, onChange, onInteraction, onDimensionsChange, defaultTemplateId }: Props) {
+  const initialTemplate = CANVAS_TEMPLATES.find(t => t.id === (defaultTemplateId ?? 'a4-poster')) ?? CANVAS_TEMPLATES[0]
 
-export default function DesignCanvas({ defaultElements, defaultBgColor, onChange, onInteraction }: Props) {
-  const [elements,    setElements]    = useState<DesignElement[]>(defaultElements)
-  const [bgColor,     setBgColor]     = useState(defaultBgColor)
-  const [selectedId,  setSelectedId]  = useState<string | null>(null)
-  const [editingId,   setEditingId]   = useState<string | null>(null)
-  const [canUndo,     setCanUndo]     = useState(false)
-  const [canRedo,     setCanRedo]     = useState(false)
-  const [shapesOpen,  setShapesOpen]  = useState(false)
-  const [canvasScale, setCanvasScale] = useState(1)
+  const [elements,        setElements]        = useState<DesignElement[]>(defaultElements)
+  const [bgColor,         setBgColor]         = useState(defaultBgColor)
+  const [selectedId,      setSelectedId]      = useState<string | null>(null)
+  const [editingId,       setEditingId]       = useState<string | null>(null)
+  const [canUndo,         setCanUndo]         = useState(false)
+  const [canRedo,         setCanRedo]         = useState(false)
+  const [canvasScale,     setCanvasScale]     = useState(1)
+  const [template,        setTemplate]        = useState<CanvasTemplate>(initialTemplate)
+  const [canvasW,         setCanvasW]         = useState(initialTemplate.realW)
+  const [canvasH,         setCanvasH]         = useState(initialTemplate.realH)
+  const [pendingTemplate, setPendingTemplate] = useState<CanvasTemplate | null>(null)
 
   const historyRef      = useRef<Array<{ elements: DesignElement[]; bgColor: string }>>([{ elements: defaultElements, bgColor: defaultBgColor }])
   const historyIdxRef   = useRef(0)
-  const canvasWrapperRef  = useRef<HTMLDivElement>(null)
-  const canvasScaleRef    = useRef(1)
-  const shapesPickerRef   = useRef<HTMLDivElement>(null)
-  const fontSizeInputRef  = useRef<HTMLInputElement>(null)
+  const canvasAreaRef    = useRef<HTMLDivElement>(null)
+  const canvasScaleRef   = useRef(1)
+  const canvasWRef       = useRef(initialTemplate.realW)
+  const canvasHRef       = useRef(initialTemplate.realH)
+  const templateIdRef    = useRef(initialTemplate.id)
 
   const selectedEl = elements.find(el => el.id === selectedId) ?? null
 
   // ── Responsive canvas scale ───────────────────────────────────────────────────
   useEffect(() => {
-    const el = canvasWrapperRef.current
-    if (!el) return
+    const area = canvasAreaRef.current
+    if (!area) return
+    const PADDING = 16, LABEL_H = 28
     const update = () => {
-      const s = el.offsetWidth / CANVAS_W
-      canvasScaleRef.current = s
-      setCanvasScale(s)
+      if (templateIdRef.current === 'free') {
+        const w = area.offsetWidth
+        const h = area.offsetHeight
+        canvasWRef.current = w
+        canvasHRef.current = h
+        setCanvasW(w)
+        setCanvasH(h)
+        canvasScaleRef.current = 1
+        setCanvasScale(1)
+        onDimensionsChange?.(w, h)
+      } else {
+        const availW = area.offsetWidth  - 2 * PADDING
+        const availH = area.offsetHeight - LABEL_H - 2 * PADDING
+        const s = Math.min(availW / canvasWRef.current, availH / canvasHRef.current)
+        canvasScaleRef.current = s
+        setCanvasScale(s)
+      }
     }
     update()
     const ro = new ResizeObserver(update)
-    ro.observe(el)
+    ro.observe(area)
     return () => ro.disconnect()
-  }, [])
-
-  // ── Shapes picker: close on outside click ─────────────────────────────────────
-  useEffect(() => {
-    if (!shapesOpen) return
-    const handler = (e: MouseEvent) => {
-      if (shapesPickerRef.current && !shapesPickerRef.current.contains(e.target as Node)) {
-        setShapesOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [shapesOpen])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [template.id])
 
   // ── History ───────────────────────────────────────────────────────────────────
   function pushHistory(els: DesignElement[], bg: string) {
@@ -628,14 +647,71 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
     document.addEventListener('mouseup', onUp)
   }
 
+  // ── Toolbar callbacks ─────────────────────────────────────────────────────────
+  function handleFontSizeChange(sz: number) {
+    if (!selectedEl || selectedEl.type !== 'text') return
+    updateElement(selectedEl.id, { fontSize: sz })
+  }
+
+  function handleBoldToggle() {
+    if (!selectedEl || selectedEl.type !== 'text') return
+    updateElement(selectedEl.id, { fontWeight: selectedEl.fontWeight === 'bold' ? 'normal' : 'bold' })
+  }
+
+  function handleItalicToggle() {
+    if (!selectedEl || selectedEl.type !== 'text') return
+    updateElement(selectedEl.id, { fontStyle: selectedEl.fontStyle === 'italic' ? 'normal' : 'italic' })
+  }
+
+  function handleUnderlineToggle() {
+    if (!selectedEl || selectedEl.type !== 'text') return
+    updateElement(selectedEl.id, { textDecoration: selectedEl.textDecoration === 'underline' ? 'none' : 'underline' })
+  }
+
+  function handleAlignChange(align: 'left' | 'center' | 'right') {
+    if (!selectedEl || selectedEl.type !== 'text') return
+    updateElement(selectedEl.id, { textAlign: align })
+  }
+
+  // ── Template management ───────────────────────────────────────────────────────
+  function applyTemplate(t: CanvasTemplate) {
+    canvasWRef.current  = t.realW
+    canvasHRef.current  = t.realH
+    templateIdRef.current = t.id
+    setTemplate(t)
+    setCanvasW(t.realW)
+    setCanvasH(t.realH)
+    const fresh: DesignElement[] = []
+    setElements(fresh)
+    setBgColor(defaultBgColor)
+    onChange(fresh, defaultBgColor)
+    historyRef.current    = [{ elements: fresh, bgColor: defaultBgColor }]
+    historyIdxRef.current = 0
+    setCanUndo(false)
+    setCanRedo(false)
+    setSelectedId(null)
+    setEditingId(null)
+    setPendingTemplate(null)
+    onDimensionsChange?.(t.realW, t.realH)
+  }
+
+  function selectTemplate(t: CanvasTemplate) {
+    const hasContent = elements.length > 0
+    if (hasContent) {
+      setPendingTemplate(t)
+    } else {
+      applyTemplate(t)
+    }
+  }
+
   // ── Derived ───────────────────────────────────────────────────────────────────
   const sorted = [...elements].sort((a, b) => a.zIndex - b.zIndex)
 
-  const activeElementColor = selectedEl
+  const activeElementColor: string | null = selectedEl
     ? (selectedEl.type === 'text'
-        ? selectedEl.color
+        ? (selectedEl.color ?? null)
         : selectedEl.type !== 'image'
-          ? selectedEl.fill
+          ? (selectedEl.fill ?? null)
           : null)
     : null
 
@@ -643,251 +719,99 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
   return (
     <div className="flex-1 flex flex-row overflow-hidden">
 
-      {/* ── Left toolbar panel ── */}
-      <div className="w-56 flex-shrink-0 bg-[#F9F7F4] border-r border-surface-border overflow-y-auto p-3">
+      {/* ── Icon toolbar ── */}
+      <GraphicDesignToolbar
+        selectedElement={selectedEl}
+        colour={activeElementColor}
+        onColourChange={applyElementColor}
+        bgColour={bgColor}
+        onBgColourChange={changeBgColor}
+        onAddText={addTextElement}
+        onAddHeading={addHeadingElement}
+        onAddRect={addRectElement}
+        onAddCircle={addCircleElement}
+        onAddShape={addShapeElement}
+        onAddImage={handleImageUpload}
+        onAddDetails={addContactBlock}
+        onFontSizeChange={handleFontSizeChange}
+        onBoldToggle={handleBoldToggle}
+        onItalicToggle={handleItalicToggle}
+        onUnderlineToggle={handleUnderlineToggle}
+        onAlignChange={handleAlignChange}
+        onDuplicate={duplicateSelected}
+        onDelete={deleteSelected}
+        canUndo={canUndo}
+        onUndo={undo}
+        canRedo={canRedo}
+        onRedo={redo}
+        templates={CANVAS_TEMPLATES}
+        activeTemplate={template}
+        onTemplateChange={selectTemplate}
+      />
 
-        {/* ADD */}
-        <p className={SECTION_HDR}>Add</p>
-        <div className="grid grid-cols-2 gap-1.5">
-          <button onClick={addTextElement}    className={`${BTN} ${BTN_ACT}`}>Text</button>
-          <button onClick={addHeadingElement} className={`${BTN} ${BTN_ACT}`}>Heading</button>
+      {/* ── Canvas area ── */}
+      <div ref={canvasAreaRef} className="flex-1 relative overflow-hidden bg-[#F3F3F3]">
+        <SessionNotepad />
 
-          <div ref={shapesPickerRef} className="relative">
-            <button
-              onClick={() => setShapesOpen(o => !o)}
-              className={`${BTN} ${shapesOpen ? BTN_ON : BTN_ACT} w-full`}
-            >Shapes</button>
-            {shapesOpen && (
-              <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-surface-border rounded-xl shadow-xl p-3" style={{ minWidth: 240 }}>
-                <div className="grid grid-cols-3 gap-2">
-                  {PICKER_ITEMS.map(item => {
-                    const key = item.kind === 'shape' ? item.type : item.kind
-                    const handleClick = () => {
-                      if (item.kind === 'rect')        { addRectElement();           setShapesOpen(false) }
-                      else if (item.kind === 'circle') { addCircleElement();         setShapesOpen(false) }
-                      else                             { addShapeElement(item.type); setShapesOpen(false) }
-                    }
-                    return (
-                      <button
-                        key={key}
-                        onClick={handleClick}
-                        className="flex flex-col items-center justify-start gap-1 pt-2 pb-1.5 px-1 rounded-lg bg-[#F9F7F4] hover:bg-white hover:shadow-sm cursor-pointer"
-                        style={{ width: '100%' }}
-                      >
-                        <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {item.kind === 'rect' && (
-                            <div style={{ width: 36, height: 24, background: '#C8960C', borderRadius: 2 }} />
-                          )}
-                          {item.kind === 'circle' && (
-                            <div style={{ width: 36, height: 36, background: '#C8960C', borderRadius: '50%' }} />
-                          )}
-                          {item.kind === 'shape' && (
-                            <svg width={40} height={40} viewBox="0 0 100 100" preserveAspectRatio="none">
-                              {SHAPE_SVG[item.type]('#C8960C')}
-                            </svg>
-                          )}
-                        </div>
-                        <span className="text-[10px] text-text-secondary text-center leading-tight">{item.label}</span>
-                      </button>
-                    )
-                  })}
+        {template.id === 'free' ? (
+          // Free Canvas: fills the entire workspace at 1:1 scale
+          <div
+            style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}
+          >
+          <div
+            className="absolute top-0 left-0"
+            style={{ width: canvasW, height: canvasH, background: bgColor, overflow: 'visible' }}
+            onClick={() => { setSelectedId(null); setEditingId(null) }}
+          >
+            {sorted.map(el => {
+              const isSelected = selectedId === el.id
+              const isEditing  = editingId  === el.id
+              return (
+                <div
+                  key={el.id}
+                  style={{ position: 'absolute', left: el.x, top: el.y, width: el.width, height: el.height, zIndex: el.zIndex, cursor: isEditing ? 'text' : 'move', userSelect: 'none' }}
+                  onClick={e => { e.stopPropagation(); setSelectedId(el.id) }}
+                  onMouseDown={e => { if (!isEditing) handleElementMouseDown(e, el.id) }}
+                  onDoubleClick={e => { e.stopPropagation(); if (el.type === 'text') { setEditingId(el.id); setSelectedId(el.id) } }}
+                >
+                  {el.type === 'text' && (<div style={{ width:'100%',height:'100%',overflow:'hidden',fontSize:el.fontSize,fontWeight:el.fontWeight,fontStyle:el.fontStyle??'normal',textDecoration:el.textDecoration==='underline'?'underline':'none',textAlign:el.textAlign,color:el.color,lineHeight:1.35,wordBreak:'break-word' }}>{!isEditing&&(el.text||'')}{isEditing&&(<textarea autoFocus defaultValue={el.text??''} onBlur={e=>{updateElement(el.id,{text:e.target.value});setEditingId(null)}} onKeyDown={e=>{if(e.key==='Escape'){setEditingId(null);e.preventDefault()}}} onMouseDown={e=>e.stopPropagation()} style={{width:'100%',height:'100%',background:'transparent',border:'none',outline:'none',resize:'none',padding:0,cursor:'text',fontSize:'inherit',fontWeight:'inherit',fontStyle:'inherit',textDecoration:'inherit',textAlign:'inherit',color:'inherit',lineHeight:'inherit'}}/>)}</div>)}
+                  {el.type==='rect'&&(<div style={{width:'100%',height:'100%',background:el.fill??'#C8960C',borderRadius:el.borderRadius,border:el.strokeColor&&el.strokeWidth?`${el.strokeWidth}px solid ${el.strokeColor}`:undefined}}/>)}
+                  {el.type==='circle'&&(<div style={{width:'100%',height:'100%',background:el.fill??'#2D6A4F',borderRadius:'50%',border:el.strokeColor&&el.strokeWidth?`${el.strokeWidth}px solid ${el.strokeColor}`:undefined}}/>)}
+                  {el.type==='shape'&&renderShapeContent(el)}
+                  {el.type==='image'&&el.src&&(<div style={{width:'100%',height:'100%',overflow:'hidden'}}><img src={el.src} alt="" draggable={false} style={{width:'100%',height:'100%',objectFit:'cover',pointerEvents:'none',userSelect:'none'}}/></div>)}
+                  {isSelected&&!isEditing&&(<><div style={{position:'absolute',inset:0,outline:'2px solid #3b82f6',outlineOffset:1,pointerEvents:'none'}}/>{(el.type==='rect'||el.type==='circle'||el.type==='shape')&&(<div style={{position:'absolute',left:'50%',top:'100%',transform:'translateX(-50%) translateY(4px)',fontSize:12,fontWeight:600,fontFamily:'sans-serif',color:'#C9A84C',background:'rgba(255,255,255,0.88)',padding:'2px 5px',borderRadius:3,whiteSpace:'nowrap',pointerEvents:'none',lineHeight:1}}>{Math.round(el.width)} x {Math.round(el.height)}</div>)}{RESIZE_HANDLES.map(h=>(<div key={h.id} style={{position:'absolute',...h.pos,width:10,height:10,background:'#ffffff',border:'1.5px solid #3b82f6',borderRadius:2,cursor:h.cursor,zIndex:9999}} onMouseDown={e=>handleResizeMouseDown(e,el.id,h.id)} onClick={e=>e.stopPropagation()}/>))}</>)}
                 </div>
+              )
+            })}
+            {elements.length === 0 && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <p className="text-gray-400 text-sm text-center px-10 leading-relaxed">
+                  Use the toolbar to add text, shapes, or images to your poster.
+                </p>
               </div>
             )}
           </div>
-
-          <label className={`${BTN} ${BTN_ACT} cursor-pointer text-center`}>
-            Image
-            <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-          </label>
-        </div>
-        <button
-          onClick={addContactBlock}
-          title="Add contact details: phone, email, or website"
-          className={`${BTN} ${BTN_ACT} w-full mt-1.5`}
-        >Add Details</button>
-
-        {/* BACKGROUND */}
-        <div className="border-t border-surface-border mt-3 pt-3" />
-        <p className={SECTION_HDR}>Background</p>
-        <div className="flex flex-wrap gap-1.5">
-          {BG_COLORS.map(c => (
-            <button
-              key={c}
-              onClick={() => changeBgColor(c)}
-              title={c}
-              className={`w-5 h-5 rounded-full border-2 transition-all flex-shrink-0 ${bgColor === c ? 'border-primary scale-110' : 'border-transparent hover:border-gray-400'}`}
-              style={{ backgroundColor: c }}
-            />
-          ))}
-          <label className="relative cursor-pointer flex-shrink-0">
-            <input
-              type="color"
-              value={bgColor}
-              onChange={e => changeBgColor(e.target.value)}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-            />
-            <span className="w-5 h-5 rounded-full border-2 border-surface-border flex items-center justify-center text-text-muted text-[10px] bg-white">+</span>
-          </label>
-        </div>
-
-        {/* COLOURS */}
-        <div className="border-t border-surface-border mt-3 pt-3" />
-        <p className={SECTION_HDR}>Colours</p>
-        <div className="flex flex-wrap gap-1.5">
-          {ELEMENT_COLORS.map(c => (
-            <button
-              key={c}
-              onClick={() => applyElementColor(c)}
-              title={c}
-              className={`w-5 h-5 rounded-full border-2 transition-all flex-shrink-0 ${activeElementColor === c ? 'border-primary scale-110' : 'border-transparent hover:border-gray-400'}`}
-              style={{ backgroundColor: c }}
-            />
-          ))}
-          <label className="relative cursor-pointer flex-shrink-0">
-            <input
-              type="color"
-              value={
-                selectedEl?.type === 'text'
-                  ? (selectedEl.color ?? '#1A1A1A')
-                  : selectedEl && selectedEl.type !== 'image'
-                    ? (selectedEl.fill ?? '#C8960C')
-                    : '#C8960C'
-              }
-              onChange={e => applyElementColor(e.target.value)}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-            />
-            <span className="w-5 h-5 rounded-full border-2 border-surface-border flex items-center justify-center text-text-muted text-[10px] bg-white">+</span>
-          </label>
-        </div>
-
-        {/* EDIT (conditional on selection) */}
-        {selectedEl && (
+          </div>
+        ) : (
+          // Fixed aspect-ratio canvas centred in the workspace
           <>
-            <div className="border-t border-surface-border mt-3 pt-3" />
-            <p className={SECTION_HDR}>Edit</p>
-
-            {selectedEl.type === 'text' && (
-              <>
-                <div className="flex items-center gap-0.5 mb-1.5">
-                  <input
-                    ref={fontSizeInputRef}
-                    key={selectedEl.id}
-                    type="number"
-                    min={8}
-                    max={200}
-                    defaultValue={selectedEl.fontSize ?? 24}
-                    onBlur={e => {
-                      const sz = Math.max(8, Math.min(200, parseInt(e.target.value) || 24))
-                      e.target.value = String(sz)
-                      updateElement(selectedEl.id, { fontSize: sz })
-                    }}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter') {
-                        const sz = Math.max(8, Math.min(200, parseInt((e.target as HTMLInputElement).value) || 24))
-                        ;(e.target as HTMLInputElement).value = String(sz)
-                        updateElement(selectedEl.id, { fontSize: sz })
-                      }
-                    }}
-                    className="border border-surface-border rounded-lg text-sm text-text-primary px-2 py-1.5 focus:outline-none focus:border-primary bg-white font-medium flex-1"
-                  />
-                  <div className="flex flex-col">
-                    <button
-                      onClick={() => {
-                        const cur = parseInt(fontSizeInputRef.current?.value ?? String(selectedEl.fontSize ?? 24)) || (selectedEl.fontSize ?? 24)
-                        const sz = Math.min(200, cur + 1)
-                        if (fontSizeInputRef.current) fontSizeInputRef.current.value = String(sz)
-                        updateElement(selectedEl.id, { fontSize: sz })
-                      }}
-                      className="text-text-muted hover:text-text-primary leading-none px-1 text-[10px]"
-                    >&#9650;</button>
-                    <button
-                      onClick={() => {
-                        const cur = parseInt(fontSizeInputRef.current?.value ?? String(selectedEl.fontSize ?? 24)) || (selectedEl.fontSize ?? 24)
-                        const sz = Math.max(8, cur - 1)
-                        if (fontSizeInputRef.current) fontSizeInputRef.current.value = String(sz)
-                        updateElement(selectedEl.id, { fontSize: sz })
-                      }}
-                      className="text-text-muted hover:text-text-primary leading-none px-1 text-[10px]"
-                    >&#9660;</button>
-                  </div>
-                </div>
-
-                <div className="flex gap-1 mb-1.5">
-                  <button
-                    onClick={() => updateElement(selectedEl.id, { fontWeight: selectedEl.fontWeight === 'bold' ? 'normal' : 'bold' })}
-                    className={`${BTN} ${selectedEl.fontWeight === 'bold' ? BTN_ON : BTN_OFF} flex-1 font-bold`}
-                  >B</button>
-                  <button
-                    onClick={() => updateElement(selectedEl.id, { fontStyle: selectedEl.fontStyle === 'italic' ? 'normal' : 'italic' })}
-                    className={`${BTN} ${selectedEl.fontStyle === 'italic' ? BTN_ON : BTN_OFF} flex-1 italic`}
-                  >I</button>
-                  <button
-                    onClick={() => updateElement(selectedEl.id, { textDecoration: selectedEl.textDecoration === 'underline' ? 'none' : 'underline' })}
-                    className={`${BTN} ${selectedEl.textDecoration === 'underline' ? BTN_ON : BTN_OFF} flex-1 underline`}
-                  >U</button>
-                </div>
-
-                <div className="flex gap-1 mb-1.5">
-                  <button
-                    onClick={() => updateElement(selectedEl.id, { textAlign: 'left' })}
-                    className={`${BTN} ${selectedEl.textAlign === 'left' ? BTN_ON : BTN_OFF} flex-1`}
-                  >Left</button>
-                  <button
-                    onClick={() => updateElement(selectedEl.id, { textAlign: 'center' })}
-                    className={`${BTN} ${selectedEl.textAlign === 'center' ? BTN_ON : BTN_OFF} flex-1`}
-                  >Centre</button>
-                  <button
-                    onClick={() => updateElement(selectedEl.id, { textAlign: 'right' })}
-                    className={`${BTN} ${selectedEl.textAlign === 'right' ? BTN_ON : BTN_OFF} flex-1`}
-                  >Right</button>
-                </div>
-
-                <div className="border-t border-surface-border my-1.5" />
-              </>
-            )}
-
-            <button onClick={duplicateSelected} className={`${BTN} ${BTN_ACT} w-full mb-1.5`}>Duplicate</button>
-            <button
-              onClick={deleteSelected}
-              title="Delete selected element"
-              className={`${BTN} ${BTN_DEL} w-full flex items-center justify-center gap-1.5`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              Delete
-            </button>
-          </>
-        )}
-
-        {/* HISTORY */}
-        <div className="border-t border-surface-border mt-3 pt-3" />
-        <p className={SECTION_HDR}>History</p>
-        <div className="flex gap-1.5">
-          <button onClick={undo} disabled={!canUndo} className={`${BTN} ${BTN_ACT} flex-1 disabled:opacity-40 disabled:cursor-not-allowed`}>Undo</button>
-          <button onClick={redo} disabled={!canRedo} className={`${BTN} ${BTN_ACT} flex-1 disabled:opacity-40 disabled:cursor-not-allowed`}>Redo</button>
-        </div>
-
-      </div>
-
-      {/* ── Canvas area ── */}
-      <div className="flex-1 overflow-auto bg-[#C8C4BC] flex items-center justify-center p-8">
-        <div
-          ref={canvasWrapperRef}
-          className="relative flex-shrink-0 border border-[#D0C9BC]"
-          style={{
-            aspectRatio: '1 / 1.414',
-            height: 'calc(100% - 2rem)',
-            maxHeight: '90vh',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
-          }}
-        >
-        <div
-          className="absolute top-0 left-0"
-          style={{
-            width: CANVAS_W,
-            height: CANVAS_H,
+          <div style={{ position: 'absolute', inset: '0 0 28px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div
+            style={{
+              width: Math.round(canvasW * canvasScale),
+              height: Math.round(canvasH * canvasScale),
+              flexShrink: 0,
+              position: 'relative',
+              overflow: 'hidden',
+              border: '1px solid #D0C9BC',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
+            }}
+          >
+          <div
+            className="absolute top-0 left-0"
+            style={{
+              width: canvasW,
+              height: canvasH,
             background: bgColor,
             transform: `scale(${canvasScale})`,
             transformOrigin: 'top left',
@@ -990,6 +914,26 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
                       outline: '2px solid #3b82f6', outlineOffset: 1,
                       pointerEvents: 'none',
                     }} />
+                    {(el.type === 'rect' || el.type === 'circle' || el.type === 'shape') && (
+                      <div style={{
+                        position: 'absolute',
+                        left: '50%',
+                        top: '100%',
+                        transform: `translateX(-50%) translateY(${4 / canvasScale}px)`,
+                        fontSize: 12 / canvasScale,
+                        fontWeight: 600,
+                        fontFamily: 'sans-serif',
+                        color: '#C9A84C',
+                        background: 'rgba(255,255,255,0.88)',
+                        padding: `${2 / canvasScale}px ${5 / canvasScale}px`,
+                        borderRadius: 3 / canvasScale,
+                        whiteSpace: 'nowrap',
+                        pointerEvents: 'none',
+                        lineHeight: 1,
+                      }}>
+                        {Math.round(el.width)} x {Math.round(el.height)}
+                      </div>
+                    )}
                     {RESIZE_HANDLES.map(h => (
                       <div
                         key={h.id}
@@ -1021,7 +965,46 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
           )}
         </div>
         </div>
+        </div>
+        {/* Format label */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: 11, color: '#6B7280', fontFamily: 'sans-serif' }}>
+            {template.label} - {template.realW} x {template.realH}px
+          </span>
+        </div>
+        </>
+        )}
+
       </div>
+
+      {/* ── Confirmation dialog: switching format will clear canvas ── */}
+      {pendingTemplate !== null && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#fff', border: '1px solid #C9A84C', borderRadius: 12, padding: 28, maxWidth: 360, width: '90%' }}>
+            <h2 style={{ fontFamily: 'sans-serif', fontSize: 16, fontWeight: 700, color: '#1A1A1A', marginBottom: 8 }}>
+              Change canvas format?
+            </h2>
+            <p style={{ fontFamily: 'sans-serif', fontSize: 13, color: '#6B7280', marginBottom: 24, lineHeight: 1.5 }}>
+              Changing the canvas format will clear your current work. This cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setPendingTemplate(null)}
+                style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 600, padding: '8px 18px', borderRadius: 8, border: '1px solid #D1D5DB', background: '#fff', cursor: 'pointer', color: '#374151' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => applyTemplate(pendingTemplate)}
+                style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 600, padding: '8px 18px', borderRadius: 8, border: 'none', background: '#C9A84C', cursor: 'pointer', color: '#fff' }}
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }

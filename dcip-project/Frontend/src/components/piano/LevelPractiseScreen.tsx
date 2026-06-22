@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import PianoKeyboard from './PianoKeyboard'
 import { buildChord, type ChordType } from '../../utils/pianoTheory'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
@@ -33,6 +34,7 @@ export default function LevelPractiseScreen({
   requiresDemoPath,
 }: Props) {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { progress, loading, markStageVisited } = usePianoProgress()
@@ -41,6 +43,7 @@ export default function LevelPractiseScreen({
 
   // Gate: if this level requires a prior demonstration, redirect if not passed
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (requiresDemo === false) return
     if (requiresDemoPath && !progress[`level${levelNumber - 1 as 1 | 2}DemonstrationPassed` as keyof typeof progress]) {
@@ -49,7 +52,7 @@ export default function LevelPractiseScreen({
         state: { lockedMessage: `Complete the Level ${levelNumber - 1} demonstration first.` },
       })
     }
-  }, [loading, progress, requiresDemo, requiresDemoPath, levelNumber, navigate])
+  }, [isPreviewMode, loading, progress, requiresDemo, requiresDemoPath, levelNumber, navigate])
 
   // Mark this practise stage as visited on mount
   useEffect(() => {
@@ -94,7 +97,7 @@ export default function LevelPractiseScreen({
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
             onClick={() => navigate('/session/music-piano')}

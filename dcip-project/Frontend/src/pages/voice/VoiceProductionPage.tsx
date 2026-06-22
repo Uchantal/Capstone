@@ -1,17 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
+import MainLayout from '../../components/MainLayout'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, drawWaveform } from '../../utils/voicePitch'
 import { runVoiceVerification, type PitchEvent } from '../../utils/voiceVerification'
 import { completeVoiceProduction } from '../../services/api'
-import Footer from '../../components/Footer'
 
 type Phase = 'intro' | 'recording' | 'results'
 
 export default function VoiceProductionPage() {
   const navigate  = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const location  = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { progress, loading, reload } = useVoiceDemonstrationProgress()
@@ -34,6 +35,7 @@ export default function VoiceProductionPage() {
   const submittedRef     = useRef(false)
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     const hasSharpening = progress.completedStages.includes('voice-sharpening')
     if (!progress.level3DemonstrationPassed || !hasSharpening) {
@@ -102,8 +104,10 @@ export default function VoiceProductionPage() {
 
     if (!submittedRef.current) {
       submittedRef.current = true
-      try { await completeVoiceProduction(verification.passed) } catch { /* best-effort */ }
-      if (verification.passed) reload()
+      if (!isPreviewMode) {
+        try { await completeVoiceProduction(verification.passed) } catch { /* best-effort */ }
+        if (verification.passed) reload()
+      }
     }
 
     setPhase('results')
@@ -121,8 +125,7 @@ export default function VoiceProductionPage() {
 
   if (phase === 'results' && result) {
     return (
-      <div className="min-h-screen bg-white">
-        <TopNav />
+      <MainLayout>
         <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
           <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
             <button onClick={() => navigate('/voice/studio')} className="hover:text-text-primary transition-colors">Voice and Singing</button>
@@ -207,14 +210,12 @@ export default function VoiceProductionPage() {
             </button>
           </div>
         </div>
-        <Footer />
-      </div>
+      </MainLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <TopNav />
+    <MainLayout>
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
         {lockedMessage && (
@@ -291,7 +292,6 @@ export default function VoiceProductionPage() {
           </div>
         )}
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
+import MainLayout from '../../components/MainLayout'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { playTone, drawWaveform, SCALE_NOTES } from '../../utils/voicePitch'
-import Footer from '../../components/Footer'
 
 export default function VoiceSharpeningPage() {
   const navigate  = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const location  = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { progress, loading, markStageVisited } = useVoiceDemonstrationProgress()
@@ -24,7 +25,7 @@ export default function VoiceSharpeningPage() {
 
   useEffect(() => {
     if (loading) return
-    if (!progress.level3DemonstrationPassed) {
+    if (!isPreviewMode && !progress.level3DemonstrationPassed) {
       navigate('/voice/level-3/demonstrate', {
         replace: true,
         state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
@@ -33,7 +34,7 @@ export default function VoiceSharpeningPage() {
     }
     markStageVisited('voice-sharpening')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, progress.level3DemonstrationPassed])
+  }, [isPreviewMode, loading, progress.level3DemonstrationPassed])
 
   useEffect(() => {
     return () => {
@@ -78,11 +79,10 @@ export default function VoiceSharpeningPage() {
     setTimeout(() => setActiveNote(null), 2200)
   }
 
-  if (loading || !progress.level3DemonstrationPassed) return null
+  if (!isPreviewMode && (loading || !progress.level3DemonstrationPassed)) return null
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
+    <MainLayout>
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
         {lockedMessage && (
@@ -193,7 +193,6 @@ export default function VoiceSharpeningPage() {
           </button>
         </div>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

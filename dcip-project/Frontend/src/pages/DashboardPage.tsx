@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { fetchProgressSummary } from '../services/api'
-import TopNav from '../components/TopNav'
-import Footer from '../components/Footer'
+import MainLayout from '../components/MainLayout'
 
 interface DisciplineSummary {
   key: string
@@ -107,7 +106,7 @@ const DISC_FIRST_URL: Record<string, string> = {
   guitar: '/guitar/virtual-instrument',
   voice: '/voice/studio',
   'visual-arts': '/visual-arts/virtual-canvas',
-  'graphic-design': '/graphic-design/virtual-studio',
+  'graphic-design': '/graphic-design/overview',
 }
 
 const MILESTONES: { label: string; stageIds: string[] }[] = [
@@ -249,8 +248,7 @@ export default function DashboardPage() {
   const levelsCompleted = summary?.totalLevelsCompleted ?? 0
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
+    <MainLayout>
       <div className="max-w-6xl mx-auto px-6 py-8">
 
         <div className="mb-8">
@@ -330,7 +328,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

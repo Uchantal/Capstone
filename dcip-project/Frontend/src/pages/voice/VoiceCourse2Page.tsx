@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
+import MainLayout from '../../components/MainLayout'
 import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, playTone, SCALE_NOTES, type PitchStatus } from '../../utils/voicePitch'
-import Footer from '../../components/Footer'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -22,6 +22,7 @@ const A4_FREQ = 440.00
 
 export default function VoiceCourse2Page() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { progress, loading, markStageVisited } = useVoiceDemonstrationProgress()
@@ -38,6 +39,7 @@ export default function VoiceCourse2Page() {
 
   // Gate: course 1 must be complete
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.completedStages.includes('voice-course-1')) {
       navigate('/voice/posture-breath-voice', {
@@ -45,7 +47,7 @@ export default function VoiceCourse2Page() {
         state: { lockedMessage: 'Complete Course 1 first.' },
       })
     }
-  }, [loading, progress.completedStages, navigate])
+  }, [isPreviewMode, loading, progress.completedStages, navigate])
 
   useEffect(() => {
     return () => {
@@ -111,9 +113,8 @@ export default function VoiceCourse2Page() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
-      <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
+    <MainLayout>
+      <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         {lockedMessage && (
           <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 mb-5 text-accent text-sm">
@@ -139,7 +140,7 @@ export default function VoiceCourse2Page() {
         </p>
 
         {/* Card A: What Is Pitch */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">What Is Pitch</h2>
           <p className="text-text-secondary text-sm mb-4 leading-relaxed">
             Pitch is how high or low a sound is. Every note in music has a specific pitch, measured in Hz
@@ -164,7 +165,7 @@ export default function VoiceCourse2Page() {
         </div>
 
         {/* Card B: The C Major Scale for Voice */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">The C Major Scale for Voice</h2>
           <p className="text-text-secondary text-sm mb-4 leading-relaxed">
             Listen to each note of the C major scale. Hum or sing along on the syllable "la". Try to match
@@ -210,7 +211,7 @@ export default function VoiceCourse2Page() {
         </div>
 
         {/* Card C: Matching a Pitch */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-8">
           <h2 className="text-text-primary font-bold text-base mb-3">Matching a Pitch</h2>
           <p className="text-text-secondary text-sm mb-4 leading-relaxed">
             Pitch matching is the foundation of singing in tune. The voice needs to find the note, not guess it.
@@ -265,8 +266,7 @@ export default function VoiceCourse2Page() {
           </button>
         </div>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }
 

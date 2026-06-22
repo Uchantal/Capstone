@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS } from '../../components/graphic-design/PosterSurface'
+import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
 
 const MINIMUM_INTERACTIONS = 8
 
 export default function GDLevel3PractisePage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
 
@@ -15,6 +18,7 @@ export default function GDLevel3PractisePage() {
   const [thresholdMet, setThresholdMet] = useState(false)
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.completedStages.includes('gd-level-3')) {
       navigate('/graphic-design/level-3', {
@@ -41,8 +45,8 @@ export default function GDLevel3PractisePage() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+    <div className="h-screen flex flex-col overflow-hidden bg-white">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button onClick={() => navigate('/graphic-design/virtual-studio')} className="hover:text-text-primary transition-colors">
             Graphic Design
@@ -54,35 +58,39 @@ export default function GDLevel3PractisePage() {
         </div>
         <button
           onClick={() => navigate('/graphic-design/level-3/demonstrate')}
-          disabled={!thresholdMet}
+          disabled={!isPreviewMode && !thresholdMet}
           className="bg-secondary text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         >
           I am ready to demonstrate
         </button>
       </div>
 
-      <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border px-4 py-3">
-        {lockedMessage && (
-          <div className="bg-accent/10 border border-accent/30 rounded-lg px-3 py-2 mb-2 text-accent text-xs">
-            {lockedMessage}
-          </div>
-        )}
-        <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-1">Level 3 Practice</p>
-        <p className="text-text-secondary text-xs leading-relaxed">
-          Practise combining hierarchy, colour, and alignment choices into one complete poster.
-          Experiment freely. You will design one final poster in your demonstration.
-        </p>
-        {!thresholdMet && (
-          <p className="text-text-muted text-xs mt-1.5">Make at least {MINIMUM_INTERACTIONS} design changes to unlock the demonstration.</p>
-        )}
-      </div>
+      <div className="flex-1 flex flex-row overflow-hidden">
+        <CanvasInstructionPanel>
+          {lockedMessage && (
+                <div className="bg-accent/10 border border-accent/30 rounded-lg px-3 py-2 mb-4 text-accent text-xs">
+                  {lockedMessage}
+                </div>
+              )}
+              <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-2">Level 3 Practice</p>
+              <p className="text-text-secondary text-sm leading-relaxed">
+                Practise combining hierarchy, colour, and alignment choices into one complete poster.
+                Experiment freely. You will design one final poster in your demonstration.
+              </p>
+              {!thresholdMet && (
+                <p className="text-text-muted text-xs mt-3">
+                  Make at least {MINIMUM_INTERACTIONS} design changes to unlock the demonstration.
+                </p>
+              )}
+        </CanvasInstructionPanel>
 
-      <DesignCanvas
-        defaultElements={DEFAULT_ELEMENTS}
-        defaultBgColor={DEFAULT_BG_COLOR}
-        onChange={() => {}}
-        onInteraction={recordInteraction}
-      />
+        <DesignCanvas
+          defaultElements={DEFAULT_ELEMENTS}
+          defaultBgColor={DEFAULT_BG_COLOR}
+          onChange={() => {}}
+          onInteraction={recordInteraction}
+        />
+      </div>
     </div>
   )
 }

@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import MainLayout from '../../components/MainLayout'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
-import Footer from '../../components/Footer'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -47,9 +46,8 @@ export default function NotesBuildChordsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
+    <MainLayout>
+      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
@@ -70,7 +68,7 @@ export default function NotesBuildChordsPage() {
         </p>
 
         {/* Section 1: Half steps */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Half Steps</h2>
           <p className="text-text-secondary text-sm mb-3">
             A <span className="font-semibold">half step</span> is the distance between any two adjacent keys on the piano, white or black.
@@ -88,7 +86,7 @@ export default function NotesBuildChordsPage() {
         </div>
 
         {/* Section 2: Major chord */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Building a Major Chord</h2>
           <p className="text-text-secondary text-sm mb-4">
             A <span className="font-semibold">major chord</span> is built with this formula:
@@ -115,7 +113,7 @@ export default function NotesBuildChordsPage() {
         </div>
 
         {/* Section 3: Minor chord */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Building a Minor Chord</h2>
           <p className="text-text-secondary text-sm mb-4">
             A <span className="font-semibold">minor chord</span> swaps the order of the first two intervals: it starts with a smaller step, giving it a darker sound.
@@ -179,7 +177,6 @@ export default function NotesBuildChordsPage() {
           </button>
         </div>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

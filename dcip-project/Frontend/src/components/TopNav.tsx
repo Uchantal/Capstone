@@ -182,9 +182,9 @@ export default function TopNav() {
   if (!isStudent) {
     const roleLabel = user?.role === 'admin' ? 'Administrator' : 'Supervisor'
     return (
-      <nav className="bg-white border-b border-surface-border h-14 flex items-center px-6 justify-between">
+      <nav className="bg-white border-b border-surface-border h-12 flex items-center px-6 justify-between">
         <div className="flex items-center gap-3">
-          <div className="bg-primary rounded-lg w-9 h-9 flex items-center justify-center">
+          <div className="bg-primary rounded-lg w-8 h-8 flex items-center justify-center">
             <span className="text-white font-bold text-sm">DCIP</span>
           </div>
           <div>
@@ -223,9 +223,9 @@ export default function TopNav() {
   const schoolName = user?.school?.name ?? ''
 
   return (
-    <nav className="bg-white border-b border-surface-border h-14 flex items-center px-6 justify-between">
+    <nav className="bg-white border-b border-surface-border h-12 flex items-center px-6 justify-between">
       <div className="flex items-center gap-3">
-        <div className="bg-primary rounded-lg w-9 h-9 flex items-center justify-center">
+        <div className="bg-primary rounded-lg w-8 h-8 flex items-center justify-center">
           <span className="text-white font-bold text-sm">DCIP</span>
         </div>
         <p className="text-text-primary font-semibold text-sm leading-tight hidden lg:block">

@@ -12,12 +12,12 @@ export default function VirtualStudioPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+    <div className="h-screen flex flex-col overflow-hidden bg-white">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <span>Graphic Design</span>
           <span>/</span>
-          <span className="text-text-primary">Studio</span>
+          <span className="text-text-primary">Graphic Design Canvas</span>
         </div>
         <button
           onClick={handleContinue}
@@ -27,18 +27,15 @@ export default function VirtualStudioPage() {
         </button>
       </div>
 
-      <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border px-4 py-3">
-        <p className="text-text-secondary text-xs leading-relaxed">
-          This is your design studio. Try adding a title, change the colours, see how it feels. There is no right answer here.
-        </p>
+      <div className="flex-1 flex overflow-hidden">
+        <DesignCanvas
+          defaultElements={DEFAULT_ELEMENTS}
+          defaultBgColor={DEFAULT_BG_COLOR}
+          onChange={() => {}}
+          onInteraction={() => {}}
+          defaultTemplateId="free"
+        />
       </div>
-
-      <DesignCanvas
-        defaultElements={DEFAULT_ELEMENTS}
-        defaultBgColor={DEFAULT_BG_COLOR}
-        onChange={() => {}}
-        onInteraction={() => {}}
-      />
     </div>
   )
 }

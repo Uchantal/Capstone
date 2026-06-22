@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS } from '../../components/graphic-design/PosterSurface'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
+import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
 
 const QUICK_REF = [
   {
@@ -32,11 +34,13 @@ const QUICK_REF = [
 
 export default function GDSharpeningPage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { progress, loading, markStageVisited } = useGDDemonstrationProgress()
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.level3DemonstrationPassed) {
       navigate('/graphic-design/level-3/demonstrate', {
@@ -57,8 +61,8 @@ export default function GDSharpeningPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+    <div className="h-screen flex flex-col overflow-hidden bg-white">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button onClick={() => navigate('/graphic-design/virtual-studio')} className="hover:text-text-primary transition-colors">
             Graphic Design
@@ -74,37 +78,41 @@ export default function GDSharpeningPage() {
         </button>
       </div>
 
-      <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border px-4 py-3">
-        {lockedMessage && (
-          <div className="bg-accent/10 border border-accent/30 rounded-lg px-3 py-2 mb-2 text-accent text-xs">
-            {lockedMessage}
-          </div>
-        )}
-        <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-1">Sharpening</p>
-        <p className="text-text-secondary text-xs leading-relaxed mb-2">
-          Practice freely. Use everything you have learned. There is no pass or fail here.
-        </p>
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          {QUICK_REF.map(section => (
-            <div key={section.heading} className="min-w-[160px]">
-              <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-1">{section.heading}</p>
-              {section.items.map(item => (
-                <div key={item.name} className="mb-0.5">
-                  <span className="text-text-primary text-xs font-medium">{item.name}: </span>
-                  <span className="text-text-secondary text-xs">{item.desc}</span>
+      <div className="flex-1 flex flex-row overflow-hidden">
+        <CanvasInstructionPanel>
+          {lockedMessage && (
+                <div className="bg-accent/10 border border-accent/30 rounded-lg px-3 py-2 mb-4 text-accent text-xs">
+                  {lockedMessage}
                 </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
+              )}
+              <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-2">Sharpening</p>
+              <p className="text-text-secondary text-sm leading-relaxed mb-5">
+                Practice freely. Use everything you have learned. There is no pass or fail here.
+              </p>
+              <div className="space-y-5">
+                {QUICK_REF.map(section => (
+                  <div key={section.heading}>
+                    <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">{section.heading}</p>
+                    <div className="space-y-1">
+                      {section.items.map(item => (
+                        <div key={item.name}>
+                          <span className="text-text-primary text-sm font-medium">{item.name}: </span>
+                          <span className="text-text-secondary text-sm">{item.desc}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+        </CanvasInstructionPanel>
 
-      <DesignCanvas
-        defaultElements={DEFAULT_ELEMENTS}
-        defaultBgColor={DEFAULT_BG_COLOR}
-        onChange={() => {}}
-        onInteraction={() => {}}
-      />
+        <DesignCanvas
+          defaultElements={DEFAULT_ELEMENTS}
+          defaultBgColor={DEFAULT_BG_COLOR}
+          onChange={() => {}}
+          onInteraction={() => {}}
+        />
+      </div>
     </div>
   )
 }

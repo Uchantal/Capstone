@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
+import MainLayout from '../../components/MainLayout'
 import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, playTone, drawWaveform, type PitchStatus } from '../../utils/voicePitch'
-import Footer from '../../components/Footer'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -32,6 +32,7 @@ type ExercisePhase =
 
 export default function VoiceLevel3Page() {
   const navigate  = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const location  = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { progress, loading, markStageVisited } = useVoiceDemonstrationProgress()
@@ -65,6 +66,7 @@ export default function VoiceLevel3Page() {
   }
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.level2DemonstrationPassed) {
       navigate('/voice/level-2/demonstrate', {
@@ -72,7 +74,7 @@ export default function VoiceLevel3Page() {
         state: { lockedMessage: 'Complete the Level 2 demonstration first.' },
       })
     }
-  }, [loading, progress.level2DemonstrationPassed, navigate])
+  }, [isPreviewMode, loading, progress.level2DemonstrationPassed, navigate])
 
   useEffect(() => {
     return () => { cancelAnimationFrame(rafRef.current) }
@@ -199,8 +201,7 @@ export default function VoiceLevel3Page() {
   const exNumber = phase.startsWith('ex1') ? 1 : phase.startsWith('ex2') ? 2 : phase.startsWith('ex3') ? 3 : 0
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
+    <MainLayout>
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
         {lockedMessage && (
@@ -344,7 +345,6 @@ export default function VoiceLevel3Page() {
           </div>
         )}
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

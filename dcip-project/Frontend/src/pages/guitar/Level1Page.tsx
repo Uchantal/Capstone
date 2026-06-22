@@ -1,13 +1,16 @@
-import { useEffect } from 'react'
+﻿import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import { Level1Screen } from '../../components/guitar/GuitarLevelScreen'
 import { useGuitarProgress } from '../../hooks/useGuitarProgress'
 
 export default function GuitarLevel1Page() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const { completedStages, loading, markComplete } = useGuitarProgress()
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     const hasBoth = completedStages.includes('guitar-course-1') && completedStages.includes('guitar-course-2')
     if (!hasBoth) {
@@ -19,7 +22,7 @@ export default function GuitarLevel1Page() {
         state: { lockedMessage: `Complete ${missing} first.` },
       })
     }
-  }, [completedStages, loading, navigate])
+  }, [isPreviewMode, completedStages, loading, navigate])
 
   return (
     <Level1Screen

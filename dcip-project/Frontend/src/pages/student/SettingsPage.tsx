@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import MainLayout from '../../components/MainLayout'
 import { useAuth } from '../../hooks/useAuth'
 import { fetchMe, changePassword as apiChangePassword } from '../../services/api'
-import Footer from '../../components/Footer'
 
 interface UserProfile {
   id: string
@@ -98,8 +97,7 @@ export default function SettingsPage() {
     : ''
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
+    <MainLayout>
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-10">
 
         <h1 className="text-text-primary font-bold text-2xl mb-8">Account Settings</h1>
@@ -240,7 +238,6 @@ export default function SettingsPage() {
           </form>
         </div>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import MainLayout from '../../components/MainLayout'
 import { useGDProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useGDProgress'
-import Footer from '../../components/Footer'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -20,8 +20,10 @@ export default function GDCourse2Page() {
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { completedStages, loading, markComplete } = useGDProgress()
+  const isPreviewMode = usePreviewMode()
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!completedStages.includes('gd-course-1')) {
       navigate(STAGE_PATHS['gd-course-1'], {
@@ -29,14 +31,15 @@ export default function GDCourse2Page() {
         state: { lockedMessage: `Complete ${STAGE_NAMES['gd-course-1']} first.` },
       })
     }
-  }, [loading, completedStages, navigate])
+  }, [isPreviewMode, loading, completedStages, navigate])
 
   const [canContinue, setCanContinue] = useState(false)
 
   useEffect(() => {
+    if (isPreviewMode) { setCanContinue(true); return }
     const t = setTimeout(() => setCanContinue(true), 60_000)
     return () => clearTimeout(t)
-  }, [])
+  }, [isPreviewMode])
 
   if (loading) {
     return (
@@ -53,9 +56,8 @@ export default function GDCourse2Page() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
+    <MainLayout>
+      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         {lockedMessage && (
           <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 mb-5 text-accent text-sm">
@@ -81,7 +83,7 @@ export default function GDCourse2Page() {
         </p>
 
         {/* Card A: Colour and Contrast */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Colour and Contrast</h2>
           <p className="text-text-secondary text-sm mb-5 leading-relaxed">
             Text must contrast clearly against its background to be readable. A dark background demands light text.
@@ -111,7 +113,7 @@ export default function GDCourse2Page() {
         </div>
 
         {/* Card B: Warm and Cool Colour Moods */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Warm and Cool Colour Moods</h2>
           <p className="text-text-secondary text-sm mb-5 leading-relaxed">
             Colours carry emotional weight that affects how a viewer feels before they read a single word.
@@ -143,7 +145,7 @@ export default function GDCourse2Page() {
         </div>
 
         {/* Card C: Whitespace and Balance */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Whitespace and Balance</h2>
           <p className="text-text-secondary text-sm mb-5 leading-relaxed">
             Empty space is not wasted space. Whitespace gives a design room to breathe and directs attention
@@ -173,7 +175,7 @@ export default function GDCourse2Page() {
         </div>
 
         {/* Card D: Putting It Together */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-8">
           <h2 className="text-text-primary font-bold text-base mb-3">Putting It Together</h2>
           <div className="space-y-3">
             <div className="flex gap-3 items-start">
@@ -207,7 +209,6 @@ export default function GDCourse2Page() {
           </button>
         </div>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

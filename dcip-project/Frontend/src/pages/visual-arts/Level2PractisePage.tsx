@@ -1,5 +1,6 @@
-import { useRef, useState, useEffect } from 'react'
+﻿import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 
@@ -7,12 +8,14 @@ const MINIMUM_INTERACTIONS = 10
 
 export default function VALevel2PractisePage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const { progress, loading, markStageVisited } = useVisualArtsDemonstrationProgress()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const interactionCount = useRef(0)
   const [thresholdMet, setThresholdMet] = useState(false)
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.completedStages.includes('va-level-2')) {
       navigate('/visual-arts/level-2', {
@@ -20,7 +23,7 @@ export default function VALevel2PractisePage() {
         state: { lockedMessage: 'Complete Level 2 first.' },
       })
     }
-  }, [loading, progress.completedStages, navigate])
+  }, [isPreviewMode, loading, progress.completedStages, navigate])
 
   useEffect(() => {
     if (loading) return
@@ -36,7 +39,7 @@ export default function VALevel2PractisePage() {
     if (interactionCount.current >= MINIMUM_INTERACTIONS) setThresholdMet(true)
   }
 
-  if (loading || !progress.completedStages.includes('va-level-2')) return null
+  if (!isPreviewMode && (loading || !progress.completedStages.includes('va-level-2'))) return null
 
   const sidebarFooter = (
     <div className="border-t border-surface-border pt-3">
@@ -54,7 +57,7 @@ export default function VALevel2PractisePage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
             onClick={() => navigate('/visual-arts/virtual-canvas')}
@@ -69,7 +72,7 @@ export default function VALevel2PractisePage() {
         </div>
         <button
           onClick={() => navigate('/visual-arts/level-2/demonstrate')}
-          disabled={!thresholdMet}
+          disabled={!isPreviewMode && !thresholdMet}
           className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm"
         >
           I am ready to demonstrate

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import TopNav from '../../components/TopNav'
+import MainLayout from '../../components/MainLayout'
 import { getSupervisorLiveActivity, getSupervisorSchoolAnalytics } from '../../services/api'
-import Footer from '../../components/Footer'
 
 interface LiveSession {
   _id: string
@@ -143,8 +142,7 @@ export default function SupervisorDashboardPage() {
   )
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
+    <MainLayout>
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
 
         {/* Section 1: Lab Session Control */}
@@ -345,7 +343,6 @@ export default function SupervisorDashboardPage() {
         </section>
 
       </main>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

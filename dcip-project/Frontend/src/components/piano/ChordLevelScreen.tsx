@@ -83,7 +83,7 @@ export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle,
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted">
           <button
             onClick={() => navigate('/piano/understanding-the-piano')}
@@ -99,7 +99,7 @@ export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle,
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border overflow-y-auto p-4">
+        <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border overflow-y-auto p-3">
           <div className="mb-4">
             <p className="text-text-muted text-xs mb-1.5">Level {levelNumber} of {totalLevels}</p>
             <div className="w-full h-1 bg-gray-200 rounded-full">
@@ -148,7 +148,7 @@ export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle,
           </div>
         </div>
 
-        <div className="flex-1 bg-[#E8E4DC] p-4 flex flex-col overflow-hidden">
+        <div className="flex-1 bg-[#E8E4DC] p-2 flex flex-col overflow-hidden">
           <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-xl shadow-sm">
             <PianoKeyboard
               onNotesChange={notes => {

@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
 
@@ -13,15 +14,17 @@ const E_POSITIONS = [
 
 export default function GuitarLevel1PractisePage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const { progress, loading, markStageVisited } = useGuitarDemonstrationProgress()
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.completedStages.includes('guitar-level-1')) {
       navigate('/guitar/level-1', { replace: true, state: { lockedMessage: 'Complete Level 1 first.' } })
     }
-  }, [loading, progress.completedStages, navigate])
+  }, [isPreviewMode, loading, progress.completedStages, navigate])
 
   useEffect(() => {
     if (loading) return
@@ -31,7 +34,7 @@ export default function GuitarLevel1PractisePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, progress.completedStages])
 
-  if (loading || !progress.completedStages.includes('guitar-level-1')) return null
+  if (!isPreviewMode && (loading || !progress.completedStages.includes('guitar-level-1'))) return null
 
   const highlight = selectedIdx !== null
     ? [{ stringIdx: E_POSITIONS[selectedIdx].stringIdx, fret: E_POSITIONS[selectedIdx].fret, label: 'E' }]
@@ -39,7 +42,7 @@ export default function GuitarLevel1PractisePage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button onClick={() => navigate('/guitar/virtual-instrument')} className="hover:text-text-primary transition-colors">Guitar</button>
           <span>/</span>

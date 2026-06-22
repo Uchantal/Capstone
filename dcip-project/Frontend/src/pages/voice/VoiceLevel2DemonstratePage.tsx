@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
+import MainLayout from '../../components/MainLayout'
 import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, drawWaveform, type PitchStatus } from '../../utils/voicePitch'
 import { completeVoiceDemonstration } from '../../services/api'
-import Footer from '../../components/Footer'
 
 const DEMO_SCALE = [
   { label: 'C4', note: 'C', freq: 261.63 },
@@ -21,6 +21,7 @@ const DEMO_TOLERANCE   = 20
 
 export default function VoiceLevel2DemonstratePage() {
   const navigate  = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const location  = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { progress, loading, reload } = useVoiceDemonstrationProgress()
@@ -41,6 +42,7 @@ export default function VoiceLevel2DemonstratePage() {
   const waveformRef     = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.completedStages.includes('voice-level-2-practise')) {
       navigate('/voice/level-2/practise', {
@@ -48,7 +50,7 @@ export default function VoiceLevel2DemonstratePage() {
         state: { lockedMessage: 'Complete the Level 2 practise session first.' },
       })
     }
-  }, [loading, progress.completedStages, navigate])
+  }, [isPreviewMode, loading, progress.completedStages, navigate])
 
   useEffect(() => {
     return () => { activeRef.current = false; cancelAnimationFrame(rafRef.current) }
@@ -66,7 +68,7 @@ export default function VoiceLevel2DemonstratePage() {
       cancelAnimationFrame(rafRef.current)
       const didPass = correctCountRef.current >= REQUIRED_CORRECT
       if (didPass) {
-        try { await completeVoiceDemonstration(2, true) } catch { /* best-effort */ }
+        if (!isPreviewMode) { try { await completeVoiceDemonstration(2, true) } catch { /* best-effort */ } }
         reload()
       }
       setFinalCorrect(correctCountRef.current)
@@ -136,8 +138,7 @@ export default function VoiceLevel2DemonstratePage() {
 
   if (phase === 'results') {
     return (
-      <div className="min-h-screen bg-white">
-        <TopNav />
+      <MainLayout>
         <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
           <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
             <button onClick={() => navigate('/voice/studio')} className="hover:text-text-primary transition-colors">Voice and Singing</button>
@@ -194,15 +195,14 @@ export default function VoiceLevel2DemonstratePage() {
             )}
           </div>
         </div>
-      </div>
+      </MainLayout>
     )
   }
 
   const currentNote = DEMO_SCALE[promptIdx]
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
+    <MainLayout>
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
         {lockedMessage && (
@@ -276,7 +276,6 @@ export default function VoiceLevel2DemonstratePage() {
           </div>
         )}
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

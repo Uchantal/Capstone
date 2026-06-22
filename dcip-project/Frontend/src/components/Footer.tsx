@@ -1,10 +1,6 @@
 import { Link } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
 
 export default function Footer() {
-  const { user } = useAuth()
-  const isStudent = user?.role === 'student'
-
   return (
     <footer className="bg-[#080A0E]">
       <div className="flex h-1">
@@ -13,7 +9,7 @@ export default function Footer() {
         <div className="flex-1 bg-secondary" />
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-12">
+      <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
 
           <div>

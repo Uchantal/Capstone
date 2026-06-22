@@ -1,5 +1,6 @@
-import { useRef, useState, useEffect } from 'react'
+﻿import { useRef, useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../modules/VisualArtsModule'
 import { useVisualArtsProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useVisualArtsProgress'
 
@@ -32,6 +33,7 @@ export default function VisualArtsLevelScreen({
   requires,
 }: Props) {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -50,6 +52,7 @@ export default function VisualArtsLevelScreen({
   }
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     const firstMissing = requires.find(r => !completedStages.includes(r))
     if (firstMissing) {
@@ -57,14 +60,14 @@ export default function VisualArtsLevelScreen({
       const name = STAGE_NAMES[firstMissing] ?? firstMissing
       navigate(path, { replace: true, state: { lockedMessage: `Complete ${name} first.` } })
     }
-  }, [loading, completedStages, requires, navigate])
+  }, [isPreviewMode, loading, completedStages, requires, navigate])
 
   const allChecked = checklist.every(item => checked.has(item.id))
-  const canComplete = thresholdMet && allChecked
+  const canComplete = isPreviewMode || (thresholdMet && allChecked)
 
   const handleComplete = async () => {
     if (!canComplete) return
-    await markComplete(stageId)
+    if (!isPreviewMode) await markComplete(stageId)
     setCompleted(true)
   }
 
@@ -77,7 +80,7 @@ export default function VisualArtsLevelScreen({
     })
   }
 
-  if (loading) {
+  if (!isPreviewMode && loading) {
     return (
       <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
@@ -139,7 +142,7 @@ export default function VisualArtsLevelScreen({
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
             onClick={() => navigate('/visual-arts/virtual-canvas')}

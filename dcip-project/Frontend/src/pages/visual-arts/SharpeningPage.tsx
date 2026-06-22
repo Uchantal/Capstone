@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react'
+﻿import { useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 
@@ -25,12 +26,14 @@ const SHADING_ZONES = [
 
 export default function SharpeningPage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { progress, loading, markStageVisited } = useVisualArtsDemonstrationProgress()
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.level3DemonstrationPassed) {
       navigate('/visual-arts/level-3/demonstrate', {
@@ -38,7 +41,7 @@ export default function SharpeningPage() {
         state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
       })
     }
-  }, [loading, progress.level3DemonstrationPassed, navigate])
+  }, [isPreviewMode, loading, progress.level3DemonstrationPassed, navigate])
 
   useEffect(() => {
     if (loading) return
@@ -96,7 +99,7 @@ export default function SharpeningPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
             onClick={() => navigate('/visual-arts/virtual-canvas')}

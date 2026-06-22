@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import MainLayout from '../../components/MainLayout'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
-import Footer from '../../components/Footer'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -95,9 +94,8 @@ export default function VoiceCourse1Page() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
-      <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
+    <MainLayout>
+      <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         {lockedMessage && (
           <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 mb-5 text-accent text-sm">
@@ -123,56 +121,34 @@ export default function VoiceCourse1Page() {
         </p>
 
         {/* Card 1: Posture */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Posture Before You Sing</h2>
           <p className="text-text-secondary text-sm mb-4 leading-relaxed">
             Good posture allows deep breathing and prevents throat tension. When your body is properly aligned,
             your lungs can expand fully and your throat stays open and relaxed.
           </p>
-          <div className="flex gap-8 flex-wrap items-start">
-            <svg viewBox="0 0 120 200" className="w-28 h-48 flex-shrink-0" aria-label="Posture diagram">
-              {/* Head */}
-              <circle cx="60" cy="28" r="20" fill="none" stroke="#C8960C" strokeWidth="2" />
-              {/* Neck */}
-              <line x1="60" y1="48" x2="60" y2="65" stroke="#C8960C" strokeWidth="2" />
-              {/* Spine */}
-              <line x1="60" y1="65" x2="60" y2="140" stroke="#C8960C" strokeWidth="2.5" />
-              {/* Shoulders */}
-              <line x1="25" y1="72" x2="95" y2="72" stroke="#C8960C" strokeWidth="2" />
-              {/* Arms */}
-              <line x1="25" y1="72" x2="20" y2="120" stroke="#C8960C" strokeWidth="2" />
-              <line x1="95" y1="72" x2="100" y2="120" stroke="#C8960C" strokeWidth="2" />
-              {/* Legs */}
-              <line x1="60" y1="140" x2="40" y2="190" stroke="#C8960C" strokeWidth="2" />
-              <line x1="60" y1="140" x2="80" y2="190" stroke="#C8960C" strokeWidth="2" />
-              {/* Labels */}
-              <text x="105" y="30" fontSize="7" fill="#888">level chin</text>
-              <line x1="80" y1="28" x2="103" y2="28" stroke="#888" strokeWidth="0.8" />
-              <text x="2" y="68" fontSize="7" fill="#888">relaxed</text>
-              <text x="2" y="76" fontSize="7" fill="#888">shoulders</text>
-              <text x="65" y="105" fontSize="7" fill="#888">straight</text>
-              <text x="65" y="113" fontSize="7" fill="#888">spine</text>
-              <text x="2" y="52" fontSize="7" fill="#888">relaxed</text>
-              <text x="2" y="60" fontSize="7" fill="#888">jaw</text>
-            </svg>
-            <div className="flex-1 min-w-48 space-y-2">
-              {[
-                'Stand or sit straight with a relaxed spine',
-                'Drop your shoulders away from your ears',
-                'Relax your jaw and neck',
-                'Keep your chin level, not tilted up or pushed forward',
-              ].map(item => (
-                <div key={item} className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-                  <p className="text-text-secondary text-sm">{item}</p>
-                </div>
-              ))}
-            </div>
+          <div className="space-y-2 mb-2">
+            {[
+              'Stand or sit straight with a relaxed spine',
+              'Drop your shoulders away from your ears',
+              'Relax your jaw and neck',
+              'Keep your chin level, not tilted up or pushed forward',
+            ].map(item => (
+              <div key={item} className="flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                <p className="text-text-secondary text-sm">{item}</p>
+              </div>
+            ))}
           </div>
+          <img
+            src="/images/posture-correct-incorrect.png"
+            alt="Correct posture shows a straight spine with green dots. Incorrect posture shows a hunched spine with red dots."
+            className="w-full max-w-md mx-auto block mt-4 rounded-lg"
+          />
         </div>
 
         {/* Card 2: Diaphragmatic Breathing */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Diaphragmatic Breathing</h2>
           <p className="text-text-secondary text-sm mb-3 leading-relaxed">
             Singing from the chest strains the voice. Singing from the diaphragm gives power, control, and
@@ -190,7 +166,7 @@ export default function VoiceCourse1Page() {
         </div>
 
         {/* Card 3: How Your Voice Works */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-6">
           <h2 className="text-text-primary font-bold text-base mb-3">Your Voice and How It Works</h2>
           <p className="text-text-secondary text-sm mb-3 leading-relaxed">
             Your vocal cords vibrate when air passes through them to create sound. The more controlled
@@ -219,7 +195,6 @@ export default function VoiceCourse1Page() {
           </button>
         </div>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

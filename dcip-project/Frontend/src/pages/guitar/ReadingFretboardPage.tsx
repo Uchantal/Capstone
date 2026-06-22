@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import MainLayout from '../../components/MainLayout'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarProgress } from '../../hooks/useGuitarProgress'
-import Footer from '../../components/Footer'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -53,9 +52,8 @@ export default function ReadingFretboardPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
+    <MainLayout>
+      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         {lockedMessage && (
           <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 mb-5 text-accent text-sm">
@@ -82,7 +80,7 @@ export default function ReadingFretboardPage() {
         </p>
 
         {/* Card 1: The Six Strings */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">The Six Strings</h2>
           <p className="text-text-secondary text-sm mb-4">
             A standard guitar has six strings, each tuned to a specific open note. From lowest pitch to highest pitch the strings are: E, A, D, G, B, E. Notice that the lowest and highest strings share the same letter name, E, two octaves apart.
@@ -116,7 +114,7 @@ export default function ReadingFretboardPage() {
         </div>
 
         {/* Card 2: The Chromatic Sequence */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">The Chromatic Sequence</h2>
           <p className="text-text-secondary text-sm mb-3">
             There are 12 notes in music. Moving one fret up the neck always moves exactly one half step forward in this sequence. After B, the sequence starts again at C.
@@ -143,7 +141,7 @@ export default function ReadingFretboardPage() {
         </div>
 
         {/* Card 3: Octaves on the Fretboard */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-8">
           <h2 className="text-text-primary font-bold text-base mb-3">Octaves on the Fretboard</h2>
           <p className="text-text-secondary text-sm mb-3">
             Every string repeats its own open note one octave higher at the 12th fret. The 12th fret is always the same letter name as the open string, just higher in pitch. This pattern holds for every string.
@@ -164,7 +162,6 @@ export default function ReadingFretboardPage() {
           </button>
         </div>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

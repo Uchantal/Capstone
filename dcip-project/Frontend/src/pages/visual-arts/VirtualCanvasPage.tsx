@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+﻿import { useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsProgress } from '../../hooks/useVisualArtsProgress'
@@ -23,7 +23,7 @@ export default function VirtualCanvasPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <span className="text-text-primary">Visual Arts</span>
           <span>/</span>

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import AdminNav from '../../components/AdminNav'
 import { getAdminSupervisors, createSupervisor, fetchSchools } from '../../services/api'
-import Footer from '../../components/Footer'
+import AdminLayout from '../../components/AdminLayout'
 
 interface Supervisor {
   _id: string
@@ -68,8 +67,7 @@ export default function AdminSupervisorsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F9F7F4]">
-      <AdminNav />
+    <AdminLayout>
       <main className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
         <div className="flex items-start justify-between mb-6 gap-4">
           <div>
@@ -198,7 +196,6 @@ export default function AdminSupervisorsPage() {
           </div>
         )}
       </main>
-      <Footer />
-    </div>
+    </AdminLayout>
   )
 }

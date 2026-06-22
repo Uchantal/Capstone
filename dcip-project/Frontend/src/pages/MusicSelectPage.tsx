@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import TopNav from '../components/TopNav'
-import Footer from '../components/Footer'
+import MainLayout from '../components/MainLayout'
 
 const paths = [
   {
@@ -54,9 +53,7 @@ export default function MusicSelectPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
-
+    <MainLayout>
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-10">
         <button
           onClick={() => navigate('/disciplines')}
@@ -120,7 +117,6 @@ export default function MusicSelectPage() {
           All three paths use your browser's built-in Web Audio API. No hardware or downloads required.
         </p>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

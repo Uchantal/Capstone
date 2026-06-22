@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { fetchPortfolio, fetchPortfolioItem, deletePortfolioItem } from '../services/api'
-import TopNav from '../components/TopNav'
+import MainLayout from '../components/MainLayout'
 import PortfolioItemCard from '../components/PortfolioItemCard'
-import Footer from '../components/Footer'
 
 export default function PortfolioPage() {
   const { user } = useAuth()
@@ -41,8 +40,7 @@ export default function PortfolioPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
+    <MainLayout>
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-10">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -134,7 +132,6 @@ export default function PortfolioPage() {
           </div>
         )}
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

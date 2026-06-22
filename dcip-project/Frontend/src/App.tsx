@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
@@ -21,6 +21,7 @@ import Level2PractisePage from './pages/piano/Level2PractisePage'
 import Level2DemonstratePage from './pages/piano/Level2DemonstratePage'
 import Level3PractisePage from './pages/piano/Level3PractisePage'
 import Level3DemonstratePage from './pages/piano/Level3DemonstratePage'
+import GDOverviewPage from './pages/graphic-design/GDOverviewPage'
 import GDVirtualStudioPage from './pages/graphic-design/VirtualStudioPage'
 import GDCourse1Page from './pages/graphic-design/GDCourse1Page'
 import GDCourse2Page from './pages/graphic-design/GDCourse2Page'
@@ -87,6 +88,8 @@ import AdminSupervisorsPage from './pages/admin/AdminSupervisorsPage'
 import AdminSchoolsPage from './pages/admin/AdminSchoolsPage'
 import AdminFeedbackPage from './pages/admin/AdminFeedbackPage'
 import FeedbackPage from './pages/FeedbackPage'
+import AdminPreviewPage from './pages/admin/AdminPreviewPage'
+import PreviewNavBar from './components/PreviewNavBar'
 import { useAuth } from './hooks/useAuth'
 
 const roleHome = (role?: string) => {
@@ -103,10 +106,13 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 function StudentRoute({ children }: { children: React.ReactNode }) {
   const { token, user } = useAuth()
+  const { search } = useLocation()
+  const isAdminPreview = user?.role === 'admin' && new URLSearchParams(search).get('preview') === 'true'
   if (!token) return <Navigate to="/login" replace />
-  if (user?.role !== 'student') return <Navigate to={roleHome(user?.role)} replace />
+  if (user?.role !== 'student' && !isAdminPreview) return <Navigate to={roleHome(user?.role)} replace />
   return <>{children}</>
 }
+
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { token, user } = useAuth()
@@ -122,10 +128,13 @@ function SupervisorRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-export default function App() {
-  return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Routes>
+function AppContent() {
+  const { user } = useAuth()
+  const { search } = useLocation()
+  const isPreview = user?.role === 'admin' && new URLSearchParams(search).get('preview') === 'true'
+
+  const routes = (
+    <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
         <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
@@ -166,6 +175,7 @@ export default function App() {
         <Route path="/guitar/sharpening-myself" element={<StudentRoute><GuitarSharpeningPage /></StudentRoute>} />
         <Route path="/guitar/production" element={<StudentRoute><GuitarProductionPage /></StudentRoute>} />
 
+        <Route path="/graphic-design/overview" element={<StudentRoute><GDOverviewPage /></StudentRoute>} />
         <Route path="/graphic-design/virtual-studio" element={<StudentRoute><GDVirtualStudioPage /></StudentRoute>} />
         <Route path="/graphic-design/course-1" element={<StudentRoute><GDCourse1Page /></StudentRoute>} />
         <Route path="/graphic-design/course-2" element={<StudentRoute><GDCourse2Page /></StudentRoute>} />
@@ -222,9 +232,30 @@ export default function App() {
         <Route path="/admin/reports" element={<AdminRoute><AdminReportsPage /></AdminRoute>} />
         <Route path="/admin/supervisors" element={<AdminRoute><AdminSupervisorsPage /></AdminRoute>} />
         <Route path="/admin/feedback" element={<AdminRoute><AdminFeedbackPage /></AdminRoute>} />
+        <Route path="/admin/preview" element={<AdminRoute><AdminPreviewPage /></AdminRoute>} />
 
         <Route path="/feedback" element={<FeedbackPage />} />
       </Routes>
+  )
+
+  if (isPreview) {
+    return (
+      <div className="h-screen flex flex-col overflow-hidden">
+        <PreviewNavBar />
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          {routes}
+        </div>
+      </div>
+    )
+  }
+
+  return routes
+}
+
+export default function App() {
+  return (
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <AppContent />
     </BrowserRouter>
   )
 }

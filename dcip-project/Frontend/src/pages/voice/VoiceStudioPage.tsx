@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import MainLayout from '../../components/MainLayout'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { drawWaveform } from '../../utils/voicePitch'
-import Footer from '../../components/Footer'
 
 export default function VoiceStudioPage() {
   const navigate = useNavigate()
@@ -76,8 +75,7 @@ export default function VoiceStudioPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
+    <MainLayout>
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
         <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Voice and Singing</p>
@@ -182,7 +180,6 @@ export default function VoiceStudioPage() {
           </div>
         )}
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

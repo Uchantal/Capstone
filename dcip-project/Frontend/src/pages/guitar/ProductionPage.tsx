@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard, { STRING_DATA } from '../../components/guitar/GuitarFretboard'
 import { noteAt } from '../../components/guitar/GuitarLevelScreen'
 import { verifyGuitarPerformance } from '../../utils/guitarVerification'
@@ -15,9 +16,11 @@ function formatTime(s: number): string {
 
 export default function GuitarProductionPage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const { progress, loading: progressLoading } = useGuitarDemonstrationProgress()
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (progressLoading) return
     if (!progress.level3DemonstrationPassed) {
       navigate('/guitar/level-3/demonstrate', {
@@ -32,7 +35,7 @@ export default function GuitarProductionPage() {
         state: { lockedMessage: 'Complete Sharpening Myself first.' },
       })
     }
-  }, [progressLoading, progress.level3DemonstrationPassed, progress.completedStages, navigate])
+  }, [isPreviewMode, progressLoading, progress.level3DemonstrationPassed, progress.completedStages, navigate])
 
   const [phase, setPhase] = useState<Phase>('intro')
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
@@ -121,6 +124,7 @@ export default function GuitarProductionPage() {
 
   const handleSave = async () => {
     if (saving || saved || !verificationResult) return
+    if (isPreviewMode) { setSaved(true); return }
     setSaving(true)
     try {
       await savePortfolioItem({
@@ -162,7 +166,7 @@ export default function GuitarProductionPage() {
     setPhase('intro')
   }
 
-  if (progressLoading || !progress.level3DemonstrationPassed) {
+  if (!isPreviewMode && (progressLoading || !progress.level3DemonstrationPassed)) {
     return (
       <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
@@ -173,7 +177,7 @@ export default function GuitarProductionPage() {
   if (phase === 'intro') {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
           <div className="flex items-center gap-2 flex-1">
             <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
               <span className="text-white font-bold text-[10px]">DC</span>
@@ -215,7 +219,7 @@ export default function GuitarProductionPage() {
     const passed = verificationResult.passed
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
           <div className="flex items-center gap-2 flex-1">
             <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
               <span className="text-white font-bold text-[10px]">DC</span>
@@ -313,7 +317,7 @@ export default function GuitarProductionPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 flex-1">
           <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
             <span className="text-white font-bold text-[10px]">DC</span>

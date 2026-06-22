@@ -1,17 +1,20 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import PianoKeyboard from '../../components/piano/PianoKeyboard'
 import { ALL_TWELVE_CHORDS, buildChord } from '../../utils/pianoTheory'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
 
 export default function SharpeningMyselfPage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const { progress, loading, markStageVisited } = usePianoProgress()
   const [pressedNotes, setPressedNotes] = useState<string[]>([])
   const [selectedChord, setSelectedChord] = useState<string | null>(null)
 
   // Gate: requires Level 3 demonstration passed
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.level3DemonstrationPassed) {
       navigate('/piano/level-3/demonstrate', {
@@ -19,7 +22,7 @@ export default function SharpeningMyselfPage() {
         state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
       })
     }
-  }, [loading, progress.level3DemonstrationPassed, navigate])
+  }, [isPreviewMode, loading, progress.level3DemonstrationPassed, navigate])
 
   // Mark sharpening as visited so Production gate can check it
   useEffect(() => {
@@ -56,7 +59,7 @@ export default function SharpeningMyselfPage() {
 
   const pressedNoteNames = pressedNotes.map(n => n.replace(/\d+$/, ''))
 
-  if (loading || !progress.level3DemonstrationPassed) {
+  if (!isPreviewMode && (loading || !progress.level3DemonstrationPassed)) {
     return (
       <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
@@ -66,7 +69,7 @@ export default function SharpeningMyselfPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
             onClick={() => navigate('/session/music-piano')}

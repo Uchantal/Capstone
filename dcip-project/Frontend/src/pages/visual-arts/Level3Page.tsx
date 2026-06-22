@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+﻿import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsLevelScreen from '../../components/visual-arts/VisualArtsLevelScreen'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 
@@ -12,9 +13,11 @@ const CHECKLIST = [
 
 export default function VALevel3Page() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const { progress, loading } = useVisualArtsDemonstrationProgress()
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.level2DemonstrationPassed) {
       navigate('/visual-arts/level-2/demonstrate', {
@@ -22,9 +25,9 @@ export default function VALevel3Page() {
         state: { lockedMessage: 'Complete the Level 2 demonstration first.' },
       })
     }
-  }, [loading, progress.level2DemonstrationPassed, navigate])
+  }, [isPreviewMode, loading, progress.level2DemonstrationPassed, navigate])
 
-  if (loading || !progress.level2DemonstrationPassed) return null
+  if (!isPreviewMode && (loading || !progress.level2DemonstrationPassed)) return null
 
   return (
     <VisualArtsLevelScreen

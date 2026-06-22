@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import MainLayout from '../../components/MainLayout'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
-import Footer from '../../components/Footer'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -59,9 +58,8 @@ export default function UnderstandingPianoPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
+    <MainLayout>
+      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
@@ -82,7 +80,7 @@ export default function UnderstandingPianoPage() {
         </p>
 
         {/* Section 1 */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">White and Black Keys</h2>
           <p className="text-text-secondary text-sm mb-4">
             A piano has two types of keys. The white keys play the seven natural notes of music:
@@ -96,7 +94,7 @@ export default function UnderstandingPianoPage() {
         </div>
 
         {/* Section 2: Static diagram */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Finding C on the Keyboard</h2>
           <p className="text-text-secondary text-sm mb-5">
             C is always the white key directly to the <span className="font-semibold">left of a group of two black keys</span>.
@@ -111,7 +109,7 @@ export default function UnderstandingPianoPage() {
         </div>
 
         {/* Section 3 */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-8">
           <h2 className="text-text-primary font-bold text-base mb-3">Octaves</h2>
           <p className="text-text-secondary text-sm mb-3">
             Each complete set of 12 keys (7 white + 5 black) is called an <span className="font-semibold">octave</span>.
@@ -144,7 +142,6 @@ export default function UnderstandingPianoPage() {
           </button>
         </div>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

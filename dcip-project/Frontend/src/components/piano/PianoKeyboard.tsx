@@ -58,6 +58,8 @@ interface Props {
 export default function PianoKeyboard({ onNotesChange, highlightNotes = [], disabled = false, externalAudioContext, recordingDest }: Props) {
   const [pressedNotes, setPressedNotes] = useState<Set<string>>(new Set())
   const pressedRef = useRef<Set<string>>(new Set())
+  const onNotesChangeRef = useRef(onNotesChange)
+  onNotesChangeRef.current = onNotesChange
   const audioCtxRef = useRef<AudioContext | null>(null)
   const activeNodesRef = useRef<Map<string, AudioNodes>>(new Map())
   const touchNotesRef = useRef<Map<number, string>>(new Map())
@@ -109,8 +111,8 @@ export default function PianoKeyboard({ onNotesChange, highlightNotes = [], disa
   }, [])
 
   useEffect(() => {
-    onNotesChange?.(Array.from(pressedNotes))
-  }, [pressedNotes, onNotesChange])
+    onNotesChangeRef.current?.(Array.from(pressedNotes))
+  }, [pressedNotes])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {

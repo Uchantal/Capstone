@@ -1,9 +1,8 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import MainLayout from '../../components/MainLayout'
 import { useGDProgress } from '../../hooks/useGDProgress'
 import { saveGDLevelPoster } from '../../services/api'
-import Footer from '../../components/Footer'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -40,9 +39,8 @@ export default function GDCourse1Page() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
+    <MainLayout>
+      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         {lockedMessage && (
           <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 mb-5 text-accent text-sm">
@@ -68,7 +66,7 @@ export default function GDCourse1Page() {
         </p>
 
         {/* Card 1: Why Typography Matters */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Why Typography Matters</h2>
           <p className="text-text-secondary text-sm mb-3 leading-relaxed">
             Typography is the art of arranging text so it communicates clearly and feels right for the context.
@@ -96,7 +94,7 @@ export default function GDCourse1Page() {
         </div>
 
         {/* Card 2: Alignment and Placement */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Alignment and Placement</h2>
           <p className="text-text-secondary text-sm mb-5 leading-relaxed">
             Where text sits on a page tells a viewer how to feel about a design. Left alignment feels editorial
@@ -127,7 +125,7 @@ export default function GDCourse1Page() {
         </div>
 
         {/* Card 3: Rule of Thirds */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">The Rule of Thirds</h2>
           <p className="text-text-secondary text-sm mb-5 leading-relaxed">
             Divide your design into a 3 by 3 grid. Placing important elements along the grid lines or at the
@@ -160,7 +158,7 @@ export default function GDCourse1Page() {
         </div>
 
         {/* Card 4: Sketch Before You Build */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-8">
           <h2 className="text-text-primary font-bold text-base mb-3">Sketch Before You Build</h2>
           <p className="text-text-secondary text-sm mb-3 leading-relaxed">
             Professional designers plan on paper before opening any software. Where will the title go? What shape
@@ -197,7 +195,6 @@ export default function GDCourse1Page() {
           </button>
         </div>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

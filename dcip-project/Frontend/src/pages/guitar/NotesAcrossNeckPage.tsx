@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
+import MainLayout from '../../components/MainLayout'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarProgress } from '../../hooks/useGuitarProgress'
-import Footer from '../../components/Footer'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -39,11 +39,13 @@ const D_POSITIONS = [
 
 export default function NotesAcrossNeckPage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { completedStages, loading, markComplete } = useGuitarProgress()
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!completedStages.includes('guitar-course-1')) {
       navigate('/guitar/reading-the-fretboard', {
@@ -51,7 +53,7 @@ export default function NotesAcrossNeckPage() {
         state: { lockedMessage: 'Complete Reading the Fretboard first.' },
       })
     }
-  }, [completedStages, loading, navigate])
+  }, [isPreviewMode, completedStages, loading, navigate])
 
   const [canContinue, setCanContinue] = useState(false)
 
@@ -67,9 +69,8 @@ export default function NotesAcrossNeckPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
+    <MainLayout>
+      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         {lockedMessage && (
           <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 mb-5 text-accent text-sm">
@@ -96,7 +97,7 @@ export default function NotesAcrossNeckPage() {
         </p>
 
         {/* Card A */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Why One Note Has Many Positions</h2>
           <p className="text-text-secondary text-sm mb-3">
             On a piano, middle C appears once. On a guitar, the note C appears six times across the neck within the first twelve frets, once on each string. This is what makes the guitar fretboard feel confusing at first: there is no single home for each note.
@@ -107,7 +108,7 @@ export default function NotesAcrossNeckPage() {
         </div>
 
         {/* Card B: Finding Every C */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Worked Example: Finding Every C</h2>
           <p className="text-text-secondary text-sm mb-2">
             The note C appears at all six positions highlighted below. Click each highlighted position to hear the C note played at different pitches.
@@ -141,7 +142,7 @@ export default function NotesAcrossNeckPage() {
         </div>
 
         {/* Card C: Finding Every D */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Worked Example: Finding Every D</h2>
           <p className="text-text-secondary text-sm mb-2">
             The note D appears at all positions below. Notice that D appears on its own string, the D string, both as the open note and at fret 12. These are the same note name, one octave apart.
@@ -176,7 +177,7 @@ export default function NotesAcrossNeckPage() {
         </div>
 
         {/* Card D: Putting It Together */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-8">
           <h2 className="text-text-primary font-bold text-base mb-3">Putting It Together</h2>
           <p className="text-text-secondary text-sm mb-4">
             The next three levels build on everything you have learned here.
@@ -207,7 +208,6 @@ export default function NotesAcrossNeckPage() {
           </button>
         </div>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

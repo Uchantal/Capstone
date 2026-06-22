@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
 
@@ -17,10 +18,12 @@ const CHORD_REFERENCE = [
 
 export default function GuitarLevel3PractisePage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const { progress, loading, markStageVisited } = useGuitarDemonstrationProgress()
   const [selectedNoteIdx, setSelectedNoteIdx] = useState<number | null>(null)
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.level2DemonstrationPassed) {
       navigate('/guitar/level-2/demonstrate', { replace: true, state: { lockedMessage: 'Complete the Level 2 demonstration first.' } })
@@ -29,7 +32,7 @@ export default function GuitarLevel3PractisePage() {
     if (!progress.completedStages.includes('guitar-level-3')) {
       navigate('/guitar/level-3', { replace: true, state: { lockedMessage: 'Complete Level 3 first.' } })
     }
-  }, [loading, progress.level2DemonstrationPassed, progress.completedStages, navigate])
+  }, [isPreviewMode, loading, progress.level2DemonstrationPassed, progress.completedStages, navigate])
 
   useEffect(() => {
     if (loading) return
@@ -40,7 +43,7 @@ export default function GuitarLevel3PractisePage() {
   }, [loading, progress.level2DemonstrationPassed, progress.completedStages])
 
   const ready = !loading && progress.level2DemonstrationPassed && progress.completedStages.includes('guitar-level-3')
-  if (!ready) return null
+  if (!isPreviewMode && !ready) return null
 
   const highlight = selectedNoteIdx !== null
     ? [{ stringIdx: D_POSITIONS[selectedNoteIdx].stringIdx, fret: D_POSITIONS[selectedNoteIdx].fret, label: 'D' }]
@@ -48,7 +51,7 @@ export default function GuitarLevel3PractisePage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button onClick={() => navigate('/guitar/virtual-instrument')} className="hover:text-text-primary transition-colors">Guitar</button>
           <span>/</span>

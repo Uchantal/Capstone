@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { completeGuitarDemonstration } from '../../services/api'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
@@ -18,9 +19,11 @@ type ValidState = 'waiting' | 'correct' | 'wrong'
 
 export default function GuitarLevel2DemonstratePage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const { progress, loading, reload } = useGuitarDemonstrationProgress()
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.level1DemonstrationPassed) {
       navigate('/guitar/level-1/demonstrate', { replace: true, state: { lockedMessage: 'Complete the Level 1 demonstration first.' } })
@@ -29,7 +32,7 @@ export default function GuitarLevel2DemonstratePage() {
     if (!progress.completedStages.includes('guitar-level-2-practise')) {
       navigate('/guitar/level-2/practise', { replace: true, state: { lockedMessage: 'Complete the Level 2 practise session first.' } })
     }
-  }, [loading, progress.level1DemonstrationPassed, progress.completedStages, navigate])
+  }, [isPreviewMode, loading, progress.level1DemonstrationPassed, progress.completedStages, navigate])
 
   const [phase, setPhase]           = useState<Phase>('testing')
   const [promptIdx, setPromptIdx]   = useState(0)
@@ -48,7 +51,7 @@ export default function GuitarLevel2DemonstratePage() {
       submittedRef.current = true
       const didPass = correctCountRef.current >= REQUIRED_CORRECT
       setPassed(didPass)
-      completeGuitarDemonstration(2, didPass).then(() => reload()).catch(() => {})
+      if (!isPreviewMode) { completeGuitarDemonstration(2, didPass).then(() => reload()).catch(() => {}) }
       setPhase('results')
     } else {
       setPromptIdx(promptIdxRef.current)
@@ -84,7 +87,7 @@ export default function GuitarLevel2DemonstratePage() {
 
   const ready = !loading && progress.level1DemonstrationPassed && progress.completedStages.includes('guitar-level-2-practise')
 
-  if (!ready) {
+  if (!isPreviewMode && !ready) {
     return (
       <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
@@ -95,7 +98,7 @@ export default function GuitarLevel2DemonstratePage() {
   if (phase === 'results') {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
           <div className="flex items-center gap-2 text-xs text-text-muted">
             <button onClick={() => navigate('/guitar/virtual-instrument')} className="hover:text-text-primary transition-colors">Guitar</button>
             <span>/</span>
@@ -167,7 +170,7 @@ export default function GuitarLevel2DemonstratePage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button onClick={() => navigate('/guitar/virtual-instrument')} className="hover:text-text-primary transition-colors">Guitar</button>
           <span>/</span>

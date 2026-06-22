@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, exportDesignToDataUrl, type DesignElement } from '../../components/graphic-design/PosterSurface'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
 import { completeGDDemonstration } from '../../services/api'
+import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
 
 const PLACEHOLDERS = ['New text', 'Your heading', 'Phone: \nEmail: \nWebsite: ', 'Your contact info']
 
@@ -42,6 +44,7 @@ function checkGDDemonstration(elements: DesignElement[], bgColor: string): { pas
 
 export default function GDLevel3DemonstratePage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
 
@@ -49,12 +52,15 @@ export default function GDLevel3DemonstratePage() {
   const [elements, setElements] = useState(DEFAULT_ELEMENTS)
   const [bgColor, setBgColor] = useState(DEFAULT_BG_COLOR)
   const [canvasKey, setCanvasKey] = useState(0)
+  const [exportW, setExportW] = useState(595)
+  const [exportH, setExportH] = useState(842)
   const [checkResult, setCheckResult] = useState<{ passed: boolean; feedback: string[] } | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [passed, setPassed] = useState(false)
   const interactionCount = useRef(0)
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.completedStages.includes('gd-level-3-practise')) {
       navigate('/graphic-design/level-3/practise', {
@@ -69,15 +75,17 @@ export default function GDLevel3DemonstratePage() {
   }
 
   function handleCheck() {
+    if (isPreviewMode) { setCheckResult({ passed: true, feedback: [] }); return }
     const result = checkGDDemonstration(elements, bgColor)
     setCheckResult(result)
   }
 
   const handleSubmit = async () => {
+    if (isPreviewMode) { setPassed(true); return }
     setSubmitting(true)
     try {
       const snapshot = JSON.stringify({ elements, bgColor })
-      const imageData = await exportDesignToDataUrl(elements, bgColor)
+      const imageData = await exportDesignToDataUrl(elements, bgColor, exportW, exportH)
       await completeGDDemonstration(3, true, snapshot, imageData)
       reload()
       setPassed(true)
@@ -106,9 +114,9 @@ export default function GDLevel3DemonstratePage() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
-        <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
+    <div className="h-screen flex flex-col overflow-hidden bg-white">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="flex items-center gap-2 text-xs text-text-muted">
           <button onClick={() => navigate('/graphic-design/virtual-studio')} className="hover:text-text-primary transition-colors">
             Graphic Design
           </button>
@@ -117,61 +125,68 @@ export default function GDLevel3DemonstratePage() {
           <span>/</span>
           <span className="text-text-primary">Demonstrate</span>
         </div>
-        {!checkResult?.passed ? (
-          <button
-            onClick={handleCheck}
-            className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors text-sm"
-          >
-            {checkResult ? 'Check again' : 'Check my work'}
-          </button>
-        ) : (
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="bg-[#2D6A4F] text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed text-sm"
-          >
-            {submitting ? 'Saving...' : 'Submit and Continue'}
-          </button>
-        )}
       </div>
 
-      <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border px-4 py-3">
-        {lockedMessage && (
-          <div className="bg-accent/10 border border-accent/30 rounded-lg px-3 py-2 mb-2 text-accent text-xs">
-            {lockedMessage}
-          </div>
-        )}
-        <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-1">Task</p>
-        <p className="text-text-secondary text-xs leading-relaxed">
-          Design a poster that shows hierarchy, contrast, and balance all working together. This is your chance to show everything you have learned.
-        </p>
+      <div className="flex-1 flex flex-row overflow-hidden">
+        <CanvasInstructionPanel>
+          {lockedMessage && (
+                <div className="bg-accent/10 border border-accent/30 rounded-lg px-3 py-2 mb-4 text-accent text-xs">
+                  {lockedMessage}
+                </div>
+              )}
 
-        {checkResult && !checkResult.passed && (
-          <div className="mt-2 space-y-1">
-            <p className="text-xs font-medium text-text-primary">Needs more work:</p>
-            {checkResult.feedback.map((msg, i) => (
-              <p key={i} className="text-xs text-accent flex items-start gap-1">
-                <span className="flex-shrink-0 mt-0.5">&#8226;</span>
-                <span>{msg}</span>
+              <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-2">Task</p>
+              <p className="text-text-secondary text-sm leading-relaxed mb-4">
+                Design a poster that shows hierarchy, contrast, and balance all working together. This is your chance to show everything you have learned.
               </p>
-            ))}
-          </div>
-        )}
 
-        {checkResult?.passed && (
-          <div className="mt-2 bg-[#2D6A4F]/10 border border-[#2D6A4F]/30 rounded-lg px-3 py-1.5">
-            <p className="text-[#2D6A4F] text-xs font-medium">Your work meets the requirements.</p>
-          </div>
-        )}
+              {checkResult && !checkResult.passed && (
+                <div className="mb-4 space-y-1">
+                  <p className="text-xs font-medium text-text-primary">Needs more work:</p>
+                  {checkResult.feedback.map((msg, i) => (
+                    <p key={i} className="text-xs text-accent flex items-start gap-1">
+                      <span className="flex-shrink-0 mt-0.5">&#8226;</span>
+                      <span>{msg}</span>
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              {checkResult?.passed && (
+                <div className="mb-4 bg-[#2D6A4F]/10 border border-[#2D6A4F]/30 rounded-lg px-3 py-2">
+                  <p className="text-[#2D6A4F] text-xs font-medium">Your work meets the requirements.</p>
+                </div>
+              )}
+
+              <div className="mt-auto pt-4">
+                {!checkResult?.passed ? (
+                  <button
+                    onClick={handleCheck}
+                    className="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-dark transition-colors text-sm"
+                  >
+                    {checkResult ? 'Check again' : 'Check my work'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSubmit}
+                    disabled={submitting}
+                    className="w-full bg-[#2D6A4F] text-white font-semibold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed text-sm"
+                  >
+                    {submitting ? 'Saving...' : isPreviewMode ? 'Submit (Preview - not saved)' : 'Submit and Continue'}
+                  </button>
+                )}
+              </div>
+        </CanvasInstructionPanel>
+
+        <DesignCanvas
+          key={canvasKey}
+          defaultElements={DEFAULT_ELEMENTS}
+          defaultBgColor={DEFAULT_BG_COLOR}
+          onChange={(els, bg) => { setElements(els); setBgColor(bg) }}
+          onInteraction={recordInteraction}
+          onDimensionsChange={(w, h) => { setExportW(w); setExportH(h) }}
+        />
       </div>
-
-      <DesignCanvas
-        key={canvasKey}
-        defaultElements={DEFAULT_ELEMENTS}
-        defaultBgColor={DEFAULT_BG_COLOR}
-        onChange={(els, bg) => { setElements(els); setBgColor(bg) }}
-        onInteraction={recordInteraction}
-      />
 
       {passed && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

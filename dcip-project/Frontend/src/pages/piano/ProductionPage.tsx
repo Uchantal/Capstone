@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import PianoKeyboard from '../../components/piano/PianoKeyboard'
 import { noteToFrequency } from '../../utils/pianoTheory'
 import { verifyPianoPerformance } from '../../utils/pianoVerification'
@@ -21,6 +22,7 @@ function parseNoteId(id: string): { note: string; octave: number } | null {
 
 export default function PianoProductionPage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const { progress, loading } = usePianoProgress()
 
   const [phase, setPhase] = useState<Phase>('intro')
@@ -48,6 +50,7 @@ export default function PianoProductionPage() {
 
   // Gate: requires Level 3 demonstration AND sharpening visited
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.level3DemonstrationPassed) {
       navigate('/piano/level-3/demonstrate', {
@@ -62,7 +65,7 @@ export default function PianoProductionPage() {
         state: { lockedMessage: 'Complete the Sharpening Myself session first.' },
       })
     }
-  }, [loading, progress.level3DemonstrationPassed, progress.completedStages, navigate])
+  }, [isPreviewMode, loading, progress.level3DemonstrationPassed, progress.completedStages, navigate])
 
   useEffect(() => {
     phaseRef.current = phase
@@ -171,6 +174,7 @@ export default function PianoProductionPage() {
 
   const handleSave = async () => {
     if (saving || saved || !verificationResult) return
+    if (isPreviewMode) { setSaved(true); return }
     setSaving(true)
     try {
       await savePortfolioItem({
@@ -212,7 +216,7 @@ export default function PianoProductionPage() {
     setPhase('intro')
   }
 
-  if (loading || !progress.level3DemonstrationPassed) {
+  if (!isPreviewMode && (loading || !progress.level3DemonstrationPassed)) {
     return (
       <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
@@ -223,7 +227,7 @@ export default function PianoProductionPage() {
   if (phase === 'intro') {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
           <div className="flex items-center gap-2 flex-1">
             <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
               <span className="text-white font-bold text-[10px]">DC</span>
@@ -265,7 +269,7 @@ export default function PianoProductionPage() {
     const passed = verificationResult.passed
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
           <div className="flex items-center gap-2 flex-1">
             <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
               <span className="text-white font-bold text-[10px]">DC</span>
@@ -363,7 +367,7 @@ export default function PianoProductionPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 flex-1">
           <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
             <span className="text-white font-bold text-[10px]">DC</span>

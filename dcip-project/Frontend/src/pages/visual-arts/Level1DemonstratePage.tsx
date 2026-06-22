@@ -1,5 +1,6 @@
-import { useRef, useState, useEffect } from 'react'
+﻿import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { completeVisualArtsDemonstration } from '../../services/api'
@@ -35,6 +36,7 @@ function checkVADemonstration(
 
 export default function VALevel1DemonstratePage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const { progress, loading } = useVisualArtsDemonstrationProgress()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [resetKey, setResetKey] = useState(0)
@@ -45,6 +47,7 @@ export default function VALevel1DemonstratePage() {
   const [passed, setPassed] = useState(false)
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.completedStages.includes('va-level-1-practise')) {
       navigate('/visual-arts/level-1/practise', {
@@ -52,7 +55,7 @@ export default function VALevel1DemonstratePage() {
         state: { lockedMessage: 'Complete Level 1 Practise first.' },
       })
     }
-  }, [loading, progress.completedStages, navigate])
+  }, [isPreviewMode, loading, progress.completedStages, navigate])
 
   function recordInteraction() {
     interactionCount.current += 1
@@ -63,6 +66,7 @@ export default function VALevel1DemonstratePage() {
   }
 
   function handleCheck() {
+    if (isPreviewMode) { setCheckResult({ passed: true, feedback: [] }); return }
     const isEmpty = coloursUsedRef.current.size === 0
     const result = checkVADemonstration(
       interactionCount.current,
@@ -74,6 +78,7 @@ export default function VALevel1DemonstratePage() {
   }
 
   const handleSubmit = async () => {
+    if (isPreviewMode) { setPassed(true); return }
     setSubmitting(true)
     const snapshot = canvasRef.current?.toDataURL('image/png') ?? ''
     try {
@@ -94,7 +99,7 @@ export default function VALevel1DemonstratePage() {
     setResetKey(k => k + 1)
   }
 
-  if (loading || !progress.completedStages.includes('va-level-1-practise')) {
+  if (!isPreviewMode && (loading || !progress.completedStages.includes('va-level-1-practise'))) {
     return (
       <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
@@ -139,7 +144,7 @@ export default function VALevel1DemonstratePage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
             onClick={() => navigate('/visual-arts/virtual-canvas')}

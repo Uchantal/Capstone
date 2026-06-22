@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import PianoKeyboard from './PianoKeyboard'
 import { useChordValidation } from '../../hooks/useChordValidation'
 import {
@@ -48,6 +49,7 @@ export default function LevelDemonstrateScreen({
   requiresDemoRedirect,
 }: Props) {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { progress, loading } = usePianoProgress()
@@ -65,6 +67,7 @@ export default function LevelDemonstrateScreen({
 
   // Gate checks
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (requiresDemoLevel && requiresDemoRedirect) {
       const key = `level${requiresDemoLevel}DemonstrationPassed` as keyof typeof progress
@@ -82,7 +85,7 @@ export default function LevelDemonstrateScreen({
         state: { lockedMessage: 'Complete the practise session for this level first.' },
       })
     }
-  }, [loading, progress, practiseStageId, practiseRedirect, requiresDemoLevel, requiresDemoRedirect, navigate])
+  }, [isPreviewMode, loading, progress, practiseStageId, practiseRedirect, requiresDemoLevel, requiresDemoRedirect, navigate])
 
   const advance = useCallback(async (wasCorrect: boolean) => {
     if (wasCorrect) correctCountRef.current++
@@ -92,7 +95,7 @@ export default function LevelDemonstrateScreen({
       if (submittedRef.current) return
       submittedRef.current = true
       const didPass = correctCountRef.current >= requiredCorrect
-      if (didPass) {
+      if (didPass && !isPreviewMode) {
         try { await completePianoDemonstration(levelNumber, true) } catch {}
       }
       setFinalCorrect(correctCountRef.current)
@@ -145,16 +148,18 @@ export default function LevelDemonstrateScreen({
   }
 
   // Synchronous gate guard — prevents flash of content before redirect fires
-  if (requiresDemoLevel && requiresDemoRedirect) {
-    const key = `level${requiresDemoLevel}DemonstrationPassed` as keyof typeof progress
-    if (!progress[key]) return null
+  if (!isPreviewMode) {
+    if (requiresDemoLevel && requiresDemoRedirect) {
+      const key = `level${requiresDemoLevel}DemonstrationPassed` as keyof typeof progress
+      if (!progress[key]) return null
+    }
+    if (!progress.completedStages.includes(practiseStageId)) return null
   }
-  if (!progress.completedStages.includes(practiseStageId)) return null
 
   if (phase === 'results') {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
           <div className="flex items-center gap-2 text-xs text-text-muted">
             <button
               onClick={() => navigate('/session/music-piano')}
@@ -238,7 +243,7 @@ export default function LevelDemonstrateScreen({
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
             onClick={() => navigate('/session/music-piano')}

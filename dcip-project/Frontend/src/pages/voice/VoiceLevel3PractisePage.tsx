@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
+import MainLayout from '../../components/MainLayout'
 import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, playTone, drawWaveform, type PitchStatus } from '../../utils/voicePitch'
-import Footer from '../../components/Footer'
 
 const REFERENCE_NOTES = [
   { label: 'A4 (sustain)', note: 'A', freq: 440.00 },
@@ -16,6 +16,7 @@ const REFERENCE_NOTES = [
 
 export default function VoiceLevel3PractisePage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const { progress, loading, markStageVisited } = useVoiceDemonstrationProgress()
   const { initMic, analyserRef, micError, micReady } = useVoiceMic()
 
@@ -28,6 +29,7 @@ export default function VoiceLevel3PractisePage() {
   const targetFreqRef = useRef<number | null>(null)
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.completedStages.includes('voice-level-3')) {
       navigate('/voice/level-3', { replace: true, state: { lockedMessage: 'Complete Level 3 first.' } })
@@ -35,7 +37,7 @@ export default function VoiceLevel3PractisePage() {
     }
     markStageVisited('voice-level-3-practise')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, progress.completedStages])
+  }, [isPreviewMode, loading, progress.completedStages])
 
   useEffect(() => {
     return () => { activeRef.current = false; cancelAnimationFrame(rafRef.current) }
@@ -66,11 +68,10 @@ export default function VoiceLevel3PractisePage() {
     if (!micReady) startMic()
   }
 
-  if (loading || !progress.completedStages.includes('voice-level-3')) return null
+  if (!isPreviewMode && (loading || !progress.completedStages.includes('voice-level-3'))) return null
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
+    <MainLayout>
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
         <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
@@ -148,7 +149,6 @@ export default function VoiceLevel3PractisePage() {
           </button>
         </div>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

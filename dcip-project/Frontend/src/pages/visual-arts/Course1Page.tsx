@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import MainLayout from '../../components/MainLayout'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsProgress } from '../../hooks/useVisualArtsProgress'
-import Footer from '../../components/Footer'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -50,9 +49,8 @@ export default function Course1Page() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
-      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
+    <MainLayout>
+      <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         {lockedMessage && (
           <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 mb-5 text-accent text-sm">
@@ -79,7 +77,7 @@ export default function Course1Page() {
         </p>
 
         {/* Card 1: Line Control */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Line Control</h2>
           <p className="text-text-secondary text-sm mb-3">
             Controlled lines are the foundation of all drawing. The quality of a line, its weight,
@@ -96,7 +94,7 @@ export default function Course1Page() {
         </div>
 
         {/* Card 2: Shapes Are Built From Lines and Curves */}
-        <div className="bg-white border border-surface-border rounded-2xl p-6 mb-5">
+        <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">Shapes Are Built From Lines and Curves</h2>
           <p className="text-text-secondary text-sm mb-5">
             Every complex drawing can be broken down into simple shapes. A face becomes an oval with
@@ -155,7 +153,6 @@ export default function Course1Page() {
           </button>
         </div>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+﻿import { useNavigate } from 'react-router-dom'
 import PianoKeyboard from '../../components/piano/PianoKeyboard'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
 
@@ -13,7 +13,7 @@ export default function VirtualInstrumentPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <span className="text-text-primary">Virtual Piano</span>
         </div>

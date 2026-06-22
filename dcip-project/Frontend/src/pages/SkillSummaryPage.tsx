@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { fetchProgressSummary, fetchPortfolio } from '../services/api'
-import TopNav from '../components/TopNav'
-import Footer from '../components/Footer'
+import MainLayout from '../components/MainLayout'
 
 interface DisciplineSummary {
   key: string
@@ -231,11 +230,7 @@ export default function SkillSummaryPage() {
   const recentPortfolio = portfolio.slice(0, 3)
 
   return (
-    <div className="min-h-screen bg-[#F9F7F4]">
-      <div className="no-print">
-        <TopNav />
-      </div>
-
+    <MainLayout background="bg-[#F9F7F4]">
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
         {/* Print button */}
@@ -347,7 +342,6 @@ export default function SkillSummaryPage() {
         </div>
 
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }

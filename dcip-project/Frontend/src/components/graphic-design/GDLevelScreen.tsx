@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, DesignElement, exportDesignToDataUrl } from './PosterSurface'
 import { useGDProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useGDProgress'
 import { fetchGDLevelPoster, saveGDLevelPoster } from '../../services/api'
+import CanvasInstructionPanel from '../canvas/CanvasInstructionPanel'
 
 const MINIMUM_INTERACTIONS = 10
 const PLACEHOLDER_TEXTS = new Set(['New text', 'Your heading', 'Phone: \nEmail: \nWebsite: '])
@@ -51,6 +53,7 @@ export default function GDLevelScreen({
   initialPosterLevel, referencePosterLevel, planningNoteLevel,
 }: Props) {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
 
@@ -79,6 +82,7 @@ export default function GDLevelScreen({
 
   // Gate check
   useEffect(() => {
+    if (isPreviewMode) return
     if (progressLoading) return
     const firstMissing = requires.find(r => !completedStages.includes(r))
     if (firstMissing) {
@@ -91,6 +95,7 @@ export default function GDLevelScreen({
 
   // Load prior poster data, reference image, and planning note
   useEffect(() => {
+    if (isPreviewMode) { setDataLoading(false); return }
     if (progressLoading) return
     const hasMissing = requires.some(r => !completedStages.includes(r))
     if (hasMissing) return
@@ -160,7 +165,7 @@ export default function GDLevelScreen({
 
   const hasTextContent = elements.some(el => el.type === 'text' && (el.text ?? '').trim().length > 0)
   const contentReady   = hasTextContent && reasoning.trim().length > 0
-  const canComplete    = thresholdMet && contentReady
+  const canComplete    = isPreviewMode || (thresholdMet && contentReady)
 
   const textElements           = elements.filter(el => el.type === 'text' && (el.text ?? '').trim().length > 0)
   const hasOnlyPlaceholderText = textElements.length > 0 && textElements.every(el => PLACEHOLDER_TEXTS.has(el.text ?? ''))
@@ -176,6 +181,7 @@ export default function GDLevelScreen({
 
   const handleComplete = async () => {
     if (!canComplete || saving) return
+    if (isPreviewMode) { setCompleted(true); return }
     setSaving(true)
     try {
       const mainText = elements.find(el => el.type === 'text')?.text ?? ''
@@ -201,8 +207,9 @@ export default function GDLevelScreen({
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+    <div className="h-screen flex flex-col overflow-hidden bg-white">
+      {/* ── Top bar ── */}
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-6">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
             onClick={() => navigate('/graphic-design/virtual-studio')}
@@ -229,83 +236,93 @@ export default function GDLevelScreen({
         </div>
       </div>
 
-      <div className="flex-shrink-0 bg-[#F9F7F4] border-b border-surface-border px-4 py-3">
-        {lockedMessage && (
-          <div className="bg-accent/10 border border-accent/30 rounded-lg px-3 py-2 mb-2 text-accent text-xs">
-            {lockedMessage}
-          </div>
-        )}
+      {/* ── Main area: instructions left, canvas right ── */}
+      <div className="flex-1 flex flex-row overflow-hidden">
 
-        <div className="flex flex-wrap items-start gap-4">
-          <div className="flex-1 min-w-[200px]">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xs font-semibold text-primary uppercase tracking-widest whitespace-nowrap">
-                Level {levelNumber} of {totalLevels}
-              </span>
-              <div className="flex-1 h-1 bg-gray-200 rounded-full">
-                <div
-                  className="h-1 bg-primary rounded-full"
-                  style={{ width: `${(levelNumber / totalLevels) * 100}%` }}
-                />
-              </div>
+        {/* ── Instructions panel (left) ── */}
+        <CanvasInstructionPanel>
+          {lockedMessage && (
+            <div className="bg-accent/10 border border-accent/30 rounded-lg px-3 py-2 mb-4 text-accent text-xs">
+              {lockedMessage}
             </div>
-            <p className="text-sm font-bold text-text-primary mt-1 mb-1">{levelTitle}</p>
-            <p className="text-xs text-text-secondary leading-relaxed mb-2">{brief}</p>
-            <div className="border-t-2 border-surface-border my-3" />
-            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Your Task</p>
-            <div className="bg-white rounded-lg p-3 border border-surface-border mb-1.5">
-              <p className="text-xs font-semibold text-text-primary mb-1">Your task</p>
-              <p className="text-xs text-text-secondary leading-relaxed font-medium">{task}</p>
+          )}
+
+          {/* Level progress */}
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-xs font-semibold text-primary uppercase tracking-widest whitespace-nowrap">
+              Level {levelNumber} of {totalLevels}
+            </span>
+            <div className="flex-1 h-1 bg-gray-200 rounded-full">
+              <div
+                className="h-1 bg-primary rounded-full"
+                style={{ width: `${(levelNumber / totalLevels) * 100}%` }}
+              />
             </div>
-
-            {planningNote && (
-              <div className="bg-primary/5 border border-primary/20 rounded-lg px-3 py-2 mb-1.5">
-                <p className="text-xs text-text-secondary uppercase tracking-widest mb-0.5">Your plan from Course 1</p>
-                <p className="text-xs italic text-text-secondary leading-relaxed line-clamp-2">{planningNote}</p>
-              </div>
-            )}
-
-            <label className="text-[10px] font-semibold text-text-secondary uppercase tracking-widest block mb-0.5">
-              {reasoningPrompt}
-            </label>
-            <textarea
-              value={reasoning}
-              onChange={e => setReasoning(e.target.value)}
-              rows={2}
-              placeholder="Write your reasoning here..."
-              className="w-full border border-surface-border rounded-lg px-2 py-1.5 text-xs text-text-primary focus:outline-none focus:border-primary resize-none bg-white"
-            />
-            {!contentReady && (
-              <p className="text-text-muted text-[10px] mt-0.5">
-                {!hasTextContent
-                  ? 'Add at least one text element to your poster to continue.'
-                  : 'Write your reasoning to continue.'}
-              </p>
-            )}
           </div>
 
+          <h1 className="text-lg font-bold text-text-primary mb-1">{levelTitle}</h1>
+          <p className="text-sm text-text-secondary leading-relaxed mb-4">{brief}</p>
+
+          {/* Task card */}
+          <div className="border border-surface-border rounded-lg p-3 mb-3 bg-white">
+            <p className="text-xs font-semibold text-text-primary uppercase tracking-wide mb-1">Your task</p>
+            <p className="text-sm text-text-secondary leading-relaxed">{task}</p>
+          </div>
+
+          {/* Planning note */}
+          {planningNote && (
+            <div className="border border-surface-border rounded-lg p-3 mb-3 bg-white">
+              <p className="text-xs text-text-muted uppercase tracking-widest mb-1">Your plan from Course 1</p>
+              <p className="text-sm italic text-text-secondary">{planningNote}</p>
+            </div>
+          )}
+
+          {/* Reference image (Level 3) */}
           {refImageUrl && (
-            <div className="flex-shrink-0 w-36">
+            <div className="mb-4">
               <p className="text-text-muted text-[9px] uppercase tracking-wide mb-1">
                 Your Level 1 poster (reference)
               </p>
               <img
                 src={refImageUrl}
                 alt="Your Level 1 design"
-                className="w-full border border-surface-border rounded-lg"
+                className="w-24 border border-surface-border rounded-lg"
               />
             </div>
           )}
-        </div>
-      </div>
 
-      <DesignCanvas
-        key={canvasKey}
-        defaultElements={elements}
-        defaultBgColor={bgColor}
-        onChange={(els, bg) => { setElements(els); setBgColor(bg) }}
-        onInteraction={recordInteraction}
-      />
+          {/* Reasoning */}
+          <div className="mb-4">
+            <label className="text-xs font-semibold uppercase tracking-widest text-text-muted block mb-2">
+              {reasoningPrompt}
+            </label>
+            <textarea
+              value={reasoning}
+              onChange={e => setReasoning(e.target.value)}
+              rows={4}
+              placeholder="Write your reasoning here..."
+              className="w-full border border-surface-border rounded-lg p-3 text-sm text-text-primary bg-white resize-none focus:outline-none focus:border-primary"
+            />
+          </div>
+
+          {!contentReady && (
+            <p className="text-xs text-text-muted">
+              {!hasTextContent
+                ? 'Add at least one text element to your poster to continue.'
+                : 'Write your reasoning to continue.'}
+            </p>
+          )}
+        </CanvasInstructionPanel>
+
+        {/* ── Canvas area (right) ── */}
+        <DesignCanvas
+          key={canvasKey}
+          defaultElements={elements}
+          defaultBgColor={bgColor}
+          onChange={(els, bg) => { setElements(els); setBgColor(bg) }}
+          onInteraction={recordInteraction}
+        />
+      </div>
 
       {completed && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

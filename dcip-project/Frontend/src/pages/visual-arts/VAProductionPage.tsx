@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { saveVAProductionResult, savePortfolioItem, completeVisualArtsProduction } from '../../services/api'
@@ -15,6 +16,7 @@ type Phase = 'intro' | 'working' | 'done'
 
 export default function VAProductionPage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { progress, loading, markStageVisited } = useVisualArtsDemonstrationProgress()
   const [phase, setPhase] = useState<Phase>('intro')
@@ -23,6 +25,7 @@ export default function VAProductionPage() {
   const [portfolioId, setPortfolioId] = useState<string | null>(null)
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.level3DemonstrationPassed) {
       navigate('/visual-arts/level-3/demonstrate', {
@@ -37,7 +40,7 @@ export default function VAProductionPage() {
         state: { lockedMessage: 'Complete Sharpening Myself first.' },
       })
     }
-  }, [loading, progress.level3DemonstrationPassed, progress.completedStages, navigate])
+  }, [isPreviewMode, loading, progress.level3DemonstrationPassed, progress.completedStages, navigate])
 
   const allChecked = PRODUCTION_CHECKLIST.every(item => checked.has(item.id))
 
@@ -52,6 +55,7 @@ export default function VAProductionPage() {
 
   const handleSubmit = async () => {
     if (!allChecked || submitting) return
+    if (isPreviewMode) { setPhase('done'); return }
     setSubmitting(true)
 
     const imageData = canvasRef.current?.toDataURL('image/png') ?? ''
@@ -86,7 +90,7 @@ export default function VAProductionPage() {
     }
   }
 
-  if (loading || !progress.level3DemonstrationPassed) {
+  if (!isPreviewMode && (loading || !progress.level3DemonstrationPassed)) {
     return (
       <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>
@@ -97,7 +101,7 @@ export default function VAProductionPage() {
   if (phase === 'done') {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
           <div className="flex items-center gap-2 flex-1">
             <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
               <span className="text-white font-bold text-[10px]">DC</span>
@@ -152,7 +156,7 @@ export default function VAProductionPage() {
   if (phase === 'intro') {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
           <div className="flex items-center gap-2 flex-1">
             <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
               <span className="text-white font-bold text-[10px]">DC</span>
@@ -239,7 +243,7 @@ export default function VAProductionPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-14 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 flex-1">
           <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
             <span className="text-white font-bold text-[10px]">DC</span>

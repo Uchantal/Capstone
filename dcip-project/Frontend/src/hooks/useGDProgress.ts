@@ -13,7 +13,7 @@ export const STAGE_PATHS: Record<string, string> = {
 }
 
 export const STAGE_NAMES: Record<string, string> = {
-  'gd-virtual-studio': 'Virtual Studio',
+  'gd-virtual-studio': 'Graphic Design Canvas',
   'gd-course-1':       'Typography and Layout',
   'gd-course-2':       'Colour and Composition',
   'gd-level-1':        'Level 1',

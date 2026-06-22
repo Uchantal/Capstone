@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import TopNav from '../../components/TopNav'
+import { usePreviewMode } from '../../hooks/usePreviewMode'
+import MainLayout from '../../components/MainLayout'
 import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, playTone, drawWaveform, type PitchStatus } from '../../utils/voicePitch'
-import Footer from '../../components/Footer'
 
 const SCALE = [
   { label: 'C4', note: 'C', freq: 261.63 },
@@ -17,6 +17,7 @@ const SCALE = [
 
 export default function VoiceLevel2PractisePage() {
   const navigate = useNavigate()
+  const isPreviewMode = usePreviewMode()
   const { progress, loading, markStageVisited } = useVoiceDemonstrationProgress()
   const { initMic, analyserRef, micError, micReady } = useVoiceMic()
 
@@ -29,6 +30,7 @@ export default function VoiceLevel2PractisePage() {
   const targetFreqRef = useRef<number | null>(null)
 
   useEffect(() => {
+    if (isPreviewMode) return
     if (loading) return
     if (!progress.completedStages.includes('voice-level-2')) {
       navigate('/voice/level-2', { replace: true, state: { lockedMessage: 'Complete Level 2 first.' } })
@@ -36,7 +38,7 @@ export default function VoiceLevel2PractisePage() {
     }
     markStageVisited('voice-level-2-practise')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, progress.completedStages])
+  }, [isPreviewMode, loading, progress.completedStages])
 
   useEffect(() => {
     return () => { activeRef.current = false; cancelAnimationFrame(rafRef.current) }
@@ -78,11 +80,10 @@ export default function VoiceLevel2PractisePage() {
     if (!micReady) startMic()
   }
 
-  if (loading || !progress.completedStages.includes('voice-level-2')) return null
+  if (!isPreviewMode && (loading || !progress.completedStages.includes('voice-level-2'))) return null
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <TopNav />
+    <MainLayout>
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
         <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
@@ -157,7 +158,6 @@ export default function VoiceLevel2PractisePage() {
           </button>
         </div>
       </div>
-      <Footer />
-    </div>
+    </MainLayout>
   )
 }
