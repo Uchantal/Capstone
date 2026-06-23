@@ -3,6 +3,14 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../modules/VisualArtsModule'
 import { useVisualArtsProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useVisualArtsProgress'
+import { useVAEngagement } from '../../hooks/useCanvasEngagement'
+
+function stageIdToEngagementKey(stageId: string): string {
+  if (stageId === 'va-level-1') return 'level1Learn'
+  if (stageId === 'va-level-2') return 'level2Learn'
+  if (stageId === 'va-level-3') return 'level3Learn'
+  return 'level1Learn'
+}
 
 export interface ChecklistItem {
   id: string
@@ -40,10 +48,15 @@ export default function VisualArtsLevelScreen({
   const { completedStages, loading, markComplete } = useVisualArtsProgress()
   const [checked, setChecked] = useState<Set<string>>(new Set())
   const [completed, setCompleted] = useState(false)
+  const [engagementScore, setEngagementScore] = useState<number | null>(null)
   const interactionCount = useRef(0)
   const [thresholdMet, setThresholdMet] = useState(false)
 
+  const { recordInteraction: recordEngInteraction, recordColour, recordTool, computeAndSave } =
+    useVAEngagement('visual-arts', stageIdToEngagementKey(stageId))
+
   function recordInteraction() {
+    recordEngInteraction()
     if (thresholdMet) return
     interactionCount.current += 1
     if (interactionCount.current >= MINIMUM_INTERACTIONS) {
@@ -67,7 +80,11 @@ export default function VisualArtsLevelScreen({
 
   const handleComplete = async () => {
     if (!canComplete) return
-    if (!isPreviewMode) await markComplete(stageId)
+    if (!isPreviewMode) {
+      const score = await computeAndSave()
+      setEngagementScore(score)
+      await markComplete(stageId)
+    }
     setCompleted(true)
   }
 
@@ -168,6 +185,8 @@ export default function VisualArtsLevelScreen({
         canvasRef={canvasRef}
         step={5}
         onInteraction={recordInteraction}
+        onColourUsed={recordColour}
+        onToolChange={recordTool}
         sidebarFooter={sidebarFooter}
       />
 
@@ -180,9 +199,14 @@ export default function VisualArtsLevelScreen({
               </svg>
             </div>
             <h2 className="text-text-primary font-bold text-xl mb-2">Level {levelNumber} Complete</h2>
-            <p className="text-text-secondary text-sm mb-6">
+            <p className="text-text-secondary text-sm mb-4">
               Well done. You completed all the tasks for this level.
             </p>
+            {engagementScore !== null && engagementScore < 40 && (
+              <p className="text-sm text-text-secondary mb-4 p-3 bg-[#F9F7F4] rounded-lg border border-surface-border">
+                Your interaction with this exercise was limited. Spending more time exploring the tools and experimenting will strengthen your skills before the next level.
+              </p>
+            )}
             <button
               onClick={() => navigate(nextPath)}
               className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"

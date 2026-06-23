@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
+import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 
 const MINIMUM_INTERACTIONS = 10
 
@@ -33,10 +34,19 @@ export default function VALevel2PractisePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, progress.completedStages])
 
+  const { recordInteraction: recordEngInteraction, recordColour, recordTool, computeAndSave } =
+    useVAEngagement('visual-arts', 'level2Practise')
+
   function recordInteraction() {
+    recordEngInteraction()
     if (thresholdMet) return
     interactionCount.current += 1
     if (interactionCount.current >= MINIMUM_INTERACTIONS) setThresholdMet(true)
+  }
+
+  const handleReady = () => {
+    computeAndSave().catch(() => {})
+    navigate('/visual-arts/level-2/demonstrate')
   }
 
   if (!isPreviewMode && (loading || !progress.completedStages.includes('va-level-2'))) return null
@@ -71,7 +81,7 @@ export default function VALevel2PractisePage() {
           <span className="text-text-primary">Practise</span>
         </div>
         <button
-          onClick={() => navigate('/visual-arts/level-2/demonstrate')}
+          onClick={handleReady}
           disabled={!isPreviewMode && !thresholdMet}
           className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm"
         >
@@ -83,6 +93,8 @@ export default function VALevel2PractisePage() {
         canvasRef={canvasRef}
         step={5}
         onInteraction={recordInteraction}
+        onColourUsed={recordColour}
+        onToolChange={recordTool}
         sidebarFooter={sidebarFooter}
       />
     </div>

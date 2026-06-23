@@ -4,6 +4,7 @@ import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { saveVAProductionResult, savePortfolioItem, completeVisualArtsProduction } from '../../services/api'
+import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 
 const PRODUCTION_CHECKLIST = [
   { id: 'three-shapes', text: 'My composition contains at least three recognisable shapes or elements' },
@@ -23,6 +24,9 @@ export default function VAProductionPage() {
   const [checked, setChecked] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
   const [portfolioId, setPortfolioId] = useState<string | null>(null)
+  const [engagementScore, setEngagementScore] = useState<number | null>(null)
+  const { recordInteraction, recordColour, recordTool, computeAndSave } =
+    useVAEngagement('visual-arts', 'production')
 
   useEffect(() => {
     if (isPreviewMode) return
@@ -58,6 +62,8 @@ export default function VAProductionPage() {
     if (isPreviewMode) { setPhase('done'); return }
     setSubmitting(true)
 
+    const score = await computeAndSave()
+    setEngagementScore(score)
     const imageData = canvasRef.current?.toDataURL('image/png') ?? ''
 
     try {
@@ -127,6 +133,11 @@ export default function VAProductionPage() {
               <p className="text-text-secondary text-sm leading-relaxed mb-4">
                 Your composition has been saved to your portfolio. You have completed the Visual Arts journey.
               </p>
+              {engagementScore !== null && engagementScore < 40 && (
+                <p className="text-sm text-amber-600 mb-4">
+                  Your engagement score for this session was low. Try spending more time exploring the tools next time.
+                </p>
+              )}
               <div className="inline-flex items-center bg-[#2D6A4F]/10 text-[#2D6A4F] text-xs font-semibold px-4 py-2 rounded-full">
                 Advanced Visual Arts Badge
               </div>
@@ -258,7 +269,14 @@ export default function VAProductionPage() {
         </button>
       </div>
 
-      <VisualArtsModule canvasRef={canvasRef} step={5} sidebarFooter={sidebarFooter} />
+      <VisualArtsModule
+        canvasRef={canvasRef}
+        step={5}
+        onInteraction={recordInteraction}
+        onColourUsed={recordColour}
+        onToolChange={recordTool}
+        sidebarFooter={sidebarFooter}
+      />
     </div>
   )
 }

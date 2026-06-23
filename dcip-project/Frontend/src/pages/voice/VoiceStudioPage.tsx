@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
@@ -91,20 +91,20 @@ export default function VoiceStudioPage() {
             <div className="flex flex-col items-center gap-3">
               <div className={`rounded-full border-4 transition-all ease-in-out duration-[4000ms] flex items-center justify-center
                 ${breathSize === 'large'
-                  ? 'w-40 h-40 bg-purple-100 border-purple-500'
-                  : 'w-24 h-24 bg-transparent border-purple-300'
+                  ? 'w-40 h-40 bg-primary/10 border-primary'
+                  : 'w-24 h-24 bg-transparent border-primary/40'
                 }`}
               >
                 {!breathDone && (
-                  <span className="text-purple-700 font-semibold text-sm">
+                  <span className="text-primary font-semibold text-sm">
                     {breathPhase === 'in' ? 'In' : 'Out'}
                   </span>
                 )}
                 {breathDone && (
-                  <span className="text-purple-500 font-semibold text-sm">Done</span>
+                  <span className="text-primary font-semibold text-sm">Done</span>
                 )}
               </div>
-              <p className="text-purple-700 text-xs font-medium">
+              <p className="text-primary text-xs font-medium">
                 {breathDone ? 'Breathing exercise complete' : breathPhase === 'in' ? 'Breathe in...' : 'Breathe out...'}
               </p>
             </div>
@@ -133,7 +133,7 @@ export default function VoiceStudioPage() {
           {!recording ? (
             <button
               onClick={startRecording}
-              className="bg-purple-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-purple-800 transition-colors"
+              className="bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-primary-dark transition-colors"
             >
               Start Recording
             </button>
@@ -144,7 +144,7 @@ export default function VoiceStudioPage() {
                 <span className="text-accent text-sm font-medium">Recording...</span>
                 <button
                   onClick={stopRecording}
-                  className="border border-purple-400 text-purple-700 text-sm px-4 py-1.5 rounded-lg hover:bg-purple-50 transition-colors"
+                  className="border border-primary/50 text-primary text-sm px-4 py-1.5 rounded-lg hover:bg-primary/10 transition-colors"
                 >
                   Stop
                 </button>
@@ -161,7 +161,7 @@ export default function VoiceStudioPage() {
               ))}
               <button
                 onClick={startRecording}
-                className="border border-purple-400 text-purple-700 text-xs font-semibold px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors"
+                className="border border-primary/50 text-primary text-xs font-semibold px-4 py-2 rounded-lg hover:bg-primary/10 transition-colors"
               >
                 Record another take
               </button>

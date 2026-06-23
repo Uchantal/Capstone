@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
+import { useReadingEngagement } from '../../hooks/useReadingEngagement'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -39,28 +40,28 @@ function BreathingGuide() {
       <div className="flex flex-col items-center gap-2">
         <div className={`rounded-full border-4 transition-all ease-in-out duration-[4000ms] flex items-center justify-center
           ${breathSize === 'large'
-            ? 'w-36 h-36 bg-purple-100 border-purple-500'
-            : 'w-20 h-20 bg-transparent border-purple-300'
+            ? 'w-36 h-36 bg-primary/10 border-primary'
+            : 'w-20 h-20 bg-transparent border-primary/40'
           }`}
         >
           {started && !done && (
-            <span className="text-purple-700 font-semibold text-sm">
+            <span className="text-primary font-semibold text-sm">
               {breathPhase === 'in' ? 'In' : 'Out'}
             </span>
           )}
-          {done && <span className="text-purple-500 text-sm font-semibold">Done</span>}
+          {done && <span className="text-primary text-sm font-semibold">Done</span>}
         </div>
         {!started ? (
           <button
             onClick={start}
-            className="bg-purple-700 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-purple-800 transition-colors"
+            className="bg-primary text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors"
           >
             Start breathing guide
           </button>
         ) : done ? (
           <button onClick={start} className="text-text-muted text-xs underline">Do it again</button>
         ) : (
-          <p className="text-purple-700 text-xs font-medium">
+          <p className="text-primary text-xs font-medium">
             {breathPhase === 'in' ? 'Breathe in...' : 'Breathe out...'}
           </p>
         )}
@@ -77,20 +78,21 @@ export default function VoiceCourse1Page() {
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { markStageVisited } = useVoiceDemonstrationProgress()
-
-  // Hidden 60-second timer before the Continue button is enabled
-  const [canContinue, setCanContinue] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    timerRef.current = setTimeout(() => setCanContinue(true), 60_000)
-    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
-  }, [])
+  const [lowEngagement, setLowEngagement] = useState(false)
+  const { computeAndSave } = useReadingEngagement('voice', 'course1')
 
   const handleContinue = async () => {
-    if (!canContinue) return
-    await markStageVisited('voice-course-1')
-    navigate('/voice/pitch-and-scale')
+    const score = await computeAndSave()
+    const proceed = async () => {
+      await markStageVisited('voice-course-1')
+      navigate('/voice/pitch-and-scale')
+    }
+    if (score < 40) {
+      setLowEngagement(true)
+      setTimeout(proceed, 3000)
+    } else {
+      await proceed()
+    }
   }
 
   return (
@@ -155,7 +157,7 @@ export default function VoiceCourse1Page() {
             protects your vocal cords. When you breathe in, your belly should expand outward. When you exhale,
             your belly falls back in. Your chest should stay relatively still.
           </p>
-          <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-5">
+          <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-5">
             <p className="text-text-primary text-sm font-semibold mb-1">Exercise</p>
             <p className="text-text-secondary text-sm">
               Place one hand on your chest and one on your belly. Breathe in slowly for 4 seconds.
@@ -173,7 +175,7 @@ export default function VoiceCourse1Page() {
             your breath, the more controlled your sound. Humming is the safest way to start because it
             keeps sound resonating in the front of your face rather than pressing in your throat.
           </p>
-          <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
+          <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
             <p className="text-text-primary text-sm font-semibold mb-1">Exercise</p>
             <p className="text-text-secondary text-sm">
               Hum a comfortable note. Feel the vibration in your lips and face. If you feel pressure in
@@ -182,14 +184,15 @@ export default function VoiceCourse1Page() {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-4">
-          {!canContinue && (
-            <p className="text-text-muted text-xs">Read through the content above before continuing.</p>
+        <div className="flex flex-col items-end gap-2">
+          {lowEngagement && (
+            <p className="text-sm text-amber-600">
+              Take your time with this content. Your engagement score for this page was low.
+            </p>
           )}
           <button
             onClick={handleContinue}
-            disabled={!canContinue}
-            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors"
           >
             Continue to Pitch and the Musical Scale
           </button>

@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import MainLayout from '../../components/MainLayout'
-import { getSupervisorLiveActivity, getSupervisorSchoolAnalytics } from '../../services/api'
+import {
+  getSupervisorLiveActivity,
+  getSupervisorSchoolAnalytics,
+  getSessionStatus,
+  openLabSession,
+  closeLabSession,
+} from '../../services/api'
 
 interface LiveSession {
   _id: string
@@ -59,21 +65,10 @@ const STATUS_STYLE: Record<string, string> = {
 }
 
 export default function SupervisorDashboardPage() {
-  const [labActive, setLabActive] = useState<boolean>(() => {
-    try {
-      return JSON.parse(localStorage.getItem('dcip-lab-session') ?? 'null')?.active === true
-    } catch {
-      return false
-    }
-  })
-  const [labStartedAt, setLabStartedAt] = useState<Date | null>(() => {
-    try {
-      const raw = JSON.parse(localStorage.getItem('dcip-lab-session') ?? 'null')
-      return raw?.startedAt ? new Date(raw.startedAt) : null
-    } catch {
-      return null
-    }
-  })
+  const [labActive, setLabActive] = useState<boolean>(false)
+  const [labStartedAt, setLabStartedAt] = useState<Date | null>(null)
+  const [sessionLoading, setSessionLoading] = useState(true)
+  const [sessionSaving, setSessionSaving] = useState(false)
 
   const [liveActivity, setLiveActivity] = useState<LiveSession[]>([])
   const [analytics, setAnalytics] = useState<SchoolAnalytics | null>(null)
@@ -94,6 +89,14 @@ export default function SupervisorDashboardPage() {
   }
 
   useEffect(() => {
+    getSessionStatus()
+      .then((res) => {
+        setLabActive(res.data.isOpen)
+        setLabStartedAt(res.data.openedAt ? new Date(res.data.openedAt) : null)
+      })
+      .catch(() => {})
+      .finally(() => setSessionLoading(false))
+
     fetchLive()
     getSupervisorSchoolAnalytics()
       .then((res) => setAnalytics(res.data))
@@ -109,17 +112,30 @@ export default function SupervisorDashboardPage() {
     }
   }, [])
 
-  const openLab = () => {
-    const startedAt = new Date()
-    localStorage.setItem('dcip-lab-session', JSON.stringify({ active: true, startedAt: startedAt.toISOString() }))
-    setLabActive(true)
-    setLabStartedAt(startedAt)
+  const openLab = async () => {
+    setSessionSaving(true)
+    try {
+      const res = await openLabSession()
+      setLabActive(res.data.isOpen)
+      setLabStartedAt(res.data.openedAt ? new Date(res.data.openedAt) : null)
+    } catch {
+      // non-critical; UI stays unchanged
+    } finally {
+      setSessionSaving(false)
+    }
   }
 
-  const closeLab = () => {
-    localStorage.removeItem('dcip-lab-session')
-    setLabActive(false)
-    setLabStartedAt(null)
+  const closeLab = async () => {
+    setSessionSaving(true)
+    try {
+      await closeLabSession()
+      setLabActive(false)
+      setLabStartedAt(null)
+    } catch {
+      // non-critical
+    } finally {
+      setSessionSaving(false)
+    }
   }
 
   const fmtTime = (d: Date) =>
@@ -152,7 +168,11 @@ export default function SupervisorDashboardPage() {
             {fmtDate(now)}, {fmtTime(now)}
           </p>
 
-          {labActive ? (
+          {sessionLoading ? (
+            <div className="h-10 flex items-center">
+              <span className="text-text-muted text-sm">Loading session status...</span>
+            </div>
+          ) : labActive ? (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-status-synced animate-pulse block" />
@@ -163,9 +183,10 @@ export default function SupervisorDashboardPage() {
               )}
               <button
                 onClick={closeLab}
-                className="border border-accent text-accent text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-accent/5 transition-colors"
+                disabled={sessionSaving}
+                className="border border-accent text-accent text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-accent/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Close Session
+                {sessionSaving ? 'Closing...' : 'Close Session'}
               </button>
             </div>
           ) : (
@@ -176,9 +197,10 @@ export default function SupervisorDashboardPage() {
               </div>
               <button
                 onClick={openLab}
-                className="bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-primary-dark transition-colors"
+                disabled={sessionSaving}
+                className="bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Open Lab Session
+                {sessionSaving ? 'Opening...' : 'Open Lab Session'}
               </button>
             </div>
           )}

@@ -1,7 +1,8 @@
-﻿import { useEffect, useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
+import { useReadingEngagement } from '../../hooks/useReadingEngagement'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -32,17 +33,21 @@ function IntervalStep({ from, to, steps, result }: { from: string; to: string; s
 export default function NotesBuildChordsPage() {
   const navigate = useNavigate()
   const { markStageVisited } = usePianoProgress()
-  const [canContinue, setCanContinue] = useState(false)
+  const [lowEngagement, setLowEngagement] = useState(false)
+  const { computeAndSave } = useReadingEngagement('piano', 'course2')
 
-  useEffect(() => {
-    const t = setTimeout(() => setCanContinue(true), 60_000)
-    return () => clearTimeout(t)
-  }, [])
-
-  const handleContinue = () => {
-    if (!canContinue) return
-    markStageVisited('piano-notes-chords')
-    navigate('/piano/level-1')
+  const handleContinue = async () => {
+    const score = await computeAndSave()
+    const proceed = () => {
+      markStageVisited('piano-notes-chords')
+      navigate('/piano/level-1')
+    }
+    if (score < 40) {
+      setLowEngagement(true)
+      setTimeout(proceed, 3000)
+    } else {
+      proceed()
+    }
   }
 
   return (
@@ -167,11 +172,15 @@ export default function NotesBuildChordsPage() {
         </div>
 
         {/* Continue */}
-        <div className="flex justify-end">
+        <div className="flex flex-col items-end gap-2">
+          {lowEngagement && (
+            <p className="text-sm text-amber-600">
+              Take your time with this content. Your engagement score for this page was low.
+            </p>
+          )}
           <button
             onClick={handleContinue}
-            disabled={!canContinue}
-            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors"
           >
             Start Level 1
           </button>

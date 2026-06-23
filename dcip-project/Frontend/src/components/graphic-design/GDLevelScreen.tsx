@@ -5,6 +5,14 @@ import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, DesignElement, export
 import { useGDProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useGDProgress'
 import { fetchGDLevelPoster, saveGDLevelPoster } from '../../services/api'
 import CanvasInstructionPanel from '../canvas/CanvasInstructionPanel'
+import { useGDEngagement } from '../../hooks/useCanvasEngagement'
+
+function stageIdToEngagementKey(stageId: string): string {
+  if (stageId === 'gd-level-1') return 'level1Learn'
+  if (stageId === 'gd-level-2') return 'level2Learn'
+  if (stageId === 'gd-level-3') return 'level3Learn'
+  return 'level1Learn'
+}
 
 const MINIMUM_INTERACTIONS = 10
 const PLACEHOLDER_TEXTS = new Set(['New text', 'Your heading', 'Phone: \nEmail: \nWebsite: '])
@@ -73,6 +81,10 @@ export default function GDLevelScreen({
 
   const interactionCount = useRef(0)
   const [thresholdMet, setThresholdMet] = useState(false)
+  const [engagementScore, setEngagementScore] = useState<number | null>(null)
+
+  const { recordElementChange, computeAndSave } =
+    useGDEngagement('graphic-design', stageIdToEngagementKey(stageId))
 
   function recordInteraction() {
     if (thresholdMet) return
@@ -193,6 +205,8 @@ export default function GDLevelScreen({
         reasoning: reasoning.trim(),
       })
     } catch { /* best-effort */ }
+    const score = await computeAndSave(elements)
+    setEngagementScore(score)
     await markComplete(stageId)
     setSaving(false)
     setCompleted(true)
@@ -319,7 +333,7 @@ export default function GDLevelScreen({
           key={canvasKey}
           defaultElements={elements}
           defaultBgColor={bgColor}
-          onChange={(els, bg) => { setElements(els); setBgColor(bg) }}
+          onChange={(els, bg) => { setElements(els); setBgColor(bg); recordElementChange(els) }}
           onInteraction={recordInteraction}
         />
       </div>
@@ -333,9 +347,14 @@ export default function GDLevelScreen({
               </svg>
             </div>
             <h2 className="text-text-primary font-bold text-xl mb-2">Level {levelNumber} Complete</h2>
-            <p className="text-text-secondary text-sm mb-6">
+            <p className="text-text-secondary text-sm mb-4">
               Well done. Your poster and reasoning have been saved.
             </p>
+            {engagementScore !== null && engagementScore < 40 && (
+              <p className="text-sm text-text-secondary mb-4 p-3 bg-[#F9F7F4] rounded-lg border border-surface-border">
+                Your interaction with this exercise was limited. Spending more time exploring the tools and experimenting will strengthen your skills before the next level.
+              </p>
+            )}
             <button
               onClick={() => navigate(nextPath)}
               className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"

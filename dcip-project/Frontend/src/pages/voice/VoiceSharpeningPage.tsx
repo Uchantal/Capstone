@@ -125,8 +125,8 @@ export default function VoiceSharpeningPage() {
                   onClick={() => handlePlayNote(n)}
                   className={`w-12 h-12 rounded-xl border-2 flex flex-col items-center justify-center transition-all text-sm font-bold ${
                     activeNote === n.label
-                      ? 'bg-purple-600 border-purple-600 text-white scale-95'
-                      : 'bg-white border-surface-border text-text-primary hover:border-purple-400 hover:bg-purple-50'
+                      ? 'bg-primary border-primary text-white scale-95'
+                      : 'bg-white border-surface-border text-text-primary hover:border-primary/50 hover:bg-primary/10'
                   }`}
                 >
                   {n.note}

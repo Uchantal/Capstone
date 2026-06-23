@@ -107,8 +107,8 @@ export default function VoiceLevel2PractisePage() {
                 onClick={() => handlePlayNote(n)}
                 className={`w-16 h-16 rounded-xl border-2 flex flex-col items-center justify-center transition-all font-bold text-xl ${
                   activeNote?.label === n.label
-                    ? 'bg-purple-600 border-purple-600 text-white scale-95'
-                    : 'bg-white border-surface-border text-text-primary hover:border-purple-400 hover:bg-purple-50'
+                    ? 'bg-primary border-primary text-white scale-95'
+                    : 'bg-white border-surface-border text-text-primary hover:border-primary/50 hover:bg-primary/10'
                 }`}
               >
                 {n.note}
@@ -118,7 +118,7 @@ export default function VoiceLevel2PractisePage() {
           </div>
           <button
             onClick={handlePlayScale}
-            className="border border-purple-400 text-purple-700 text-xs font-semibold px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors"
+            className="border border-primary/50 text-primary text-xs font-semibold px-4 py-2 rounded-lg hover:bg-primary/10 transition-colors"
           >
             Play full scale (C to G)
           </button>
@@ -137,7 +137,7 @@ export default function VoiceLevel2PractisePage() {
           ) : (
             <button
               onClick={startMic}
-              className="bg-purple-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-purple-800 transition-colors"
+              className="bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-primary-dark transition-colors"
             >
               Enable microphone for live feedback
             </button>

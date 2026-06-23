@@ -10,11 +10,11 @@ dotenv.config()
 // One supervisor per participating school.
 // Username pattern: sup.<short-key>  Password: Supervisor2025
 const SCHOOL_SUPERVISORS = [
-  { name: 'Participating School A', district: 'Nyamagabe', supUsername: 'sup.school.a', supFullName: 'Supervisor School A', supEmail: 'sup.school.a@dcip.rw' },
-  { name: 'Participating School B', district: 'Muhanga',   supUsername: 'sup.school.b', supFullName: 'Supervisor School B', supEmail: 'sup.school.b@dcip.rw' },
-  { name: 'Participating School C', district: 'Huye',      supUsername: 'sup.school.c', supFullName: 'Supervisor School C', supEmail: 'sup.school.c@dcip.rw' },
-  { name: 'Participating School D', district: 'Ruhango',   supUsername: 'sup.school.d', supFullName: 'Supervisor School D', supEmail: 'sup.school.d@dcip.rw' },
-  { name: 'Participating School E', district: 'Karongi',   supUsername: 'sup.school.e', supFullName: 'Supervisor School E', supEmail: 'sup.school.e@dcip.rw' },
+  { name: 'GS Kigeme A',              district: 'Nyamagabe', province: 'Southern Province', supUsername: 'sup.kigeme',  supFullName: 'Supervisor GS Kigeme A',              supEmail: 'sup.kigeme@dcip.rw'  },
+  { name: 'ES Mushubi',               district: 'Nyamagabe', province: 'Southern Province', supUsername: 'sup.mushubi', supFullName: 'Supervisor ES Mushubi',               supEmail: 'sup.mushubi@dcip.rw' },
+  { name: 'ES Ruhango',               district: 'Ruhango',   province: 'Southern Province', supUsername: 'sup.ruhango', supFullName: 'Supervisor ES Ruhango',               supEmail: 'sup.ruhango@dcip.rw' },
+  { name: 'GS Shyogwe',               district: 'Muhanga',   province: 'Southern Province', supUsername: 'sup.shyogwe', supFullName: 'Supervisor GS Shyogwe',               supEmail: 'sup.shyogwe@dcip.rw' },
+  { name: 'College Ste Marie Kibuye', district: 'Karongi',   province: 'Western Province',  supUsername: 'sup.kibuye',  supFullName: 'Supervisor College Ste Marie Kibuye', supEmail: 'sup.kibuye@dcip.rw'  },
 ]
 
 const seed = async () => {
@@ -25,7 +25,7 @@ const seed = async () => {
   await Module.deleteMany({})
 
   const schools = await School.insertMany(
-    SCHOOL_SUPERVISORS.map(({ name, district }) => ({ name, district }))
+    SCHOOL_SUPERVISORS.map(({ name, district, province }) => ({ name, district, province }))
   )
 
   console.log('Schools seeded')

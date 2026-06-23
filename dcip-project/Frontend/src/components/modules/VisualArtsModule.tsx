@@ -7,6 +7,7 @@ interface Props {
   step: number
   onInteraction?: () => void
   onColourUsed?: (colour: string) => void
+  onToolChange?: (tool: string) => void
   sidebarFooter?: React.ReactNode
 }
 
@@ -44,7 +45,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   })
 }
 
-export default function VisualArtsModule({ canvasRef, step: _step, onInteraction, onColourUsed, sidebarFooter }: Props) {
+export default function VisualArtsModule({ canvasRef, step: _step, onInteraction, onColourUsed, onToolChange, sidebarFooter }: Props) {
   const [panelCollapsed, setPanelCollapsed] = useState(false)
   const [tool,        setTool]        = useState<Tool>('brush')
   const [colour,      setColour]      = useState('#1A1A1A')
@@ -478,7 +479,7 @@ export default function VisualArtsModule({ canvasRef, step: _step, onInteraction
         {/* ── Icon toolbar ── */}
         <VisualArtsToolbar
           activeTool={tool}
-          onToolChange={setTool}
+          onToolChange={(t) => { setTool(t); onToolChange?.(t) }}
           shapeMode={shapeMode}
           onShapeModeChange={setShapeMode}
           colour={colour}

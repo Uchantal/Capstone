@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
 import { useGDProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useGDProgress'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
+import { useReadingEngagement } from '../../hooks/useReadingEngagement'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -33,13 +34,22 @@ export default function GDCourse2Page() {
     }
   }, [isPreviewMode, loading, completedStages, navigate])
 
-  const [canContinue, setCanContinue] = useState(false)
+  const [lowEngagement, setLowEngagement] = useState(false)
+  const { computeAndSave } = useReadingEngagement('graphic-design', 'course2')
 
-  useEffect(() => {
-    if (isPreviewMode) { setCanContinue(true); return }
-    const t = setTimeout(() => setCanContinue(true), 60_000)
-    return () => clearTimeout(t)
-  }, [isPreviewMode])
+  const handleContinue = async () => {
+    const score = await computeAndSave()
+    const proceed = async () => {
+      await markComplete('gd-course-2')
+      navigate('/graphic-design/level-1')
+    }
+    if (score < 40) {
+      setLowEngagement(true)
+      setTimeout(proceed, 3000)
+    } else {
+      await proceed()
+    }
+  }
 
   if (loading) {
     return (
@@ -47,12 +57,6 @@ export default function GDCourse2Page() {
         <p className="text-text-muted text-sm">Loading...</p>
       </div>
     )
-  }
-
-  const handleContinue = async () => {
-    if (!canContinue) return
-    await markComplete('gd-course-2')
-    navigate('/graphic-design/level-1')
   }
 
   return (
@@ -199,11 +203,15 @@ export default function GDCourse2Page() {
           </div>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex flex-col items-end gap-2">
+          {lowEngagement && (
+            <p className="text-sm text-amber-600">
+              Take your time with this content. Your engagement score for this page was low.
+            </p>
+          )}
           <button
             onClick={handleContinue}
-            disabled={!canContinue}
-            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors"
           >
             Continue to Level 1
           </button>

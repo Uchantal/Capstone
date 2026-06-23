@@ -5,6 +5,7 @@ import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, exportDesignToDataUrl
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
 import { saveGDProductionResult, savePortfolioItem, completeGDProduction } from '../../services/api'
 import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
+import { useGDEngagement } from '../../hooks/useCanvasEngagement'
 
 const CHECKLIST = [
   { id: 'hierarchy',   text: 'My poster has a title and subtitle with clear visual hierarchy' },
@@ -49,6 +50,9 @@ export default function GDProductionPage() {
   const [checked, setChecked] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
   const [portfolioId, setPortfolioId] = useState<string | null>(null)
+  const [engagementScore, setEngagementScore] = useState<number | null>(null)
+  const { recordInteraction, recordElementChange, computeAndSave } =
+    useGDEngagement('graphic-design', 'production')
 
   useEffect(() => {
     if (isPreviewMode) return
@@ -84,6 +88,8 @@ export default function GDProductionPage() {
     if (!canSubmit) return
     if (isPreviewMode) { setPhase('done'); return }
     setSubmitting(true)
+    const score = await computeAndSave(elements)
+    setEngagementScore(score)
     const textEls = elements.filter(el => el.type === 'text')
     const mainEl  = textEls[0]
     const subEl   = textEls[1]
@@ -150,6 +156,11 @@ export default function GDProductionPage() {
               <p className="text-text-secondary text-sm leading-relaxed max-w-md mx-auto mb-4">
                 Your work has been saved to your portfolio. You have completed the Graphic Design journey.
               </p>
+              {engagementScore !== null && engagementScore < 40 && (
+                <p className="text-sm text-amber-600 mb-4">
+                  Your engagement score for this session was low. Try making more design changes next time.
+                </p>
+              )}
               <div className="inline-flex items-center bg-[#2D6A4F]/10 text-[#2D6A4F] text-xs font-semibold px-4 py-2 rounded-full">
                 Advanced Graphic Design Badge
               </div>
@@ -281,8 +292,8 @@ export default function GDProductionPage() {
           key={canvasKey}
           defaultElements={DEFAULT_ELEMENTS}
           defaultBgColor={DEFAULT_BG_COLOR}
-          onChange={(els, bg) => { setElements(els); setBgColor(bg) }}
-          onInteraction={() => {}}
+          onChange={(els, bg) => { setElements(els); setBgColor(bg); recordElementChange(els) }}
+          onInteraction={recordInteraction}
           onDimensionsChange={(w, h) => { setExportW(w); setExportH(h) }}
         />
       </div>

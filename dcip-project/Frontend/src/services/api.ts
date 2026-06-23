@@ -216,4 +216,21 @@ export const submitFeedback = (data: {
 export const getAdminFeedback = () => api.get('/feedback')
 export const getAdminFeedbackCount = () => api.get('/feedback/count')
 
+// Engagement tracking
+export const saveEngagementScore = (discipline: string, stage: string, score: number) =>
+  api.post(`/engagement/${discipline}/${stage}`, { score })
+
+export const fetchEngagementScores = (discipline: string) =>
+  api.get(`/engagement/${discipline}`)
+
+// Lab session management
+export const getSessionStatus = () =>
+  api.get<{ isOpen: boolean; openedAt?: string; noSchool?: boolean }>('/supervisor/session/status')
+
+export const openLabSession = () =>
+  api.post<{ isOpen: boolean; openedAt: string }>('/supervisor/session/open')
+
+export const closeLabSession = () =>
+  api.post<{ isOpen: boolean }>('/supervisor/session/close')
+
 export default api

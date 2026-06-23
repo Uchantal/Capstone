@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react'
 import { getPendingItems, removePendingItem } from '../services/db'
 import { savePortfolioItem } from '../services/api'
+import api from '../services/api'
+import { replayPendingRequests } from '../utils/syncQueue'
 
 export const useSync = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [syncing, setSyncing] = useState(false)
 
-  const syncPendingItems = async () => {
+  const syncAll = async () => {
     if (!navigator.onLine) return
-    const pending = await getPendingItems()
-    if (pending.length === 0) return
     setSyncing(true)
+
+    // Sync legacy portfolio pending items from db.ts store
+    const pending = await getPendingItems()
     for (const item of pending) {
       try {
         await savePortfolioItem({
@@ -27,21 +30,24 @@ export const useSync = () => {
         // will retry on next online event
       }
     }
+
+    // Replay general pending requests queued by the offline interceptor
+    await replayPendingRequests(api)
+
     setSyncing(false)
   }
 
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true)
-      syncPendingItems()
+      syncAll()
     }
     const handleOffline = () => setIsOnline(false)
 
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
 
-    // Try to sync on mount
-    syncPendingItems()
+    syncAll()
 
     return () => {
       window.removeEventListener('online', handleOnline)

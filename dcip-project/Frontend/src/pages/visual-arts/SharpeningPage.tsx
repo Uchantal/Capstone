@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
+import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 
 const TOOL_QUICK_REF = [
   { name: 'Brush',       desc: 'Freehand strokes, variable size.' },
@@ -31,6 +32,13 @@ export default function SharpeningPage() {
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { progress, loading, markStageVisited } = useVisualArtsDemonstrationProgress()
+  const { recordInteraction, recordColour, recordTool, computeAndSave } =
+    useVAEngagement('visual-arts', 'sharpening')
+
+  const handleContinue = () => {
+    computeAndSave().catch(() => {})
+    navigate('/visual-arts/production')
+  }
 
   useEffect(() => {
     if (isPreviewMode) return
@@ -111,14 +119,21 @@ export default function SharpeningPage() {
           <span className="text-text-primary">Sharpening Myself</span>
         </div>
         <button
-          onClick={() => navigate('/visual-arts/production')}
+          onClick={handleContinue}
           className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors text-sm"
         >
           I am ready. Continue to Production
         </button>
       </div>
 
-      <VisualArtsModule canvasRef={canvasRef} step={5} sidebarFooter={sidebarFooter} />
+      <VisualArtsModule
+        canvasRef={canvasRef}
+        step={5}
+        onInteraction={recordInteraction}
+        onColourUsed={recordColour}
+        onToolChange={recordTool}
+        sidebarFooter={sidebarFooter}
+      />
     </div>
   )
 }

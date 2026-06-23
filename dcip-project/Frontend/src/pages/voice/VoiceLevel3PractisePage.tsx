@@ -95,8 +95,8 @@ export default function VoiceLevel3PractisePage() {
                 onClick={() => handlePlayNote(n)}
                 className={`h-20 rounded-xl border-2 flex flex-col items-center justify-center transition-all ${
                   activeNote?.label === n.label
-                    ? 'bg-purple-600 border-purple-600 text-white scale-95'
-                    : 'bg-white border-surface-border text-text-primary hover:border-purple-400 hover:bg-purple-50'
+                    ? 'bg-primary border-primary text-white scale-95'
+                    : 'bg-white border-surface-border text-text-primary hover:border-primary/50 hover:bg-primary/10'
                 }`}
               >
                 <span className="font-bold text-xl">{n.note}</span>
@@ -128,7 +128,7 @@ export default function VoiceLevel3PractisePage() {
           ) : (
             <button
               onClick={startMic}
-              className="bg-purple-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-purple-800 transition-colors"
+              className="bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-primary-dark transition-colors"
             >
               Enable microphone for live feedback
             </button>

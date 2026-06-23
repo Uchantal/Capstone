@@ -19,8 +19,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     const school = await School.findById(schoolId)
-    if (!school) {
-      res.status(400).json({ message: 'School not found or not active on this platform' })
+    if (!school || !school.isActive) {
+      res.status(400).json({ message: 'Please select your school to continue' })
       return
     }
 
@@ -162,7 +162,7 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
 
 export const getSchools = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const schools = await School.find().sort({ name: 1 })
+    const schools = await School.find({ isActive: true }).sort({ province: 1, district: 1 })
     res.json(schools)
   } catch (error) {
     console.error('Get schools error:', error)

@@ -263,7 +263,7 @@ export default function VoiceLevel3Page() {
                   )}
                   {phase === 'ex1-playing' && !started && (
                     <button onClick={startExercise}
-                      className="bg-purple-700 text-white font-semibold px-6 py-2.5 rounded-xl hover:bg-purple-800 transition-colors text-sm">
+                      className="bg-primary text-white font-semibold px-6 py-2.5 rounded-xl hover:bg-primary-dark transition-colors text-sm">
                       Start exercises
                     </button>
                   )}

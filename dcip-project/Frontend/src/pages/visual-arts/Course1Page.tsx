@@ -1,8 +1,9 @@
-﻿import { useEffect, useRef, useState } from 'react'
+﻿import { useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsProgress } from '../../hooks/useVisualArtsProgress'
+import { useReadingEngagement } from '../../hooks/useReadingEngagement'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -34,18 +35,21 @@ export default function Course1Page() {
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const practiceCanvasRef = useRef<HTMLCanvasElement>(null)
   const { markComplete } = useVisualArtsProgress()
-
-  const [canContinue, setCanContinue] = useState(false)
-
-  useEffect(() => {
-    const t = setTimeout(() => setCanContinue(true), 60_000)
-    return () => clearTimeout(t)
-  }, [])
+  const [lowEngagement, setLowEngagement] = useState(false)
+  const { computeAndSave } = useReadingEngagement('visual-arts', 'course1')
 
   const handleContinue = async () => {
-    if (!canContinue) return
-    await markComplete('va-course-1')
-    navigate('/visual-arts/course-2')
+    const score = await computeAndSave()
+    const proceed = async () => {
+      await markComplete('va-course-1')
+      navigate('/visual-arts/course-2')
+    }
+    if (score < 40) {
+      setLowEngagement(true)
+      setTimeout(proceed, 3000)
+    } else {
+      await proceed()
+    }
   }
 
   return (
@@ -143,11 +147,15 @@ export default function Course1Page() {
           </div>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex flex-col items-end gap-2">
+          {lowEngagement && (
+            <p className="text-sm text-amber-600">
+              Take your time with this content. Your engagement score for this page was low.
+            </p>
+          )}
           <button
             onClick={handleContinue}
-            disabled={!canContinue}
-            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors"
           >
             Continue to Colour and Light
           </button>

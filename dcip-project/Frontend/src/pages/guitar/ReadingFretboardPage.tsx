@@ -1,8 +1,9 @@
-﻿import { useEffect, useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarProgress } from '../../hooks/useGuitarProgress'
+import { useReadingEngagement } from '../../hooks/useReadingEngagement'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -37,18 +38,21 @@ export default function ReadingFretboardPage() {
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { markComplete } = useGuitarProgress()
-
-  const [canContinue, setCanContinue] = useState(false)
-
-  useEffect(() => {
-    const t = setTimeout(() => setCanContinue(true), 60_000)
-    return () => clearTimeout(t)
-  }, [])
+  const [lowEngagement, setLowEngagement] = useState(false)
+  const { computeAndSave } = useReadingEngagement('guitar', 'course1')
 
   const handleContinue = async () => {
-    if (!canContinue) return
-    await markComplete('guitar-course-1')
-    navigate('/guitar/notes-across-the-neck')
+    const score = await computeAndSave()
+    const proceed = async () => {
+      await markComplete('guitar-course-1')
+      navigate('/guitar/notes-across-the-neck')
+    }
+    if (score < 40) {
+      setLowEngagement(true)
+      setTimeout(proceed, 3000)
+    } else {
+      await proceed()
+    }
   }
 
   return (
@@ -152,11 +156,15 @@ export default function ReadingFretboardPage() {
           <GuitarFretboard showChords={false} highlightPositions={OCTAVE_HIGHLIGHT} />
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex flex-col items-end gap-2">
+          {lowEngagement && (
+            <p className="text-sm text-amber-600">
+              Take your time with this content. Your engagement score for this page was low.
+            </p>
+          )}
           <button
             onClick={handleContinue}
-            disabled={!canContinue}
-            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors"
           >
             Continue to Notes Across the Neck
           </button>

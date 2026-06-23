@@ -6,6 +6,7 @@ import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, playTone, SCALE_NOTES, type PitchStatus } from '../../utils/voicePitch'
+import { useReadingEngagement } from '../../hooks/useReadingEngagement'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -99,9 +100,21 @@ export default function VoiceCourse2Page() {
     setTimeout(() => setActiveTone(null), 3000)
   }
 
+  const [lowEngagement, setLowEngagement] = useState(false)
+  const { computeAndSave } = useReadingEngagement('voice', 'course2')
+
   const handleContinue = async () => {
-    await markStageVisited('voice-course-2')
-    navigate('/voice/level-1')
+    const score = await computeAndSave()
+    const proceed = async () => {
+      await markStageVisited('voice-course-2')
+      navigate('/voice/level-1')
+    }
+    if (score < 40) {
+      setLowEngagement(true)
+      setTimeout(proceed, 3000)
+    } else {
+      await proceed()
+    }
   }
 
   if (loading) {
@@ -178,8 +191,8 @@ export default function VoiceCourse2Page() {
                 onClick={() => { playTone(n.freq, 1.5); setActiveTone(n.label); setTimeout(() => setActiveTone(null), 1500) }}
                 className={`px-3 py-2 rounded-lg border text-sm font-semibold transition-all ${
                   activeTone === n.label
-                    ? 'bg-purple-600 text-white border-purple-600 scale-95'
-                    : 'bg-white border-surface-border text-text-primary hover:border-purple-400 hover:bg-purple-50'
+                    ? 'bg-primary text-white border-primary scale-95'
+                    : 'bg-white border-surface-border text-text-primary hover:border-primary/50 hover:bg-primary/10'
                 }`}
               >
                 {n.label}
@@ -189,7 +202,7 @@ export default function VoiceCourse2Page() {
           <div className="flex gap-3 flex-wrap mb-4">
             <button
               onClick={handlePlayScale}
-              className="border border-purple-400 text-purple-700 text-xs font-semibold px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors"
+              className="border border-primary/50 text-primary text-xs font-semibold px-4 py-2 rounded-lg hover:bg-primary/10 transition-colors"
             >
               Play entire scale
             </button>
@@ -222,8 +235,8 @@ export default function VoiceCourse2Page() {
               onClick={handlePlayA4}
               className={`px-5 py-2.5 rounded-lg border text-sm font-semibold transition-all ${
                 activeTone === 'A4'
-                  ? 'bg-purple-600 text-white border-purple-600'
-                  : 'border-purple-400 text-purple-700 hover:bg-purple-50'
+                  ? 'bg-primary text-white border-primary'
+                  : 'border-primary/50 text-primary hover:bg-primary/10'
               }`}
             >
               {activeTone === 'A4' ? 'Playing A4...' : 'Play A4 (440 Hz)'}
@@ -231,7 +244,7 @@ export default function VoiceCourse2Page() {
             {!micReady && (
               <button
                 onClick={startPitchDetection}
-                className="bg-purple-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-purple-800 transition-colors"
+                className="bg-primary text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-primary-dark transition-colors"
               >
                 Start microphone
               </button>
@@ -256,7 +269,12 @@ export default function VoiceCourse2Page() {
           )}
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex flex-col items-end gap-2">
+          {lowEngagement && (
+            <p className="text-sm text-amber-600">
+              Take your time with this content. Your engagement score for this page was low.
+            </p>
+          )}
           <button
             onClick={handleContinue}
             disabled={!cardCPassed}

@@ -90,6 +90,7 @@ import AdminFeedbackPage from './pages/admin/AdminFeedbackPage'
 import FeedbackPage from './pages/FeedbackPage'
 import AdminPreviewPage from './pages/admin/AdminPreviewPage'
 import PreviewNavBar from './components/PreviewNavBar'
+import SessionGate from './components/SessionGate'
 import { useAuth } from './hooks/useAuth'
 
 const roleHome = (role?: string) => {
@@ -110,7 +111,8 @@ function StudentRoute({ children }: { children: React.ReactNode }) {
   const isAdminPreview = user?.role === 'admin' && new URLSearchParams(search).get('preview') === 'true'
   if (!token) return <Navigate to="/login" replace />
   if (user?.role !== 'student' && !isAdminPreview) return <Navigate to={roleHome(user?.role)} replace />
-  return <>{children}</>
+  if (isAdminPreview) return <>{children}</>
+  return <SessionGate>{children}</SessionGate>
 }
 
 

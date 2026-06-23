@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
 import { useGDProgress } from '../../hooks/useGDProgress'
 import { saveGDLevelPoster } from '../../services/api'
+import { useReadingEngagement } from '../../hooks/useReadingEngagement'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -22,6 +23,8 @@ export default function GDCourse1Page() {
   const { markComplete } = useGDProgress()
   const [planningText, setPlanningText] = useState('')
   const [saving, setSaving] = useState(false)
+  const [lowEngagement, setLowEngagement] = useState(false)
+  const { computeAndSave } = useReadingEngagement('graphic-design', 'course1')
 
   const canContinue = planningText.trim().length > 0
 
@@ -33,9 +36,19 @@ export default function GDCourse1Page() {
     } catch {
       // Best-effort
     }
-    await markComplete('gd-course-1')
-    navigate('/graphic-design/course-2')
-    setSaving(false)
+    const score = await computeAndSave()
+    const proceed = async () => {
+      await markComplete('gd-course-1')
+      navigate('/graphic-design/course-2')
+    }
+    if (score < 40) {
+      setLowEngagement(true)
+      setSaving(false)
+      setTimeout(proceed, 3000)
+    } else {
+      await proceed()
+      setSaving(false)
+    }
   }
 
   return (
@@ -185,7 +198,12 @@ export default function GDCourse1Page() {
           )}
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex flex-col items-end gap-2">
+          {lowEngagement && (
+            <p className="text-sm text-amber-600">
+              Take your time with this content. Your engagement score for this page was low.
+            </p>
+          )}
           <button
             onClick={handleContinue}
             disabled={!canContinue || saving}

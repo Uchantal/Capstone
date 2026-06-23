@@ -4,6 +4,7 @@ import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { completeVisualArtsDemonstration } from '../../services/api'
+import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 
 const TASK =
   'Create one small complete scene using at least three shapes, more than one colour, and shading on at least ' +
@@ -38,6 +39,9 @@ export default function VALevel3DemonstratePage() {
   const [checkResult, setCheckResult] = useState<{ passed: boolean; feedback: string[] } | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [passed, setPassed] = useState(false)
+  const [engagementScore, setEngagementScore] = useState<number | null>(null)
+  const { recordInteraction: recordEngInteraction, recordColour: recordEngColour, recordTool, computeAndSave } =
+    useVAEngagement('visual-arts', 'level3Demonstrate')
 
   useEffect(() => {
     if (isPreviewMode) return
@@ -51,10 +55,12 @@ export default function VALevel3DemonstratePage() {
   }, [isPreviewMode, loading, progress.completedStages, navigate])
 
   function recordInteraction() {
+    recordEngInteraction()
     interactionCount.current += 1
   }
 
   function handleColourUsed(colour: string) {
+    recordEngColour(colour)
     coloursUsedRef.current.add(colour)
   }
 
@@ -72,6 +78,8 @@ export default function VALevel3DemonstratePage() {
   const handleSubmit = async () => {
     if (isPreviewMode) { setPassed(true); return }
     setSubmitting(true)
+    const score = await computeAndSave()
+    setEngagementScore(score)
     const snapshot = canvasRef.current?.toDataURL('image/png') ?? ''
     try {
       await completeVisualArtsDemonstration(3, true, snapshot)
@@ -173,6 +181,7 @@ export default function VALevel3DemonstratePage() {
         step={5}
         onInteraction={recordInteraction}
         onColourUsed={handleColourUsed}
+        onToolChange={recordTool}
         sidebarFooter={sidebarFooter}
       />
 
@@ -188,6 +197,11 @@ export default function VALevel3DemonstratePage() {
             <p className="text-text-secondary text-sm mb-3">
               Your drawing has been saved to your portfolio.
             </p>
+            {engagementScore !== null && engagementScore < 40 && (
+              <p className="text-sm text-amber-600 mb-3">
+                Your engagement score for this session was low. Try spending more time exploring the tools next time.
+              </p>
+            )}
             <div className="inline-flex items-center bg-primary/10 text-primary text-xs font-semibold px-4 py-2 rounded-full mb-5">
               Intermediate Visual Arts Badge
             </div>

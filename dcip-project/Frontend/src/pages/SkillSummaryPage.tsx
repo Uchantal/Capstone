@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { fetchProgressSummary, fetchPortfolio } from '../services/api'
+import { fetchProgressSummary, fetchPortfolio, fetchEngagementScores } from '../services/api'
 import MainLayout from '../components/MainLayout'
 
 interface DisciplineSummary {
@@ -132,7 +132,21 @@ function MilestonePath({ milestones, stages }: { milestones: Milestone[]; stages
   )
 }
 
-function DisciplineCard({ disc }: { disc: DisciplineSummary }) {
+function engagementLabel(score: number): string {
+  if (score >= 75) return 'Excellent'
+  if (score >= 50) return 'Good'
+  if (score >= 25) return 'Building'
+  return 'Low'
+}
+
+function engagementLabelClass(score: number): string {
+  if (score >= 75) return 'text-[#2D6A4F] font-semibold'
+  if (score >= 50) return 'text-primary font-semibold'
+  if (score >= 25) return 'text-text-secondary font-semibold'
+  return 'text-accent font-semibold'
+}
+
+function DisciplineCard({ disc, overallEngagement }: { disc: DisciplineSummary; overallEngagement: number | null }) {
   const milestones = MILESTONES[disc.key] ?? []
   const lastIdx = getLastDoneIdx(milestones, disc.completedStages)
   const nextStep = nextStepText(lastIdx)
@@ -162,6 +176,23 @@ function DisciplineCard({ disc }: { disc: DisciplineSummary }) {
         </div>
       )}
 
+      {overallEngagement !== null && (
+        <div className="mb-4">
+          <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Engagement</p>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-1.5 bg-primary rounded-full"
+                style={{ width: `${Math.min(overallEngagement, 100)}%` }}
+              />
+            </div>
+            <span className={`text-xs ${engagementLabelClass(overallEngagement)}`}>
+              {engagementLabel(overallEngagement)}
+            </span>
+          </div>
+        </div>
+      )}
+
       {(disc.totalSessions > 0 || disc.totalMinutes > 0) && (
         <div className="flex gap-6">
           <div>
@@ -188,23 +219,35 @@ const DISC_LABEL: Record<string, string> = {
   voice: 'Voice and Singing',
 }
 
+const DISCIPLINE_SLUGS = ['piano', 'guitar', 'voice', 'visual-arts', 'graphic-design']
+
 export default function SkillSummaryPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [summary, setSummary] = useState<SummaryResponse | null>(null)
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [engagementMap, setEngagementMap] = useState<Record<string, number | null>>({})
 
   useEffect(() => {
     if (!user) {
       navigate('/login')
       return
     }
-    Promise.all([fetchProgressSummary(), fetchPortfolio()])
-      .then(([sumRes, portRes]) => {
-        setSummary(sumRes.data)
-        setPortfolio(portRes.data)
+    Promise.all([
+      fetchProgressSummary(),
+      fetchPortfolio(),
+      ...DISCIPLINE_SLUGS.map(slug => fetchEngagementScores(slug).catch(() => null)),
+    ]).then(([sumRes, portRes, ...engResults]) => {
+      setSummary(sumRes.data)
+      setPortfolio(portRes.data)
+      const map: Record<string, number | null> = {}
+      DISCIPLINE_SLUGS.forEach((slug, i) => {
+        map[slug] = (engResults[i] as { data?: { overallEngagement?: number | null } } | null)
+          ?.data?.overallEngagement ?? null
       })
+      setEngagementMap(map)
+    })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [user, navigate])
@@ -307,7 +350,13 @@ export default function SkillSummaryPage() {
               <p className="text-text-secondary text-sm">No activity recorded yet.</p>
             </div>
           ) : (
-            disciplines.map(disc => <DisciplineCard key={disc.key} disc={disc} />)
+            disciplines.map(disc => (
+              <DisciplineCard
+                key={disc.key}
+                disc={disc}
+                overallEngagement={engagementMap[disc.key] ?? null}
+              />
+            ))
           )}
 
           {/* Portfolio highlights */}

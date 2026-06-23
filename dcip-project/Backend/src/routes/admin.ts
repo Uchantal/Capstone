@@ -170,6 +170,47 @@ router.get('/schools', protect, requireRole('admin'), async (_req: AuthRequest, 
   }
 })
 
+router.post('/schools', protect, requireRole('admin'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { name, district, province } = req.body
+    if (!name?.trim() || !district?.trim() || !province?.trim()) {
+      res.status(400).json({ message: 'Name, district and province are required' })
+      return
+    }
+    const school = await School.create({ name: name.trim(), district: district.trim(), province: province.trim() })
+    res.status(201).json(school)
+  } catch (err: any) {
+    if (err.code === 11000) {
+      res.status(400).json({ message: 'A school with that name already exists' })
+      return
+    }
+    res.status(500).json({ message: 'Could not create school' })
+  }
+})
+
+router.patch('/schools/:id', protect, requireRole('admin'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { name, district, province } = req.body
+    if (!name?.trim() || !district?.trim() || !province?.trim()) {
+      res.status(400).json({ message: 'Name, district and province are required' })
+      return
+    }
+    const school = await School.findByIdAndUpdate(
+      req.params.id,
+      { name: name.trim(), district: district.trim(), province: province.trim() },
+      { new: true, runValidators: true }
+    )
+    if (!school) { res.status(404).json({ message: 'School not found' }); return }
+    res.json(school)
+  } catch (err: any) {
+    if (err.code === 11000) {
+      res.status(400).json({ message: 'A school with that name already exists' })
+      return
+    }
+    res.status(500).json({ message: 'Could not update school' })
+  }
+})
+
 router.patch('/schools/:id/activate', protect, requireRole('admin'), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const school = await School.findByIdAndUpdate(req.params.id, { isActive: true }, { new: true })

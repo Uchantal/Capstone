@@ -16,6 +16,7 @@ import graphicDesignRoutes from './routes/graphicDesign'
 import voiceRoutes from './routes/voice'
 import progressSummaryRoutes from './routes/progressSummary'
 import feedbackRoutes from './routes/feedback'
+import engagementRoutes from './routes/engagement'
 
 dotenv.config()
 
@@ -50,6 +51,7 @@ app.use('/api/graphic-design', graphicDesignRoutes)
 app.use('/api/voice', voiceRoutes)
 app.use('/api/progress', progressSummaryRoutes)
 app.use('/api/feedback', feedbackRoutes)
+app.use('/api/engagement', engagementRoutes)
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }))
 

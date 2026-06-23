@@ -8,6 +8,7 @@ interface School {
   _id: string
   name: string
   district: string
+  province: string
 }
 
 export default function RegisterPage() {
@@ -62,17 +63,21 @@ export default function RegisterPage() {
       next.confirmPassword = 'Passwords do not match.'
     }
 
+    if (!form.schoolId) {
+      next.schoolId = 'Please select your school to continue'
+    }
+
     return next
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.fullName || !form.username || !form.email || !form.password || !form.confirmPassword || !form.schoolId) {
+
+    const fieldErrors = validate()
+    if (!form.fullName || !form.username || !form.email || !form.password || !form.confirmPassword) {
       setSubmitError('All fields are required')
       return
     }
-
-    const fieldErrors = validate()
     if (Object.keys(fieldErrors).length > 0) {
       setErrors(fieldErrors)
       return
@@ -257,13 +262,17 @@ export default function RegisterPage() {
                 <option value="">Select your school</option>
                 {schools.map((s) => (
                   <option key={s._id} value={s._id}>
-                    {s.name}, {s.district}
+                    {s.name} - {s.district}
                   </option>
                 ))}
               </select>
-              <p className="text-text-secondary text-xs mt-1.5">
-                Only verified participating schools are listed.
-              </p>
+              {errors.schoolId ? (
+                <p className="text-accent text-xs mt-1.5">{errors.schoolId}</p>
+              ) : (
+                <p className="text-text-secondary text-xs mt-1.5">
+                  Only verified participating schools are listed.
+                </p>
+              )}
             </div>
 
             {submitError && (

@@ -309,7 +309,7 @@ export default function DashboardPage() {
                   onClick={() => navigate('/disciplines')}
                   className="w-full bg-primary text-white font-semibold text-sm py-3 rounded-xl hover:bg-primary-dark transition-colors"
                 >
-                  Start Practice
+                  Go to Disciplines
                 </button>
                 <button
                   onClick={() => navigate('/portfolio')}

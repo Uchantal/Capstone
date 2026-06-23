@@ -1,9 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
-import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS } from '../../components/graphic-design/PosterSurface'
+import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, type DesignElement } from '../../components/graphic-design/PosterSurface'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
 import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
+import { useGDEngagement } from '../../hooks/useCanvasEngagement'
 
 const QUICK_REF = [
   {
@@ -38,6 +39,14 @@ export default function GDSharpeningPage() {
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { progress, loading, markStageVisited } = useGDDemonstrationProgress()
+  const [elements, setElements] = useState<DesignElement[]>(DEFAULT_ELEMENTS)
+  const { recordInteraction, recordElementChange, computeAndSave } =
+    useGDEngagement('graphic-design', 'sharpening')
+
+  const handleContinue = () => {
+    computeAndSave(elements).catch(() => {})
+    navigate('/graphic-design/production')
+  }
 
   useEffect(() => {
     if (isPreviewMode) return
@@ -71,7 +80,7 @@ export default function GDSharpeningPage() {
           <span className="text-text-primary">Sharpening</span>
         </div>
         <button
-          onClick={() => navigate('/graphic-design/production')}
+          onClick={handleContinue}
           className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors text-sm"
         >
           I am ready. Continue to Production
@@ -109,8 +118,8 @@ export default function GDSharpeningPage() {
         <DesignCanvas
           defaultElements={DEFAULT_ELEMENTS}
           defaultBgColor={DEFAULT_BG_COLOR}
-          onChange={() => {}}
-          onInteraction={() => {}}
+          onChange={(els) => { setElements(els); recordElementChange(els) }}
+          onInteraction={recordInteraction}
         />
       </div>
     </div>

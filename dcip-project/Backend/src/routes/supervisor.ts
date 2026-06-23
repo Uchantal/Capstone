@@ -2,6 +2,7 @@ import { Router, Response } from 'express'
 import { protect, AuthRequest } from '../middleware/authMiddleware'
 import { requireRole } from '../middleware/requireRole'
 import User from '../models/User'
+import School from '../models/School'
 import PracticeSession from '../models/PracticeSession'
 import PortfolioItem from '../models/PortfolioItem'
 import StudentProgress from '../models/StudentProgress'
@@ -288,6 +289,83 @@ router.get(
     } catch (err) {
       console.error(err)
       res.status(500).json({ message: 'Could not fetch school analytics' })
+    }
+  }
+)
+
+// POST /api/supervisor/session/open
+router.post(
+  '/session/open',
+  protect,
+  requireRole('supervisor'),
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const supervisor = await User.findById(req.userId).select('school')
+      if (!supervisor?.school) {
+        res.status(400).json({ message: 'Supervisor has no school assigned' })
+        return
+      }
+      const openedAt = new Date()
+      await School.findByIdAndUpdate(supervisor.school, {
+        labSessionOpen: true,
+        labSessionOpenedAt: openedAt,
+        labSessionOpenedBy: supervisor._id,
+      })
+      res.json({ isOpen: true, openedAt })
+    } catch {
+      res.status(500).json({ message: 'Could not open lab session' })
+    }
+  }
+)
+
+// POST /api/supervisor/session/close
+router.post(
+  '/session/close',
+  protect,
+  requireRole('supervisor'),
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const supervisor = await User.findById(req.userId).select('school')
+      if (!supervisor?.school) {
+        res.status(400).json({ message: 'Supervisor has no school assigned' })
+        return
+      }
+      await School.findByIdAndUpdate(supervisor.school, {
+        labSessionOpen: false,
+        labSessionOpenedAt: null,
+        labSessionOpenedBy: null,
+      })
+      res.json({ isOpen: false })
+    } catch {
+      res.status(500).json({ message: 'Could not close lab session' })
+    }
+  }
+)
+
+// GET /api/supervisor/session/status
+// Any authenticated user can call this so students can poll their school's session state
+router.get(
+  '/session/status',
+  protect,
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const user = await User.findById(req.userId).select('school')
+      if (!user?.school) {
+        // No school assigned — never block access
+        res.json({ isOpen: true, noSchool: true })
+        return
+      }
+      const school = await School.findById(user.school).select('labSessionOpen labSessionOpenedAt')
+      if (!school) {
+        res.json({ isOpen: true })
+        return
+      }
+      res.json({
+        isOpen: school.labSessionOpen,
+        openedAt: school.labSessionOpen ? school.labSessionOpenedAt : null,
+      })
+    } catch {
+      res.status(500).json({ message: 'Could not fetch session status' })
     }
   }
 )

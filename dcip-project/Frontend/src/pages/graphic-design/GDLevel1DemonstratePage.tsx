@@ -5,6 +5,7 @@ import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, exportDesignToDataUrl
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
 import { completeGDDemonstration } from '../../services/api'
 import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
+import { useGDEngagement } from '../../hooks/useCanvasEngagement'
 
 const PLACEHOLDERS = ['New text', 'Your heading', 'Phone: \nEmail: \nWebsite: ', 'Your contact info']
 
@@ -65,7 +66,10 @@ export default function GDLevel1DemonstratePage() {
   const [checkResult, setCheckResult] = useState<{ passed: boolean; feedback: string[] } | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [passed, setPassed] = useState(false)
+  const [engagementScore, setEngagementScore] = useState<number | null>(null)
   const interactionCount = useRef(0)
+  const { recordInteraction: recordEngInteraction, recordElementChange, computeAndSave } =
+    useGDEngagement('graphic-design', 'level1Demonstrate')
 
   useEffect(() => {
     if (isPreviewMode) return
@@ -79,6 +83,7 @@ export default function GDLevel1DemonstratePage() {
   }, [loading, progress.completedStages, navigate])
 
   function recordInteraction() {
+    recordEngInteraction()
     interactionCount.current += 1
   }
 
@@ -91,6 +96,8 @@ export default function GDLevel1DemonstratePage() {
   const handleSubmit = async () => {
     if (isPreviewMode) { setPassed(true); return }
     setSubmitting(true)
+    const score = await computeAndSave(elements)
+    setEngagementScore(score)
     try {
       const snapshot = JSON.stringify({ elements, bgColor })
       const imageData = await exportDesignToDataUrl(elements, bgColor, exportW, exportH)
@@ -190,7 +197,7 @@ export default function GDLevel1DemonstratePage() {
           key={canvasKey}
           defaultElements={DEFAULT_ELEMENTS}
           defaultBgColor={DEFAULT_BG_COLOR}
-          onChange={(els, bg) => { setElements(els); setBgColor(bg) }}
+          onChange={(els, bg) => { setElements(els); setBgColor(bg); recordElementChange(els) }}
           onInteraction={recordInteraction}
           onDimensionsChange={(w, h) => { setExportW(w); setExportH(h) }}
         />
@@ -208,6 +215,11 @@ export default function GDLevel1DemonstratePage() {
             <p className="text-text-secondary text-sm mb-4">
               Your poster has been saved to your portfolio.
             </p>
+            {engagementScore !== null && engagementScore < 40 && (
+              <p className="text-sm text-amber-600 mb-4">
+                Your engagement score for this session was low. Try making more design changes next time.
+              </p>
+            )}
             <div className="inline-flex items-center bg-primary/10 text-primary text-xs font-semibold px-4 py-2 rounded-full mb-6">
               Beginner Graphic Design Badge
             </div>

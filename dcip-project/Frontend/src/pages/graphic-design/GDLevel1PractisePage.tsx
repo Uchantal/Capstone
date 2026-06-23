@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
-import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS } from '../../components/graphic-design/PosterSurface'
+import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, type DesignElement } from '../../components/graphic-design/PosterSurface'
 import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
+import { useGDEngagement } from '../../hooks/useCanvasEngagement'
 
 const MINIMUM_INTERACTIONS = 8
 
@@ -16,6 +17,9 @@ export default function GDLevel1PractisePage() {
   const { progress, loading, markStageVisited } = useGDDemonstrationProgress()
   const interactionCount = useRef(0)
   const [thresholdMet, setThresholdMet] = useState(false)
+  const [elements, setElements] = useState<DesignElement[]>(DEFAULT_ELEMENTS)
+  const { recordInteraction: recordEngInteraction, recordElementChange, computeAndSave } =
+    useGDEngagement('graphic-design', 'level1Practise')
 
   useEffect(() => {
     if (isPreviewMode) return
@@ -31,9 +35,15 @@ export default function GDLevel1PractisePage() {
   }, [loading, progress.completedStages, navigate, markStageVisited])
 
   function recordInteraction() {
+    recordEngInteraction()
     if (thresholdMet) return
     interactionCount.current += 1
     if (interactionCount.current >= MINIMUM_INTERACTIONS) setThresholdMet(true)
+  }
+
+  const handleReady = () => {
+    computeAndSave(elements).catch(() => {})
+    navigate('/graphic-design/level-1/demonstrate')
   }
 
   if (loading) {
@@ -57,7 +67,7 @@ export default function GDLevel1PractisePage() {
           <span className="text-text-primary">Practise</span>
         </div>
         <button
-          onClick={() => navigate('/graphic-design/level-1/demonstrate')}
+          onClick={handleReady}
           disabled={!isPreviewMode && !thresholdMet}
           className="bg-secondary text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         >
@@ -87,7 +97,7 @@ export default function GDLevel1PractisePage() {
         <DesignCanvas
           defaultElements={DEFAULT_ELEMENTS}
           defaultBgColor={DEFAULT_BG_COLOR}
-          onChange={() => {}}
+          onChange={(els) => { setElements(els); recordElementChange(els) }}
           onInteraction={recordInteraction}
         />
       </div>
