@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { registerUser, fetchSchools } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
@@ -29,10 +29,28 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
+  // School searchable dropdown
+  const [schoolOpen, setSchoolOpen]     = useState(false)
+  const [schoolSearch, setSchoolSearch] = useState('')
+  const schoolRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     fetchSchools()
-      .then((res) => setSchools(Array.isArray(res.data) ? res.data : []))
+      .then((res) => {
+        const list = Array.isArray(res.data) ? res.data : []
+        setSchools(list.sort((a: School, b: School) => a.name.localeCompare(b.name)))
+      })
       .catch(() => setSubmitError('Could not load schools. Check your connection.'))
+  }, [])
+
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (schoolRef.current && !schoolRef.current.contains(e.target as Node)) {
+        setSchoolOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
   }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -252,20 +270,95 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="text-text-primary text-sm font-medium block mb-1.5">School</label>
-              <select
-                name="schoolId"
-                value={form.schoolId}
-                onChange={handleChange}
-                className="w-full border border-surface-border rounded-lg px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-primary bg-white"
-              >
-                <option value="">Select your school</option>
-                {schools.map((s) => (
-                  <option key={s._id} value={s._id}>
-                    {s.name} - {s.district}
-                  </option>
-                ))}
-              </select>
+              {/* Label row — search icon on the right */}
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-text-primary text-sm font-medium">School</label>
+                <button
+                  type="button"
+                  onClick={() => { setSchoolOpen(true) }}
+                  className="text-text-secondary hover:text-secondary transition-colors"
+                  aria-label="Search schools"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Custom dropdown */}
+              <div className="relative" ref={schoolRef}>
+                {/* Trigger */}
+                <button
+                  type="button"
+                  onClick={() => setSchoolOpen(v => !v)}
+                  className="w-full border border-surface-border rounded-lg px-4 py-3 text-sm text-left flex items-center justify-between bg-white focus:outline-none focus:border-primary"
+                >
+                  <span className={form.schoolId ? 'text-text-primary' : 'text-gray-400'}>
+                    {form.schoolId
+                      ? (() => { const s = schools.find(x => x._id === form.schoolId); return s ? `${s.name} — ${s.district}` : 'Select your school' })()
+                      : 'Select your school'}
+                  </span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 text-text-secondary transition-transform ${schoolOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Dropdown panel */}
+                {schoolOpen && (
+                  <div className="absolute z-20 w-full mt-1 bg-white border border-surface-border rounded-lg shadow-md overflow-hidden">
+                    {/* Search input */}
+                    <div className="p-2 border-b border-surface-border">
+                      <div className="relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+                        </svg>
+                        <input
+                          type="text"
+                          placeholder="Search schools..."
+                          value={schoolSearch}
+                          onChange={e => setSchoolSearch(e.target.value)}
+                          autoFocus
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-surface-border rounded-md focus:outline-none focus:border-primary text-text-primary placeholder-gray-400"
+                        />
+                      </div>
+                    </div>
+
+                    {/* School list */}
+                    <div className="max-h-48 overflow-y-auto">
+                      {schools
+                        .filter(s =>
+                          `${s.name} ${s.district}`.toLowerCase().includes(schoolSearch.toLowerCase())
+                        )
+                        .map(school => (
+                          <button
+                            key={school._id}
+                            type="button"
+                            onClick={() => {
+                              setForm(prev => ({ ...prev, schoolId: school._id }))
+                              setErrors(prev => ({ ...prev, schoolId: '' }))
+                              setSubmitError('')
+                              setSchoolOpen(false)
+                              setSchoolSearch('')
+                            }}
+                            className={`w-full text-left px-4 py-2.5 text-sm transition-colors
+                              ${form.schoolId === school._id
+                                ? 'bg-secondary/10 text-secondary font-medium'
+                                : 'text-text-primary hover:bg-surface-warm'}`}
+                          >
+                            {school.name}
+                            <span className="text-text-muted"> — {school.district}</span>
+                          </button>
+                        ))}
+                      {schools.filter(s =>
+                        `${s.name} ${s.district}`.toLowerCase().includes(schoolSearch.toLowerCase())
+                      ).length === 0 && (
+                        <p className="px-4 py-3 text-sm text-text-muted text-center">No schools match your search.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {errors.schoolId ? (
                 <p className="text-accent text-xs mt-1.5">{errors.schoolId}</p>
               ) : (

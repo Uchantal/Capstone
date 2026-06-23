@@ -182,7 +182,7 @@ router.get(
       }
 
       const students = await User.find({ role: 'student', school: supervisor.school })
-        .select('_id fullName discipline createdAt')
+        .select('_id fullName discipline subDiscipline createdAt')
 
       const studentIds = students.map((s) => s._id)
       const totalStudents = students.length
@@ -205,26 +205,39 @@ router.get(
       const avgSessionsPerStudent =
         totalStudents > 0 ? Math.round((allSessions.length / totalStudents) * 10) / 10 : 0
 
-      // Discipline stats
+      const musicSubDiscs = ['piano', 'guitar', 'voice']
+
+      const calcAvgLevel = (docs: typeof progressDocs): number | null =>
+        docs.length > 0
+          ? Math.round((docs.reduce((sum, p) => sum + p.currentLevel, 0) / docs.length) * 10) / 10
+          : null
+
+      // Discipline stats — music sessions/progress are stored under sub-discipline keys
       const disciplines = ['music', 'visual-arts', 'graphic-design']
       const disciplineStats = disciplines.map((disc) => {
         const discStudents = students.filter((s) => s.discipline === disc)
-        const discSessions = allSessions.filter((s) => s.discipline === disc)
-        const discProgress = progressDocs.filter((p) => p.discipline === disc)
-        const avgLevel =
-          discProgress.length > 0
-            ? Math.round(
-                (discProgress.reduce((sum, p) => sum + p.currentLevel, 0) / discProgress.length) *
-                  10
-              ) / 10
-            : 1
+        const sessionKeys = disc === 'music' ? [...musicSubDiscs, 'music'] : [disc]
+        const discSessions = allSessions.filter((s) => sessionKeys.includes(s.discipline))
+        const discProgress = progressDocs.filter((p) => sessionKeys.includes(p.discipline))
 
-        return {
+        type SubStat = { discipline: string; studentCount: number; totalSessions: number; avgLevel: number | null }
+        const result: { discipline: string; studentCount: number; totalSessions: number; avgLevel: number | null; subDisciplines?: SubStat[] } = {
           discipline: disc,
           studentCount: discStudents.length,
           totalSessions: discSessions.length,
-          avgLevel,
+          avgLevel: calcAvgLevel(discProgress),
         }
+
+        if (disc === 'music') {
+          result.subDisciplines = musicSubDiscs.map((sd) => ({
+            discipline: sd,
+            studentCount: discStudents.filter((s) => s.subDiscipline === sd).length,
+            totalSessions: allSessions.filter((s) => s.discipline === sd).length,
+            avgLevel: calcAvgLevel(progressDocs.filter((p) => p.discipline === sd)),
+          }))
+        }
+
+        return result
       })
 
       // Student progress table
@@ -264,6 +277,7 @@ router.get(
           id: uid,
           name: student.fullName,
           discipline: student.discipline ?? 'N/A',
+          subDiscipline: student.subDiscipline ?? null,
           currentLevel: prog?.currentLevel ?? 1,
           skillLabel: prog?.skillLabel ?? 'Beginner',
           totalSessions: sessionCountByUser.get(uid) ?? 0,

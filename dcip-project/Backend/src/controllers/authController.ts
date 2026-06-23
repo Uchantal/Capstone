@@ -55,6 +55,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         role: user.role,
         school: { id: school._id, name: school.name, district: school.district },
         discipline: user.discipline,
+        subDiscipline: user.subDiscipline,
       },
     })
   } catch (error) {
@@ -99,6 +100,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         role: user.role,
         school: school ? { id: school._id, name: school.name, district: school.district } : null,
         discipline: user.discipline,
+        subDiscipline: user.subDiscipline,
       },
     })
   } catch (error) {
@@ -152,6 +154,7 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
       role: user.role,
       school: school ? { id: school._id, name: school.name, district: school.district } : null,
       discipline: user.discipline,
+      subDiscipline: user.subDiscipline,
       createdAt: user.createdAt,
     })
   } catch (error) {
@@ -172,13 +175,29 @@ export const getSchools = async (_req: Request, res: Response): Promise<void> =>
 
 export const updateDiscipline = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { discipline } = req.body
-    const valid = ['music', 'visual-arts', 'graphic-design']
-    if (!valid.includes(discipline)) {
+    const { discipline, subDiscipline } = req.body
+    const validDisc = ['music', 'visual-arts', 'graphic-design']
+    const validSub = ['piano', 'guitar', 'voice']
+
+    if (!validDisc.includes(discipline)) {
       res.status(400).json({ message: 'Invalid discipline' })
       return
     }
-    const user = await User.findByIdAndUpdate(req.userId, { discipline }, { new: true }).populate('school')
+
+    const update: Record<string, string | null> = { discipline }
+    if (discipline === 'music' && subDiscipline) {
+      if (!validSub.includes(subDiscipline)) {
+        res.status(400).json({ message: 'Invalid sub-discipline' })
+        return
+      }
+      update.subDiscipline = subDiscipline
+    } else {
+      // clear sub-discipline when switching away from music, or when music is
+      // selected without a sub-discipline (student is still on MusicSelectPage)
+      update.subDiscipline = null
+    }
+
+    const user = await User.findByIdAndUpdate(req.userId, update, { new: true }).populate('school')
     if (!user) {
       res.status(404).json({ message: 'User not found' })
       return
@@ -191,6 +210,7 @@ export const updateDiscipline = async (req: AuthRequest, res: Response): Promise
       role: user.role,
       school: school ? { id: school._id, name: school.name, district: school.district } : null,
       discipline: user.discipline,
+      subDiscipline: user.subDiscipline,
     })
   } catch (error) {
     console.error('Update discipline error:', error)

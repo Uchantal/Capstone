@@ -25,7 +25,7 @@ const seed = async () => {
   await Module.deleteMany({})
 
   const schools = await School.insertMany(
-    SCHOOL_SUPERVISORS.map(({ name, district, province }) => ({ name, district, province }))
+    SCHOOL_SUPERVISORS.map(({ name, district, province }) => ({ name, district, province, isActive: true }))
   )
 
   console.log('Schools seeded')

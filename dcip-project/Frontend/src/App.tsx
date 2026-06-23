@@ -88,6 +88,7 @@ import AdminSupervisorsPage from './pages/admin/AdminSupervisorsPage'
 import AdminSchoolsPage from './pages/admin/AdminSchoolsPage'
 import AdminFeedbackPage from './pages/admin/AdminFeedbackPage'
 import FeedbackPage from './pages/FeedbackPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import AdminPreviewPage from './pages/admin/AdminPreviewPage'
 import PreviewNavBar from './components/PreviewNavBar'
 import SessionGate from './components/SessionGate'
@@ -140,6 +141,7 @@ function AppContent() {
         <Route path="/" element={<HomePage />} />
         <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
         <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+        <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
 
         <Route path="/dashboard" element={<StudentRoute><DashboardPage /></StudentRoute>} />
         <Route path="/disciplines" element={<StudentRoute><DisciplineSelectPage /></StudentRoute>} />

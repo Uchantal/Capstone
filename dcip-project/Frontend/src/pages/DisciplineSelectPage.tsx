@@ -9,27 +9,30 @@ const disciplines = [
     name: 'Music',
     sub: 'Guitar · Piano · Voice & Singing',
     desc: 'Play instruments and record your voice. Step-by-step sessions from your first note to a saved composition.',
+    img: '/images/music.jpg',
+    imgAlt: 'Music instruments',
     accent: 'border-primary',
     accentText: 'text-primary',
-    accentBg: 'bg-primary',
   },
   {
     id: 'visual-arts',
     name: 'Visual Arts',
     sub: 'Drawing · Colour · Composition',
     desc: 'Create digital artworks on an HTML canvas. Explore colour, form, and composition through guided exercises.',
+    img: '/images/visual-arts.jpg',
+    imgAlt: 'Visual arts',
     accent: 'border-secondary',
     accentText: 'text-secondary',
-    accentBg: 'bg-secondary',
   },
   {
     id: 'graphic-design',
     name: 'Graphic Design',
     sub: 'Layouts · Typography · Posters',
     desc: 'Learn visual communication fundamentals and create poster designs step by step.',
-    accent: 'border-surface-border',
-    accentText: 'text-text-primary',
-    accentBg: 'bg-surface-canvas',
+    img: '/images/graphic-design.jpg',
+    imgAlt: 'Graphic design',
+    accent: 'border-primary',
+    accentText: 'text-primary',
   },
 ]
 
@@ -69,18 +72,31 @@ export default function DisciplineSelectPage() {
             <button
               key={d.id}
               onClick={() => handleSelect(d.id)}
-              className={`text-left bg-white border-2 rounded-2xl p-6 hover:shadow-md transition-all ${
+              className={`text-left bg-white border-2 rounded-2xl overflow-hidden hover:shadow-md transition-all group ${
                 user?.discipline === d.id ? d.accent : 'border-surface-border hover:border-gray-300'
               }`}
             >
-              <p className="text-text-primary font-bold text-base mb-1">{d.name}</p>
-              <p className={`text-xs mb-3 ${d.accentText}`}>{d.sub}</p>
-              <p className="text-text-secondary text-xs leading-relaxed">{d.desc}</p>
-              {user?.discipline === d.id && (
-                <div className={`mt-4 text-xs font-medium ${d.accentText}`}>
-                  ✓ Current discipline
-                </div>
-              )}
+              {/* Image */}
+              <div className="relative h-44 overflow-hidden">
+                <img
+                  src={d.img}
+                  alt={d.imgAlt}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                {user?.discipline === d.id && (
+                  <div className="absolute top-3 right-3 bg-white/90 text-xs font-semibold text-secondary px-2.5 py-1 rounded-full">
+                    ✓ Current
+                  </div>
+                )}
+              </div>
+
+              {/* Content */}
+              <div className="p-5">
+                <p className="text-text-primary font-bold text-base mb-1">{d.name}</p>
+                <p className={`text-xs mb-3 ${d.accentText}`}>{d.sub}</p>
+                <p className="text-text-secondary text-xs leading-relaxed">{d.desc}</p>
+              </div>
             </button>
           ))}
         </div>

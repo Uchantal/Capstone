@@ -24,8 +24,8 @@ export const loginUser = (data: { username: string; password: string }) =>
 
 export const fetchSchools = () => api.get('/auth/schools')
 
-export const updateDiscipline = (discipline: string) =>
-  api.patch('/auth/discipline', { discipline })
+export const updateDiscipline = (discipline: string, subDiscipline?: string) =>
+  api.patch('/auth/discipline', { discipline, ...(subDiscipline ? { subDiscipline } : {}) })
 
 export const fetchMe = () => api.get('/auth/me')
 

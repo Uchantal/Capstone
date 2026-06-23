@@ -77,7 +77,7 @@ function StepIcon({ index }: { index: number }) {
 const disciplines = [
   {
     name: 'Music',
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4hrFxBXkVp7G6H45NH-d8U8ZhHPw-kB86KSkHD9DSfA&s=10',
+    img: '/images/music.jpg',
     imgAlt: 'Rwandan youth in music session',
     color: '#ffffff',
     cardBg: 'bg-[#1a2030]',
@@ -86,7 +86,7 @@ const disciplines = [
   },
   {
     name: 'Visual Arts',
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWuTGPFiUGX2a-Ry0-717R8XMe5XwwN5elmjl_OVIJSw&s=10',
+    img: '/images/visual-arts.jpg',
     imgAlt: 'Rwandan youth in drawing session',
     color: '#ffffff',
     cardBg: 'bg-[#0d1a12]',
@@ -95,7 +95,7 @@ const disciplines = [
   },
   {
     name: 'Graphic Design',
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS6onXecRLNIGg4NZdHw_fQMdC73sQ00rZ6dzNk63pEOA&s=10',
+    img: '/images/graphic-design.jpg',
     imgAlt: 'Students at computers learning digital skills',
     color: '#ffffff',
     cardBg: 'bg-[#1a1408]',
@@ -237,7 +237,6 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
           <FadeIn delay={0}>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-px bg-primary" />
               <span className="text-primary text-xs font-semibold tracking-widest uppercase">About the Platform</span>
             </div>
             <h2 className="text-[#1A1A1A] font-extrabold text-3xl lg:text-4xl leading-tight mb-5">
@@ -266,7 +265,6 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
             <div className="flex items-center justify-center gap-2">
-              <div className="w-8 h-px bg-primary" />
               <span className="text-primary text-xs font-semibold tracking-widest uppercase">Creative Disciplines</span>
             </div>
             <h2
@@ -299,11 +297,11 @@ export default function HomePage() {
                     }}
                   />
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-black/55 backdrop-blur-[2px]">
                     <h3 className="font-sans font-bold text-white text-2xl mb-2">{d.name}</h3>
-                    <p className="text-white/85 text-sm leading-relaxed mb-4">{d.description}</p>
+                    <p className="text-white text-sm leading-relaxed mb-4">{d.description}</p>
                     <Link
                       to="/register"
                       className="inline-block text-white font-semibold text-sm border border-white/60 rounded-lg px-5 py-2 hover:bg-white/10 transition-colors"

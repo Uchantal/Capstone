@@ -9,6 +9,7 @@ export interface AuthUser {
   role: UserRole
   school: { id: string; name: string; district: string } | null
   discipline: string | null
+  subDiscipline: string | null
 }
 
 const loadToken = (): string | null => localStorage.getItem('token')

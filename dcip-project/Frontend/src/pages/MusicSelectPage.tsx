@@ -1,10 +1,16 @@
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
+import { updateDiscipline } from '../services/api'
 import MainLayout from '../components/MainLayout'
 
 const paths = [
   {
     url: '/guitar/reading-the-fretboard',
+    subDiscipline: 'guitar',
     name: 'Guitar',
+    img: '/images/guitar.jpg',
+    imgAlt: 'Guitar',
+    imgPosition: 'object-center',
     description:
       'Learn chords, strumming patterns, and simple melodies using an interactive virtual fretboard powered by the Web Audio API.',
     items: [
@@ -15,11 +21,15 @@ const paths = [
     ],
     accent: 'border-t-primary',
     btn: 'bg-primary hover:bg-primary-dark',
-    label: 'Practise Guitar',
+    label: 'Open Guitar',
   },
   {
     url: '/piano/virtual-instrument',
+    subDiscipline: 'piano',
     name: 'Piano',
+    img: '/images/piano.jpg',
+    imgAlt: 'Piano keyboard',
+    imgPosition: 'object-center',
     description:
       'Learn scales, chords, and melodies using an interactive virtual keyboard. Follow guided exercises at your own pace.',
     items: [
@@ -30,11 +40,15 @@ const paths = [
     ],
     accent: 'border-t-primary',
     btn: 'bg-primary hover:bg-primary-dark',
-    label: 'Practise Piano',
+    label: 'Open Piano',
   },
   {
     url: '/voice/posture-breath-voice',
+    subDiscipline: 'voice',
     name: 'Voice & Singing',
+    img: '/images/voice.jpg',
+    imgAlt: 'Voice and singing',
+    imgPosition: 'object-top',
     description:
       'Record your voice, practise pitch, warm up with vocal exercises, and save recordings of your singing using your device microphone.',
     items: [
@@ -45,12 +59,23 @@ const paths = [
     ],
     accent: 'border-t-primary',
     btn: 'bg-primary hover:bg-primary-dark',
-    label: 'Practise Singing',
+    label: 'Open Voice & Singing',
   },
 ]
 
 export default function MusicSelectPage() {
   const navigate = useNavigate()
+  const { updateUser } = useAuth()
+
+  const handleSelect = async (path: (typeof paths)[number]) => {
+    try {
+      const res = await updateDiscipline('music', path.subDiscipline)
+      updateUser({ discipline: res.data.discipline, subDiscipline: res.data.subDiscipline })
+    } catch {
+      // non-critical — navigate anyway
+    }
+    navigate(path.url)
+  }
 
   return (
     <MainLayout>
@@ -66,19 +91,23 @@ export default function MusicSelectPage() {
           Music Module: Choose your practice
         </h1>
         <p className="text-text-secondary text-sm mb-8">
-          Select how you want to practise music today. Each path is guided step by step.
+          Select  your favorite part of music today and advance your skills. 
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {paths.map((path) => (
             <div
               key={path.url}
-              className={`bg-white rounded-2xl border-2 border-surface-border border-t-4 ${path.accent} flex flex-col overflow-hidden`}
+              className={`bg-white rounded-2xl border-2 border-surface-border border-t-4 ${path.accent} flex flex-col overflow-hidden group`}
             >
-              {/* Icon area */}
-              <div className="bg-primary/5 flex items-center justify-center py-10">
-                <div className="bg-primary/10 rounded-2xl w-24 h-24 flex items-center justify-center">
-                </div>
+              {/* Image */}
+              <div className="relative h-44 overflow-hidden">
+                <img
+                  src={path.img}
+                  alt={path.imgAlt}
+                  className={`w-full h-full object-cover ${path.imgPosition} transition-transform duration-500 group-hover:scale-105`}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
               </div>
 
               {/* Content */}
@@ -102,7 +131,7 @@ export default function MusicSelectPage() {
                   </ul>
 
                   <button
-                    onClick={() => navigate(path.url)}
+                    onClick={() => handleSelect(path)}
                     className={`w-full ${path.btn} text-white font-semibold text-sm py-3.5 rounded-xl transition-colors`}
                   >
                     {path.label}
@@ -113,9 +142,7 @@ export default function MusicSelectPage() {
           ))}
         </div>
 
-        <p className="text-text-secondary text-xs text-center mt-8">
-          All three paths use your browser's built-in Web Audio API. No hardware or downloads required.
-        </p>
+       
       </div>
     </MainLayout>
   )

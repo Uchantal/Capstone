@@ -11,6 +11,7 @@ export interface IUser extends Document {
   isActive: boolean
   school: mongoose.Types.ObjectId | null
   discipline: string | null
+  subDiscipline: string | null
   createdAt: Date
 }
 
@@ -25,6 +26,11 @@ const userSchema = new Schema<IUser>({
   discipline: {
     type: String,
     enum: ['music', 'visual-arts', 'graphic-design', null],
+    default: null,
+  },
+  subDiscipline: {
+    type: String,
+    enum: ['piano', 'guitar', 'voice', null],
     default: null,
   },
   createdAt: { type: Date, default: Date.now },
