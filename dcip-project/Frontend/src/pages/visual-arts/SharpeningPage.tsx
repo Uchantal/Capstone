@@ -1,6 +1,5 @@
 ﻿import { useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
@@ -27,11 +26,10 @@ const SHADING_ZONES = [
 
 export default function SharpeningPage() {
   const navigate = useNavigate()
-  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { progress, loading, markStageVisited } = useVisualArtsDemonstrationProgress()
+  const { loading, markStageVisited } = useVisualArtsDemonstrationProgress()
   const { recordInteraction, recordColour, recordTool, computeAndSave } =
     useVAEngagement('visual-arts', 'sharpening')
 
@@ -41,23 +39,10 @@ export default function SharpeningPage() {
   }
 
   useEffect(() => {
-    if (isPreviewMode) return
     if (loading) return
-    if (!progress.level3DemonstrationPassed) {
-      navigate('/visual-arts/level-3/demonstrate', {
-        replace: true,
-        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
-      })
-    }
-  }, [isPreviewMode, loading, progress.level3DemonstrationPassed, navigate])
-
-  useEffect(() => {
-    if (loading) return
-    if (progress.level3DemonstrationPassed) {
-      markStageVisited('va-sharpening')
-    }
+    markStageVisited('va-sharpening')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, progress.level3DemonstrationPassed])
+  }, [loading])
 
   if (loading) {
     return (

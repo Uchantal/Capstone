@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, exportDesignToDataUrl, type DesignElement } from '../../components/graphic-design/PosterSurface'
@@ -42,7 +42,7 @@ export default function GDLevel2DemonstratePage() {
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
 
-  const { progress, loading, reload } = useGDDemonstrationProgress()
+  const { loading, reload } = useGDDemonstrationProgress()
   const [elements, setElements] = useState(DEFAULT_ELEMENTS)
   const [bgColor, setBgColor] = useState(DEFAULT_BG_COLOR)
   const [canvasKey, setCanvasKey] = useState(0)
@@ -56,20 +56,8 @@ export default function GDLevel2DemonstratePage() {
   const { recordInteraction: recordEngInteraction, recordElementChange, computeAndSave } =
     useGDEngagement('graphic-design', 'level2Demonstrate')
 
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.completedStages.includes('gd-level-2-practise')) {
-      navigate('/graphic-design/level-2/practise', {
-        replace: true,
-        state: { lockedMessage: 'Complete Level 2 Practice first.' },
-      })
-    }
-  }, [loading, progress.completedStages, navigate])
-
   function recordInteraction() {
     recordEngInteraction()
-    interactionCount.current += 1
   }
 
   function handleCheck() {

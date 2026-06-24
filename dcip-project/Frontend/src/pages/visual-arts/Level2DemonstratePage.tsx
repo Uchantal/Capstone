@@ -1,4 +1,4 @@
-﻿import { useRef, useState, useEffect } from 'react'
+﻿import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
@@ -29,7 +29,7 @@ function checkVADemonstration(
 export default function VALevel2DemonstratePage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
-  const { progress, loading } = useVisualArtsDemonstrationProgress()
+  const { loading } = useVisualArtsDemonstrationProgress()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [resetKey, setResetKey] = useState(0)
   const interactionCount = useRef(0)
@@ -41,16 +41,6 @@ export default function VALevel2DemonstratePage() {
   const { recordInteraction: recordEngInteraction, recordColour: recordEngColour, recordTool, computeAndSave } =
     useVAEngagement('visual-arts', 'level2Demonstrate')
 
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.completedStages.includes('va-level-2-practise')) {
-      navigate('/visual-arts/level-2/practise', {
-        replace: true,
-        state: { lockedMessage: 'Complete Level 2 Practise first.' },
-      })
-    }
-  }, [isPreviewMode, loading, progress.completedStages, navigate])
 
   function recordInteraction() {
     recordEngInteraction()
@@ -97,7 +87,7 @@ export default function VALevel2DemonstratePage() {
     setResetKey(k => k + 1)
   }
 
-  if (!isPreviewMode && (loading || !progress.completedStages.includes('va-level-2-practise'))) {
+  if (!isPreviewMode && loading) {
     return (
       <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>

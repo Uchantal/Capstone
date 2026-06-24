@@ -1,8 +1,4 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { usePreviewMode } from '../../hooks/usePreviewMode'
 import ChordLevelScreen from '../../components/piano/ChordLevelScreen'
-import { usePianoProgress } from '../../hooks/usePianoProgress'
 
 const LEVEL1_CHORDS = [
   { symbol: 'C',  root: 'C', type: 'major' as const },
@@ -13,27 +9,6 @@ const LEVEL1_CHORDS = [
 ]
 
 export default function Level1Page() {
-  const navigate = useNavigate()
-  const isPreviewMode = usePreviewMode()
-  const { progress, loading } = usePianoProgress()
-
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    const hasUnderstanding = progress.completedStages.includes('piano-understanding')
-    const hasNotesChords = progress.completedStages.includes('piano-notes-chords')
-    if (!hasUnderstanding || !hasNotesChords) {
-      navigate('/piano/understanding-the-piano', {
-        replace: true,
-        state: { lockedMessage: 'Complete both courses before starting Level 1.' },
-      })
-    }
-  }, [isPreviewMode, loading, progress.completedStages, navigate])
-
-  if (!isPreviewMode && (loading || !progress.completedStages.includes('piano-understanding') || !progress.completedStages.includes('piano-notes-chords'))) {
-    return null
-  }
-
   return (
     <ChordLevelScreen
       levelNumber={1}

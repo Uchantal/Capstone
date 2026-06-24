@@ -24,7 +24,7 @@ export default function VoiceLevel2DemonstratePage() {
   const isPreviewMode = usePreviewMode()
   const location  = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
-  const { progress, loading, reload } = useVoiceDemonstrationProgress()
+  const { loading, reload } = useVoiceDemonstrationProgress()
   const { initMic, analyserRef, micError } = useVoiceMic()
 
   const [phase,        setPhase]        = useState<'testing' | 'results'>('testing')
@@ -40,17 +40,6 @@ export default function VoiceLevel2DemonstratePage() {
   const submittedRef    = useRef(false)
   const onPitchSinceRef = useRef<number | null>(null)
   const waveformRef     = useRef<HTMLCanvasElement>(null)
-
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.completedStages.includes('voice-level-2-practise')) {
-      navigate('/voice/level-2/practise', {
-        replace: true,
-        state: { lockedMessage: 'Complete the Level 2 practise session first.' },
-      })
-    }
-  }, [isPreviewMode, loading, progress.completedStages, navigate])
 
   useEffect(() => {
     return () => { activeRef.current = false; cancelAnimationFrame(rafRef.current) }

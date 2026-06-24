@@ -261,15 +261,31 @@ router.get('/stats', protect, requireRole('admin'), async (_req: AuthRequest, re
   }
 })
 
-router.get('/reports', protect, requireRole('admin'), async (_req: AuthRequest, res: Response): Promise<void> => {
+router.get('/reports', protect, requireRole('admin'), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    const startDate = req.query.startDate ? new Date(req.query.startDate as string) : null
+    const endDate = req.query.endDate ? new Date(req.query.endDate as string) : null
+
+    const dateFilter: Record<string, unknown> = {}
+    if (startDate || endDate) {
+      const range: Record<string, Date> = {}
+      if (startDate) range.$gte = startDate
+      if (endDate) range.$lte = endDate
+      dateFilter.createdAt = range
+    }
+
+    const matchStage = Object.keys(dateFilter).length > 0 ? [{ $match: dateFilter }] : []
+
     const [totalStudents, totalSessions, totalPortfolioItems, activeSchools, disciplineSessions] =
       await Promise.all([
         User.countDocuments({ role: 'student', isActive: true }),
-        PracticeSession.countDocuments(),
-        PortfolioItem.countDocuments(),
+        PracticeSession.countDocuments(dateFilter),
+        PortfolioItem.countDocuments(dateFilter),
         School.countDocuments({ isActive: true }),
-        PracticeSession.aggregate([{ $group: { _id: '$discipline', count: { $sum: 1 } } }]),
+        PracticeSession.aggregate([
+          ...matchStage,
+          { $group: { _id: '$discipline', count: { $sum: 1 } } },
+        ]),
       ])
     res.json({ totalStudents, totalSessions, totalPortfolioItems, activeSchools, sessionsByDiscipline: disciplineSessions })
   } catch {

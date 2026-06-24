@@ -1,8 +1,7 @@
-﻿import { useEffect, useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
-import { useVisualArtsProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useVisualArtsProgress'
-import { usePreviewMode } from '../../hooks/usePreviewMode'
+import { useVisualArtsProgress } from '../../hooks/useVisualArtsProgress'
 import { useReadingEngagement } from '../../hooks/useReadingEngagement'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
@@ -54,20 +53,7 @@ export default function Course2Page() {
   const navigate = useNavigate()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
-  const { completedStages, loading, markComplete } = useVisualArtsProgress()
-  const isPreviewMode = usePreviewMode()
-
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!completedStages.includes('va-course-1')) {
-      navigate(STAGE_PATHS['va-course-1'], {
-        replace: true,
-        state: { lockedMessage: `Complete ${STAGE_NAMES['va-course-1']} first.` },
-      })
-    }
-  }, [isPreviewMode, loading, completedStages, navigate])
-
+  const { loading, markComplete } = useVisualArtsProgress()
   const [lowEngagement, setLowEngagement] = useState(false)
   const { computeAndSave } = useReadingEngagement('visual-arts', 'course2')
 

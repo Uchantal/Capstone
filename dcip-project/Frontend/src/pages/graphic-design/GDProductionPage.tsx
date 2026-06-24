@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, exportDesignToDataUrl, DesignElement } from '../../components/graphic-design/PosterSurface'
@@ -39,7 +39,7 @@ function MinimalNav({ onExit }: { onExit: () => void }) {
 export default function GDProductionPage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
-  const { progress, loading, markStageVisited } = useGDDemonstrationProgress()
+  const { loading, markStageVisited } = useGDDemonstrationProgress()
   const [phase, setPhase] = useState<Phase>('intro')
   const [elements, setElements] = useState<DesignElement[]>(DEFAULT_ELEMENTS)
   const [bgColor, setBgColor] = useState(DEFAULT_BG_COLOR)
@@ -54,23 +54,6 @@ export default function GDProductionPage() {
   const { recordInteraction, recordElementChange, computeAndSave } =
     useGDEngagement('graphic-design', 'production')
 
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.level3DemonstrationPassed) {
-      navigate('/graphic-design/level-3/demonstrate', {
-        replace: true,
-        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
-      })
-      return
-    }
-    if (!progress.completedStages.includes('gd-sharpening')) {
-      navigate('/graphic-design/sharpening', {
-        replace: true,
-        state: { lockedMessage: 'Complete Sharpening Myself first.' },
-      })
-    }
-  }, [loading, progress.level3DemonstrationPassed, progress.completedStages, navigate])
 
   const allChecked = CHECKLIST.every(item => checked.has(item.id))
   const canSubmit = allChecked && reasoning.trim().length > 0 && !submitting

@@ -1,8 +1,8 @@
-﻿import { useRef, useState, useEffect } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../modules/VisualArtsModule'
-import { useVisualArtsProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useVisualArtsProgress'
+import { useVisualArtsProgress } from '../../hooks/useVisualArtsProgress'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 
 function stageIdToEngagementKey(stageId: string): string {
@@ -28,8 +28,6 @@ interface Props {
   requires: string[]
 }
 
-const MINIMUM_INTERACTIONS = 10
-
 export default function VisualArtsLevelScreen({
   levelNumber,
   totalLevels,
@@ -38,45 +36,27 @@ export default function VisualArtsLevelScreen({
   checklist,
   nextPath,
   stageId,
-  requires,
+  requires: _requires,
 }: Props) {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { completedStages, loading, markComplete } = useVisualArtsProgress()
+  const { loading, markComplete } = useVisualArtsProgress()
   const [checked, setChecked] = useState<Set<string>>(new Set())
   const [completed, setCompleted] = useState(false)
   const [engagementScore, setEngagementScore] = useState<number | null>(null)
-  const interactionCount = useRef(0)
-  const [thresholdMet, setThresholdMet] = useState(false)
 
   const { recordInteraction: recordEngInteraction, recordColour, recordTool, computeAndSave } =
     useVAEngagement('visual-arts', stageIdToEngagementKey(stageId))
 
   function recordInteraction() {
     recordEngInteraction()
-    if (thresholdMet) return
-    interactionCount.current += 1
-    if (interactionCount.current >= MINIMUM_INTERACTIONS) {
-      setThresholdMet(true)
-    }
   }
 
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    const firstMissing = requires.find(r => !completedStages.includes(r))
-    if (firstMissing) {
-      const path = STAGE_PATHS[firstMissing] ?? '/visual-arts/course-1'
-      const name = STAGE_NAMES[firstMissing] ?? firstMissing
-      navigate(path, { replace: true, state: { lockedMessage: `Complete ${name} first.` } })
-    }
-  }, [isPreviewMode, loading, completedStages, requires, navigate])
-
   const allChecked = checklist.every(item => checked.has(item.id))
-  const canComplete = isPreviewMode || (thresholdMet && allChecked)
+  const canComplete = isPreviewMode || allChecked
 
   const handleComplete = async () => {
     if (!canComplete) return
@@ -148,12 +128,6 @@ export default function VisualArtsLevelScreen({
           </label>
         ))}
       </div>
-
-      {!thresholdMet && (
-        <p className="text-text-muted text-[10px] leading-snug">
-          Keep drawing to unlock completion. ({interactionCount.current}/{MINIMUM_INTERACTIONS} strokes)
-        </p>
-      )}
     </div>
   )
 

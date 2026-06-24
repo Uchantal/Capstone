@@ -1,8 +1,7 @@
-﻿import { useEffect, useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
-import { useGDProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useGDProgress'
-import { usePreviewMode } from '../../hooks/usePreviewMode'
+import { useGDProgress } from '../../hooks/useGDProgress'
 import { useReadingEngagement } from '../../hooks/useReadingEngagement'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
@@ -20,19 +19,7 @@ export default function GDCourse2Page() {
   const navigate = useNavigate()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
-  const { completedStages, loading, markComplete } = useGDProgress()
-  const isPreviewMode = usePreviewMode()
-
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!completedStages.includes('gd-course-1')) {
-      navigate(STAGE_PATHS['gd-course-1'], {
-        replace: true,
-        state: { lockedMessage: `Complete ${STAGE_NAMES['gd-course-1']} first.` },
-      })
-    }
-  }, [isPreviewMode, loading, completedStages, navigate])
+  const { loading, markComplete } = useGDProgress()
 
   const [lowEngagement, setLowEngagement] = useState(false)
   const { computeAndSave } = useReadingEngagement('graphic-design', 'course2')

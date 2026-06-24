@@ -1,8 +1,4 @@
-﻿import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { usePreviewMode } from '../../hooks/usePreviewMode'
-import VisualArtsLevelScreen from '../../components/visual-arts/VisualArtsLevelScreen'
-import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
+﻿import VisualArtsLevelScreen from '../../components/visual-arts/VisualArtsLevelScreen'
 
 const CHECKLIST = [
   { id: 'two-elements',   text: 'My composition has at least two distinct elements' },
@@ -12,23 +8,6 @@ const CHECKLIST = [
 ]
 
 export default function VALevel3Page() {
-  const navigate = useNavigate()
-  const isPreviewMode = usePreviewMode()
-  const { progress, loading } = useVisualArtsDemonstrationProgress()
-
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.level2DemonstrationPassed) {
-      navigate('/visual-arts/level-2/demonstrate', {
-        replace: true,
-        state: { lockedMessage: 'Complete the Level 2 demonstration first.' },
-      })
-    }
-  }, [isPreviewMode, loading, progress.level2DemonstrationPassed, navigate])
-
-  if (!isPreviewMode && (loading || !progress.level2DemonstrationPassed)) return null
-
   return (
     <VisualArtsLevelScreen
       levelNumber={3}

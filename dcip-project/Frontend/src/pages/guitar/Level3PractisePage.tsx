@@ -19,31 +19,16 @@ const CHORD_REFERENCE = [
 export default function GuitarLevel3PractisePage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
-  const { progress, loading, markStageVisited } = useGuitarDemonstrationProgress()
+  const { loading, markStageVisited } = useGuitarDemonstrationProgress()
   const [selectedNoteIdx, setSelectedNoteIdx] = useState<number | null>(null)
 
   useEffect(() => {
-    if (isPreviewMode) return
     if (loading) return
-    if (!progress.level2DemonstrationPassed) {
-      navigate('/guitar/level-2/demonstrate', { replace: true, state: { lockedMessage: 'Complete the Level 2 demonstration first.' } })
-      return
-    }
-    if (!progress.completedStages.includes('guitar-level-3')) {
-      navigate('/guitar/level-3', { replace: true, state: { lockedMessage: 'Complete Level 3 first.' } })
-    }
-  }, [isPreviewMode, loading, progress.level2DemonstrationPassed, progress.completedStages, navigate])
-
-  useEffect(() => {
-    if (loading) return
-    if (progress.level2DemonstrationPassed && progress.completedStages.includes('guitar-level-3')) {
-      markStageVisited('guitar-level-3-practise')
-    }
+    markStageVisited('guitar-level-3-practise')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, progress.level2DemonstrationPassed, progress.completedStages])
+  }, [loading])
 
-  const ready = !loading && progress.level2DemonstrationPassed && progress.completedStages.includes('guitar-level-3')
-  if (!isPreviewMode && !ready) return null
+  if (!isPreviewMode && loading) return null
 
   const highlight = selectedNoteIdx !== null
     ? [{ stringIdx: D_POSITIONS[selectedNoteIdx].stringIdx, fret: D_POSITIONS[selectedNoteIdx].fret, label: 'D' }]

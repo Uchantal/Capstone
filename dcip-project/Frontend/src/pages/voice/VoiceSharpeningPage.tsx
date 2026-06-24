@@ -11,7 +11,7 @@ export default function VoiceSharpeningPage() {
   const isPreviewMode = usePreviewMode()
   const location  = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
-  const { progress, loading, markStageVisited } = useVoiceDemonstrationProgress()
+  const { loading, markStageVisited } = useVoiceDemonstrationProgress()
   const { initMic, analyserRef, micStreamRef, micError, micReady } = useVoiceMic()
 
   const [recording,    setRecording]    = useState(false)
@@ -25,16 +25,9 @@ export default function VoiceSharpeningPage() {
 
   useEffect(() => {
     if (loading) return
-    if (!isPreviewMode && !progress.level3DemonstrationPassed) {
-      navigate('/voice/level-3/demonstrate', {
-        replace: true,
-        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
-      })
-      return
-    }
     markStageVisited('voice-sharpening')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPreviewMode, loading, progress.level3DemonstrationPassed])
+  }, [loading])
 
   useEffect(() => {
     return () => {
@@ -79,7 +72,7 @@ export default function VoiceSharpeningPage() {
     setTimeout(() => setActiveNote(null), 2200)
   }
 
-  if (!isPreviewMode && (loading || !progress.level3DemonstrationPassed)) return null
+  if (!isPreviewMode && loading) return null
 
   return (
     <MainLayout>

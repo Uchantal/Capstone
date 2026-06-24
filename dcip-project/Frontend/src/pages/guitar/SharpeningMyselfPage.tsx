@@ -50,28 +50,15 @@ const CHORD_REFERENCE = [
 export default function GuitarSharpeningPage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
-  const { progress, loading, markStageVisited } = useGuitarDemonstrationProgress()
-
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.level3DemonstrationPassed) {
-      navigate('/guitar/level-3/demonstrate', {
-        replace: true,
-        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
-      })
-    }
-  }, [isPreviewMode, loading, progress.level3DemonstrationPassed, navigate])
+  const { loading, markStageVisited } = useGuitarDemonstrationProgress()
 
   useEffect(() => {
     if (loading) return
-    if (progress.level3DemonstrationPassed) {
-      markStageVisited('guitar-sharpening')
-    }
+    markStageVisited('guitar-sharpening')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, progress.level3DemonstrationPassed])
+  }, [loading])
 
-  if (!isPreviewMode && (loading || !progress.level3DemonstrationPassed)) {
+  if (!isPreviewMode && loading) {
     return (
       <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>

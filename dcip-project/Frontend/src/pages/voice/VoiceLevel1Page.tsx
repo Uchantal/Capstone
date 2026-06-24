@@ -1,6 +1,5 @@
 ﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { usePreviewMode } from '../../hooks/usePreviewMode'
 import MainLayout from '../../components/MainLayout'
 import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
@@ -28,10 +27,9 @@ const REQUIRED_MS = 2000
 
 export default function VoiceLevel1Page() {
   const navigate  = useNavigate()
-  const isPreviewMode = usePreviewMode()
   const location  = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
-  const { progress, loading, markStageVisited } = useVoiceDemonstrationProgress()
+  const { loading, markStageVisited } = useVoiceDemonstrationProgress()
   const { initMic, analyserRef, micError } = useVoiceMic()
 
   const [noteIdx,      setNoteIdx]      = useState(0)
@@ -45,18 +43,6 @@ export default function VoiceLevel1Page() {
   const onPitchSinceRef = useRef<number | null>(null)
   const waveformRef     = useRef<HTMLCanvasElement>(null)
   const startedRef      = useRef(false)
-
-  // Gate: both courses done
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.completedStages.includes('voice-course-2')) {
-      navigate('/voice/pitch-and-scale', {
-        replace: true,
-        state: { lockedMessage: 'Complete both courses first.' },
-      })
-    }
-  }, [isPreviewMode, loading, progress.completedStages, navigate])
 
   useEffect(() => {
     return () => { cancelAnimationFrame(rafRef.current) }

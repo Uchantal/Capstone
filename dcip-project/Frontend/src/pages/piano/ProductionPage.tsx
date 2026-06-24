@@ -23,7 +23,7 @@ function parseNoteId(id: string): { note: string; octave: number } | null {
 export default function PianoProductionPage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
-  const { progress, loading } = usePianoProgress()
+  const { loading } = usePianoProgress()
 
   const [phase, setPhase] = useState<Phase>('intro')
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
@@ -47,25 +47,6 @@ export default function PianoProductionPage() {
   // Timer ref
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const phaseRef = useRef<Phase>('intro')
-
-  // Gate: requires Level 3 demonstration AND sharpening visited
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.level3DemonstrationPassed) {
-      navigate('/piano/level-3/demonstrate', {
-        replace: true,
-        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
-      })
-      return
-    }
-    if (!progress.completedStages.includes('piano-sharpening')) {
-      navigate('/piano/sharpening-myself', {
-        replace: true,
-        state: { lockedMessage: 'Complete the Sharpening Myself session first.' },
-      })
-    }
-  }, [isPreviewMode, loading, progress.level3DemonstrationPassed, progress.completedStages, navigate])
 
   useEffect(() => {
     phaseRef.current = phase
@@ -216,7 +197,7 @@ export default function PianoProductionPage() {
     setPhase('intro')
   }
 
-  if (!isPreviewMode && (loading || !progress.level3DemonstrationPassed)) {
+  if (!isPreviewMode && loading) {
     return (
       <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>

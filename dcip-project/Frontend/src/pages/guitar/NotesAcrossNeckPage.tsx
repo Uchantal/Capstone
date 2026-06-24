@@ -1,6 +1,5 @@
-﻿import { useEffect, useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { usePreviewMode } from '../../hooks/usePreviewMode'
 import MainLayout from '../../components/MainLayout'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarProgress } from '../../hooks/useGuitarProgress'
@@ -40,21 +39,9 @@ const D_POSITIONS = [
 
 export default function NotesAcrossNeckPage() {
   const navigate = useNavigate()
-  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
-  const { completedStages, loading, markComplete } = useGuitarProgress()
-
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!completedStages.includes('guitar-course-1')) {
-      navigate('/guitar/reading-the-fretboard', {
-        replace: true,
-        state: { lockedMessage: 'Complete Reading the Fretboard first.' },
-      })
-    }
-  }, [isPreviewMode, completedStages, loading, navigate])
+  const { markComplete } = useGuitarProgress()
 
   const [lowEngagement, setLowEngagement] = useState(false)
   const { computeAndSave } = useReadingEngagement('guitar', 'course2')

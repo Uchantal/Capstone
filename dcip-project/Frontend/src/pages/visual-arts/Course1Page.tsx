@@ -92,7 +92,7 @@ export default function Course1Page() {
             Use the canvas below to draw a few free strokes. Try varying the brush size using the Size
             control. Notice how a heavier line reads differently from a lighter one.
           </p>
-          <div className="max-w-lg">
+          <div className="h-[440px] flex flex-col overflow-hidden rounded-xl border border-surface-border">
             <VisualArtsModule canvasRef={practiceCanvasRef} step={1} />
           </div>
         </div>

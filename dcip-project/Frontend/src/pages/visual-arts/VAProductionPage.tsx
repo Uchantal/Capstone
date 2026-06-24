@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react'
+﻿import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
@@ -19,7 +19,7 @@ export default function VAProductionPage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { progress, loading, markStageVisited } = useVisualArtsDemonstrationProgress()
+  const { loading, markStageVisited } = useVisualArtsDemonstrationProgress()
   const [phase, setPhase] = useState<Phase>('intro')
   const [checked, setChecked] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
@@ -28,23 +28,6 @@ export default function VAProductionPage() {
   const { recordInteraction, recordColour, recordTool, computeAndSave } =
     useVAEngagement('visual-arts', 'production')
 
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.level3DemonstrationPassed) {
-      navigate('/visual-arts/level-3/demonstrate', {
-        replace: true,
-        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
-      })
-      return
-    }
-    if (!progress.completedStages.includes('va-sharpening')) {
-      navigate('/visual-arts/sharpening', {
-        replace: true,
-        state: { lockedMessage: 'Complete Sharpening Myself first.' },
-      })
-    }
-  }, [isPreviewMode, loading, progress.level3DemonstrationPassed, progress.completedStages, navigate])
 
   const allChecked = PRODUCTION_CHECKLIST.every(item => checked.has(item.id))
 
@@ -96,7 +79,7 @@ export default function VAProductionPage() {
     }
   }
 
-  if (!isPreviewMode && (loading || !progress.level3DemonstrationPassed)) {
+  if (!isPreviewMode && loading) {
     return (
       <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>

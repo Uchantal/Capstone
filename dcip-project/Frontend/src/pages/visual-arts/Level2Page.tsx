@@ -1,8 +1,4 @@
-﻿import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { usePreviewMode } from '../../hooks/usePreviewMode'
-import VisualArtsLevelScreen from '../../components/visual-arts/VisualArtsLevelScreen'
-import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
+﻿import VisualArtsLevelScreen from '../../components/visual-arts/VisualArtsLevelScreen'
 
 const CHECKLIST = [
   { id: 'circle-drawn',   text: 'I have drawn one circle using the Ellipse tool' },
@@ -12,23 +8,6 @@ const CHECKLIST = [
 ]
 
 export default function VALevel2Page() {
-  const navigate = useNavigate()
-  const isPreviewMode = usePreviewMode()
-  const { progress, loading } = useVisualArtsDemonstrationProgress()
-
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.level1DemonstrationPassed) {
-      navigate('/visual-arts/level-1/demonstrate', {
-        replace: true,
-        state: { lockedMessage: 'Complete the Level 1 demonstration first.' },
-      })
-    }
-  }, [isPreviewMode, loading, progress.level1DemonstrationPassed, navigate])
-
-  if (!isPreviewMode && (loading || !progress.level1DemonstrationPassed)) return null
-
   return (
     <VisualArtsLevelScreen
       levelNumber={2}

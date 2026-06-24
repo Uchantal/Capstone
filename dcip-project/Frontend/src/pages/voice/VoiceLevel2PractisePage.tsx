@@ -18,7 +18,7 @@ const SCALE = [
 export default function VoiceLevel2PractisePage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
-  const { progress, loading, markStageVisited } = useVoiceDemonstrationProgress()
+  const { loading, markStageVisited } = useVoiceDemonstrationProgress()
   const { initMic, analyserRef, micError, micReady } = useVoiceMic()
 
   const [activeNote, setActiveNote]   = useState<typeof SCALE[number] | null>(null)
@@ -30,15 +30,10 @@ export default function VoiceLevel2PractisePage() {
   const targetFreqRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (isPreviewMode) return
     if (loading) return
-    if (!progress.completedStages.includes('voice-level-2')) {
-      navigate('/voice/level-2', { replace: true, state: { lockedMessage: 'Complete Level 2 first.' } })
-      return
-    }
     markStageVisited('voice-level-2-practise')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPreviewMode, loading, progress.completedStages])
+  }, [loading])
 
   useEffect(() => {
     return () => { activeRef.current = false; cancelAnimationFrame(rafRef.current) }
@@ -80,7 +75,7 @@ export default function VoiceLevel2PractisePage() {
     if (!micReady) startMic()
   }
 
-  if (!isPreviewMode && (loading || !progress.completedStages.includes('voice-level-2'))) return null
+  if (!isPreviewMode && loading) return null
 
   return (
     <MainLayout>

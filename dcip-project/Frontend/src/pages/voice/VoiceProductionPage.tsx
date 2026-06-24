@@ -15,7 +15,7 @@ export default function VoiceProductionPage() {
   const isPreviewMode = usePreviewMode()
   const location  = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
-  const { progress, loading, reload } = useVoiceDemonstrationProgress()
+  const { loading, reload } = useVoiceDemonstrationProgress()
   const { initMic, analyserRef, micStreamRef, micError } = useVoiceMic()
 
   const [phase,        setPhase]        = useState<Phase>('intro')
@@ -33,18 +33,6 @@ export default function VoiceProductionPage() {
   const pitchTimerRef    = useRef<ReturnType<typeof setInterval> | null>(null)
   const waveformRef      = useRef<HTMLCanvasElement>(null)
   const submittedRef     = useRef(false)
-
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    const hasSharpening = progress.completedStages.includes('voice-sharpening')
-    if (!progress.level3DemonstrationPassed || !hasSharpening) {
-      navigate('/voice/sharpening-myself', {
-        replace: true,
-        state: { lockedMessage: 'Complete the Sharpening Myself stage first.' },
-      })
-    }
-  }, [loading, progress, navigate])
 
   useEffect(() => {
     return () => {

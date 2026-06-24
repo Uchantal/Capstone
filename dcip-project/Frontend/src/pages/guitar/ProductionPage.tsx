@@ -17,25 +17,7 @@ function formatTime(s: number): string {
 export default function GuitarProductionPage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
-  const { progress, loading: progressLoading } = useGuitarDemonstrationProgress()
-
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (progressLoading) return
-    if (!progress.level3DemonstrationPassed) {
-      navigate('/guitar/level-3/demonstrate', {
-        replace: true,
-        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
-      })
-      return
-    }
-    if (!progress.completedStages.includes('guitar-sharpening')) {
-      navigate('/guitar/sharpening-myself', {
-        replace: true,
-        state: { lockedMessage: 'Complete Sharpening Myself first.' },
-      })
-    }
-  }, [isPreviewMode, progressLoading, progress.level3DemonstrationPassed, progress.completedStages, navigate])
+  const { loading: progressLoading } = useGuitarDemonstrationProgress()
 
   const [phase, setPhase] = useState<Phase>('intro')
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
@@ -166,7 +148,7 @@ export default function GuitarProductionPage() {
     setPhase('intro')
   }
 
-  if (!isPreviewMode && (progressLoading || !progress.level3DemonstrationPassed)) {
+  if (!isPreviewMode && progressLoading) {
     return (
       <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>

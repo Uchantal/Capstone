@@ -1,6 +1,5 @@
 ﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { usePreviewMode } from '../../hooks/usePreviewMode'
 import MainLayout from '../../components/MainLayout'
 import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
@@ -23,10 +22,9 @@ const A4_FREQ = 440.00
 
 export default function VoiceCourse2Page() {
   const navigate = useNavigate()
-  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
-  const { progress, loading, markStageVisited } = useVoiceDemonstrationProgress()
+  const { loading, markStageVisited } = useVoiceDemonstrationProgress()
   const { initMic, analyserRef, micError, micReady } = useVoiceMic()
 
   const [pitchStatus, setPitchStatus] = useState<PitchStatus>('none')
@@ -37,18 +35,6 @@ export default function VoiceCourse2Page() {
   const activeRef        = useRef(false)
   const onPitchSinceRef  = useRef<number | null>(null)
   const cardCPassedRef   = useRef(false)
-
-  // Gate: course 1 must be complete
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.completedStages.includes('voice-course-1')) {
-      navigate('/voice/posture-breath-voice', {
-        replace: true,
-        state: { lockedMessage: 'Complete Course 1 first.' },
-      })
-    }
-  }, [isPreviewMode, loading, progress.completedStages, navigate])
 
   useEffect(() => {
     return () => {

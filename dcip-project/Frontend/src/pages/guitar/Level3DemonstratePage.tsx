@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useRef, useState } from 'react'
+﻿import { useCallback, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
@@ -46,19 +46,7 @@ type ValidState = 'waiting' | 'correct' | 'wrong'
 export default function GuitarLevel3DemonstratePage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
-  const { progress, loading, reload } = useGuitarDemonstrationProgress()
-
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.level2DemonstrationPassed) {
-      navigate('/guitar/level-2/demonstrate', { replace: true, state: { lockedMessage: 'Complete the Level 2 demonstration first.' } })
-      return
-    }
-    if (!progress.completedStages.includes('guitar-level-3-practise')) {
-      navigate('/guitar/level-3/practise', { replace: true, state: { lockedMessage: 'Complete the Level 3 practise session first.' } })
-    }
-  }, [isPreviewMode, loading, progress.level2DemonstrationPassed, progress.completedStages, navigate])
+  const { loading, reload } = useGuitarDemonstrationProgress()
 
   const [phase, setPhase]           = useState<Phase>('testing')
   const [promptIdx, setPromptIdx]   = useState(0)
@@ -123,9 +111,7 @@ export default function GuitarLevel3DemonstratePage() {
     setPhase('testing')
   }
 
-  const ready = !loading && progress.level2DemonstrationPassed && progress.completedStages.includes('guitar-level-3-practise')
-
-  if (!isPreviewMode && !ready) {
+  if (!isPreviewMode && loading) {
     return (
       <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>

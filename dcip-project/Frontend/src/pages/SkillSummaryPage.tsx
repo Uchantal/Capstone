@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { fetchProgressSummary, fetchPortfolio, fetchEngagementScores } from '../services/api'
 import MainLayout from '../components/MainLayout'
+// @ts-ignore
+import html2pdf from 'html2pdf.js'
 
 interface DisciplineSummary {
   key: string
@@ -228,6 +230,19 @@ export default function SkillSummaryPage() {
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([])
   const [loading, setLoading] = useState(true)
   const [engagementMap, setEngagementMap] = useState<Record<string, number | null>>({})
+  const reportRef = useRef<HTMLDivElement>(null)
+
+  const handleDownload = () => {
+    if (!reportRef.current) return
+    const name = user?.fullName ?? 'Student'
+    const date = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')
+    html2pdf().set({
+      margin: 10,
+      filename: `DCIP-Skill-Summary-${name}-${date}.pdf`,
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    }).from(reportRef.current).save()
+  }
 
   useEffect(() => {
     if (!user) {
@@ -276,16 +291,19 @@ export default function SkillSummaryPage() {
     <MainLayout background="bg-[#F9F7F4]">
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
-        {/* Print button */}
         <div className="flex justify-end mb-6 no-print">
           <button
-            onClick={() => window.print()}
-            className="bg-primary text-white font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-primary-dark transition-colors"
+            onClick={handleDownload}
+            className="flex items-center gap-2 bg-primary text-white font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-primary-dark transition-colors"
           >
-            Download / Print Summary
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+            </svg>
+            Download PDF
           </button>
         </div>
 
+        <div ref={reportRef}>
         {/* Summary card */}
         <div className="bg-white border border-surface-border rounded-2xl overflow-hidden mb-6">
 
@@ -389,6 +407,7 @@ export default function SkillSummaryPage() {
             </p>
           </div>
         </div>
+        </div>{/* end reportRef */}
 
       </div>
     </MainLayout>

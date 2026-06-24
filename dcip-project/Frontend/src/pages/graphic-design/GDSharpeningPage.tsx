@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { usePreviewMode } from '../../hooks/usePreviewMode'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, type DesignElement } from '../../components/graphic-design/PosterSurface'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
 import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
@@ -35,10 +34,9 @@ const QUICK_REF = [
 
 export default function GDSharpeningPage() {
   const navigate = useNavigate()
-  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
-  const { progress, loading, markStageVisited } = useGDDemonstrationProgress()
+  const { loading, markStageVisited } = useGDDemonstrationProgress()
   const [elements, setElements] = useState<DesignElement[]>(DEFAULT_ELEMENTS)
   const { recordInteraction, recordElementChange, computeAndSave } =
     useGDEngagement('graphic-design', 'sharpening')
@@ -49,17 +47,9 @@ export default function GDSharpeningPage() {
   }
 
   useEffect(() => {
-    if (isPreviewMode) return
     if (loading) return
-    if (!progress.level3DemonstrationPassed) {
-      navigate('/graphic-design/level-3/demonstrate', {
-        replace: true,
-        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
-      })
-      return
-    }
     markStageVisited('gd-sharpening')
-  }, [loading, progress.level3DemonstrationPassed, navigate, markStageVisited])
+  }, [loading, markStageVisited])
 
   if (loading) {
     return (

@@ -30,6 +30,15 @@ export default function MainLayout({ children, background = 'bg-white' }: Props)
   const isStudent = user?.role === 'student'
   const showBack = isStudent && !NO_BACK_PATHS.has(pathname)
 
+  const handleBack = () => {
+    // history.state.idx is 0 when there is no previous page inside this SPA session
+    if ((window.history.state?.idx ?? 0) > 0) {
+      navigate(-1)
+    } else {
+      navigate('/disciplines')
+    }
+  }
+
   return (
     <div className={`min-h-screen flex flex-col ${background}`}>
       <TopNav />
@@ -38,7 +47,7 @@ export default function MainLayout({ children, background = 'bg-white' }: Props)
         {showBack && (
           <div className="px-6 md:px-10 pt-4">
             <button
-              onClick={() => navigate(-1)}
+              onClick={handleBack}
               className="inline-flex items-center gap-1.5 text-text-secondary text-sm hover:text-text-primary transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

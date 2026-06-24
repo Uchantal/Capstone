@@ -187,13 +187,37 @@ router.get(
       const studentIds = students.map((s) => s._id)
       const totalStudents = students.length
 
+      const period = req.query.period as string | undefined
+      const reqNow = new Date()
+      let startDate: Date | null = null
+      let endDate: Date | null = null
+      if (period === '1m') {
+        startDate = new Date(reqNow.getFullYear(), reqNow.getMonth() - 1, 1)
+        endDate = new Date(reqNow.getFullYear(), reqNow.getMonth(), 0, 23, 59, 59, 999)
+      } else if (period === '3m') {
+        startDate = new Date(reqNow.getFullYear(), reqNow.getMonth() - 3, reqNow.getDate())
+      } else if (period === '6m') {
+        startDate = new Date(reqNow.getFullYear(), reqNow.getMonth() - 6, reqNow.getDate())
+      } else if (period === '1y') {
+        startDate = new Date(reqNow.getFullYear() - 1, reqNow.getMonth(), reqNow.getDate())
+      }
+
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+      const activeWindowStart = startDate ?? sevenDaysAgo
+
+      const createdAtFilter: Record<string, Date> = {}
+      if (startDate) createdAtFilter.$gte = startDate
+      if (endDate) createdAtFilter.$lte = endDate
+
+      const sessionFilter = startDate
+        ? { user: { $in: studentIds }, createdAt: createdAtFilter }
+        : { user: { $in: studentIds } }
 
       const [allSessions, recentSessionUsers, progressDocs] = await Promise.all([
-        PracticeSession.find({ user: { $in: studentIds } }),
+        PracticeSession.find(sessionFilter),
         PracticeSession.distinct('user', {
           user: { $in: studentIds },
-          createdAt: { $gte: sevenDaysAgo },
+          createdAt: { $gte: activeWindowStart },
         }),
         StudentProgress.find({ user: { $in: studentIds } }),
       ])

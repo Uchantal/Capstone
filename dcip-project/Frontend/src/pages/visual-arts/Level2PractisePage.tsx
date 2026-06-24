@@ -1,47 +1,27 @@
-﻿import { useRef, useState, useEffect } from 'react'
+﻿import { useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 
-const MINIMUM_INTERACTIONS = 10
-
 export default function VALevel2PractisePage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
-  const { progress, loading, markStageVisited } = useVisualArtsDemonstrationProgress()
+  const { loading, markStageVisited } = useVisualArtsDemonstrationProgress()
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const interactionCount = useRef(0)
-  const [thresholdMet, setThresholdMet] = useState(false)
-
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.completedStages.includes('va-level-2')) {
-      navigate('/visual-arts/level-2', {
-        replace: true,
-        state: { lockedMessage: 'Complete Level 2 first.' },
-      })
-    }
-  }, [isPreviewMode, loading, progress.completedStages, navigate])
 
   useEffect(() => {
     if (loading) return
-    if (progress.completedStages.includes('va-level-2')) {
-      markStageVisited('va-level-2-practise')
-    }
+    markStageVisited('va-level-2-practise')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, progress.completedStages])
+  }, [loading])
 
   const { recordInteraction: recordEngInteraction, recordColour, recordTool, computeAndSave } =
     useVAEngagement('visual-arts', 'level2Practise')
 
   function recordInteraction() {
     recordEngInteraction()
-    if (thresholdMet) return
-    interactionCount.current += 1
-    if (interactionCount.current >= MINIMUM_INTERACTIONS) setThresholdMet(true)
   }
 
   const handleReady = () => {
@@ -49,7 +29,7 @@ export default function VALevel2PractisePage() {
     navigate('/visual-arts/level-2/demonstrate')
   }
 
-  if (!isPreviewMode && (loading || !progress.completedStages.includes('va-level-2'))) return null
+  if (!isPreviewMode && loading) return null
 
   const sidebarFooter = (
     <div className="border-t border-surface-border pt-3">
@@ -57,11 +37,6 @@ export default function VALevel2PractisePage() {
       <p className="text-text-secondary text-xs leading-relaxed">
         Practise shading a circle. Draw one using the Ellipse tool and add darker tones to one side to show where the light is coming from.
       </p>
-      {!thresholdMet && (
-        <p className="text-text-muted text-[10px] mt-2">
-          {interactionCount.current}/{MINIMUM_INTERACTIONS} strokes before you can continue.
-        </p>
-      )}
     </div>
   )
 
@@ -82,8 +57,7 @@ export default function VALevel2PractisePage() {
         </div>
         <button
           onClick={handleReady}
-          disabled={!isPreviewMode && !thresholdMet}
-          className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+          className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors text-sm"
         >
           I am ready to demonstrate
         </button>

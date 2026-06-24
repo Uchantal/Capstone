@@ -15,26 +15,16 @@ const E_POSITIONS = [
 export default function GuitarLevel1PractisePage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
-  const { progress, loading, markStageVisited } = useGuitarDemonstrationProgress()
+  const { loading, markStageVisited } = useGuitarDemonstrationProgress()
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
 
   useEffect(() => {
-    if (isPreviewMode) return
     if (loading) return
-    if (!progress.completedStages.includes('guitar-level-1')) {
-      navigate('/guitar/level-1', { replace: true, state: { lockedMessage: 'Complete Level 1 first.' } })
-    }
-  }, [isPreviewMode, loading, progress.completedStages, navigate])
-
-  useEffect(() => {
-    if (loading) return
-    if (progress.completedStages.includes('guitar-level-1')) {
-      markStageVisited('guitar-level-1-practise')
-    }
+    markStageVisited('guitar-level-1-practise')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, progress.completedStages])
+  }, [loading])
 
-  if (!isPreviewMode && (loading || !progress.completedStages.includes('guitar-level-1'))) return null
+  if (!isPreviewMode && loading) return null
 
   const highlight = selectedIdx !== null
     ? [{ stringIdx: E_POSITIONS[selectedIdx].stringIdx, fret: E_POSITIONS[selectedIdx].fret, label: 'E' }]

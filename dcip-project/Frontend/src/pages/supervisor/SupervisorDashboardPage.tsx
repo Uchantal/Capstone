@@ -60,17 +60,27 @@ const STATUS_STYLE: Record<string, string> = {
   Dormant: 'bg-accent/10 text-accent',
 }
 
+const PERIODS = [
+  { value: '1m', label: 'Last Month' },
+  { value: '3m', label: 'Last 3 Months' },
+  { value: '6m', label: 'Last 6 Months' },
+  { value: '1y', label: 'Last Year' },
+  { value: 'all', label: 'All Time' },
+]
+
 export default function SupervisorDashboardPage() {
   const [analytics, setAnalytics] = useState<SchoolAnalytics | null>(null)
   const [analyticsLoading, setAnalyticsLoading] = useState(true)
   const [studentFilter, setStudentFilter] = useState('')
+  const [period, setPeriod] = useState('all')
 
   useEffect(() => {
-    getSupervisorSchoolAnalytics()
+    setAnalyticsLoading(true)
+    getSupervisorSchoolAnalytics(period === 'all' ? undefined : period)
       .then((res) => setAnalytics(res.data))
       .catch(() => {})
       .finally(() => setAnalyticsLoading(false))
-  }, [])
+  }, [period])
 
   const fmtRelative = (dateStr: string | null) => {
     if (!dateStr) return 'Never'
@@ -184,18 +194,33 @@ export default function SupervisorDashboardPage() {
 
         {/* School Progress Analytics */}
         <section className="space-y-6">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
             <h2 className="text-text-primary font-bold text-lg">School Progress Analytics</h2>
-            <button
-              onClick={downloadReport}
-              disabled={analyticsLoading || !analytics}
-              className="inline-flex items-center gap-2 border border-secondary text-secondary text-sm font-semibold px-4 py-2 rounded-xl hover:bg-secondary/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
-              </svg>
-              Download Report
-            </button>
+            <div className="flex items-center gap-2 flex-wrap">
+              {PERIODS.map(p => (
+                <button
+                  key={p.value}
+                  onClick={() => setPeriod(p.value)}
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
+                    period === p.value
+                      ? 'bg-primary text-white border-primary'
+                      : 'bg-white text-text-secondary border-surface-border hover:border-primary hover:text-primary'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+              <button
+                onClick={downloadReport}
+                disabled={analyticsLoading || !analytics}
+                className="inline-flex items-center gap-2 border border-secondary text-secondary text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-secondary/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                </svg>
+                Download CSV
+              </button>
+            </div>
           </div>
 
           {/* Row 1: Stat cards */}

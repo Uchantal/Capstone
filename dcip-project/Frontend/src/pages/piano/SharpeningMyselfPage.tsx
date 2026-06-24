@@ -8,31 +8,15 @@ import { usePianoProgress } from '../../hooks/usePianoProgress'
 export default function SharpeningMyselfPage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
-  const { progress, loading, markStageVisited } = usePianoProgress()
+  const { loading, markStageVisited } = usePianoProgress()
   const [pressedNotes, setPressedNotes] = useState<string[]>([])
   const [selectedChord, setSelectedChord] = useState<string | null>(null)
 
-  // Gate: requires Level 3 demonstration passed
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.level3DemonstrationPassed) {
-      navigate('/piano/level-3/demonstrate', {
-        replace: true,
-        state: { lockedMessage: 'Complete the Level 3 demonstration first.' },
-      })
-    }
-  }, [isPreviewMode, loading, progress.level3DemonstrationPassed, navigate])
-
-  // Mark sharpening as visited so Production gate can check it
   useEffect(() => {
     if (loading) return
-    if (progress.level3DemonstrationPassed) {
-      markStageVisited('piano-sharpening')
-    }
-  // markStageVisited is stable; run once after gating passes
+    markStageVisited('piano-sharpening')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, progress.level3DemonstrationPassed])
+  }, [loading])
 
   const currentChordDef = selectedChord
     ? ALL_TWELVE_CHORDS.find(c => c.symbol === selectedChord)
@@ -59,7 +43,7 @@ export default function SharpeningMyselfPage() {
 
   const pressedNoteNames = pressedNotes.map(n => n.replace(/\d+$/, ''))
 
-  if (!isPreviewMode && (loading || !progress.level3DemonstrationPassed)) {
+  if (!isPreviewMode && loading) {
     return (
       <div className="h-screen bg-white flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading...</p>

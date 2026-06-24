@@ -16,7 +16,7 @@ const NOTES = [
 export default function VoiceLevel1PractisePage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
-  const { progress, loading, markStageVisited } = useVoiceDemonstrationProgress()
+  const { loading, markStageVisited } = useVoiceDemonstrationProgress()
   const { initMic, analyserRef, micError, micReady } = useVoiceMic()
 
   const [activeNote, setActiveNote]   = useState<typeof NOTES[number] | null>(null)
@@ -28,15 +28,10 @@ export default function VoiceLevel1PractisePage() {
   const targetFreqRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (isPreviewMode) return
     if (loading) return
-    if (!progress.completedStages.includes('voice-level-1')) {
-      navigate('/voice/level-1', { replace: true, state: { lockedMessage: 'Complete Level 1 first.' } })
-      return
-    }
     markStageVisited('voice-level-1-practise')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPreviewMode, loading, progress.completedStages])
+  }, [loading])
 
   useEffect(() => {
     return () => { activeRef.current = false; cancelAnimationFrame(rafRef.current) }
@@ -66,7 +61,7 @@ export default function VoiceLevel1PractisePage() {
     if (!micReady) startMic()
   }
 
-  if (!isPreviewMode && (loading || !progress.completedStages.includes('voice-level-1'))) return null
+  if (!isPreviewMode && loading) return null
 
   return (
     <MainLayout>

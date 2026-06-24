@@ -1,47 +1,27 @@
-﻿import { useRef, useState, useEffect } from 'react'
+﻿import { useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 
-const MINIMUM_INTERACTIONS = 10
-
 export default function VALevel1PractisePage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
   const { progress, loading, markStageVisited } = useVisualArtsDemonstrationProgress()
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const interactionCount = useRef(0)
-  const [thresholdMet, setThresholdMet] = useState(false)
-
-  useEffect(() => {
-    if (isPreviewMode) return
-    if (loading) return
-    if (!progress.completedStages.includes('va-level-1')) {
-      navigate('/visual-arts/level-1', {
-        replace: true,
-        state: { lockedMessage: 'Complete Level 1 first.' },
-      })
-    }
-  }, [isPreviewMode, loading, progress.completedStages, navigate])
 
   useEffect(() => {
     if (loading) return
-    if (progress.completedStages.includes('va-level-1')) {
-      markStageVisited('va-level-1-practise')
-    }
+    markStageVisited('va-level-1-practise')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, progress.completedStages])
+  }, [loading])
 
   const { recordInteraction: recordEngInteraction, recordColour, recordTool, computeAndSave } =
     useVAEngagement('visual-arts', 'level1Practise')
 
   function recordInteraction() {
     recordEngInteraction()
-    if (thresholdMet) return
-    interactionCount.current += 1
-    if (interactionCount.current >= MINIMUM_INTERACTIONS) setThresholdMet(true)
   }
 
   const handleReady = () => {
@@ -49,7 +29,7 @@ export default function VALevel1PractisePage() {
     navigate('/visual-arts/level-1/demonstrate')
   }
 
-  if (!isPreviewMode && (loading || !progress.completedStages.includes('va-level-1'))) return null
+  if (!isPreviewMode && loading) return null
 
   const sidebarFooter = (
     <div className="border-t border-surface-border pt-3">
@@ -57,11 +37,6 @@ export default function VALevel1PractisePage() {
       <p className="text-text-secondary text-xs leading-relaxed">
         Practise drawing shapes using the Line, Rectangle, and Ellipse tools. Try different sizes and combinations before moving on.
       </p>
-      {!thresholdMet && (
-        <p className="text-text-muted text-[10px] mt-2">
-          {interactionCount.current}/{MINIMUM_INTERACTIONS} strokes before you can continue.
-        </p>
-      )}
     </div>
   )
 
@@ -82,8 +57,7 @@ export default function VALevel1PractisePage() {
         </div>
         <button
           onClick={handleReady}
-          disabled={!isPreviewMode && !thresholdMet}
-          className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+          className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors text-sm"
         >
           I am ready to demonstrate
         </button>

@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 import HomePage from './pages/HomePage'
 import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
@@ -95,6 +95,23 @@ import AdminPreviewPage from './pages/admin/AdminPreviewPage'
 import PreviewNavBar from './components/PreviewNavBar'
 import { useAuth } from './hooks/useAuth'
 
+const PreviewContext = createContext(false)
+
+function PreviewProvider({ children }: { children: React.ReactNode }) {
+  const [isPreview, setIsPreview] = useState(false)
+  const location = useLocation()
+  const { user } = useAuth()
+
+  useEffect(() => {
+    if (user?.role !== 'admin') { setIsPreview(false); return }
+    if (location.pathname.startsWith('/admin')) { setIsPreview(false); return }
+    if (new URLSearchParams(location.search).get('preview') === 'true') setIsPreview(true)
+    // Student page without ?preview=true → preserve current value (keep preview alive)
+  }, [location, user?.role])
+
+  return <PreviewContext.Provider value={isPreview}>{children}</PreviewContext.Provider>
+}
+
 const roleHome = (role?: string) => {
   if (role === 'admin') return '/admin/overview'
   if (role === 'supervisor') return '/supervisor'
@@ -110,22 +127,15 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 function StudentRoute({ children }: { children: React.ReactNode }) {
   const { token, user } = useAuth()
   const { search } = useLocation()
+  const isAdminPreview = useContext(PreviewContext)
   const urlPreview = user?.role === 'admin' && new URLSearchParams(search).get('preview') === 'true'
-  const sessionPreview = user?.role === 'admin' && sessionStorage.getItem('dcip:preview') === 'true'
-  const isAdminPreview = urlPreview || sessionPreview
-  if (urlPreview) sessionStorage.setItem('dcip:preview', 'true')
   if (!token) return <Navigate to="/login" replace />
-  if (user?.role !== 'student' && !isAdminPreview) return <Navigate to={roleHome(user?.role)} replace />
-  if (isAdminPreview) return <>{children}</>
+  if (user?.role !== 'student' && !isAdminPreview && !urlPreview) return <Navigate to={roleHome(user?.role)} replace />
   return <>{children}</>
 }
 
-
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { token, user } = useAuth()
-  useEffect(() => {
-    sessionStorage.removeItem('dcip:preview')
-  })
   if (!token) return <Navigate to="/login" replace />
   if (user?.role !== 'admin') return <Navigate to={roleHome(user?.role)} replace />
   return <>{children}</>
@@ -140,12 +150,8 @@ function SupervisorRoute({ children }: { children: React.ReactNode }) {
 
 function AppContent() {
   const { user } = useAuth()
-  const { pathname, search } = useLocation()
-  const isPreview =
-    !pathname.startsWith('/admin') &&
-    user?.role === 'admin' &&
-    (new URLSearchParams(search).get('preview') === 'true' ||
-      sessionStorage.getItem('dcip:preview') === 'true')
+  const { pathname } = useLocation()
+  const isPreview = useContext(PreviewContext) && !pathname.startsWith('/admin') && user?.role === 'admin'
 
   const routes = (
     <Routes>
@@ -271,7 +277,9 @@ function AppContent() {
 export default function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <AppContent />
+      <PreviewProvider>
+        <AppContent />
+      </PreviewProvider>
     </BrowserRouter>
   )
 }

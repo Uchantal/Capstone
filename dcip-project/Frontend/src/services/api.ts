@@ -70,7 +70,13 @@ export const getAdminModules = () => api.get('/admin/modules')
 
 export const toggleModule = (id: string) => api.patch(`/admin/modules/${id}/toggle`)
 
-export const getAdminReports = () => api.get('/admin/reports')
+export const getAdminReports = (params?: { startDate?: string; endDate?: string }) => {
+  const q = new URLSearchParams()
+  if (params?.startDate) q.set('startDate', params.startDate)
+  if (params?.endDate) q.set('endDate', params.endDate)
+  const qs = q.toString()
+  return api.get(`/admin/reports${qs ? `?${qs}` : ''}`)
+}
 
 export const getAdminSupervisors = () => api.get('/admin/supervisors')
 
@@ -102,7 +108,7 @@ export const getSupervisorProgress = () => api.get('/supervisor/progress')
 
 export const getSupervisorLiveActivity = () => api.get('/supervisor/live-activity')
 
-export const getSupervisorSchoolAnalytics = () => api.get('/supervisor/school-analytics')
+export const getSupervisorSchoolAnalytics = (period?: string) => api.get(`/supervisor/school-analytics${period ? `?period=${period}` : ''}`)
 
 // Production
 export const saveProductionResult = (data: {

@@ -1,44 +1,27 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { usePreviewMode } from '../../hooks/usePreviewMode'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, type DesignElement } from '../../components/graphic-design/PosterSurface'
 import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
 import { useGDEngagement } from '../../hooks/useCanvasEngagement'
 
-const MINIMUM_INTERACTIONS = 8
-
 export default function GDLevel2PractisePage() {
   const navigate = useNavigate()
-  const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
 
-  const { progress, loading, markStageVisited } = useGDDemonstrationProgress()
-  const interactionCount = useRef(0)
-  const [thresholdMet, setThresholdMet] = useState(false)
+  const { loading, markStageVisited } = useGDDemonstrationProgress()
   const [elements, setElements] = useState<DesignElement[]>(DEFAULT_ELEMENTS)
   const { recordInteraction: recordEngInteraction, recordElementChange, computeAndSave } =
     useGDEngagement('graphic-design', 'level2Practise')
 
   useEffect(() => {
-    if (isPreviewMode) return
     if (loading) return
-    if (!progress.completedStages.includes('gd-level-2')) {
-      navigate('/graphic-design/level-2', {
-        replace: true,
-        state: { lockedMessage: 'Complete Level 2 first.' },
-      })
-      return
-    }
     markStageVisited('gd-level-2-practise')
-  }, [loading, progress.completedStages, navigate, markStageVisited])
+  }, [loading, markStageVisited])
 
   function recordInteraction() {
     recordEngInteraction()
-    if (thresholdMet) return
-    interactionCount.current += 1
-    if (interactionCount.current >= MINIMUM_INTERACTIONS) setThresholdMet(true)
   }
 
   const handleReady = () => {
@@ -68,8 +51,7 @@ export default function GDLevel2PractisePage() {
         </div>
         <button
           onClick={handleReady}
-          disabled={!isPreviewMode && !thresholdMet}
-          className="bg-secondary text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          className="bg-secondary text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity text-sm"
         >
           I am ready to demonstrate
         </button>
@@ -87,11 +69,6 @@ export default function GDLevel2PractisePage() {
                 Practise changing the background and title colours until you find a combination with strong contrast.
                 Try different pairings and notice how the mood shifts.
               </p>
-              {!thresholdMet && (
-                <p className="text-text-muted text-xs mt-3">
-                  Make at least {MINIMUM_INTERACTIONS} design changes to unlock the demonstration.
-                </p>
-              )}
         </CanvasInstructionPanel>
 
         <DesignCanvas
