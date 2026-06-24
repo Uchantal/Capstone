@@ -110,7 +110,10 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 function StudentRoute({ children }: { children: React.ReactNode }) {
   const { token, user } = useAuth()
   const { search } = useLocation()
-  const isAdminPreview = user?.role === 'admin' && new URLSearchParams(search).get('preview') === 'true'
+  const urlPreview = user?.role === 'admin' && new URLSearchParams(search).get('preview') === 'true'
+  const sessionPreview = user?.role === 'admin' && sessionStorage.getItem('dcip:preview') === 'true'
+  const isAdminPreview = urlPreview || sessionPreview
+  if (urlPreview) sessionStorage.setItem('dcip:preview', 'true')
   if (!token) return <Navigate to="/login" replace />
   if (user?.role !== 'student' && !isAdminPreview) return <Navigate to={roleHome(user?.role)} replace />
   if (isAdminPreview) return <>{children}</>
@@ -120,6 +123,7 @@ function StudentRoute({ children }: { children: React.ReactNode }) {
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { token, user } = useAuth()
+  sessionStorage.removeItem('dcip:preview')
   if (!token) return <Navigate to="/login" replace />
   if (user?.role !== 'admin') return <Navigate to={roleHome(user?.role)} replace />
   return <>{children}</>
