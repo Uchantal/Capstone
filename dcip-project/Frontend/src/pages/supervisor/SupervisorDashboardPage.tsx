@@ -1,11 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import MainLayout from '../../components/MainLayout'
-import {
-  getSupervisorSchoolAnalytics,
-  getSessionStatus,
-  openLabSession,
-  closeLabSession,
-} from '../../services/api'
+import { getSupervisorSchoolAnalytics } from '../../services/api'
 
 interface SubDisciplineStat {
   discipline: string
@@ -66,70 +61,16 @@ const STATUS_STYLE: Record<string, string> = {
 }
 
 export default function SupervisorDashboardPage() {
-  const [labActive, setLabActive] = useState<boolean>(false)
-  const [labStartedAt, setLabStartedAt] = useState<Date | null>(null)
-  const [sessionLoading, setSessionLoading] = useState(true)
-  const [sessionSaving, setSessionSaving] = useState(false)
-
   const [analytics, setAnalytics] = useState<SchoolAnalytics | null>(null)
   const [analyticsLoading, setAnalyticsLoading] = useState(true)
   const [studentFilter, setStudentFilter] = useState('')
-  const [now, setNow] = useState(new Date())
-
-  const clockRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    getSessionStatus()
-      .then((res) => {
-        setLabActive(res.data.isOpen)
-        setLabStartedAt(res.data.openedAt ? new Date(res.data.openedAt) : null)
-      })
-      .catch(() => {})
-      .finally(() => setSessionLoading(false))
-
     getSupervisorSchoolAnalytics()
       .then((res) => setAnalytics(res.data))
       .catch(() => {})
       .finally(() => setAnalyticsLoading(false))
-
-    clockRef.current = setInterval(() => setNow(new Date()), 1_000)
-
-    return () => {
-      if (clockRef.current) clearInterval(clockRef.current)
-    }
   }, [])
-
-  const openLab = async () => {
-    setSessionSaving(true)
-    try {
-      const res = await openLabSession()
-      setLabActive(res.data.isOpen)
-      setLabStartedAt(res.data.openedAt ? new Date(res.data.openedAt) : null)
-    } catch {
-      // non-critical; UI stays unchanged
-    } finally {
-      setSessionSaving(false)
-    }
-  }
-
-  const closeLab = async () => {
-    setSessionSaving(true)
-    try {
-      await closeLabSession()
-      setLabActive(false)
-      setLabStartedAt(null)
-    } catch {
-      // non-critical
-    } finally {
-      setSessionSaving(false)
-    }
-  }
-
-  const fmtTime = (d: Date) =>
-    d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-
-  const fmtDate = (d: Date) =>
-    d.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 
   const fmtRelative = (dateStr: string | null) => {
     if (!dateStr) return 'Never'
@@ -241,53 +182,7 @@ export default function SupervisorDashboardPage() {
     <MainLayout>
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
 
-        {/* Section 1: Lab Session Control */}
-        <section className="bg-white border border-surface-border rounded-2xl p-6">
-          <h2 className="text-text-primary font-bold text-lg mb-1">Laboratory Session</h2>
-          <p className="text-text-secondary text-sm mb-5">
-            {fmtDate(now)}, {fmtTime(now)}
-          </p>
-
-          {sessionLoading ? (
-            <div className="h-10 flex items-center">
-              <span className="text-text-muted text-sm">Loading session status...</span>
-            </div>
-          ) : labActive ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-status-synced animate-pulse block" />
-                <span className="text-text-primary font-semibold text-sm">Session Open</span>
-              </div>
-              {labStartedAt && (
-                <p className="text-text-secondary text-sm">Opened at {fmtTime(labStartedAt)}</p>
-              )}
-              <button
-                onClick={closeLab}
-                disabled={sessionSaving}
-                className="border border-accent text-accent text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-accent/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {sessionSaving ? 'Closing...' : 'Close Session'}
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-gray-300 block" />
-                <span className="text-text-secondary font-medium text-sm">Session Closed</span>
-              </div>
-              <button
-                onClick={openLab}
-                disabled={sessionSaving}
-                className="bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {sessionSaving ? 'Opening...' : 'Open Lab Session'}
-              </button>
-            </div>
-          )}
-        </section>
-
-
-        {/* Section 3: School Progress Analytics */}
+        {/* School Progress Analytics */}
         <section className="space-y-6">
           <div className="flex items-center justify-between gap-4">
             <h2 className="text-text-primary font-bold text-lg">School Progress Analytics</h2>

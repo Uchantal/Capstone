@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { useAuth } from './useAuth'
 
-const SESSION_KEY = 'dcip-admin-preview'
+const SESSION_KEY = 'dcip:preview'
 
 export const usePreviewMode = (): boolean => {
   const { user } = useAuth()

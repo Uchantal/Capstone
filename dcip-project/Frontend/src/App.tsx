@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import HomePage from './pages/HomePage'
 import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
@@ -92,7 +93,6 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import AdminPreviewPage from './pages/admin/AdminPreviewPage'
 import PreviewNavBar from './components/PreviewNavBar'
-import SessionGate from './components/SessionGate'
 import { useAuth } from './hooks/useAuth'
 
 const roleHome = (role?: string) => {
@@ -117,13 +117,15 @@ function StudentRoute({ children }: { children: React.ReactNode }) {
   if (!token) return <Navigate to="/login" replace />
   if (user?.role !== 'student' && !isAdminPreview) return <Navigate to={roleHome(user?.role)} replace />
   if (isAdminPreview) return <>{children}</>
-  return <SessionGate>{children}</SessionGate>
+  return <>{children}</>
 }
 
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { token, user } = useAuth()
-  sessionStorage.removeItem('dcip:preview')
+  useEffect(() => {
+    sessionStorage.removeItem('dcip:preview')
+  })
   if (!token) return <Navigate to="/login" replace />
   if (user?.role !== 'admin') return <Navigate to={roleHome(user?.role)} replace />
   return <>{children}</>
@@ -138,8 +140,12 @@ function SupervisorRoute({ children }: { children: React.ReactNode }) {
 
 function AppContent() {
   const { user } = useAuth()
-  const { search } = useLocation()
-  const isPreview = user?.role === 'admin' && new URLSearchParams(search).get('preview') === 'true'
+  const { pathname, search } = useLocation()
+  const isPreview =
+    !pathname.startsWith('/admin') &&
+    user?.role === 'admin' &&
+    (new URLSearchParams(search).get('preview') === 'true' ||
+      sessionStorage.getItem('dcip:preview') === 'true')
 
   const routes = (
     <Routes>

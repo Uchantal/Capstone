@@ -232,14 +232,4 @@ export const fetchEngagementScores = (discipline: string) =>
 export const fetchAdminStudentProfile = (id: string) =>
   api.get(`/admin/students/${id}/profile`)
 
-// Lab session management
-export const getSessionStatus = () =>
-  api.get<{ isOpen: boolean; openedAt?: string; noSchool?: boolean }>('/supervisor/session/status')
-
-export const openLabSession = () =>
-  api.post<{ isOpen: boolean; openedAt: string }>('/supervisor/session/open')
-
-export const closeLabSession = () =>
-  api.post<{ isOpen: boolean }>('/supervisor/session/close')
-
 export default api
