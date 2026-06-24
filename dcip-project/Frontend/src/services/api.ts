@@ -229,6 +229,9 @@ export const saveEngagementScore = (discipline: string, stage: string, score: nu
 export const fetchEngagementScores = (discipline: string) =>
   api.get(`/engagement/${discipline}`)
 
+export const fetchAdminStudentProfile = (id: string) =>
+  api.get(`/admin/students/${id}/profile`)
+
 // Lab session management
 export const getSessionStatus = () =>
   api.get<{ isOpen: boolean; openedAt?: string; noSchool?: boolean }>('/supervisor/session/status')

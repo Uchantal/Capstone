@@ -7,6 +7,7 @@ import Module from '../models/Module'
 import PracticeSession from '../models/PracticeSession'
 import PortfolioItem from '../models/PortfolioItem'
 import School from '../models/School'
+import EngagementScore from '../models/EngagementScore'
 
 const router = Router()
 
@@ -21,6 +22,19 @@ router.get('/students', protect, requireRole('admin'), async (_req: AuthRequest,
     res.json(students)
   } catch {
     res.status(500).json({ message: 'Could not fetch students' })
+  }
+})
+
+router.get('/students/:id/profile', protect, requireRole('admin'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const student = await User.findOne({ _id: req.params.id, role: 'student' })
+      .populate('school', 'name district')
+      .select('-password')
+    if (!student) { res.status(404).json({ message: 'Student not found' }); return }
+    const engagementScores = await EngagementScore.find({ user: req.params.id })
+    res.json({ student, engagementScores })
+  } catch {
+    res.status(500).json({ message: 'Could not fetch student profile' })
   }
 })
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { fetchProgressSummary } from '../services/api'
+import { fetchProgressSummary, fetchEngagementScores } from '../services/api'
 import MainLayout from '../components/MainLayout'
 
 interface DisciplineSummary {
@@ -222,6 +222,78 @@ function DisciplineCard({ disc, onContinue }: { disc: DisciplineSummary; onConti
   )
 }
 
+const STAGE_LABELS: Record<string, string> = {
+  course1: 'Course 1', course2: 'Course 2',
+  level1Learn: 'Level 1: Learn', level1Practise: 'Level 1: Practise', level1Demonstrate: 'Level 1: Demonstrate',
+  level2Learn: 'Level 2: Learn', level2Practise: 'Level 2: Practise', level2Demonstrate: 'Level 2: Demonstrate',
+  level3Learn: 'Level 3: Learn', level3Practise: 'Level 3: Practise', level3Demonstrate: 'Level 3: Demonstrate',
+  sharpening: 'Sharpening', production: 'Production',
+}
+
+type ScoreMap = Record<string, number | null>
+
+function gradeInfo(score: number | null): { label: string; color: string } {
+  if (score === null) return { label: '—', color: 'text-text-muted' }
+  if (score >= 80) return { label: 'Excellent', color: 'text-[#2D6A4F]' }
+  if (score >= 60) return { label: 'Good', color: 'text-primary' }
+  if (score >= 40) return { label: 'Fair', color: 'text-orange-500' }
+  return { label: 'Needs Improvement', color: 'text-accent' }
+}
+
+function GradesCard({ discKey, discLabel }: { discKey: string; discLabel: string }) {
+  const [scores, setScores] = useState<ScoreMap | null>(null)
+
+  useEffect(() => {
+    fetchEngagementScores(discKey)
+      .then(res => setScores(res.data ?? {}))
+      .catch(() => setScores({}))
+  }, [discKey])
+
+  const attempted = Object.entries(STAGE_LABELS).filter(
+    ([key]) => scores && typeof scores[key] === 'number'
+  )
+
+  const overall = scores?.overallEngagement ?? null
+  const { label: overallLabel, color: overallColor } = gradeInfo(overall as number | null)
+
+  if (scores === null) return null
+  if (attempted.length === 0) return null
+
+  return (
+    <div className="bg-white border border-surface-border rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-text-primary font-semibold text-sm">{discLabel}</p>
+        {overall !== null && (
+          <span className={`text-xs font-bold ${overallColor}`}>{overall}% · {overallLabel}</span>
+        )}
+      </div>
+      <div className="space-y-2">
+        {attempted.map(([key, label]) => {
+          const score = scores[key] as number
+          const { label: g, color } = gradeInfo(score)
+          return (
+            <div key={key} className="grid grid-cols-[130px_1fr] gap-2 items-center">
+              <p className="text-text-muted text-xs truncate">{label}</p>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-primary rounded-full" style={{ width: `${score}%` }} />
+                </div>
+                <span className="text-xs tabular-nums text-text-secondary w-6 text-right">{score}%</span>
+                <span className={`text-xs font-medium w-24 ${color}`}>{g}</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+const DISC_LABEL: Record<string, string> = {
+  piano: 'Piano', guitar: 'Guitar', voice: 'Voice & Singing',
+  'visual-arts': 'Visual Arts', 'graphic-design': 'Graphic Design',
+}
+
 export default function DashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -334,6 +406,21 @@ export default function DashboardPage() {
                 </button>
               </div>
             </div>
+
+            {disciplines.length > 0 && (
+              <div>
+                <h2 className="text-text-primary font-bold text-base mb-3">My Grades</h2>
+                <div className="space-y-4">
+                  {disciplines.map(disc => (
+                    <GradesCard
+                      key={disc.key}
+                      discKey={disc.key}
+                      discLabel={DISC_LABEL[disc.key] ?? disc.label}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
