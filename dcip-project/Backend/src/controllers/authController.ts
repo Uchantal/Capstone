@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
+import nodemailer from 'nodemailer'
 import User from '../models/User'
 import School, { ISchool } from '../models/School'
 import { AuthRequest } from '../middleware/authMiddleware'
@@ -215,5 +217,106 @@ export const updateDiscipline = async (req: AuthRequest, res: Response): Promise
   } catch (error) {
     console.error('Update discipline error:', error)
     res.status(500).json({ message: 'Could not update discipline' })
+  }
+}
+
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body
+    if (!email) {
+      res.status(400).json({ message: 'Email is required.' })
+      return
+    }
+
+    // Always respond with the same message so we don't reveal whether an account exists
+    const ok = { message: 'If an account with that email exists, a reset link has been sent.' }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() })
+    if (!user) {
+      res.json(ok)
+      return
+    }
+
+    // Generate a plain token, store its SHA-256 hash
+    const plainToken = crypto.randomBytes(32).toString('hex')
+    const hashedToken = crypto.createHash('sha256').update(plainToken).digest('hex')
+
+    user.passwordResetToken = hashedToken
+    user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+    await user.save()
+
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${plainToken}`
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    })
+
+    await transporter.sendMail({
+      from: `"DCIP Platform" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: 'Reset your DCIP password',
+      html: `
+        <div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px 24px;border:1px solid #e5e7eb;border-radius:12px;">
+          <h2 style="color:#1a1a1a;margin-bottom:8px;">Reset your password</h2>
+          <p style="color:#6b7280;font-size:14px;margin-bottom:24px;">
+            Hello ${user.fullName},<br/>
+            We received a request to reset the password for your DCIP account.
+            Click the button below — the link is valid for <strong>1 hour</strong>.
+          </p>
+          <a href="${resetUrl}" style="display:inline-block;background:#C8960C;color:#fff;font-weight:600;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none;">
+            Reset Password
+          </a>
+          <p style="color:#9ca3af;font-size:12px;margin-top:24px;">
+            If you did not request this, you can safely ignore this email.
+            Your password will not change.
+          </p>
+        </div>
+      `,
+    })
+
+    res.json(ok)
+  } catch (error) {
+    console.error('Forgot password error:', error)
+    res.status(500).json({ message: 'Could not send reset email. Please try again later.' })
+  }
+}
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token, newPassword } = req.body
+    if (!token || !newPassword) {
+      res.status(400).json({ message: 'Token and new password are required.' })
+      return
+    }
+    if (newPassword.length < 8) {
+      res.status(400).json({ message: 'Password must be at least 8 characters.' })
+      return
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: new Date() },
+    })
+
+    if (!user) {
+      res.status(400).json({ message: 'Reset link is invalid or has expired.' })
+      return
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10)
+    user.passwordResetToken = undefined
+    user.passwordResetExpires = undefined
+    await user.save()
+
+    res.json({ message: 'Password updated successfully. You can now log in.' })
+  } catch (error) {
+    console.error('Reset password error:', error)
+    res.status(500).json({ message: 'Could not reset password. Please try again.' })
   }
 }

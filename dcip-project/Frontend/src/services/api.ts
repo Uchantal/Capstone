@@ -32,6 +32,12 @@ export const fetchMe = () => api.get('/auth/me')
 export const changePassword = (currentPassword: string, newPassword: string) =>
   api.put('/auth/change-password', { currentPassword, newPassword })
 
+export const forgotPassword = (email: string) =>
+  api.post('/auth/forgot-password', { email })
+
+export const resetPassword = (token: string, newPassword: string) =>
+  api.post('/auth/reset-password', { token, newPassword })
+
 // Sessions
 export const createSession = (data: { discipline: string; durationMinutes: number }) =>
   api.post('/sessions', data)

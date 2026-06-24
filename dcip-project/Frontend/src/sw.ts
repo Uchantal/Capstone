@@ -41,7 +41,14 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   // Only handle GET for caching strategies; let POSTs/PATCHes pass through
   if (req.method !== 'GET') return
 
-  // Network First for API requests
+  // Session status must never be served from cache — always network or 503 so
+  // the client catch-block can default to isOpen=true when offline.
+  if (url.href.includes('/api/supervisor/session/status')) {
+    event.respondWith(networkOnly(req))
+    return
+  }
+
+  // Network First for all other API requests
   if (url.href.includes('/api/')) {
     event.respondWith(networkFirst(req))
     return
@@ -56,6 +63,17 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   // Cache First from precache for app shell (HTML, JS, CSS)
   event.respondWith(precacheFirst(req))
 })
+
+async function networkOnly(req: Request): Promise<Response> {
+  try {
+    return await fetch(req)
+  } catch {
+    return new Response(JSON.stringify({ offline: true, error: 'No network' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+}
 
 async function networkFirst(req: Request): Promise<Response> {
   try {

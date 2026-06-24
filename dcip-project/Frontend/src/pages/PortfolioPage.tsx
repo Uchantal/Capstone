@@ -5,11 +5,22 @@ import { fetchPortfolio, fetchPortfolioItem, deletePortfolioItem } from '../serv
 import MainLayout from '../components/MainLayout'
 import PortfolioItemCard from '../components/PortfolioItemCard'
 
+interface PortfolioItem {
+  _id: string
+  discipline: string
+  title: string
+  fileType: string
+  fileData: string
+  durationMinutes: number
+  syncStatus?: 'synced' | 'pending'
+  createdAt: string
+}
+
 export default function PortfolioPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [items, setItems] = useState<any[]>([])
-  const [selected, setSelected] = useState<any | null>(null)
+  const [items, setItems] = useState<PortfolioItem[]>([])
+  const [selected, setSelected] = useState<PortfolioItem | null>(null)
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
 
@@ -19,7 +30,7 @@ export default function PortfolioPage() {
       .then((res) => setItems(res.data))
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [user])
+  }, [user, navigate])
 
   const handleView = async (id: string) => {
     try {
@@ -59,7 +70,6 @@ export default function PortfolioPage() {
           <div className="text-center text-text-secondary text-sm py-16">Loading...</div>
         ) : items.length === 0 ? (
           <div className="bg-white border border-surface-border rounded-xl p-12 text-center">
-            <p className="text-4xl mb-3"></p>
             <p className="text-text-primary font-semibold mb-2">No work yet</p>
             <p className="text-text-secondary text-sm mb-6">Complete a session to save your first piece.</p>
             <button

@@ -228,15 +228,24 @@ export default function DashboardPage() {
   const [summary, setSummary] = useState<SummaryResponse | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const loadSummary = () => {
+    fetchProgressSummary()
+      .then(res => setSummary(res.data))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }
+
   useEffect(() => {
     if (!user) {
       navigate('/login')
       return
     }
-    fetchProgressSummary()
-      .then(res => setSummary(res.data))
-      .catch(() => {})
-      .finally(() => setLoading(false))
+    loadSummary()
+
+    // Refresh dashboard data automatically when offline work syncs back
+    const handleSynced = () => loadSummary()
+    document.addEventListener('dcip:synced', handleSynced)
+    return () => document.removeEventListener('dcip:synced', handleSynced)
   }, [user, navigate])
 
   if (!user) return null

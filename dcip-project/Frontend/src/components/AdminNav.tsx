@@ -2,12 +2,14 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 const NAV_LINKS = [
-  { label: 'Overview', to: '/admin/overview' },
-  { label: 'Students', to: '/admin/students' },
+  { label: 'Overview',    to: '/admin/overview' },
+  { label: 'Students',    to: '/admin/students' },
   { label: 'Supervisors', to: '/admin/supervisors' },
-  { label: 'Schools', to: '/admin/schools' },
-  { label: 'Modules', to: '/admin/modules' },
-  { label: 'Reports', to: '/admin/reports' },
+  { label: 'Schools',     to: '/admin/schools' },
+  { label: 'Modules',     to: '/admin/modules' },
+  { label: 'Reports',     to: '/admin/reports' },
+  { label: 'Feedback',    to: '/admin/feedback' },
+  { label: 'Preview',     to: '/admin/preview' },
 ]
 
 export default function AdminNav() {
@@ -20,22 +22,22 @@ export default function AdminNav() {
   }
 
   return (
-    <nav className="bg-white border-b border-surface-border h-14 flex items-center px-6 md:px-3 lg:px-6 justify-between">
-      <div className="flex items-center gap-6 md:gap-2 lg:gap-6 min-w-0">
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="bg-primary rounded-lg w-9 h-9 flex items-center justify-center">
-            <span className="text-white font-bold text-sm">DC</span>
+    <nav className="bg-white border-b border-surface-border h-14 flex items-center px-4 lg:px-6 justify-between gap-2">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="bg-primary rounded-lg w-8 h-8 flex items-center justify-center">
+            <span className="text-white font-bold text-xs">DC</span>
           </div>
-          <span className="text-text-secondary text-xs font-medium hidden sm:inline">Admin</span>
+          <span className="text-text-secondary text-xs font-medium hidden lg:inline">Admin</span>
         </div>
-        <div className="flex items-center gap-0.5 overflow-x-auto">
+        <div className="flex items-center flex-wrap gap-0.5">
           {NAV_LINKS.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
               end
               className={({ isActive }) =>
-                `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                `px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
                   isActive
                     ? 'bg-primary/10 text-primary'
                     : 'text-text-secondary hover:text-primary hover:bg-gray-50'
@@ -48,13 +50,13 @@ export default function AdminNav() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 shrink-0">
         {user && (
-          <span className="text-text-secondary text-xs hidden sm:inline">{user.fullName}</span>
+          <span className="text-text-secondary text-xs hidden xl:inline truncate max-w-[120px]">{user.fullName}</span>
         )}
         <button
           onClick={handleLogout}
-          className="border border-surface-border text-text-secondary text-xs px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+          className="border border-surface-border text-text-secondary text-xs px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
         >
           Log out
         </button>

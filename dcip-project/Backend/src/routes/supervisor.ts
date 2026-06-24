@@ -207,6 +207,10 @@ router.get(
 
       const musicSubDiscs = ['piano', 'guitar', 'voice']
 
+      // Sessions are stored with two conventions: 'guitar' (journey) and 'music-guitar' (production)
+      const subKeys = (sd: string) => [sd, `music-${sd}`]
+      const allMusicSessionKeys = [...musicSubDiscs.flatMap(subKeys), 'music']
+
       const calcAvgLevel = (docs: typeof progressDocs): number | null =>
         docs.length > 0
           ? Math.round((docs.reduce((sum, p) => sum + p.currentLevel, 0) / docs.length) * 10) / 10
@@ -216,7 +220,7 @@ router.get(
       const disciplines = ['music', 'visual-arts', 'graphic-design']
       const disciplineStats = disciplines.map((disc) => {
         const discStudents = students.filter((s) => s.discipline === disc)
-        const sessionKeys = disc === 'music' ? [...musicSubDiscs, 'music'] : [disc]
+        const sessionKeys = disc === 'music' ? allMusicSessionKeys : [disc]
         const discSessions = allSessions.filter((s) => sessionKeys.includes(s.discipline))
         const discProgress = progressDocs.filter((p) => sessionKeys.includes(p.discipline))
 
@@ -232,8 +236,8 @@ router.get(
           result.subDisciplines = musicSubDiscs.map((sd) => ({
             discipline: sd,
             studentCount: discStudents.filter((s) => s.subDiscipline === sd).length,
-            totalSessions: allSessions.filter((s) => s.discipline === sd).length,
-            avgLevel: calcAvgLevel(progressDocs.filter((p) => p.discipline === sd)),
+            totalSessions: allSessions.filter((s) => subKeys(sd).includes(s.discipline)).length,
+            avgLevel: calcAvgLevel(progressDocs.filter((p) => subKeys(sd).includes(p.discipline))),
           }))
         }
 

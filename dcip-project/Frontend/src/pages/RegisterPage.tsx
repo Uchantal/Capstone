@@ -106,8 +106,12 @@ export default function RegisterPage() {
       const res = await registerUser({ fullName: form.fullName, username: form.username, email: form.email, password: form.password, schoolId: form.schoolId })
       saveAuth(res.data.token, res.data.user)
       navigate('/disciplines')
-    } catch (err) {
-      setSubmitError((err as any)?.response?.data?.message || 'Registration failed')
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined
+      setSubmitError(message || 'Registration failed')
     } finally {
       setLoading(false)
     }

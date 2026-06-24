@@ -13,7 +13,13 @@ export function setupOfflineInterceptor(instance: AxiosInstance): void {
       const method = (config.method ?? '').toUpperCase()
       const isNetworkError = !error.response
 
-      if (isNetworkError && (method === 'POST' || method === 'PATCH')) {
+      // Auth endpoints cannot be queued — they require live server authentication
+      const url = config.url ?? ''
+      const isAuthEndpoint = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password'].some(
+        (p) => url.includes(p)
+      )
+
+      if (isNetworkError && (method === 'POST' || method === 'PATCH') && !isAuthEndpoint) {
         let body: unknown = null
         try {
           body = config.data ? JSON.parse(config.data as string) : null

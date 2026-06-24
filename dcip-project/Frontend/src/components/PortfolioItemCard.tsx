@@ -2,17 +2,16 @@ interface Props {
   discipline: string
   title: string
   createdAt: string
-  syncStatus: 'synced' | 'pending'
+  syncStatus?: 'synced' | 'pending'
   sessionNumber?: number
   onView?: () => void
 }
-
 
 export default function PortfolioItemCard({
   discipline,
   title,
   createdAt,
-  syncStatus,
+  syncStatus = 'synced',
   sessionNumber,
   onView,
 }: Props) {

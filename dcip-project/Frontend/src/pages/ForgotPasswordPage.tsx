@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { forgotPassword } from '../services/api'
 import Footer from '../components/Footer'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
   const isValidEmail = (value: string) =>
@@ -15,7 +17,7 @@ export default function ForgotPasswordPage() {
     setError('')
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email.trim()) {
       setError('Email address is required.')
@@ -25,7 +27,15 @@ export default function ForgotPasswordPage() {
       setError('Please enter a valid email address.')
       return
     }
-    setSubmitted(true)
+    setLoading(true)
+    try {
+      await forgotPassword(email.trim().toLowerCase())
+      setSubmitted(true)
+    } catch {
+      setError('Could not send reset email. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -61,7 +71,7 @@ export default function ForgotPasswordPage() {
               <p className="text-text-secondary text-sm mb-6">
                 If an account exists for{' '}
                 <span className="text-text-primary font-medium">{email}</span>,
-                password reset instructions will be sent once this feature is activated.
+                a password reset link has been sent. The link expires in 1 hour.
               </p>
 
               <div className="bg-surface-warm border border-surface-border rounded-lg px-4 py-3 mb-6">
@@ -108,9 +118,10 @@ export default function ForgotPasswordPage() {
 
                 <button
                   type="submit"
-                  className="w-full bg-primary text-white font-semibold text-sm py-3.5 rounded-xl hover:bg-primary-dark transition-colors"
+                  disabled={loading}
+                  className="w-full bg-primary text-white font-semibold text-sm py-3.5 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Send Reset Instructions
+                  {loading ? 'Sending…' : 'Send Reset Instructions'}
                 </button>
               </form>
             </div>

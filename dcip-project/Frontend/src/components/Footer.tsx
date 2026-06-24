@@ -39,8 +39,6 @@ export default function Footer() {
             <p className="text-white/40 text-xs font-semibold tracking-widest mb-3 uppercase">Support</p>
             <div className="flex flex-col gap-2.5">
               <Link to="/feedback" className="text-white/70 text-sm hover:text-white transition-colors">Send us Feedback</Link>
-             
-             
             </div>
           </div>
 

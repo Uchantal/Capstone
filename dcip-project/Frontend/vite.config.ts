@@ -11,7 +11,8 @@ export default defineConfig({
       filename: 'sw.ts',
       registerType: 'autoUpdate',
       devOptions: {
-        enabled: false,
+        enabled: true,
+        type: 'module',
       },
       manifest: {
         name: 'Digital Creative Infrastructure Platform',

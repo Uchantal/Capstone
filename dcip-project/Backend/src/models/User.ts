@@ -12,6 +12,8 @@ export interface IUser extends Document {
   school: mongoose.Types.ObjectId | null
   discipline: string | null
   subDiscipline: string | null
+  passwordResetToken: string | undefined
+  passwordResetExpires: Date | undefined
   createdAt: Date
 }
 
@@ -33,6 +35,8 @@ const userSchema = new Schema<IUser>({
     enum: ['piano', 'guitar', 'voice', null],
     default: null,
   },
+  passwordResetToken: { type: String },
+  passwordResetExpires: { type: Date },
   createdAt: { type: Date, default: Date.now },
 })
 

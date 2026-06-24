@@ -15,7 +15,11 @@ interface Reports {
   sessionsByDiscipline: DisciplineCount[]
 }
 
-const MUSIC_SUBS = ['piano', 'guitar', 'voice']
+// Sessions are stored as both 'guitar' (journey) and 'music-guitar' (production)
+const MUSIC_SUBS = ['piano', 'guitar', 'voice', 'music-piano', 'music-guitar', 'music-voice']
+
+// Normalise both naming conventions to a canonical key
+const toCanonical = (d: string) => d.replace(/^music-/, '')
 
 const SUB_LABEL: Record<string, string> = {
   piano: 'Piano',
@@ -41,15 +45,17 @@ export default function AdminReportsPage() {
   }, [])
 
   const buildRows = (sessionsByDiscipline: DisciplineCount[]) => {
-    // Separate top-level disciplines from music sub-disciplines
     const topMap = new Map<string, number>()
+    // Canonical sub-map: keys are 'piano', 'guitar', 'voice'
     const subMap = new Map<string, number>()
 
     sessionsByDiscipline.forEach(({ _id, count }) => {
       if (MUSIC_SUBS.includes(_id)) {
-        subMap.set(_id, count)
+        // Merge 'music-guitar' and 'guitar' into the same 'guitar' bucket
+        const canonical = toCanonical(_id)
+        subMap.set(canonical, (subMap.get(canonical) ?? 0) + count)
       } else {
-        topMap.set(_id, count)
+        topMap.set(_id, (topMap.get(_id) ?? 0) + count)
       }
     })
 
@@ -57,7 +63,6 @@ export default function AdminReportsPage() {
     const musicTop = (topMap.get('music') ?? 0) + musicSubTotal
     if (musicTop > 0) topMap.set('music', musicTop)
 
-    // Build sorted top-level rows
     const rows = [...topMap.entries()]
       .filter(([key]) => key !== 'music' || musicTop > 0)
       .sort(([, a], [, b]) => b - a)

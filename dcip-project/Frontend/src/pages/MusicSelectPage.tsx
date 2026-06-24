@@ -12,16 +12,17 @@ const paths = [
     imgAlt: 'Guitar',
     imgPosition: 'object-center',
     description:
-      'Learn chords, strumming patterns, and simple melodies using an interactive virtual fretboard powered by the Web Audio API.',
+      'Explore the fretboard, discover how notes and chords sit across all six strings, and practise real chord progressions using an interactive virtual instrument.',
     items: [
-      'Explore the fretboard',
-      'Play your first chord',
-      '3-chord progression',
-      'Record a melody',
+      'Navigate the 6-string fretboard',
+      'Find any note across the neck',
+      'Play major chord progressions',
+      'Record a practice session',
     ],
     accent: 'border-t-primary',
     btn: 'bg-primary hover:bg-primary-dark',
     label: 'Open Guitar',
+    meta: '2 Courses · 3 Levels',
   },
   {
     url: '/piano/virtual-instrument',
@@ -31,16 +32,17 @@ const paths = [
     imgAlt: 'Piano keyboard',
     imgPosition: 'object-center',
     description:
-      'Learn scales, chords, and melodies using an interactive virtual keyboard. Follow guided exercises at your own pace.',
+      'Understand how the keyboard is organised, learn the half-step formula that builds every chord, and develop fluency through structured levels on a virtual piano.',
     items: [
-      'C major scale',
-      'Basic chords (C, F, G)',
-      'Short melody by ear',
-      'Record your session',
+      'Identify every key by name',
+      'Build major and minor chords by formula',
+      'Play C, F, and G progressions',
+      'Record and review your session',
     ],
     accent: 'border-t-primary',
     btn: 'bg-primary hover:bg-primary-dark',
     label: 'Open Piano',
+    meta: '2 Courses · 3 Levels',
   },
   {
     url: '/voice/posture-breath-voice',
@@ -50,16 +52,17 @@ const paths = [
     imgAlt: 'Voice and singing',
     imgPosition: 'object-top',
     description:
-      'Record your voice, practise pitch, warm up with vocal exercises, and save recordings of your singing using your device microphone.',
+      'Develop proper posture and diaphragmatic breathing, train your ear to match pitch in real time, and sing through the musical scale with live microphone feedback.',
     items: [
-      'Breathing & warm-up',
-      'Pitch matching exercise',
-      'Sing a short melody',
-      'Record & save your voice',
+      'Set up posture and breathing technique',
+      'Match pitch with live microphone feedback',
+      'Sing through the C major scale',
+      'Record and save your vocal performance',
     ],
     accent: 'border-t-primary',
     btn: 'bg-primary hover:bg-primary-dark',
     label: 'Open Voice & Singing',
+    meta: '2 Courses · 3 Levels',
   },
 ]
 
@@ -88,10 +91,13 @@ export default function MusicSelectPage() {
         </button>
 
         <h1 className="text-text-primary font-bold text-2xl mb-1">
-          Music Module: Choose your practice
+          Music Module: Choose Your Practice
         </h1>
-        <p className="text-text-secondary text-sm mb-8">
-          Select  your favorite part of music today and advance your skills. 
+        <p className="text-text-secondary text-sm mb-1">
+          Select your favourite part of music today and advance your skills.
+        </p>
+        <p className="text-text-muted text-sm mb-8">
+          Two foundation courses lead into three graded levels, each with dedicated practice and demonstration stages, then a sharpening phase and a final production part that you save under your portfolio.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -112,14 +118,19 @@ export default function MusicSelectPage() {
 
               {/* Content */}
               <div className="p-6 flex flex-col flex-1">
-                <h2 className="text-text-primary font-bold text-xl mb-2">{path.name}</h2>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <h2 className="text-text-primary font-bold text-xl">{path.name}</h2>
+                  <span className="shrink-0 text-xs text-text-muted font-medium bg-gray-50 border border-gray-200 rounded-full px-2.5 py-0.5 mt-0.5">
+                    {path.meta}
+                  </span>
+                </div>
                 <p className="text-text-secondary text-sm leading-relaxed mb-6">
                   {path.description}
                 </p>
 
                 <div className="mt-auto">
-                  <p className="text-text-primary text-xs font-semibold mb-3">
-                    What you'll practise:
+                  <p className="text-text-primary text-xs font-semibold uppercase tracking-wide mb-3">
+                    Expectations for this Module
                   </p>
                   <ul className="space-y-2 mb-6">
                     {path.items.map((item) => (
@@ -141,8 +152,6 @@ export default function MusicSelectPage() {
             </div>
           ))}
         </div>
-
-       
       </div>
     </MainLayout>
   )

@@ -8,9 +8,10 @@ const disciplines = [
     id: 'music',
     name: 'Music',
     sub: 'Guitar · Piano · Voice & Singing',
-    desc: 'Play instruments and record your voice. Step-by-step sessions from your first note to a saved composition.',
+    desc: 'Choose from Guitar, Piano, or Voice and Singing. Each instrument follows a structured path from theory and technique through progressive levels to a final recorded production saved to your portfolio.',
     img: '/images/music.jpg',
     imgAlt: 'Music instruments',
+    imgPosition: 'object-center',
     accent: 'border-primary',
     accentText: 'text-primary',
   },
@@ -18,19 +19,21 @@ const disciplines = [
     id: 'visual-arts',
     name: 'Visual Arts',
     sub: 'Drawing · Colour · Composition',
-    desc: 'Create digital artworks on an HTML canvas. Explore colour, form, and composition through guided exercises.',
+    desc: 'Build drawing foundations on an interactive canvas. Study line control, shape construction, the colour wheel, and shading techniques, then apply them across three graded levels to a final portfolio artwork.',
     img: '/images/visual-arts.jpg',
     imgAlt: 'Visual arts',
+    imgPosition: 'object-top',
     accent: 'border-secondary',
-    accentText: 'text-secondary',
+    accentText: 'text-primary',
   },
   {
     id: 'graphic-design',
     name: 'Graphic Design',
     sub: 'Layouts · Typography · Posters',
-    desc: 'Learn visual communication fundamentals and create poster designs step by step.',
+    desc: 'Design real formats used in schools and professional settings. Learn typography, layout hierarchy, colour contrast, and composition, then apply them to posters, social media posts, and digital covers.',
     img: '/images/graphic-design.jpg',
     imgAlt: 'Graphic design',
+    imgPosition: 'object-center',
     accent: 'border-primary',
     accentText: 'text-primary',
   },
@@ -63,8 +66,8 @@ export default function DisciplineSelectPage() {
         <h1 className="text-text-primary font-bold text-2xl mb-1">Choose your discipline</h1>
         <p className="text-text-secondary text-sm mb-8">
           {user?.discipline
-            ? `You are currently practising ${user.discipline.replace('-', ' ')}. You can switch anytime.`
-            : 'Select the creative area you want to practise today.'}
+            ? `You are currently taking ${user.discipline.replace('-', ' ')}. You can switch anytime.`
+            : 'Select the creative area you want to learn today.'}
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -76,12 +79,11 @@ export default function DisciplineSelectPage() {
                 user?.discipline === d.id ? d.accent : 'border-surface-border hover:border-gray-300'
               }`}
             >
-              {/* Image */}
-              <div className="relative h-44 overflow-hidden">
+              <div className="relative h-48 overflow-hidden bg-gray-100">
                 <img
                   src={d.img}
                   alt={d.imgAlt}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className={`w-full h-full object-cover ${d.imgPosition} transition-transform duration-500 group-hover:scale-105`}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 {user?.discipline === d.id && (
@@ -91,11 +93,10 @@ export default function DisciplineSelectPage() {
                 )}
               </div>
 
-              {/* Content */}
               <div className="p-5">
                 <p className="text-text-primary font-bold text-base mb-1">{d.name}</p>
-                <p className={`text-xs mb-3 ${d.accentText}`}>{d.sub}</p>
-                <p className="text-text-secondary text-xs leading-relaxed">{d.desc}</p>
+                <p className={`text-xs font-semibold mb-3 ${d.accentText}`}>{d.sub}</p>
+                <p className="text-text-secondary text-sm leading-relaxed">{d.desc}</p>
               </div>
             </button>
           ))}

@@ -23,6 +23,10 @@ export default function LoginPage() {
       setError('Username and password are required')
       return
     }
+    if (!navigator.onLine) {
+      setError('You are offline. Please connect to the internet to log in.')
+      return
+    }
     setLoading(true)
     try {
       const res = await loginUser(form)
@@ -30,7 +34,7 @@ export default function LoginPage() {
       const role = res.data.user.role
       if (role === 'admin') navigate('/admin')
       else if (role === 'supervisor') navigate('/supervisor')
-      else navigate('/dashboard')
+      else navigate('/disciplines')
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err

@@ -12,6 +12,8 @@ export const useSync = () => {
     if (!navigator.onLine) return
     setSyncing(true)
 
+    let anySucceeded = false
+
     // Sync legacy portfolio pending items from db.ts store
     const pending = await getPendingItems()
     for (const item of pending) {
@@ -26,13 +28,21 @@ export const useSync = () => {
         if (item.localId !== undefined) {
           await removePendingItem(item.localId)
         }
+        anySucceeded = true
       } catch {
         // will retry on next online event
       }
     }
 
     // Replay general pending requests queued by the offline interceptor
+    // replayPendingRequests dispatches dcip:synced itself when it succeeds
     await replayPendingRequests(api)
+
+    // If legacy portfolio items synced but replayPendingRequests had nothing,
+    // still notify the app so pages can refresh
+    if (anySucceeded) {
+      document.dispatchEvent(new CustomEvent('dcip:synced'))
+    }
 
     setSyncing(false)
   }

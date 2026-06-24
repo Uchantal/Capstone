@@ -89,6 +89,7 @@ import AdminSchoolsPage from './pages/admin/AdminSchoolsPage'
 import AdminFeedbackPage from './pages/admin/AdminFeedbackPage'
 import FeedbackPage from './pages/FeedbackPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import AdminPreviewPage from './pages/admin/AdminPreviewPage'
 import PreviewNavBar from './components/PreviewNavBar'
 import SessionGate from './components/SessionGate'
@@ -142,6 +143,7 @@ function AppContent() {
         <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
         <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
         <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
+        <Route path="/reset-password" element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
 
         <Route path="/dashboard" element={<StudentRoute><DashboardPage /></StudentRoute>} />
         <Route path="/disciplines" element={<StudentRoute><DisciplineSelectPage /></StudentRoute>} />
