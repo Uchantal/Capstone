@@ -37,6 +37,15 @@ const allowedOrigin = (origin: string | undefined, cb: (err: Error | null, allow
 app.use(cors({ origin: allowedOrigin, credentials: true }))
 app.use(express.json({ limit: '10mb' }))
 
+app.get('/api/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    platform: 'DCIP',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+  })
+})
+
 app.use('/api/auth', authRoutes)
 app.use('/api/sessions', sessionRoutes)
 app.use('/api/portfolio', portfolioRoutes)
@@ -52,8 +61,6 @@ app.use('/api/voice', voiceRoutes)
 app.use('/api/progress', progressSummaryRoutes)
 app.use('/api/feedback', feedbackRoutes)
 app.use('/api/engagement', engagementRoutes)
-
-app.get('/api/health', (_req, res) => res.json({ status: 'ok' }))
 
 const PORT = process.env.PORT || 5000
 
