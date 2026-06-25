@@ -14,7 +14,7 @@ export default function Footer() {
 
           <div>
             <Link to="/" className="inline-block w-9 h-9 bg-primary rounded-lg flex items-center justify-center mb-3 hover:opacity-80 transition-opacity">
-              <span className="text-white font-bold text-sm">DC</span>
+              <span className="text-white font-bold text-[11px] tracking-tight">DCIP</span>
             </Link>
             <p className="text-white font-semibold text-sm mb-2">
               Digital Creative Infrastructure Platform

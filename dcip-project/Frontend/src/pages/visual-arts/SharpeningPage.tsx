@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef } from 'react'
+﻿import { useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
@@ -28,7 +28,6 @@ export default function SharpeningPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const { loading, markStageVisited } = useVisualArtsDemonstrationProgress()
   const { recordInteraction, recordColour, recordTool, computeAndSave } =
     useVAEngagement('visual-arts', 'sharpening')
@@ -112,7 +111,6 @@ export default function SharpeningPage() {
       </div>
 
       <VisualArtsModule
-        canvasRef={canvasRef}
         step={5}
         onInteraction={recordInteraction}
         onColourUsed={recordColour}

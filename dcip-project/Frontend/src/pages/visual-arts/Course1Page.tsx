@@ -1,4 +1,4 @@
-﻿import { useRef, useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
@@ -33,7 +33,6 @@ export default function Course1Page() {
   const navigate = useNavigate()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
-  const practiceCanvasRef = useRef<HTMLCanvasElement>(null)
   const { markComplete } = useVisualArtsProgress()
   const [lowEngagement, setLowEngagement] = useState(false)
   const { computeAndSave } = useReadingEngagement('visual-arts', 'course1')
@@ -93,7 +92,7 @@ export default function Course1Page() {
             control. Notice how a heavier line reads differently from a lighter one.
           </p>
           <div className="h-[440px] flex flex-col overflow-hidden rounded-xl border border-surface-border">
-            <VisualArtsModule canvasRef={practiceCanvasRef} step={1} />
+            <VisualArtsModule step={1} />
           </div>
         </div>
 

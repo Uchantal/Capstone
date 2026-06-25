@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../modules/VisualArtsModule'
@@ -42,7 +42,6 @@ export default function VisualArtsLevelScreen({
   const isPreviewMode = usePreviewMode()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const { loading, markComplete } = useVisualArtsProgress()
   const [checked, setChecked] = useState<Set<string>>(new Set())
   const [completed, setCompleted] = useState(false)
@@ -158,7 +157,6 @@ export default function VisualArtsLevelScreen({
       </div>
 
       <VisualArtsModule
-        canvasRef={canvasRef}
         step={5}
         onInteraction={recordInteraction}
         onColourUsed={recordColour}

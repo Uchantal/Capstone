@@ -1,7 +1,7 @@
 ﻿import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
-import VisualArtsModule from '../../components/modules/VisualArtsModule'
+import VisualArtsModule, { VisualArtsModuleHandle } from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { completeVisualArtsDemonstration, fetchEngagementScores } from '../../services/api'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
@@ -38,7 +38,7 @@ export default function VALevel3DemonstratePage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
   const { loading } = useVisualArtsDemonstrationProgress()
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const moduleRef = useRef<VisualArtsModuleHandle>(null)
   const [resetKey, setResetKey] = useState(0)
   const interactionCount = useRef(0)
   const coloursUsedRef = useRef(new Set<string>())
@@ -77,7 +77,7 @@ export default function VALevel3DemonstratePage() {
     setSubmitting(true)
     const score = await computeAndSave()
     setEngagementScore(score)
-    const snapshot = canvasRef.current?.toDataURL('image/png') ?? ''
+    const snapshot = moduleRef.current?.captureCleanImage() ?? ''
     let combined = score
     try {
       const res = await fetchEngagementScores('visual-arts')
@@ -184,8 +184,8 @@ export default function VALevel3DemonstratePage() {
       </div>
 
       <VisualArtsModule
+        ref={moduleRef}
         key={resetKey}
-        canvasRef={canvasRef}
         step={5}
         onInteraction={recordInteraction}
         onColourUsed={handleColourUsed}

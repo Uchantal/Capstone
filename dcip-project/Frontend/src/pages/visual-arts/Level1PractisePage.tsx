@@ -1,4 +1,4 @@
-﻿import { useRef, useEffect } from 'react'
+﻿import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
@@ -9,8 +9,6 @@ export default function VALevel1PractisePage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
   const { progress, loading, markStageVisited } = useVisualArtsDemonstrationProgress()
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-
   useEffect(() => {
     if (loading) return
     markStageVisited('va-level-1-practise')
@@ -64,7 +62,6 @@ export default function VALevel1PractisePage() {
       </div>
 
       <VisualArtsModule
-        canvasRef={canvasRef}
         step={5}
         onInteraction={recordInteraction}
         onColourUsed={recordColour}

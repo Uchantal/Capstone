@@ -1,14 +1,17 @@
-import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import VisualArtsToolbar from '../canvas/VisualArtsToolbar'
 import SessionNotepad from '../canvas/SessionNotepad'
 
 interface Props {
-  canvasRef: RefObject<HTMLCanvasElement>
   step: number
   onInteraction?: () => void
   onColourUsed?: (colour: string) => void
   onToolChange?: (tool: string) => void
   sidebarFooter?: React.ReactNode
+}
+
+export interface VisualArtsModuleHandle {
+  captureCleanImage: () => string
 }
 
 export type Tool = 'brush' | 'eraser' | 'line' | 'rect' | 'circle' | 'select' | 'ruler'
@@ -131,9 +134,9 @@ function hitTestShape(s: Shape, x: number, y: number, pad = 8): boolean {
   return false
 }
 
-export default function VisualArtsModule({
-  canvasRef, step: _step, onInteraction, onColourUsed, onToolChange, sidebarFooter,
-}: Props) {
+const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function VisualArtsModule({
+  step: _step, onInteraction, onColourUsed, onToolChange, sidebarFooter,
+}, ref) {
   const [panelCollapsed, setPanelCollapsed] = useState(false)
   const [tool,        setTool]        = useState<Tool>('brush')
   const [colour,      setColour]      = useState('#1A1A1A')
@@ -147,11 +150,12 @@ export default function VisualArtsModule({
   const [shapeDim,    setShapeDim]    = useState<{ cx: number; bottom: number; w: number; h: number } | null>(null)
   const [rulerLine,   setRulerLine]   = useState<{ x1: number; y1: number; x2: number; y2: number; dist: number } | null>(null)
 
-  const bgCanvasRef    = useRef<HTMLCanvasElement>(null)
-  const shapeCanvasRef = useRef<HTMLCanvasElement>(null)
-  const drawCanvasRef  = useRef<HTMLCanvasElement>(null)
-  const eraseCanvasRef = useRef<HTMLCanvasElement>(null)  // hidden; stores eraser path for shape pixel-erasure
-  const containerRef   = useRef<HTMLDivElement>(null)
+  const bgCanvasRef      = useRef<HTMLCanvasElement>(null)
+  const shapeCanvasRef   = useRef<HTMLCanvasElement>(null)
+  const drawCanvasRef    = useRef<HTMLCanvasElement>(null)
+  const eraseCanvasRef   = useRef<HTMLCanvasElement>(null)
+  const compositeRef     = useRef<HTMLCanvasElement>(null)  // hidden; export-only composite
+  const containerRef     = useRef<HTMLDivElement>(null)
 
   // Hot-path refs (avoid stale closure in event handlers)
   const drawing           = useRef(false)
@@ -227,7 +231,7 @@ export default function VisualArtsModule({
     const bg    = bgCanvasRef.current
     const shape = shapeCanvasRef.current
     const draw  = drawCanvasRef.current
-    const out   = canvasRef.current
+    const out   = compositeRef.current
     if (!bg || !shape || !draw || !out) return
     const ctx = out.getContext('2d', { willReadFrequently: true })
     if (!ctx) return
@@ -235,7 +239,7 @@ export default function VisualArtsModule({
     ctx.drawImage(bg,    0, 0)
     ctx.drawImage(shape, 0, 0)
     ctx.drawImage(draw,  0, 0)
-  }, [canvasRef])
+  }, [])
 
   // ── History ───────────────────────────────────────────────────────────────
   const saveToHistory = useCallback(() => {
@@ -344,7 +348,7 @@ export default function VisualArtsModule({
       const shape = shapeCanvasRef.current
       const draw  = drawCanvasRef.current
       const erase = eraseCanvasRef.current
-      const out   = canvasRef.current
+      const out   = compositeRef.current
 
       const drawCtx  = draw?.getContext('2d',  { willReadFrequently: true })
       const eraseCtx = erase?.getContext('2d', { willReadFrequently: true })
@@ -634,6 +638,40 @@ export default function VisualArtsModule({
     return 'crosshair'
   }
 
+  useImperativeHandle(ref, () => ({
+    captureCleanImage: () => {
+      const bg    = bgCanvasRef.current
+      const draw  = drawCanvasRef.current
+      const erase = eraseCanvasRef.current
+      const out   = compositeRef.current
+      if (!bg || !draw || !out) return ''
+      const ctx = out.getContext('2d', { willReadFrequently: true })
+      if (!ctx) return ''
+      const w = out.width
+      const h = out.height
+      // Render committed shapes without any selection UI to a temp canvas
+      const tempCanvas = document.createElement('canvas')
+      tempCanvas.width = w
+      tempCanvas.height = h
+      const tempCtx = tempCanvas.getContext('2d')
+      if (tempCtx) {
+        for (const s of shapesRef.current) paintShape(tempCtx, s)
+        if (erase) {
+          tempCtx.save()
+          tempCtx.globalCompositeOperation = 'destination-out'
+          tempCtx.drawImage(erase, 0, 0)
+          tempCtx.restore()
+        }
+      }
+      // Composite: background + clean shapes + freehand strokes
+      ctx.clearRect(0, 0, w, h)
+      ctx.drawImage(bg, 0, 0)
+      if (tempCtx) ctx.drawImage(tempCanvas, 0, 0)
+      ctx.drawImage(draw, 0, 0)
+      return out.toDataURL('image/png')
+    },
+  }))
+
   return (
     <>
       {showConfirm && (
@@ -737,7 +775,7 @@ export default function VisualArtsModule({
             {/* Layer 4: hidden erase mask (source for destination-out in renderShapes) */}
             <canvas ref={eraseCanvasRef} className="hidden" />
             {/* Layer 5: hidden composite for save/export */}
-            <canvas ref={canvasRef} className="hidden" />
+            <canvas ref={compositeRef} className="hidden" />
 
             {/* Ruler overlay */}
             {rulerLine && (
@@ -813,4 +851,6 @@ export default function VisualArtsModule({
       </div>
     </>
   )
-}
+})
+
+export default VisualArtsModule

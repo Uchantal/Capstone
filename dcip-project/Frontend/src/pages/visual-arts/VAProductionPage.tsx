@@ -1,7 +1,7 @@
 ﻿import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
-import VisualArtsModule from '../../components/modules/VisualArtsModule'
+import VisualArtsModule, { VisualArtsModuleHandle } from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { saveVAProductionResult, savePortfolioItem, completeVisualArtsProduction } from '../../services/api'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
@@ -18,7 +18,7 @@ type Phase = 'intro' | 'working' | 'done'
 export default function VAProductionPage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const moduleRef = useRef<VisualArtsModuleHandle>(null)
   const { loading, markStageVisited } = useVisualArtsDemonstrationProgress()
   const [phase, setPhase] = useState<Phase>('intro')
   const [checked, setChecked] = useState<Set<string>>(new Set())
@@ -47,7 +47,7 @@ export default function VAProductionPage() {
 
     const score = await computeAndSave()
     setEngagementScore(score)
-    const imageData = canvasRef.current?.toDataURL('image/png') ?? ''
+    const imageData = moduleRef.current?.captureCleanImage() ?? ''
 
     try {
       await saveVAProductionResult({
@@ -277,7 +277,7 @@ export default function VAProductionPage() {
       </div>
 
       <VisualArtsModule
-        canvasRef={canvasRef}
+        ref={moduleRef}
         step={5}
         onInteraction={recordInteraction}
         onColourUsed={recordColour}

@@ -1,11 +1,10 @@
-﻿import { useRef } from 'react'
+﻿import {} from 'react'
 import { useNavigate } from 'react-router-dom'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsProgress } from '../../hooks/useVisualArtsProgress'
 
 export default function VirtualCanvasPage() {
   const navigate = useNavigate()
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const { markComplete } = useVisualArtsProgress()
 
   const handleContinue = async () => {
@@ -83,7 +82,7 @@ export default function VirtualCanvasPage() {
         </button>
       </div>
 
-      <VisualArtsModule canvasRef={canvasRef} step={5} sidebarFooter={sidebarFooter} />
+      <VisualArtsModule step={5} sidebarFooter={sidebarFooter} />
     </div>
   )
 }
