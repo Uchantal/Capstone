@@ -18,7 +18,7 @@ function ProgressBar({ value, total, label }: { value: number; total: number; la
   )
 }
 
-const A4_FREQ = 440.00
+const C4_FREQ = 261.63  // C4 (middle C) — most accessible note for any untrained voice
 
 export default function VoiceCourse2Page() {
   const navigate = useNavigate()
@@ -50,13 +50,13 @@ export default function VoiceCourse2Page() {
     const loop = () => {
       if (!activeRef.current || !analyserRef.current) return
       const freq   = detectPitch(analyserRef.current)
-      const status = getPitchStatus(freq, A4_FREQ)
+      const status = getPitchStatus(freq, C4_FREQ)
       setPitchStatus(status)
 
       if (!cardCPassedRef.current) {
         if (status === 'on') {
           if (!onPitchSinceRef.current) onPitchSinceRef.current = Date.now()
-          else if (Date.now() - onPitchSinceRef.current >= 2000) {
+          else if (Date.now() - onPitchSinceRef.current >= 1500) {
             cardCPassedRef.current = true
             setCardCPassed(true)
             onPitchSinceRef.current = null
@@ -80,9 +80,9 @@ export default function VoiceCourse2Page() {
     })
   }
 
-  const handlePlayA4 = () => {
-    playTone(A4_FREQ, 3.0)
-    setActiveTone('A4')
+  const handlePlayC4 = () => {
+    playTone(C4_FREQ, 3.0)
+    setActiveTone('C4')
     setTimeout(() => setActiveTone(null), 3000)
   }
 
@@ -214,18 +214,18 @@ export default function VoiceCourse2Page() {
           <h2 className="text-text-primary font-bold text-base mb-3">Matching a Pitch</h2>
           <p className="text-text-secondary text-sm mb-4 leading-relaxed">
             Pitch matching is the foundation of singing in tune. The voice needs to find the note, not guess it.
-            Listen to A4 below, then hum or sing the same pitch. Hold it steady until the indicator turns green.
+            Listen to C4 below, then hum or sing the same pitch softly. Hold it steady until the indicator turns green.
           </p>
           <div className="flex items-center gap-4 mb-5 flex-wrap">
             <button
-              onClick={handlePlayA4}
+              onClick={handlePlayC4}
               className={`px-5 py-2.5 rounded-lg border text-sm font-semibold transition-all ${
-                activeTone === 'A4'
+                activeTone === 'C4'
                   ? 'bg-primary text-white border-primary'
                   : 'border-primary/50 text-primary hover:bg-primary/10'
               }`}
             >
-              {activeTone === 'A4' ? 'Playing A4...' : 'Play A4 (440 Hz)'}
+              {activeTone === 'C4' ? 'Playing C4...' : 'Play C4 (261 Hz)'}
             </button>
             {!micReady && (
               <button
@@ -241,7 +241,7 @@ export default function VoiceCourse2Page() {
           )}
           {micReady && (
             <div className="space-y-3">
-              <PitchIndicator status={pitchStatus} label="Sing A4 and hold for 2 seconds" />
+              <PitchIndicator status={pitchStatus} label="Sing C4 and hold for 1.5 seconds" />
               {cardCPassed && (
                 <div className="bg-secondary/5 border border-secondary/30 rounded-xl px-4 py-3">
                   <p className="text-secondary font-semibold text-sm">You matched the pitch.</p>

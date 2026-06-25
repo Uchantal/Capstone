@@ -103,8 +103,10 @@ interface DisciplineSummary {
 }
 
 function computeContinueUrl(disciplines: DisciplineSummary[]): string {
-  let bestUrl = '/dashboard'
-  let bestIdx = -1
+  if (disciplines.length === 0) return '/disciplines'
+
+  let bestUrl = '/disciplines'
+  let bestIdx = -2 // -2 so that even lastCompletedIdx=-1 (no stages done) still wins
 
   for (const disc of disciplines) {
     const stages = STAGE_URLS[disc.key]
@@ -128,6 +130,7 @@ export default function TopNav() {
   const navigate = useNavigate()
 
   const [profileOpen, setProfileOpen] = useState(false)
+  const [continueLoading, setContinueLoading] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const continueUrlRef = useRef<string | null>(null)
 
@@ -163,12 +166,15 @@ export default function TopNav() {
     const opening = !profileOpen
     setProfileOpen(opening)
     if (opening && continueUrlRef.current === null) {
+      setContinueLoading(true)
       try {
         const res = await fetchProgressSummary()
         const disciplines: DisciplineSummary[] = res.data?.disciplines ?? []
         continueUrlRef.current = computeContinueUrl(disciplines)
       } catch {
-        continueUrlRef.current = '/dashboard'
+        continueUrlRef.current = '/disciplines'
+      } finally {
+        setContinueLoading(false)
       }
     }
   }
@@ -184,7 +190,7 @@ export default function TopNav() {
     return (
       <nav className="bg-white border-b border-surface-border h-12 flex items-center px-6 justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/dashboard')} className="bg-primary rounded-lg w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0">
+          <button onClick={() => navigate('/')} className="bg-primary rounded-lg w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0">
             <span className="text-white font-bold text-sm">DCIP</span>
           </button>
           <div>
@@ -225,7 +231,7 @@ export default function TopNav() {
   return (
     <nav className="bg-white border-b border-surface-border h-12 flex items-center px-6 justify-between">
       <div className="flex items-center gap-3">
-        <button onClick={() => navigate('/dashboard')} className="bg-primary rounded-lg w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0">
+        <button onClick={() => navigate('/')} className="bg-primary rounded-lg w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0">
           <span className="text-white font-bold text-sm">DCIP</span>
         </button>
         <p className="text-text-primary font-semibold text-sm leading-tight hidden lg:block">
@@ -292,10 +298,12 @@ export default function TopNav() {
                 </div>
 
                 <div
-                  onClick={() => go(continueUrlRef.current ?? '/dashboard')}
-                  className="px-4 py-3 flex flex-col gap-0.5 hover:bg-[#F9F7F4] cursor-pointer transition-colors duration-100 border-b border-surface-border"
+                  onClick={() => !continueLoading && go(continueUrlRef.current ?? '/disciplines')}
+                  className={`px-4 py-3 flex flex-col gap-0.5 transition-colors duration-100 border-b border-surface-border ${continueLoading ? 'opacity-50 cursor-wait' : 'hover:bg-[#F9F7F4] cursor-pointer'}`}
                 >
-                  <span className="text-sm font-medium text-text-primary">Continue Learning</span>
+                  <span className="text-sm font-medium text-text-primary">
+                    {continueLoading ? 'Loading…' : 'Continue Learning'}
+                  </span>
                   <span className="text-xs text-text-secondary">Pick up where you left off</span>
                 </div>
 

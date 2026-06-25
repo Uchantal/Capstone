@@ -1,5 +1,20 @@
 ﻿import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+
+const VOICE_TERMS = [
+  { term: 'Pitch', def: 'How high or low a sound is. Singing in tune means producing the correct pitch for each note.' },
+  { term: 'Frequency', def: 'The number of vibrations per second (Hz). Frequency determines pitch.' },
+  { term: 'Note', def: 'A named musical pitch: C D E F G A B. After B, the pattern repeats one octave higher.' },
+  { term: 'Scale', def: 'A sequence of notes arranged from low to high, following a specific pattern of steps.' },
+  { term: 'Octave', def: 'The interval between one note and the same note name higher. That note vibrates twice as fast.' },
+  { term: 'Tone', def: 'A steady sound with a clear, definite pitch — as opposed to noise, which has no pitch.' },
+  { term: 'Diaphragm', def: 'The dome-shaped muscle beneath your lungs that pushes air upward through your vocal cords.' },
+  { term: 'Breath support', def: 'Using controlled diaphragm pressure to maintain a steady airflow while singing.' },
+  { term: 'Vocal cords', def: 'Two small folds of tissue in your larynx that vibrate when air passes through them to produce sound.' },
+  { term: 'Resonance', def: 'The way your throat, mouth, and skull amplify and colour the sound your vocal cords produce.' },
+  { term: 'Melody', def: 'A sequence of notes forming a recognisable musical phrase or tune.' },
+  { term: 'Harmony', def: 'Two or more pitches that complement each other when sung or played at the same time.' },
+]
 import MainLayout from '../../components/MainLayout'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useReadingEngagement } from '../../hooks/useReadingEngagement'
@@ -78,6 +93,7 @@ export default function VoiceCourse1Page() {
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { markStageVisited } = useVoiceDemonstrationProgress()
+  const [showGlossary, setShowGlossary] = useState(false)
   const [lowEngagement, setLowEngagement] = useState(false)
   const { computeAndSave } = useReadingEngagement('voice', 'course1')
 
@@ -105,7 +121,7 @@ export default function VoiceCourse1Page() {
           </div>
         )}
 
-        <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
+        <div className="flex items-center gap-2 text-xs text-text-muted mb-4">
           <button onClick={() => navigate('/voice/studio')} className="hover:text-text-primary transition-colors">
             Voice and Singing
           </button>
@@ -114,6 +130,25 @@ export default function VoiceCourse1Page() {
           <span>/</span>
           <span className="text-text-primary">Posture, Breath, and Your Voice</span>
         </div>
+
+        {/* Key Terms banner */}
+        <div className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 mb-5">
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <p className="text-text-secondary text-sm">
+              Not sure what some words mean? Review the <span className="font-semibold text-text-primary">Key Terms</span> glossary before you start.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowGlossary(true)}
+            className="bg-primary text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors shrink-0 ml-4"
+          >
+            View Key Terms
+          </button>
+        </div>
+
 
         <ProgressBar value={1} total={2} label="Course 1 of 2" />
 
@@ -198,6 +233,27 @@ export default function VoiceCourse1Page() {
           </button>
         </div>
       </div>
+
+      {showGlossary && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowGlossary(false)}>
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white border-b border-surface-border px-6 py-4 flex items-center justify-between">
+              <h2 className="text-text-primary font-bold text-lg">Voice and Singing — Key Terms</h2>
+              <button onClick={() => setShowGlossary(false)} className="text-text-muted hover:text-text-primary transition-colors">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {VOICE_TERMS.map(({ term, def }) => (
+                <div key={term} className="bg-[#F9F7F4] rounded-xl p-4">
+                  <p className="text-primary font-bold text-sm mb-1">{term}</p>
+                  <p className="text-text-secondary text-xs leading-relaxed">{def}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   )
 }

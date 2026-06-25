@@ -5,7 +5,7 @@ import MainLayout from '../../components/MainLayout'
 import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
-import { detectPitch, getPitchStatus, drawWaveform, type PitchStatus } from '../../utils/voicePitch'
+import { detectPitch, getPitchStatus, drawWaveform, DEMO_TOLERANCE, type PitchStatus } from '../../utils/voicePitch'
 import { completeVoiceDemonstration } from '../../services/api'
 
 const DEMO_NOTES = [
@@ -15,7 +15,7 @@ const DEMO_NOTES = [
 ]
 const REQUIRED_CORRECT = 2
 const REQUIRED_MS      = 2000
-const DEMO_TOLERANCE   = 20
+
 
 type Phase = 'testing' | 'results'
 

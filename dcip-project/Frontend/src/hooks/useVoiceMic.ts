@@ -17,13 +17,20 @@ export function useVoiceMic() {
   const initMic = useCallback(async (): Promise<boolean> => {
     if (micStreamRef.current) return true
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          noiseSuppression: true,
+          echoCancellation: true,
+          autoGainControl: false,
+        },
+        video: false,
+      })
       micStreamRef.current = stream
       const ctx = new AudioContext()
       audioCtxRef.current = ctx
       const source = ctx.createMediaStreamSource(stream)
       const analyser = ctx.createAnalyser()
-      analyser.fftSize = 2048
+      analyser.fftSize = 4096  // larger FFT for better harmonic resolution
       source.connect(analyser)
       analyserRef.current = analyser
       setMicReady(true)

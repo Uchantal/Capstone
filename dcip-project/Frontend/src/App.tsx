@@ -87,6 +87,7 @@ import AdminModulesPage from './pages/admin/AdminModulesPage'
 import AdminReportsPage from './pages/admin/AdminReportsPage'
 import AdminSupervisorsPage from './pages/admin/AdminSupervisorsPage'
 import AdminSchoolsPage from './pages/admin/AdminSchoolsPage'
+import AdminSchoolDetailPage from './pages/admin/AdminSchoolDetailPage'
 import AdminFeedbackPage from './pages/admin/AdminFeedbackPage'
 import FeedbackPage from './pages/FeedbackPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
@@ -250,6 +251,7 @@ function AppContent() {
         <Route path="/admin/overview" element={<AdminRoute><AdminOverviewPage /></AdminRoute>} />
         <Route path="/admin/students" element={<AdminRoute><AdminStudentsPage /></AdminRoute>} />
         <Route path="/admin/schools" element={<AdminRoute><AdminSchoolsPage /></AdminRoute>} />
+        <Route path="/admin/schools/:id" element={<AdminRoute><AdminSchoolDetailPage /></AdminRoute>} />
         <Route path="/admin/modules" element={<AdminRoute><AdminModulesPage /></AdminRoute>} />
         <Route path="/admin/reports" element={<AdminRoute><AdminReportsPage /></AdminRoute>} />
         <Route path="/admin/supervisors" element={<AdminRoute><AdminSupervisorsPage /></AdminRoute>} />

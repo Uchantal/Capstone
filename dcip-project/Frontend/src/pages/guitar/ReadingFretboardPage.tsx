@@ -1,5 +1,20 @@
 ﻿import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+
+const GUITAR_TERMS = [
+  { term: 'String', def: 'One of the six wires stretched across the guitar, tuned E A D G B e from lowest to highest.' },
+  { term: 'Fret', def: 'A metal strip across the neck. Pressing a string behind a fret raises its pitch by one semitone.' },
+  { term: 'Note', def: 'A specific musical pitch produced at a string and fret combination. Named C D E F G A B.' },
+  { term: 'Chord', def: 'A group of strings fretted and strummed together to produce harmony.' },
+  { term: 'Open string', def: 'A string played without pressing any fret. Each open string has a fixed pitch (E A D G B e).' },
+  { term: 'Strumming', def: 'Sweeping a finger or pick across several strings in one motion to play a chord.' },
+  { term: 'Picking', def: 'Plucking individual strings one at a time with a finger or pick.' },
+  { term: 'Scale', def: 'A sequence of notes following a specific pattern of intervals, used for melodies and solos.' },
+  { term: 'Tab (Tablature)', def: 'A notation system showing which strings and frets to play, read left to right.' },
+  { term: 'Tuning', def: 'Adjusting string tension so each string produces the correct pitch. Standard: E A D G B e.' },
+  { term: 'Barre chord', def: 'A chord where one finger presses all six strings at the same fret.' },
+  { term: 'Nut', def: 'The small grooved piece at the top of the neck that spaces the strings before the tuning pegs.' },
+]
 import MainLayout from '../../components/MainLayout'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarProgress } from '../../hooks/useGuitarProgress'
@@ -38,6 +53,7 @@ export default function ReadingFretboardPage() {
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { markComplete } = useGuitarProgress()
+  const [showGlossary, setShowGlossary] = useState(false)
   const [lowEngagement, setLowEngagement] = useState(false)
   const { computeAndSave } = useReadingEngagement('guitar', 'course1')
 
@@ -66,7 +82,7 @@ export default function ReadingFretboardPage() {
         )}
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
+        <div className="flex items-center gap-2 text-xs text-text-muted mb-4">
           <button onClick={() => navigate('/guitar/virtual-instrument')} className="hover:text-text-primary transition-colors">
             Guitar
           </button>
@@ -74,6 +90,24 @@ export default function ReadingFretboardPage() {
           <span>Door To Know Guitar</span>
           <span>/</span>
           <span className="text-text-primary">Reading the Fretboard</span>
+        </div>
+
+        {/* Key Terms banner */}
+        <div className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 mb-5">
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <p className="text-text-secondary text-sm">
+              Not sure what some words mean? Review the <span className="font-semibold text-text-primary">Key Terms</span> glossary before you start.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowGlossary(true)}
+            className="bg-primary text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors shrink-0 ml-4"
+          >
+            View Key Terms
+          </button>
         </div>
 
         <ProgressBar value={1} total={2} label="Course 1 of 2" />
@@ -170,6 +204,27 @@ export default function ReadingFretboardPage() {
           </button>
         </div>
       </div>
+
+      {showGlossary && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowGlossary(false)}>
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white border-b border-surface-border px-6 py-4 flex items-center justify-between">
+              <h2 className="text-text-primary font-bold text-lg">Guitar — Key Terms</h2>
+              <button onClick={() => setShowGlossary(false)} className="text-text-muted hover:text-text-primary transition-colors">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {GUITAR_TERMS.map(({ term, def }) => (
+                <div key={term} className="bg-[#F9F7F4] rounded-xl p-4">
+                  <p className="text-primary font-bold text-sm mb-1">{term}</p>
+                  <p className="text-text-secondary text-xs leading-relaxed">{def}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   )
 }

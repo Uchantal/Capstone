@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import AdminLayout from '../../components/AdminLayout'
 import { getAdminSchools, activateSchool, deactivateSchool, updateSchool, createSchool } from '../../services/adminApi'
 
@@ -19,6 +20,7 @@ interface FieldDraft {
 const emptyDraft = (): FieldDraft => ({ name: '', district: '', province: '' })
 
 export default function AdminSchoolsPage() {
+  const navigate = useNavigate()
   const [schools, setSchools] = useState<School[]>([])
   const [filter, setFilter] = useState('')
   const [loading, setLoading] = useState(true)
@@ -326,6 +328,12 @@ export default function AdminSchoolsPage() {
                           </div>
                         ) : (
                           <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => navigate(`/admin/schools/${school._id}?name=${encodeURIComponent(school.name)}`)}
+                              className="bg-primary text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-primary-dark transition-colors"
+                            >
+                              View Students
+                            </button>
                             <button
                               onClick={() => startEdit(school)}
                               disabled={!!actionId}

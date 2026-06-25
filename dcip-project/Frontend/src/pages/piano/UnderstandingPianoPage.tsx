@@ -1,5 +1,20 @@
 ﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+const PIANO_TERMS = [
+  { term: 'Note', def: 'A single musical sound with a specific pitch. Notes are named C D E F G A B, then the pattern repeats.' },
+  { term: 'Key', def: 'One of the individual black or white bars on the keyboard. Pressing a key produces a note.' },
+  { term: 'Octave', def: 'The same note name appearing eight steps higher or lower. The higher version vibrates exactly twice as fast.' },
+  { term: 'Scale', def: 'A set of notes arranged in order from low to high, following a fixed pattern of whole and half steps.' },
+  { term: 'Chord', def: 'Three or more notes pressed at the same time, producing harmony.' },
+  { term: 'Melody', def: 'A sequence of single notes played one after another that forms a recognisable tune.' },
+  { term: 'Harmony', def: 'Notes sounded together to support or colour the melody.' },
+  { term: 'Treble', def: 'The upper half of the keyboard, typically played by the right hand.' },
+  { term: 'Bass', def: 'The lower half of the keyboard, typically played by the left hand.' },
+  { term: 'Tempo', def: 'The speed of a piece of music, measured in beats per minute (BPM).' },
+  { term: 'Staff', def: 'The five parallel horizontal lines on which musical notes are written.' },
+  { term: 'Interval', def: 'The distance in pitch between any two notes. For example, C to G is a fifth.' },
+]
 import MainLayout from '../../components/MainLayout'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
 import { useReadingEngagement } from '../../hooks/useReadingEngagement'
@@ -45,6 +60,7 @@ function StaticKeyboard() {
 export default function UnderstandingPianoPage() {
   const navigate = useNavigate()
   const { markStageVisited } = usePianoProgress()
+  const [showGlossary, setShowGlossary] = useState(false)
   const [lowEngagement, setLowEngagement] = useState(false)
   const { computeAndSave } = useReadingEngagement('piano', 'course1')
 
@@ -67,7 +83,7 @@ export default function UnderstandingPianoPage() {
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
+        <div className="flex items-center gap-2 text-xs text-text-muted mb-4">
           <button onClick={() => navigate('/piano/understanding-the-piano')} className="hover:text-text-primary transition-colors">
             Piano
           </button>
@@ -75,6 +91,24 @@ export default function UnderstandingPianoPage() {
           <span>Door To Know Piano</span>
           <span>/</span>
           <span className="text-text-primary">Understanding the Piano</span>
+        </div>
+
+        {/* Key Terms banner */}
+        <div className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 mb-5">
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <p className="text-text-secondary text-sm">
+              Not sure what some words mean? Review the <span className="font-semibold text-text-primary">Key Terms</span> glossary before you start.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowGlossary(true)}
+            className="bg-primary text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors shrink-0 ml-4"
+          >
+            View Key Terms
+          </button>
         </div>
 
         <ProgressBar value={1} total={2} label="Course 1 of 2" />
@@ -151,6 +185,27 @@ export default function UnderstandingPianoPage() {
           </button>
         </div>
       </div>
+
+      {showGlossary && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowGlossary(false)}>
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white border-b border-surface-border px-6 py-4 flex items-center justify-between">
+              <h2 className="text-text-primary font-bold text-lg">Piano — Key Terms</h2>
+              <button onClick={() => setShowGlossary(false)} className="text-text-muted hover:text-text-primary transition-colors">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {PIANO_TERMS.map(({ term, def }) => (
+                <div key={term} className="bg-[#F9F7F4] rounded-xl p-4">
+                  <p className="text-primary font-bold text-sm mb-1">{term}</p>
+                  <p className="text-text-secondary text-xs leading-relaxed">{def}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   )
 }

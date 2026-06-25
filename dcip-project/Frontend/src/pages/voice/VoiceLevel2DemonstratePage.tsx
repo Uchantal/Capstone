@@ -5,7 +5,7 @@ import MainLayout from '../../components/MainLayout'
 import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
-import { detectPitch, getPitchStatus, drawWaveform, type PitchStatus } from '../../utils/voicePitch'
+import { detectPitch, getPitchStatus, drawWaveform, DEMO_TOLERANCE, type PitchStatus } from '../../utils/voicePitch'
 import { completeVoiceDemonstration } from '../../services/api'
 
 const DEMO_SCALE = [
@@ -17,7 +17,7 @@ const DEMO_SCALE = [
 ]
 const REQUIRED_CORRECT = 4
 const REQUIRED_MS      = 1500
-const DEMO_TOLERANCE   = 20
+
 
 export default function VoiceLevel2DemonstratePage() {
   const navigate  = useNavigate()

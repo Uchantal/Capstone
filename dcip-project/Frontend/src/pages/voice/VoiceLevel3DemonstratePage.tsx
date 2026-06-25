@@ -5,7 +5,7 @@ import MainLayout from '../../components/MainLayout'
 import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
-import { detectPitch, getPitchStatus, drawWaveform, type PitchStatus } from '../../utils/voicePitch'
+import { detectPitch, getPitchStatus, drawWaveform, DEMO_TOLERANCE, type PitchStatus } from '../../utils/voicePitch'
 import { completeVoiceDemonstration } from '../../services/api'
 
 // 4 prompts: A4 sustained 3s, C4 1.5s, G4 1.5s, C4 1.5s. 3/4 required to pass.
@@ -16,7 +16,7 @@ const PROMPTS = [
   { label: 'C4', note: 'C', freq: 261.63, requiredMs: 1500, displayLabel: 'Return to C4 for 1.5 seconds' },
 ]
 const REQUIRED_CORRECT = 3
-const DEMO_TOLERANCE   = 20
+
 
 export default function VoiceLevel3DemonstratePage() {
   const navigate  = useNavigate()
