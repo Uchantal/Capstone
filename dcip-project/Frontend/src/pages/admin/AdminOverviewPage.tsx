@@ -56,11 +56,11 @@ export default function AdminOverviewPage() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3">
           <Link
-            to="/admin/students"
+            to="/admin/schools"
             className="bg-white border border-surface-border rounded-2xl p-6 hover:border-primary transition-colors block"
           >
             <p className="text-text-primary font-semibold mb-1">Manage Students</p>
-            <p className="text-text-secondary text-sm">View all registered students, activate or deactivate accounts</p>
+            <p className="text-text-secondary text-sm">View students by school, activate or deactivate accounts</p>
           </Link>
           <Link
             to="/admin/schools"

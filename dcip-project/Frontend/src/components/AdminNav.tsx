@@ -3,7 +3,6 @@ import { useAuth } from '../hooks/useAuth'
 
 const NAV_LINKS = [
   { label: 'Overview',    to: '/admin/overview' },
-  { label: 'Students',    to: '/admin/students' },
   { label: 'Supervisors', to: '/admin/supervisors' },
   { label: 'Schools',     to: '/admin/schools' },
   { label: 'Modules',     to: '/admin/modules' },
