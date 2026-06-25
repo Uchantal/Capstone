@@ -11,7 +11,7 @@ const schoolSchema = new Schema<ISchool>({
   name: { type: String, required: true, unique: true, trim: true },
   district: { type: String, required: true, trim: true },
   province: { type: String, default: '', trim: true },
-  isActive: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: true },
 })
 
 export default model<ISchool>('School', schoolSchema)

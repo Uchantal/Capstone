@@ -27,6 +27,9 @@ export const fetchSchools = () => api.get('/auth/schools')
 export const updateDiscipline = (discipline: string, subDiscipline?: string) =>
   api.patch('/auth/discipline', { discipline, ...(subDiscipline ? { subDiscipline } : {}) })
 
+export const updateUserSchool = (schoolId: string) =>
+  api.patch('/auth/school', { schoolId })
+
 export const fetchMe = () => api.get('/auth/me')
 
 export const changePassword = (currentPassword: string, newPassword: string) =>

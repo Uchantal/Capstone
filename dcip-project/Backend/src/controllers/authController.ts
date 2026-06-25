@@ -220,6 +220,29 @@ export const updateDiscipline = async (req: AuthRequest, res: Response): Promise
   }
 }
 
+export const updateSchool = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { schoolId } = req.body
+    if (!schoolId) { res.status(400).json({ message: 'schoolId is required' }); return }
+    const school = await School.findById(schoolId)
+    if (!school || !school.isActive) { res.status(400).json({ message: 'School not found' }); return }
+    const user = await User.findByIdAndUpdate(req.userId, { school: schoolId }, { new: true }).populate('school')
+    if (!user) { res.status(404).json({ message: 'User not found' }); return }
+    const schoolDoc = user.school ? (user.school as unknown as ISchool) : null
+    res.json({
+      id: user._id,
+      fullName: user.fullName,
+      username: user.username,
+      role: user.role,
+      school: schoolDoc ? { id: schoolDoc._id, name: schoolDoc.name, district: schoolDoc.district } : null,
+      discipline: user.discipline,
+      subDiscipline: user.subDiscipline,
+    })
+  } catch {
+    res.status(500).json({ message: 'Could not update school' })
+  }
+}
+
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email } = req.body

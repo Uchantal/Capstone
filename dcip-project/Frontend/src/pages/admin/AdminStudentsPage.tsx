@@ -126,6 +126,7 @@ function StudentDetail({ profile, onBack }: { profile: StudentProfile; onBack: (
         </div>
       </div>
 
+
       {engagementScores.length === 0 ? (
         <div className="bg-white border border-surface-border rounded-2xl p-6 text-center">
           <p className="text-text-secondary text-sm">No engagement data yet — student has not completed any course stages.</p>

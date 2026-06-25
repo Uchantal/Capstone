@@ -5,6 +5,7 @@ import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import DisciplineSelectPage from './pages/DisciplineSelectPage'
+import SelectSchoolPage from './pages/SelectSchoolPage'
 import MusicSelectPage from './pages/MusicSelectPage'
 import PianoVirtualInstrumentPage from './pages/piano/VirtualInstrumentPage'
 import PortfolioPage from './pages/PortfolioPage'
@@ -127,11 +128,12 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 function StudentRoute({ children }: { children: React.ReactNode }) {
   const { token, user } = useAuth()
-  const { search } = useLocation()
+  const { search, pathname } = useLocation()
   const isAdminPreview = useContext(PreviewContext)
   const urlPreview = user?.role === 'admin' && new URLSearchParams(search).get('preview') === 'true'
   if (!token) return <Navigate to="/login" replace />
   if (user?.role !== 'student' && !isAdminPreview && !urlPreview) return <Navigate to={roleHome(user?.role)} replace />
+  if (user?.role === 'student' && !user.school && pathname !== '/select-school') return <Navigate to="/select-school" replace />
   return <>{children}</>
 }
 
@@ -163,6 +165,7 @@ function AppContent() {
         <Route path="/reset-password" element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
 
         <Route path="/dashboard" element={<StudentRoute><DashboardPage /></StudentRoute>} />
+        <Route path="/select-school" element={<StudentRoute><SelectSchoolPage /></StudentRoute>} />
         <Route path="/disciplines" element={<StudentRoute><DisciplineSelectPage /></StudentRoute>} />
         <Route path="/session/music" element={<StudentRoute><MusicSelectPage /></StudentRoute>} />
         <Route path="/portfolio" element={<StudentRoute><PortfolioPage /></StudentRoute>} />
