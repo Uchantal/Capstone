@@ -10,6 +10,8 @@ export const updateSchool = (id: string, data: { name: string; district: string;
   api.patch(`/admin/schools/${id}`, data)
 export const createSchool = (data: { name: string; district: string; province: string }) =>
   api.post('/admin/schools', data)
+export const getAdminSchoolStudents = (schoolId: string) =>
+  api.get(`/admin/schools/${schoolId}/students`)
 
 export const getAdminStudents = () => api.get('/admin/students')
 export const activateStudent = (id: string) => api.patch(`/admin/students/${id}/activate`)

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
-import { completeVisualArtsDemonstration } from '../../services/api'
+import { completeVisualArtsDemonstration, fetchEngagementScores } from '../../services/api'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 
 const TASK =
@@ -35,6 +35,12 @@ function checkVADemonstration(
   return { passed: feedback.length === 0, feedback }
 }
 
+function levelAverage(scores: Record<string, number | null>, keys: string[]): number {
+  const values = keys.map(k => scores[k]).filter((v): v is number => v !== null && v !== undefined)
+  if (values.length === 0) return 0
+  return Math.round(values.reduce((a, b) => a + b, 0) / values.length)
+}
+
 export default function VALevel1DemonstratePage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
@@ -47,6 +53,7 @@ export default function VALevel1DemonstratePage() {
   const [submitting, setSubmitting] = useState(false)
   const [passed, setPassed] = useState(false)
   const [engagementScore, setEngagementScore] = useState<number | null>(null)
+  const [combinedScore, setCombinedScore] = useState<number | null>(null)
   const { recordInteraction: recordEngInteraction, recordColour: recordEngColour, recordTool, computeAndSave } =
     useVAEngagement('visual-arts', 'level1Demonstrate')
 
@@ -79,12 +86,25 @@ export default function VALevel1DemonstratePage() {
     const score = await computeAndSave()
     setEngagementScore(score)
     const snapshot = canvasRef.current?.toDataURL('image/png') ?? ''
+    let combined = score
     try {
-      await completeVisualArtsDemonstration(1, true, snapshot)
-      setPassed(true)
+      const res = await fetchEngagementScores('visual-arts')
+      const scores = res.data?.scores ?? {}
+      combined = levelAverage(scores, ['level1Learn', 'level1Practise', 'level1Demonstrate'])
+      // Override the demonstrate slot with the freshly computed score
+      combined = levelAverage({ ...scores, level1Demonstrate: score }, ['level1Learn', 'level1Practise', 'level1Demonstrate'])
     } catch {
-      setPassed(true)
+      // fall back to demonstrate score alone
+    }
+    setCombinedScore(combined)
+    try {
+      if (combined >= 60) {
+        await completeVisualArtsDemonstration(1, true, snapshot)
+      }
+    } catch {
+      // ignore
     } finally {
+      setPassed(true)
       setSubmitting(false)
     }
   }
@@ -183,46 +203,77 @@ export default function VALevel1DemonstratePage() {
         sidebarFooter={sidebarFooter}
       />
 
-      {passed && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
-            <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2 className="text-text-primary font-bold text-xl mb-2">Level 1 Demonstration Complete</h2>
-            <p className="text-text-secondary text-sm mb-3">
-              Your drawing has been saved to your portfolio.
-            </p>
-            {engagementScore !== null && engagementScore < 40 && (
-              <p className="text-sm text-amber-600 mb-3">
-                Your engagement score for this session was low. Try spending more time exploring the tools next time.
-              </p>
-            )}
-            <div className="inline-flex items-center bg-primary/10 text-primary text-xs font-semibold px-4 py-2 rounded-full mb-5">
-              Beginner Visual Arts Badge
-            </div>
-            <p className="text-text-muted text-xs mb-5">
-              Review your work against the task and try again if you are not satisfied.
-            </p>
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={() => navigate('/visual-arts/level-2')}
-                className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"
-              >
-                Continue to Level 2
-              </button>
-              <button
-                onClick={handleReset}
-                className="border border-surface-border text-text-secondary font-medium px-6 py-2.5 rounded-xl hover:bg-gray-50 transition-colors w-full text-sm"
-              >
-                Try Again
-              </button>
+      {passed && (() => {
+        const displayScore = combinedScore ?? engagementScore
+        const levelPassed = isPreviewMode || displayScore === null || displayScore >= 60
+        const gradeLabel = displayScore === null ? null
+          : displayScore >= 80 ? 'Excellent' : displayScore >= 60 ? 'Good'
+          : displayScore >= 40 ? 'Fair' : 'Needs Improvement'
+        return (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
+              {levelPassed ? (
+                <>
+                  <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h2 className="text-text-primary font-bold text-xl mb-2">Level 1 Complete</h2>
+                  <p className="text-text-secondary text-sm mb-3">Your drawing has been saved to your portfolio.</p>
+                  {displayScore !== null && (
+                    <div className="mb-4 p-3 bg-[#F9F7F4] rounded-xl border border-surface-border">
+                      <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Level Score (Combined)</p>
+                      <p className="text-2xl font-bold text-text-primary">{displayScore}<span className="text-sm font-normal text-text-muted">/100</span></p>
+                      <p className="text-xs font-semibold mt-1 text-secondary">{gradeLabel}</p>
+                    </div>
+                  )}
+                  <div className="inline-flex items-center bg-primary/10 text-primary text-xs font-semibold px-4 py-2 rounded-full mb-5">
+                    Beginner Visual Arts Badge
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={() => navigate('/visual-arts/level-2')}
+                      className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"
+                    >
+                      Continue to Level 2
+                    </button>
+                    <button
+                      onClick={handleReset}
+                      className="border border-surface-border text-text-secondary font-medium px-6 py-2.5 rounded-xl hover:bg-gray-50 transition-colors w-full text-sm"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-7 h-7 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-text-primary font-bold text-xl mb-2">Demonstration Not Completed</h2>
+                  <div className="mb-4 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                    <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Level Score (Combined)</p>
+                    <p className="text-2xl font-bold text-text-primary">{displayScore}<span className="text-sm font-normal text-text-muted">/100</span></p>
+                    <p className="text-xs font-semibold mt-1 text-amber-600">{gradeLabel}</p>
+                  </div>
+                  <p className="text-sm text-amber-700 leading-relaxed mb-6">
+                    You need at least 60/100 to earn this badge. Spend more time exploring the tools, then try again.
+                  </p>
+                  <button
+                    onClick={handleReset}
+                    className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"
+                  >
+                    Try Again
+                  </button>
+                </>
+              )}
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </div>
   )
 }

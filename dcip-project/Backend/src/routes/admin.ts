@@ -245,6 +245,18 @@ router.patch('/schools/:id/deactivate', protect, requireRole('admin'), async (re
   }
 })
 
+router.get('/schools/:id/students', protect, requireRole('admin'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const students = await User.find({ role: 'student', school: req.params.id })
+      .populate('school', 'name district')
+      .sort({ fullName: 1 })
+      .select('fullName username email discipline isActive createdAt school')
+    res.json(students)
+  } catch {
+    res.status(500).json({ message: 'Could not fetch students for school' })
+  }
+})
+
 // === STATS & REPORTS ===
 
 router.get('/stats', protect, requireRole('admin'), async (_req: AuthRequest, res: Response): Promise<void> => {

@@ -88,7 +88,7 @@ export default function VAProductionPage() {
   }
 
   if (phase === 'done') {
-    const lowEngagement = engagementScore !== null && engagementScore < 40
+    const lowEngagement = engagementScore !== null && engagementScore < 60
     const gradeLabel = engagementScore === null ? null
       : engagementScore >= 80 ? 'Excellent' : engagementScore >= 60 ? 'Good'
       : engagementScore >= 40 ? 'Fair' : 'Needs Improvement'

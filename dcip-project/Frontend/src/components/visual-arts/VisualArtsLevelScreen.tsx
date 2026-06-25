@@ -63,7 +63,9 @@ export default function VisualArtsLevelScreen({
     if (!isPreviewMode) {
       const score = await computeAndSave()
       setEngagementScore(score)
-      await markComplete(stageId)
+      if (score >= 60) {
+        await markComplete(stageId)
+      }
     }
     setCompleted(true)
   }
@@ -164,32 +166,68 @@ export default function VisualArtsLevelScreen({
         sidebarFooter={sidebarFooter}
       />
 
-      {completed && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
+      {completed && (() => {
+        const passed = isPreviewMode || engagementScore === null || engagementScore >= 60
+        const gradeLabel = engagementScore === null ? null
+          : engagementScore >= 80 ? 'Excellent' : engagementScore >= 60 ? 'Good'
+          : engagementScore >= 40 ? 'Fair' : 'Needs Improvement'
+
+        return (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
+              {passed ? (
+                <>
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h2 className="text-text-primary font-bold text-xl mb-2">Level {levelNumber} Complete</h2>
+                  <p className="text-text-secondary text-sm mb-4">
+                    Well done. You have completed all the tasks for this level.
+                  </p>
+                  {engagementScore !== null && (
+                    <div className="mb-4 p-3 bg-[#F9F7F4] rounded-xl border border-surface-border">
+                      <p className="text-text-muted text-[10px] uppercase tracking-wide mb-1">Engagement Score</p>
+                      <p className="text-2xl font-bold text-text-primary">{engagementScore}<span className="text-sm font-normal text-text-muted">/100</span></p>
+                      <p className="text-xs font-semibold mt-1 text-secondary">{gradeLabel}</p>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => navigate(nextPath)}
+                    className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"
+                  >
+                    Continue to Practise
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-text-primary font-bold text-xl mb-2">Level Not Completed</h2>
+                  <div className="mb-4 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                    <p className="text-text-muted text-[10px] uppercase tracking-wide mb-1">Engagement Score</p>
+                    <p className="text-2xl font-bold text-text-primary">{engagementScore}<span className="text-sm font-normal text-text-muted">/100</span></p>
+                    <p className="text-xs font-semibold mt-1 text-amber-600">{gradeLabel}</p>
+                  </div>
+                  <p className="text-sm text-amber-700 leading-relaxed mb-6">
+                    You need at least 60/100 to earn the Level {levelNumber} badge. Spend more time exploring the tools and experimenting with different techniques, then try again.
+                  </p>
+                  <button
+                    onClick={() => setCompleted(false)}
+                    className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"
+                  >
+                    Try Again
+                  </button>
+                </>
+              )}
             </div>
-            <h2 className="text-text-primary font-bold text-xl mb-2">Level {levelNumber} Complete</h2>
-            <p className="text-text-secondary text-sm mb-4">
-              Well done. You completed all the tasks for this level.
-            </p>
-            {engagementScore !== null && engagementScore < 40 && (
-              <p className="text-sm text-text-secondary mb-4 p-3 bg-[#F9F7F4] rounded-lg border border-surface-border">
-                Your interaction with this exercise was limited. Spending more time exploring the tools and experimenting will strengthen your skills before the next level.
-              </p>
-            )}
-            <button
-              onClick={() => navigate(nextPath)}
-              className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark transition-colors w-full"
-            >
-              Continue to Practise
-            </button>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </div>
   )
 }
