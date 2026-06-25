@@ -24,12 +24,12 @@ export default function AdminNav() {
   return (
     <nav className="bg-white border-b border-surface-border h-14 flex items-center px-4 lg:px-6 justify-between gap-2">
       <div className="flex items-center gap-3 min-w-0">
-        <div className="flex items-center gap-2 shrink-0">
+        <button onClick={() => navigate('/admin')} className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
           <div className="bg-primary rounded-lg w-8 h-8 flex items-center justify-center">
             <span className="text-white font-bold text-xs">DC</span>
           </div>
           <span className="text-text-secondary text-xs font-medium hidden lg:inline">Admin</span>
-        </div>
+        </button>
         <div className="flex items-center flex-wrap gap-0.5">
           {NAV_LINKS.map((link) => (
             <NavLink

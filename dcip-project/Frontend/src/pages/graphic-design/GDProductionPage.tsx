@@ -18,12 +18,13 @@ const CHECKLIST = [
 type Phase = 'intro' | 'working' | 'done'
 
 function MinimalNav({ onExit }: { onExit: () => void }) {
+  const navigate = useNavigate()
   return (
     <nav className="border-b border-surface-border bg-white flex items-center justify-between px-6 py-4 flex-shrink-0">
       <div className="flex items-center gap-2">
-        <div className="bg-primary rounded-md w-8 h-8 flex items-center justify-center">
+        <button onClick={() => navigate('/dashboard')} className="bg-primary rounded-md w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0">
           <span className="text-white font-bold text-xs">DC</span>
-        </div>
+        </button>
         <span className="text-text-primary font-bold text-sm">DCIP Graphic Design</span>
       </div>
       <button
@@ -124,32 +125,56 @@ export default function GDProductionPage() {
   }
 
   if (phase === 'done') {
+    const lowEngagement = engagementScore !== null && engagementScore < 40
+    const gradeLabel = engagementScore === null ? null
+      : engagementScore >= 80 ? 'Excellent' : engagementScore >= 60 ? 'Good'
+      : engagementScore >= 40 ? 'Fair' : 'Needs Improvement'
+
     return (
       <div className="h-screen bg-white flex flex-col">
         <MinimalNav onExit={() => navigate('/dashboard')} />
         <div className="flex-1 flex items-center justify-center px-6">
           <div className="max-w-md w-full">
-            <div className="bg-secondary/5 border-2 border-secondary/30 rounded-2xl p-8 text-center mb-6">
-              <div className="w-14 h-14 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-7 h-7 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            <div className={`border-2 rounded-2xl p-8 text-center mb-6 ${lowEngagement ? 'bg-amber-50 border-amber-200' : 'bg-secondary/5 border-secondary/30'}`}>
+              <div className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 ${lowEngagement ? 'bg-amber-100' : 'bg-secondary/10'}`}>
+                <svg className={`w-7 h-7 ${lowEngagement ? 'text-amber-600' : 'text-secondary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d={lowEngagement ? 'M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z' : 'M5 13l4 4L19 7'} />
                 </svg>
               </div>
               <h1 className="text-text-primary font-bold text-2xl mb-2">Production Complete</h1>
               <p className="text-text-secondary text-sm leading-relaxed max-w-md mx-auto mb-4">
-                Your work has been saved to your portfolio. You have completed the Graphic Design journey.
+                Your work has been saved to your portfolio.
               </p>
-              {engagementScore !== null && engagementScore < 40 && (
-                <p className="text-sm text-amber-600 mb-4">
-                  Your engagement score for this session was low. Try making more design changes next time.
-                </p>
+              {engagementScore !== null && (
+                <div className="mb-4 p-3 bg-white rounded-xl border border-surface-border">
+                  <p className="text-text-muted text-[10px] uppercase tracking-wide mb-1">Engagement Score</p>
+                  <p className="text-3xl font-bold text-text-primary">{engagementScore}<span className="text-sm font-normal text-text-muted">/100</span></p>
+                  <p className={`text-xs font-semibold mt-1 ${lowEngagement ? 'text-amber-600' : 'text-secondary'}`}>{gradeLabel}</p>
+                </div>
               )}
-              <div className="inline-flex items-center bg-[#2D6A4F]/10 text-[#2D6A4F] text-xs font-semibold px-4 py-2 rounded-full">
-                Advanced Graphic Design Badge
-              </div>
+              {lowEngagement ? (
+                <p className="text-sm text-amber-700 leading-relaxed">
+                  Your engagement was too low to earn the badge. Make more design changes and experiment with different elements, then try again.
+                </p>
+              ) : (
+                <>
+                  <p className="text-text-secondary text-sm mb-4">You have completed the Graphic Design journey.</p>
+                  <div className="inline-flex items-center bg-[#2D6A4F]/10 text-[#2D6A4F] text-xs font-semibold px-4 py-2 rounded-full">
+                    Advanced Graphic Design Badge
+                  </div>
+                </>
+              )}
             </div>
             <div className="flex flex-col gap-3">
-              {portfolioId && (
+              {lowEngagement && (
+                <button
+                  onClick={() => { setPhase('working'); setChecked(new Set()); setEngagementScore(null); setPortfolioId(null) }}
+                  className="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-dark transition-colors text-sm"
+                >
+                  Try Again
+                </button>
+              )}
+              {portfolioId && !lowEngagement && (
                 <button
                   onClick={() => navigate('/portfolio')}
                   className="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-dark transition-colors text-sm"
@@ -209,9 +234,9 @@ export default function GDProductionPage() {
     <div className="h-screen flex flex-col overflow-hidden bg-white">
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 flex-1">
-          <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
+          <button onClick={() => navigate('/dashboard')} className="bg-primary rounded-md w-6 h-6 flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0">
             <span className="text-white font-bold text-[10px]">DC</span>
-          </div>
+          </button>
           <span className="text-text-secondary text-xs">Graphic Design</span>
           <span className="text-text-muted text-xs">/</span>
           <span className="text-text-primary text-xs font-medium">Production</span>

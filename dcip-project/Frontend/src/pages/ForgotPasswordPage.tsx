@@ -45,9 +45,9 @@ export default function ForgotPasswordPage() {
 
           {/* Logo */}
           <div className="flex items-center gap-3 mb-8">
-            <div className="bg-primary rounded-lg w-9 h-9 flex items-center justify-center">
+            <Link to="/" className="bg-primary rounded-lg w-9 h-9 flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0">
               <span className="text-white font-bold text-sm">DC</span>
-            </div>
+            </Link>
             <span className="text-text-primary font-semibold text-sm">Digital Creative Platform</span>
           </div>
 

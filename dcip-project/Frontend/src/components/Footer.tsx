@@ -13,9 +13,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
 
           <div>
-            <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center mb-3">
+            <Link to="/" className="inline-block w-9 h-9 bg-primary rounded-lg flex items-center justify-center mb-3 hover:opacity-80 transition-opacity">
               <span className="text-white font-bold text-sm">DC</span>
-            </div>
+            </Link>
             <p className="text-white font-semibold text-sm mb-2">
               Digital Creative Infrastructure Platform
             </p>

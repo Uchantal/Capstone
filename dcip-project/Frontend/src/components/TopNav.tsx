@@ -184,9 +184,9 @@ export default function TopNav() {
     return (
       <nav className="bg-white border-b border-surface-border h-12 flex items-center px-6 justify-between">
         <div className="flex items-center gap-3">
-          <div className="bg-primary rounded-lg w-8 h-8 flex items-center justify-center">
+          <button onClick={() => navigate('/dashboard')} className="bg-primary rounded-lg w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0">
             <span className="text-white font-bold text-sm">DCIP</span>
-          </div>
+          </button>
           <div>
             <p className="text-text-primary font-semibold text-sm leading-tight hidden lg:block">
               Digital Creative Infrastructure Platform
@@ -225,9 +225,9 @@ export default function TopNav() {
   return (
     <nav className="bg-white border-b border-surface-border h-12 flex items-center px-6 justify-between">
       <div className="flex items-center gap-3">
-        <div className="bg-primary rounded-lg w-8 h-8 flex items-center justify-center">
+        <button onClick={() => navigate('/dashboard')} className="bg-primary rounded-lg w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0">
           <span className="text-white font-bold text-sm">DCIP</span>
-        </div>
+        </button>
         <p className="text-text-primary font-semibold text-sm leading-tight hidden lg:block">
           Digital Creative Infrastructure Platform
         </p>

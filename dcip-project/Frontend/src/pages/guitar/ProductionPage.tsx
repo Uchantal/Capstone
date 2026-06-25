@@ -161,9 +161,9 @@ export default function GuitarProductionPage() {
       <div className="h-screen flex flex-col overflow-hidden">
         <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
           <div className="flex items-center gap-2 flex-1">
-            <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
+            <button onClick={() => navigate('/dashboard')} className="bg-primary rounded-md w-6 h-6 flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0">
               <span className="text-white font-bold text-[10px]">DC</span>
-            </div>
+            </button>
             <span className="text-text-primary font-bold text-sm">DCIP Guitar</span>
           </div>
           <button
@@ -203,9 +203,9 @@ export default function GuitarProductionPage() {
       <div className="h-screen flex flex-col overflow-hidden">
         <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
           <div className="flex items-center gap-2 flex-1">
-            <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
+            <button onClick={() => navigate('/dashboard')} className="bg-primary rounded-md w-6 h-6 flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0">
               <span className="text-white font-bold text-[10px]">DC</span>
-            </div>
+            </button>
             <span className="text-text-primary font-bold text-sm">DCIP Guitar</span>
           </div>
           <button
@@ -301,9 +301,9 @@ export default function GuitarProductionPage() {
     <div className="h-screen flex flex-col overflow-hidden">
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 flex-1">
-          <div className="bg-primary rounded-md w-6 h-6 flex items-center justify-center">
+          <button onClick={() => navigate('/dashboard')} className="bg-primary rounded-md w-6 h-6 flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0">
             <span className="text-white font-bold text-[10px]">DC</span>
-          </div>
+          </button>
           <span className="text-text-primary font-bold text-sm">DCIP Guitar</span>
         </div>
         <div className="flex items-center gap-3">
