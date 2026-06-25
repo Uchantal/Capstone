@@ -44,9 +44,15 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       username,
       email,
       password: hashed,
-      school: schoolId,
+      school: school._id,
       role: 'student',
     })
+
+    // Explicitly ensure school is persisted (belt-and-suspenders for Mongoose casting edge cases)
+    if (!user.school) {
+      await User.findByIdAndUpdate(user._id, { $set: { school: school._id } })
+      user.school = school._id
+    }
 
     res.status(201).json({
       token: generateToken(user._id.toString(), user.role),
@@ -55,7 +61,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         fullName: user.fullName,
         username: user.username,
         role: user.role,
-        school: { id: school._id, name: school.name, district: school.district },
+        school: user.school ? { id: school._id, name: school.name, district: school.district } : null,
         discipline: user.discipline,
         subDiscipline: user.subDiscipline,
       },

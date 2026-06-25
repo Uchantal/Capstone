@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useRef } from 'react'
+import { fetchMe } from './services/api'
 import HomePage from './pages/HomePage'
 import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
@@ -126,11 +127,23 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+// Refreshed once per page session so stale localStorage school data gets corrected
+const _studentRefreshed = { done: false }
+
 function StudentRoute({ children }: { children: React.ReactNode }) {
-  const { token, user } = useAuth()
+  const { token, user, updateUser } = useAuth()
   const { search, pathname } = useLocation()
   const isAdminPreview = useContext(PreviewContext)
   const urlPreview = user?.role === 'admin' && new URLSearchParams(search).get('preview') === 'true'
+  const ranRef = useRef(false)
+
+  useEffect(() => {
+    if (ranRef.current || _studentRefreshed.done || !token || user?.role !== 'student') return
+    ranRef.current = true
+    _studentRefreshed.done = true
+    fetchMe().then(res => updateUser(res.data)).catch(() => {})
+  }, [token, user?.role])
+
   if (!token) return <Navigate to="/login" replace />
   if (user?.role !== 'student' && !isAdminPreview && !urlPreview) return <Navigate to={roleHome(user?.role)} replace />
   if (user?.role === 'student' && !user.school && pathname !== '/select-school') return <Navigate to="/select-school" replace />
