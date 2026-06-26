@@ -17,6 +17,95 @@ const NO_BACK_PATHS = new Set([
   '/profile',
 ])
 
+// Explicit parent for every content page.
+// Used when there is no browser history (direct URL, bookmark, post-SW-reload)
+// so the back button always navigates to the right place rather than
+// falling back blindly to /disciplines.
+const ROUTE_PARENT: Record<string, string> = {
+  // ── Piano ────────────────────────────────────────────────────────────
+  '/piano/understanding-the-piano':     '/piano/virtual-instrument',
+  '/piano/notes-build-chords':          '/piano/understanding-the-piano',
+  '/piano/level-1':                     '/piano/virtual-instrument',
+  '/piano/level-1/practise':            '/piano/level-1',
+  '/piano/level-1/demonstrate':         '/piano/level-1',
+  '/piano/level-2':                     '/piano/virtual-instrument',
+  '/piano/level-2/practise':            '/piano/level-2',
+  '/piano/level-2/demonstrate':         '/piano/level-2',
+  '/piano/level-3':                     '/piano/virtual-instrument',
+  '/piano/level-3/practise':            '/piano/level-3',
+  '/piano/level-3/demonstrate':         '/piano/level-3',
+  '/piano/sharpening-myself':           '/piano/virtual-instrument',
+  '/piano/production':                  '/piano/virtual-instrument',
+
+  // ── Guitar ───────────────────────────────────────────────────────────
+  '/guitar/reading-the-fretboard':      '/guitar/virtual-instrument',
+  '/guitar/notes-across-the-neck':      '/guitar/reading-the-fretboard',
+  '/guitar/level-1':                    '/guitar/virtual-instrument',
+  '/guitar/level-1/practise':           '/guitar/level-1',
+  '/guitar/level-1/demonstrate':        '/guitar/level-1',
+  '/guitar/level-2':                    '/guitar/virtual-instrument',
+  '/guitar/level-2/practise':           '/guitar/level-2',
+  '/guitar/level-2/demonstrate':        '/guitar/level-2',
+  '/guitar/level-3':                    '/guitar/virtual-instrument',
+  '/guitar/level-3/practise':           '/guitar/level-3',
+  '/guitar/level-3/demonstrate':        '/guitar/level-3',
+  '/guitar/sharpening-myself':          '/guitar/virtual-instrument',
+  '/guitar/production':                 '/guitar/virtual-instrument',
+
+  // ── Voice ────────────────────────────────────────────────────────────
+  '/voice/posture-breath-voice':        '/voice/studio',
+  '/voice/pitch-and-scale':             '/voice/posture-breath-voice',
+  '/voice/level-1':                     '/voice/studio',
+  '/voice/level-1/practise':            '/voice/level-1',
+  '/voice/level-1/demonstrate':         '/voice/level-1',
+  '/voice/level-2':                     '/voice/studio',
+  '/voice/level-2/practise':            '/voice/level-2',
+  '/voice/level-2/demonstrate':         '/voice/level-2',
+  '/voice/level-3':                     '/voice/studio',
+  '/voice/level-3/practise':            '/voice/level-3',
+  '/voice/level-3/demonstrate':         '/voice/level-3',
+  '/voice/sharpening-myself':           '/voice/studio',
+  '/voice/production':                  '/voice/studio',
+
+  // ── Visual Arts ──────────────────────────────────────────────────────
+  '/visual-arts/course-1':              '/visual-arts/virtual-canvas',
+  '/visual-arts/course-2':              '/visual-arts/course-1',
+  '/visual-arts/level-1':               '/visual-arts/virtual-canvas',
+  '/visual-arts/level-1/practise':      '/visual-arts/level-1',
+  '/visual-arts/level-1/demonstrate':   '/visual-arts/level-1',
+  '/visual-arts/level-2':               '/visual-arts/virtual-canvas',
+  '/visual-arts/level-2/practise':      '/visual-arts/level-2',
+  '/visual-arts/level-2/demonstrate':   '/visual-arts/level-2',
+  '/visual-arts/level-3':               '/visual-arts/virtual-canvas',
+  '/visual-arts/level-3/practise':      '/visual-arts/level-3',
+  '/visual-arts/level-3/demonstrate':   '/visual-arts/level-3',
+  '/visual-arts/sharpening':            '/visual-arts/virtual-canvas',
+  '/visual-arts/production':            '/visual-arts/virtual-canvas',
+
+  // ── Graphic Design ───────────────────────────────────────────────────
+  '/graphic-design/course-1':           '/graphic-design/virtual-studio',
+  '/graphic-design/course-2':           '/graphic-design/course-1',
+  '/graphic-design/level-1':            '/graphic-design/virtual-studio',
+  '/graphic-design/level-1/practise':   '/graphic-design/level-1',
+  '/graphic-design/level-1/demonstrate':'/graphic-design/level-1',
+  '/graphic-design/level-2':            '/graphic-design/virtual-studio',
+  '/graphic-design/level-2/practise':   '/graphic-design/level-2',
+  '/graphic-design/level-2/demonstrate':'/graphic-design/level-2',
+  '/graphic-design/level-3':            '/graphic-design/virtual-studio',
+  '/graphic-design/level-3/practise':   '/graphic-design/level-3',
+  '/graphic-design/level-3/demonstrate':'/graphic-design/level-3',
+  '/graphic-design/sharpening':         '/graphic-design/virtual-studio',
+  '/graphic-design/production':         '/graphic-design/virtual-studio',
+
+  // ── Hub / instrument pages ───────────────────────────────────────────
+  '/piano/virtual-instrument':          '/disciplines',
+  '/guitar/virtual-instrument':         '/disciplines',
+  '/voice/studio':                      '/disciplines',
+  '/visual-arts/virtual-canvas':        '/disciplines',
+  '/graphic-design/virtual-studio':     '/disciplines',
+  '/graphic-design/overview':           '/disciplines',
+}
+
 interface Props {
   children: React.ReactNode
   background?: string
@@ -31,11 +120,15 @@ export default function MainLayout({ children, background = 'bg-white' }: Props)
   const showBack = isStudent && !NO_BACK_PATHS.has(pathname)
 
   const handleBack = () => {
-    // history.state.idx is 0 when there is no previous page inside this SPA session
+    // If there is real browser history from within this SPA session use it —
+    // this gives the most natural "undo last navigation" feeling.
+    // Otherwise fall back to the statically-defined parent for this route so
+    // that the button still works after a page reload, a direct URL open, or
+    // after the service-worker reload that fires on each new deploy.
     if ((window.history.state?.idx ?? 0) > 0) {
       navigate(-1)
     } else {
-      navigate('/disciplines')
+      navigate(ROUTE_PARENT[pathname] ?? '/disciplines')
     }
   }
 

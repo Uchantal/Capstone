@@ -15,7 +15,7 @@ npm run build
 
 echo "Restarting backend with PM2..."
 cd "$PROJECT_DIR"
-pm2 restart dcip-backend || pm2 start ecosystem.config.js
+pm2 restart dcip-backend || pm2 start Backend/ecosystem.config.js
 pm2 save
 
 echo "Building frontend..."

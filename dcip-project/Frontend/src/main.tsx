@@ -19,7 +19,17 @@ if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register('/sw.js')
-        .then(() => console.log('Service Worker registered'))
+        .then(() => {
+          console.log('Service Worker registered')
+          // When a new SW activates (skipWaiting fires after a deploy), reload so
+          // the page always runs the latest JS bundle. Without this the old bundle
+          // keeps running even though the new SW is controlling the page, which
+          // causes features added in the latest deploy (e.g. the back button) to
+          // appear broken until the student manually refreshes.
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            window.location.reload()
+          })
+        })
         .catch((err) => console.log('SW registration failed:', err))
     })
   } else {
