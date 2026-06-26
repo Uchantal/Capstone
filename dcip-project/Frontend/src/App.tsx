@@ -94,7 +94,9 @@ import AdminFeedbackPage from './pages/admin/AdminFeedbackPage'
 import FeedbackPage from './pages/FeedbackPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import StudioPage from './pages/StudioPage'
 import AdminPreviewPage from './pages/admin/AdminPreviewPage'
+import AdminStudioPage from './pages/admin/AdminStudioPage'
 import PreviewNavBar from './components/PreviewNavBar'
 import { useAuth } from './hooks/useAuth'
 
@@ -260,6 +262,7 @@ function AppContent() {
         <Route path="/voice/sharpening-myself" element={<StudentRoute><VoiceSharpeningPage /></StudentRoute>} />
         <Route path="/voice/production" element={<StudentRoute><VoiceProductionPage /></StudentRoute>} />
         <Route path="/settings" element={<StudentRoute><SettingsPage /></StudentRoute>} />
+        <Route path="/studio" element={<StudentRoute><StudioPage /></StudentRoute>} />
 
         <Route path="/supervisor" element={<SupervisorRoute><SupervisorDashboardPage /></SupervisorRoute>} />
 
@@ -273,6 +276,7 @@ function AppContent() {
         <Route path="/admin/supervisors" element={<AdminRoute><AdminSupervisorsPage /></AdminRoute>} />
         <Route path="/admin/feedback" element={<AdminRoute><AdminFeedbackPage /></AdminRoute>} />
         <Route path="/admin/preview" element={<AdminRoute><AdminPreviewPage /></AdminRoute>} />
+        <Route path="/admin/studio"  element={<AdminRoute><AdminStudioPage /></AdminRoute>} />
 
         <Route path="/feedback" element={<FeedbackPage />} />
       </Routes>

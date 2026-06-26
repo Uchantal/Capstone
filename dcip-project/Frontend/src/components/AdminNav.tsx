@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { label: 'Schools',     to: '/admin/schools' },
   { label: 'Modules',     to: '/admin/modules' },
   { label: 'Reports',     to: '/admin/reports' },
+  { label: 'Studio',      to: '/admin/studio' },
   { label: 'Feedback',    to: '/admin/feedback' },
   { label: 'Preview',     to: '/admin/preview' },
 ]

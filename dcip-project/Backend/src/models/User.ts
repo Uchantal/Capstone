@@ -12,6 +12,9 @@ export interface IUser extends Document {
   school: mongoose.Types.ObjectId | null
   discipline: string | null
   subDiscipline: string | null
+  graduated: boolean
+  graduatedAt: Date | undefined
+  graduatedDisciplines: string[]
   passwordResetToken: string | undefined
   passwordResetExpires: Date | undefined
   createdAt: Date
@@ -35,9 +38,12 @@ const userSchema = new Schema<IUser>({
     enum: ['piano', 'guitar', 'voice', null],
     default: null,
   },
-  passwordResetToken: { type: String },
-  passwordResetExpires: { type: Date },
-  createdAt: { type: Date, default: Date.now },
+  graduated:             { type: Boolean, default: false },
+  graduatedAt:           { type: Date },
+  graduatedDisciplines:  [{ type: String }],
+  passwordResetToken:    { type: String },
+  passwordResetExpires:  { type: Date },
+  createdAt:             { type: Date, default: Date.now },
 })
 
 export default mongoose.model<IUser>('User', userSchema)

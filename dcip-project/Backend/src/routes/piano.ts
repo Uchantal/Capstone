@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { protect, AuthRequest } from '../middleware/authMiddleware'
 import JourneyProgress from '../models/JourneyProgress'
 import PianoDemonstrationProgress, { computePianoSkillLevel } from '../models/PianoDemonstrationProgress'
+import User from '../models/User'
 
 const router = Router()
 
@@ -108,6 +109,10 @@ router.post('/production/complete', protect, async (req: AuthRequest, res) => {
       { user: req.userId },
       { $set: { pianoSkillLevel: skillLevel } }
     )
+    await User.findByIdAndUpdate(req.userId, {
+      $set:      { graduated: true, graduatedAt: new Date() },
+      $addToSet: { graduatedDisciplines: 'piano' },
+    })
 
     res.json({ ok: true, pianoSkillLevel: skillLevel })
   } catch {

@@ -17,6 +17,7 @@ import voiceRoutes from './routes/voice'
 import progressSummaryRoutes from './routes/progressSummary'
 import feedbackRoutes from './routes/feedback'
 import engagementRoutes from './routes/engagement'
+import studioRoutes from './routes/studioRoutes'
 
 dotenv.config()
 
@@ -61,6 +62,7 @@ app.use('/api/voice', voiceRoutes)
 app.use('/api/progress', progressSummaryRoutes)
 app.use('/api/feedback', feedbackRoutes)
 app.use('/api/engagement', engagementRoutes)
+app.use('/api/studio', studioRoutes)
 
 const PORT = process.env.PORT || 5000
 

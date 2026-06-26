@@ -3,6 +3,7 @@ import { protect, AuthRequest } from '../middleware/authMiddleware'
 import JourneyProgress from '../models/JourneyProgress'
 import GDDemonstrationProgress, { computeGDSkillLevel } from '../models/GDDemonstrationProgress'
 import PortfolioItem from '../models/PortfolioItem'
+import User from '../models/User'
 
 const router = Router()
 router.use(protect)
@@ -91,6 +92,10 @@ router.post('/production/complete', async (req: AuthRequest, res: Response): Pro
     )
     updated.graphicDesignSkillLevel = computeGDSkillLevel(updated)
     await updated.save()
+    await User.findByIdAndUpdate(req.userId, {
+      $set:      { graduated: true, graduatedAt: new Date() },
+      $addToSet: { graduatedDisciplines: 'graphic-design' },
+    })
     res.json({ acknowledged: true, graphicDesignSkillLevel: updated.graphicDesignSkillLevel })
   } catch {
     res.status(500).json({ message: 'Server error' })

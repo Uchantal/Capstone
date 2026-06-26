@@ -341,6 +341,21 @@ export default function DashboardPage() {
           </p>
         </div>
 
+        <div className="bg-primary-light border border-primary/30 rounded-2xl px-6 py-5 mb-6 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-primary font-bold text-sm">DCIP Studio</p>
+            <p className="text-primary/80 text-xs mt-0.5">
+              Your professional creative workspace. Create serious work, save it, and download it for your career or fellowships.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/studio')}
+            className="flex-shrink-0 bg-primary text-white font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-primary-dark transition-colors"
+          >
+            Enter Studio
+          </button>
+        </div>
+
         <div className="grid grid-cols-3 gap-4 mb-8 md:grid-cols-1 lg:grid-cols-3">
           <div className="bg-white border border-surface-border rounded-2xl p-6">
             <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Total Practice</p>
@@ -387,8 +402,14 @@ export default function DashboardPage() {
               <h2 className="text-text-primary font-bold text-base mb-4">Quick Actions</h2>
               <div className="space-y-3">
                 <button
-                  onClick={() => navigate('/disciplines')}
+                  onClick={() => navigate('/studio')}
                   className="w-full bg-primary text-white font-semibold text-sm py-3 rounded-xl hover:bg-primary-dark transition-colors"
+                >
+                  Open Studio
+                </button>
+                <button
+                  onClick={() => navigate('/disciplines')}
+                  className="w-full bg-white border border-surface-border text-text-primary font-semibold text-sm py-3 rounded-xl hover:bg-gray-50 transition-colors"
                 >
                   Go to Disciplines
                 </button>

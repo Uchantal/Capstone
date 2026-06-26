@@ -10,6 +10,8 @@ export interface AuthUser {
   school: { id: string; name: string; district: string } | null
   discipline: string | null
   subDiscipline: string | null
+  graduated?: boolean
+  graduatedDisciplines?: string[]
 }
 
 const loadToken = (): string | null => localStorage.getItem('token')

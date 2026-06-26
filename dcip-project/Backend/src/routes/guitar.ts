@@ -2,6 +2,7 @@ import { Router, Response } from 'express'
 import { protect, AuthRequest } from '../middleware/authMiddleware'
 import JourneyProgress from '../models/JourneyProgress'
 import GuitarDemonstrationProgress, { computeGuitarSkillLevel } from '../models/GuitarDemonstrationProgress'
+import User from '../models/User'
 
 const router = Router()
 router.use(protect)
@@ -71,6 +72,10 @@ router.post('/production/complete', async (req: AuthRequest, res: Response): Pro
     )
     const skillLevel = computeGuitarSkillLevel(demo)
     await GuitarDemonstrationProgress.updateOne({ user: req.userId }, { $set: { guitarSkillLevel: skillLevel } })
+    await User.findByIdAndUpdate(req.userId, {
+      $set:      { graduated: true, graduatedAt: new Date() },
+      $addToSet: { graduatedDisciplines: 'guitar' },
+    })
     res.json({ guitarSkillLevel: skillLevel })
   } catch {
     res.status(500).json({ message: 'Server error' })

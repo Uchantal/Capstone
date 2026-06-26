@@ -5,6 +5,11 @@ import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
 import User from '../models/User'
 import School, { ISchool } from '../models/School'
+import VisualArtsDemonstrationProgress from '../models/VisualArtsDemonstrationProgress'
+import GDDemonstrationProgress from '../models/GDDemonstrationProgress'
+import PianoDemonstrationProgress from '../models/PianoDemonstrationProgress'
+import GuitarDemonstrationProgress from '../models/GuitarDemonstrationProgress'
+import VoiceDemonstrationProgress from '../models/VoiceDemonstrationProgress'
 import { AuthRequest } from '../middleware/authMiddleware'
 
 const generateToken = (id: string, role: string): string => {
@@ -155,6 +160,19 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
       return
     }
     const school = user.school ? (user.school as unknown as ISchool) : null
+
+    // Auto-detect graduation for students who completed production before the
+    // graduated field was introduced. Once set, this branch never runs again.
+    let graduated            = user.graduated
+    let graduatedDisciplines = user.graduatedDisciplines ?? []
+    if (!graduated && user.role === 'student') {
+      const detected = await autoDetectGraduation(String(user._id))
+      if (detected.graduated) {
+        graduated            = true
+        graduatedDisciplines = detected.disciplines
+      }
+    }
+
     res.json({
       id: user._id,
       fullName: user.fullName,
@@ -163,12 +181,38 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
       school: school ? { id: school._id, name: school.name, district: school.district } : null,
       discipline: user.discipline,
       subDiscipline: user.subDiscipline,
+      graduated,
+      graduatedDisciplines,
       createdAt: user.createdAt,
     })
   } catch (error) {
     console.error('Get me error:', error)
     res.status(500).json({ message: 'Server error.' })
   }
+}
+
+// Run once per student who hasn't been marked yet — detects pre-existing graduates
+export async function autoDetectGraduation(userId: string): Promise<{ graduated: boolean; disciplines: string[] }> {
+  const [va, gd, piano, guitar, voice] = await Promise.all([
+    VisualArtsDemonstrationProgress.findOne({ user: userId, productionPassed: true }),
+    GDDemonstrationProgress.findOne(        { user: userId, productionPassed: true }),
+    PianoDemonstrationProgress.findOne(     { user: userId, productionPassed: true }),
+    GuitarDemonstrationProgress.findOne(    { user: userId, productionPassed: true }),
+    VoiceDemonstrationProgress.findOne(     { user: userId, productionPassed: true }),
+  ])
+  const disciplines: string[] = []
+  if (va)     disciplines.push('visual-arts')
+  if (gd)     disciplines.push('graphic-design')
+  if (piano)  disciplines.push('piano')
+  if (guitar) disciplines.push('guitar')
+  if (voice)  disciplines.push('voice')
+  if (disciplines.length > 0) {
+    await User.findByIdAndUpdate(userId, {
+      $set:      { graduated: true, graduatedAt: new Date() },
+      $addToSet: { graduatedDisciplines: { $each: disciplines } },
+    })
+  }
+  return { graduated: disciplines.length > 0, disciplines }
 }
 
 export const getSchools = async (_req: Request, res: Response): Promise<void> => {

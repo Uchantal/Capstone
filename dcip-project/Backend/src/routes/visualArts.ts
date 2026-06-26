@@ -3,6 +3,7 @@ import { protect, AuthRequest } from '../middleware/authMiddleware'
 import JourneyProgress from '../models/JourneyProgress'
 import VisualArtsDemonstrationProgress, { computeVisualArtsSkillLevel } from '../models/VisualArtsDemonstrationProgress'
 import PortfolioItem from '../models/PortfolioItem'
+import User from '../models/User'
 
 const router = Router()
 router.use(protect)
@@ -98,6 +99,11 @@ router.post('/production/complete', async (req: AuthRequest, res: Response): Pro
       { user: req.userId },
       { $set: { visualArtsSkillLevel: skillLevel } }
     )
+    // Mark student as graduated
+    await User.findByIdAndUpdate(req.userId, {
+      $set:      { graduated: true, graduatedAt: new Date() },
+      $addToSet: { graduatedDisciplines: 'visual-arts' },
+    })
     res.json({ visualArtsSkillLevel: skillLevel })
   } catch {
     res.status(500).json({ message: 'Server error' })
