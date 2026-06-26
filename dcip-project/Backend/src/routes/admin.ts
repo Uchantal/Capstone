@@ -8,6 +8,7 @@ import PracticeSession from '../models/PracticeSession'
 import PortfolioItem from '../models/PortfolioItem'
 import School from '../models/School'
 import EngagementScore from '../models/EngagementScore'
+import StudioWork from '../models/StudioWork'
 
 const router = Router()
 
@@ -302,6 +303,53 @@ router.get('/reports', protect, requireRole('admin'), async (req: AuthRequest, r
     res.json({ totalStudents, totalSessions, totalPortfolioItems, activeSchools, sessionsByDiscipline: disciplineSessions })
   } catch {
     res.status(500).json({ message: 'Could not fetch reports' })
+  }
+})
+
+// === STUDIO (admin view of all student studio works) ===
+
+router.get('/studio', protect, requireRole('admin'), async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const works = await StudioWork.find()
+      .select('-fileData')
+      .populate('user', 'fullName username school discipline')
+      .sort({ createdAt: -1 })
+    res.json(works)
+  } catch {
+    res.status(500).json({ message: 'Could not fetch studio works' })
+  }
+})
+
+router.get('/studio/stats', protect, requireRole('admin'), async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const [totalWorks, graduatedCount, byDiscipline] = await Promise.all([
+      StudioWork.countDocuments(),
+      User.countDocuments({ role: 'student', graduated: true }),
+      StudioWork.aggregate([{ $group: { _id: '$discipline', count: { $sum: 1 } } }]),
+    ])
+    res.json({ totalWorks, graduatedCount, byDiscipline })
+  } catch {
+    res.status(500).json({ message: 'Could not fetch studio stats' })
+  }
+})
+
+router.get('/studio/:id', protect, requireRole('admin'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const work = await StudioWork.findById(req.params.id)
+      .populate('user', 'fullName username school discipline')
+    if (!work) { res.status(404).json({ message: 'Not found' }); return }
+    res.json(work)
+  } catch {
+    res.status(500).json({ message: 'Could not fetch studio work' })
+  }
+})
+
+router.delete('/studio/:id', protect, requireRole('admin'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    await StudioWork.findByIdAndDelete(req.params.id)
+    res.json({ message: 'Deleted' })
+  } catch {
+    res.status(500).json({ message: 'Could not delete studio work' })
   }
 })
 

@@ -97,6 +97,13 @@ export default function AdminOverviewPage() {
             <p className="text-text-primary font-semibold mb-1">Feedback</p>
             <p className="text-text-secondary text-sm">View feedback submissions from students and visitors</p>
           </Link>
+          <Link
+            to="/admin/studio"
+            className="bg-white border border-primary/30 rounded-2xl p-6 hover:border-primary transition-colors block"
+          >
+            <p className="text-primary font-semibold mb-1">Studio</p>
+            <p className="text-text-secondary text-sm">Browse and manage professional works created by graduated students</p>
+          </Link>
         </div>
       </main>
     </AdminLayout>
