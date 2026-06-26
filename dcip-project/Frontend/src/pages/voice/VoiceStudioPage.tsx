@@ -22,6 +22,12 @@ export default function VoiceStudioPage() {
   const rafRef         = useRef<number>(0)
   const recordingRef   = useRef(false)
   const stageMarkedRef = useRef(false)
+  const recordingUrlsRef = useRef<string[]>([])
+
+  // Revoke blob URLs on unmount to avoid memory leaks
+  useEffect(() => {
+    return () => { recordingUrlsRef.current.forEach(url => URL.revokeObjectURL(url)) }
+  }, [])
 
   // Breathing animation: 2 cycles (in 4s, out 4s) × 2 = 16s total
   useEffect(() => {
@@ -58,7 +64,9 @@ export default function VoiceStudioPage() {
     mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data) }
     mr.onstop = () => {
       const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
-      setRecordings(prev => [...prev, { url: URL.createObjectURL(blob) }])
+      const url = URL.createObjectURL(blob)
+      recordingUrlsRef.current.push(url)
+      setRecordings(prev => [...prev, { url }])
     }
     mr.start()
     mediaRef.current = mr
@@ -115,6 +123,14 @@ export default function VoiceStudioPage() {
               <p className="text-text-muted text-xs mt-2">
                 Follow the circle. Two full cycles, then you are ready to continue.
               </p>
+              {!breathDone && (
+                <button
+                  onClick={() => setBreathDone(true)}
+                  className="mt-3 text-xs text-text-muted underline hover:text-text-primary transition-colors"
+                >
+                  Skip
+                </button>
+              )}
             </div>
           </div>
         </div>
