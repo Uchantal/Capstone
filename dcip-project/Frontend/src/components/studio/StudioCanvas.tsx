@@ -77,6 +77,166 @@ export const CANVAS_FORMATS: CanvasFormat[] = [
   { id: 'a3p', label: 'A3 Portrait',    width: 1123, height: 1587 },
 ]
 
+// ---------------------------------------------------------------------------
+// Ruler size constant
+// ---------------------------------------------------------------------------
+
+const RULER_SIZE = 18
+
+// ---------------------------------------------------------------------------
+// Preset color palette for the color swatches
+// ---------------------------------------------------------------------------
+
+const PRESET_COLORS = [
+  '#1A1A1A', '#555555', '#888888', '#FFFFFF',
+  '#C8960C', '#2D6A4F', '#D62828', '#1E3A5F',
+  '#FF6B35', '#FFD93D', '#06D6A0', '#4CC9F0',
+  '#E63946', '#7B2D8B', '#F4A261', '#2A9D8F',
+]
+
+// ---------------------------------------------------------------------------
+// ColorSwatch — styled color picker replacing raw <input type="color">
+// ---------------------------------------------------------------------------
+
+function ColorSwatch({
+  value,
+  onChange,
+  label,
+}: {
+  value: string
+  onChange: (v: string) => void
+  label: string
+}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  return (
+    <div>
+      <p className="text-text-muted text-[9px] mb-1.5">{label}</p>
+      <div className="grid grid-cols-4 gap-1 mb-1.5">
+        {PRESET_COLORS.map(c => (
+          <button
+            key={c}
+            onClick={() => onChange(c)}
+            title={c}
+            style={{ background: c }}
+            className={`h-4 rounded-sm border-2 transition-all hover:scale-110 ${
+              value.toLowerCase() === c.toLowerCase()
+                ? 'border-primary'
+                : 'border-transparent'
+            }`}
+          />
+        ))}
+      </div>
+      <button
+        onClick={() => inputRef.current?.click()}
+        className="w-full h-7 rounded border border-surface-border flex items-center gap-2 px-2 hover:opacity-90 transition-opacity"
+      >
+        <div
+          className="w-4 h-4 rounded-sm border border-surface-border flex-shrink-0"
+          style={{ background: value }}
+        />
+        <span className="text-[9px] text-text-muted">Custom color</span>
+      </button>
+      <input
+        ref={inputRef}
+        type="color"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="sr-only"
+      />
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// ToolIcon — SVG icon for each drawing tool
+// ---------------------------------------------------------------------------
+
+function ToolIcon({ tool }: { tool: StudioTool }) {
+  return (
+    <svg width={16} height={16} viewBox="0 0 22 22" fill="none" className="mx-auto">
+      {tool === 'brush' && (
+        <>
+          <path d="M16 4l2 2L7 17l-3 1 1-3L16 4z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M5 18c0 .8-.7 1.5-1.5 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </>
+      )}
+      {tool === 'eraser' && (
+        <>
+          <path d="M20 19H7L3 15l9-9 8 8-2 2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M7 19l-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </>
+      )}
+      {tool === 'line' && (
+        <path d="M4 18L18 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      )}
+      {tool === 'rect' && (
+        <rect x="3" y="4" width="16" height="14" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+      )}
+      {tool === 'ellipse' && (
+        <ellipse cx="11" cy="11" rx="9" ry="7.5" stroke="currentColor" strokeWidth="1.5"/>
+      )}
+      {tool === 'text' && (
+        <path d="M4 6h14M11 6v13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      )}
+      {tool === 'image' && (
+        <>
+          <rect x="3" y="3" width="16" height="16" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+          <circle cx="7.5" cy="8" r="1.5" fill="currentColor"/>
+          <path d="M3 16l4.5-5 3.5 4 2.5-2.5L19 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </>
+      )}
+      {tool === 'select' && (
+        <path d="M5 3l13 9-7.5 1.5-3.5 6.5L5 3z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      )}
+    </svg>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Ruler bars
+// ---------------------------------------------------------------------------
+
+function HRuler({ logicalWidth, scale, displayW }: { logicalWidth: number; scale: number; displayW: number }) {
+  const interval = scale < 0.35 ? 200 : scale < 0.7 ? 100 : 50
+  const ticks = Array.from({ length: Math.floor(logicalWidth / interval) + 1 }, (_, i) => i * interval)
+  return (
+    <svg width={displayW} height={RULER_SIZE} style={{ display: 'block', flexShrink: 0 }}>
+      <rect width={displayW} height={RULER_SIZE} fill="#1E1E1E"/>
+      {ticks.map(lx => {
+        const x = Math.round(lx * scale)
+        const isMajor = (lx / interval) % 2 === 0
+        return (
+          <g key={lx}>
+            <line x1={x} y1={RULER_SIZE} x2={x} y2={isMajor ? RULER_SIZE - 8 : RULER_SIZE - 4} stroke="#555" strokeWidth={1}/>
+            {isMajor && lx > 0 && (
+              <text x={x + 2} y={8} fontSize={7} fill="#888" fontFamily="monospace">{lx}</text>
+            )}
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
+function VRuler({ logicalHeight, scale, displayH }: { logicalHeight: number; scale: number; displayH: number }) {
+  const interval = scale < 0.35 ? 200 : scale < 0.7 ? 100 : 50
+  const ticks = Array.from({ length: Math.floor(logicalHeight / interval) + 1 }, (_, i) => i * interval)
+  return (
+    <svg width={RULER_SIZE} height={displayH} style={{ display: 'block', flexShrink: 0 }}>
+      <rect width={RULER_SIZE} height={displayH} fill="#1E1E1E"/>
+      {ticks.map(ly => {
+        const y = Math.round(ly * scale)
+        const isMajor = (ly / interval) % 2 === 0
+        return (
+          <g key={ly}>
+            <line x1={RULER_SIZE} y1={y} x2={isMajor ? RULER_SIZE - 8 : RULER_SIZE - 4} y2={y} stroke="#555" strokeWidth={1}/>
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
 export interface StudioCanvasHandle {
   captureImage: () => string
   getFormat: () => CanvasFormat
@@ -306,9 +466,11 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     return () => ro.disconnect()
   }, [])
 
-  const { displayW, displayH } = useMemo(() => {
-    const scale = Math.min(containerSize.width / format.width, containerSize.height / format.height, 1)
-    return { displayW: Math.round(format.width * scale), displayH: Math.round(format.height * scale) }
+  const { displayW, displayH, scale } = useMemo(() => {
+    const availW = Math.max(containerSize.width  - RULER_SIZE, 100)
+    const availH = Math.max(containerSize.height - RULER_SIZE, 100)
+    const s = Math.min(availW / format.width, availH / format.height, 1)
+    return { displayW: Math.round(format.width * s), displayH: Math.round(format.height * s), scale: s }
   }, [containerSize, format])
 
   // --- Canvas coordinate conversion ---
@@ -770,13 +932,15 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
               <button
                 key={tool}
                 onClick={() => setActiveTool(tool)}
-                className={`text-[11px] font-medium py-1.5 rounded transition-colors ${
+                title={label}
+                className={`py-2 rounded transition-colors flex flex-col items-center gap-0.5 ${
                   activeTool === tool
                     ? 'bg-primary text-white'
-                    : 'bg-surface-warm text-text-primary hover:bg-surface-border'
+                    : 'bg-surface-warm text-text-secondary hover:bg-surface-border'
                 }`}
               >
-                {label}
+                <ToolIcon tool={tool} />
+                <span className="text-[9px] font-medium leading-none">{label}</span>
               </button>
             ))}
           </div>
@@ -787,30 +951,20 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
           <p className="text-text-muted text-[9px] uppercase tracking-wide font-semibold">Options</p>
 
           {/* Stroke / text color */}
-          <div>
-            <p className="text-text-muted text-[9px] mb-1">
-              {activeTool === 'text' || selectedShape?.type === 'text' ? 'Text Color' : 'Stroke Color'}
-            </p>
-            <input
-              type="color"
-              value={strokeColor}
-              onChange={e => setStrokeColor(e.target.value)}
-              className="w-full h-7 rounded cursor-pointer border border-surface-border"
-            />
-          </div>
+          <ColorSwatch
+            value={strokeColor}
+            onChange={setStrokeColor}
+            label={activeTool === 'text' || selectedShape?.type === 'text' ? 'Text Color' : 'Stroke Color'}
+          />
 
           {/* Fill color */}
           {showFillOptions && (
             <>
-              <div>
-                <p className="text-text-muted text-[9px] mb-1">Fill Color</p>
-                <input
-                  type="color"
-                  value={fillColor}
-                  onChange={e => setFillColor(e.target.value)}
-                  className="w-full h-7 rounded cursor-pointer border border-surface-border"
-                />
-              </div>
+              <ColorSwatch
+                value={fillColor}
+                onChange={setFillColor}
+                label="Fill Color"
+              />
               <div className="flex gap-1">
                 <button
                   onClick={() => setFilled(false)}
@@ -899,12 +1053,7 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
         {/* Background */}
         <div className="px-3 pt-3 pb-2 border-b border-surface-border">
           <p className="text-text-muted text-[9px] uppercase tracking-wide font-semibold mb-1.5">Background</p>
-          <input
-            type="color"
-            value={bgColor}
-            onChange={e => setBgColor(e.target.value)}
-            className="w-full h-7 rounded cursor-pointer border border-surface-border"
-          />
+          <ColorSwatch value={bgColor} onChange={setBgColor} label="Canvas Color" />
         </div>
 
         {/* Actions */}
@@ -924,25 +1073,41 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
       </div>
 
       {/* Canvas area */}
-      <div ref={containerRef} className="flex-1 flex items-center justify-center overflow-hidden bg-surface-canvas/40 p-4 relative">
-        <div
-          className="relative shadow-2xl"
-          style={{ width: displayW, height: displayH, flexShrink: 0 }}
-        >
-          <canvas ref={bgCanvasRef}    width={format.width} height={format.height} className="absolute inset-0" style={{ width: displayW, height: displayH }} />
-          <canvas ref={shapeCanvasRef} width={format.width} height={format.height} className="absolute inset-0" style={{ width: displayW, height: displayH }} />
-          <canvas ref={drawCanvasRef}  width={format.width} height={format.height} className="absolute inset-0" style={{ width: displayW, height: displayH }} />
-          <canvas
-            ref={interactionRef}
-            width={format.width}
-            height={format.height}
-            className={`absolute inset-0 ${cursor}`}
-            style={{ width: displayW, height: displayH }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-          />
+      <div
+        ref={containerRef}
+        className="flex-1 flex items-center justify-center overflow-hidden p-2 relative"
+        style={{ background: '#2B2B2B' }}
+      >
+        {/* Ruler + canvas block */}
+        <div style={{ flexShrink: 0 }}>
+          {/* Top row: corner + horizontal ruler */}
+          <div className="flex">
+            <div style={{ width: RULER_SIZE, height: RULER_SIZE, background: '#141414', flexShrink: 0 }} />
+            <HRuler logicalWidth={format.width} scale={scale} displayW={displayW} />
+          </div>
+          {/* Main row: vertical ruler + canvas */}
+          <div className="flex">
+            <VRuler logicalHeight={format.height} scale={scale} displayH={displayH} />
+            <div
+              className="relative"
+              style={{ width: displayW, height: displayH, flexShrink: 0, boxShadow: '0 4px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.4)' }}
+            >
+              <canvas ref={bgCanvasRef}    width={format.width} height={format.height} className="absolute inset-0" style={{ width: displayW, height: displayH }} />
+              <canvas ref={shapeCanvasRef} width={format.width} height={format.height} className="absolute inset-0" style={{ width: displayW, height: displayH }} />
+              <canvas ref={drawCanvasRef}  width={format.width} height={format.height} className="absolute inset-0" style={{ width: displayW, height: displayH }} />
+              <canvas
+                ref={interactionRef}
+                width={format.width}
+                height={format.height}
+                className={`absolute inset-0 ${cursor}`}
+                style={{ width: displayW, height: displayH }}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Floating text input */}
