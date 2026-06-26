@@ -63,12 +63,11 @@ apt install -y git
 ## PART 4 — CLONE THE REPOSITORY
 
 ```bash
-mkdir -p /var/www/dcip
+mkdir -p /var/www
 cd /var/www
-git https://github.com/Uchantal/Capstone.git
+git clone https://github.com/Uchantal/Capstone.git
 
- 
-cd dcip-repo
+cd Capstone/dcip-project
 ```
 
 ---
@@ -86,7 +85,10 @@ PORT=5000
 NODE_ENV=production
 MONGODB_URI=your_mongodb_atlas_connection_string
 JWT_SECRET=your_jwt_secret_string_minimum_32_characters
-CLIENT_URL=http://YOUR_DROPLET_IP
+CLIENT_URL=https://dcip-rw.online
+FRONTEND_URL=https://dcip-rw.online
+EMAIL_USER=your_gmail_address@gmail.com
+EMAIL_PASS=your_gmail_app_password
 ```
 
 Save and exit: **Ctrl+X → Y → Enter**
@@ -133,7 +135,7 @@ cp -r dist/* /var/www/dcip/
 ## PART 8 — CONFIGURE NGINX
 
 ```bash
-cp /var/www/dcip-repo/nginx.conf /etc/nginx/sites-available/dcip
+cp /var/www/Capstone/dcip-project/nginx.conf /etc/nginx/sites-available/dcip
 ln -s /etc/nginx/sites-available/dcip /etc/nginx/sites-enabled/dcip
 rm /etc/nginx/sites-enabled/default
 nginx -t
@@ -144,9 +146,11 @@ systemctl restart nginx
 
 ## PART 9 — TEST THE DEPLOYMENT
 
-Open in browser: `http://YOUR_DROPLET_IP`
+Open in browser: `http://YOUR_DROPLET_IP` (before the domain is wired up)
 
 Backend health check: `http://YOUR_DROPLET_IP/api/health`
+
+Once the domain is active: `https://dcip-rw.online`
 
 You should see the DCIP homepage and the health endpoint returning:
 ```json
@@ -155,30 +159,39 @@ You should see the DCIP homepage and the health endpoint returning:
 
 ---
 
-## PART 10 — ADD A DOMAIN NAME (once you have one)
+## PART 10 — ADD A DOMAIN NAME
 
-1. Point your domain's **A record** to `YOUR_DROPLET_IP`.
+> The platform domain is **dcip-rw.online**. Steps below are already complete
+> for the current deployment — keep this section for reference or re-setup.
+
+1. Point `dcip-rw.online` **A record** to `YOUR_DROPLET_IP` in your DNS provider.
 2. Wait for DNS propagation (up to 24 hours).
-3. Edit `nginx.conf` and replace `server_name _;` with:
-   ```nginx
-   server_name yourdomain.com www.yourdomain.com;
-   ```
-4. Copy the updated config and reload Nginx:
+3. `nginx.conf` already has `server_name dcip-rw.online www.dcip-rw.online;` — copy it to the server:
    ```bash
-   cp /var/www/dcip-repo/nginx.conf /etc/nginx/sites-available/dcip
+   cp /var/www/Capstone/dcip-project/nginx.conf /etc/nginx/sites-available/dcip
    nginx -t && systemctl restart nginx
    ```
-5. Install a free HTTPS certificate with Certbot:
+4. Install a free HTTPS certificate with Certbot:
    ```bash
    apt install certbot python3-certbot-nginx -y
-   certbot --nginx -d yourdomain.com
+   certbot --nginx -d dcip-rw.online -d www.dcip-rw.online
    ```
    Follow the prompts — select the option to redirect HTTP to HTTPS.
-6. Verify: `https://yourdomain.com`
-7. Update `CLIENT_URL` in `Backend/.env` to `https://yourdomain.com`, then:
+5. Verify: `https://dcip-rw.online`
+6. Update both `CLIENT_URL` and `FRONTEND_URL` in `Backend/.env` to `https://dcip-rw.online`:
+   ```
+   CLIENT_URL=https://dcip-rw.online
+   FRONTEND_URL=https://dcip-rw.online
+   ```
+   Then restart the backend:
    ```bash
    pm2 restart dcip-backend
    ```
+   > `CLIENT_URL` controls which origins the CORS policy allows.
+   > `FRONTEND_URL` is used to build the link inside password-reset emails —
+   > if it still points to `http://`, reset links will break once HTTPS is active.
+
+---
 
 ---
 
@@ -187,7 +200,7 @@ You should see the DCIP homepage and the health endpoint returning:
 After pushing changes to GitHub, SSH into the server and run:
 
 ```bash
-cd /var/www/dcip-repo
+cd /var/www/Capstone/dcip-project
 bash deploy.sh
 ```
 

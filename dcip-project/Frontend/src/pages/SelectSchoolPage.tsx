@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchSchools, updateUserSchool } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
@@ -18,13 +18,19 @@ export default function SelectSchoolPage() {
   const [schoolOpen, setSchoolOpen] = useState(false)
   const [schoolSearch, setSchoolSearch] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [slow, setSlow] = useState(false)
+  const [loadingSchools, setLoadingSchools] = useState(true)
   const [error, setError] = useState('')
   const schoolRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    setLoadingSchools(true)
     fetchSchools()
-      .then(res => setSchools(res.data.sort((a: School, b: School) => a.name.localeCompare(b.name))))
+      .then(res => {
+        setSchools(res.data.sort((a: School, b: School) => a.name.localeCompare(b.name)))
+      })
       .catch(() => setError('Could not load schools. Check your connection.'))
+      .finally(() => setLoadingSchools(false))
   }, [])
 
   useEffect(() => {
@@ -37,20 +43,29 @@ export default function SelectSchoolPage() {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!schoolId) { setError('Please select your school to continue.'); return }
     setSubmitting(true)
+    setSlow(false)
     setError('')
+
+    // After 8 s with no response, tell the student to keep waiting instead of
+    // letting them think the platform crashed.
+    const slowTimer = setTimeout(() => setSlow(true), 8000)
+
     try {
       const res = await updateUserSchool(schoolId)
+      clearTimeout(slowTimer)
       updateUser({ school: res.data.school })
       navigate('/dashboard', { replace: true })
     } catch {
+      clearTimeout(slowTimer)
+      setSlow(false)
       setError('Could not save your school. Please try again.')
     } finally {
       setSubmitting(false)
     }
-  }
+  }, [schoolId, updateUser, navigate])
 
   const selected = schools.find(s => s._id === schoolId)
 
@@ -66,6 +81,15 @@ export default function SelectSchoolPage() {
 
         <div className="mb-5">
           <label className="text-text-primary text-sm font-medium block mb-1.5">School</label>
+          {loadingSchools ? (
+            <div className="w-full border border-surface-border rounded-lg px-4 py-3 flex items-center gap-3 bg-white">
+              <svg className="animate-spin w-4 h-4 text-primary flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+              </svg>
+              <span className="text-sm text-gray-400">Loading schools…</span>
+            </div>
+          ) : (
           <div className="relative" ref={schoolRef}>
             <button
               type="button"
@@ -116,15 +140,28 @@ export default function SelectSchoolPage() {
               </div>
             )}
           </div>
+          )}
         </div>
 
         {error && <p className="text-accent text-xs mb-4">{error}</p>}
 
+        {slow && (
+          <p className="text-text-secondary text-xs mb-3 text-center">
+            Still saving — the server is warming up, please don't close this page…
+          </p>
+        )}
+
         <button
           onClick={handleSubmit}
-          disabled={!schoolId || submitting}
-          className="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50"
+          disabled={!schoolId || submitting || loadingSchools}
+          className="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
         >
+          {submitting && (
+            <svg className="animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+            </svg>
+          )}
           {submitting ? 'Saving…' : 'Confirm School'}
         </button>
       </div>
