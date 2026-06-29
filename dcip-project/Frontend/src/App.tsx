@@ -96,6 +96,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import VerifyEmailPage from './pages/VerifyEmailPage'
 import StudioPage from './pages/StudioPage'
+import DisciplineDetailPage from './pages/DisciplineDetailPage'
 import AdminPreviewPage from './pages/admin/AdminPreviewPage'
 import AdminStudioPage from './pages/admin/AdminStudioPage'
 import PreviewNavBar from './components/PreviewNavBar'
@@ -266,6 +267,7 @@ function AppContent() {
         <Route path="/voice/production" element={<StudentRoute><VoiceProductionPage /></StudentRoute>} />
         <Route path="/settings" element={<StudentRoute><SettingsPage /></StudentRoute>} />
         <Route path="/studio" element={<StudentRoute><StudioPage /></StudentRoute>} />
+        <Route path="/discipline/:key" element={<StudentRoute><DisciplineDetailPage /></StudentRoute>} />
 
         <Route path="/supervisor" element={<SupervisorRoute><SupervisorDashboardPage /></SupervisorRoute>} />
 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule, { VisualArtsModuleHandle } from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
-import { completeVisualArtsDemonstration, fetchEngagementScores } from '../../services/api'
+import { completeVisualArtsDemonstration, fetchEngagementScores, savePortfolioItem } from '../../services/api'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 
 const TASK =
@@ -88,6 +88,7 @@ export default function VALevel2DemonstratePage() {
     try {
       if (combined >= 60) {
         await completeVisualArtsDemonstration(2, true, snapshot)
+        if (snapshot) savePortfolioItem({ discipline: 'visual-arts', title: 'Visual Arts Level 2 Demonstration', fileType: 'image/png', fileData: snapshot, durationMinutes: 0 }).catch(() => {})
       }
     } catch {
       // ignore

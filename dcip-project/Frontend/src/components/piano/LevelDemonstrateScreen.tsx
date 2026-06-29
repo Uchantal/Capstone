@@ -7,7 +7,7 @@ import {
   buildChord,
   type ChordType,
 } from '../../utils/pianoTheory'
-import { completePianoDemonstration } from '../../services/api'
+import { completePianoDemonstration, savePortfolioItem } from '../../services/api'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
 
 interface ChordDef {
@@ -97,6 +97,13 @@ export default function LevelDemonstrateScreen({
       const didPass = correctCountRef.current >= requiredCorrect
       if (didPass && !isPreviewMode) {
         try { await completePianoDemonstration(levelNumber, true) } catch {}
+        savePortfolioItem({
+          discipline: 'piano',
+          title: `Piano Level ${levelNumber} Demonstration`,
+          fileType: 'result',
+          fileData: `Passed ${correctCountRef.current} of ${testChords.length} chords`,
+          durationMinutes: 0,
+        }).catch(() => {})
       }
       setFinalCorrect(correctCountRef.current)
       setPassed(didPass)

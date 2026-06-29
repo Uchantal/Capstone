@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
-import { completeGuitarDemonstration } from '../../services/api'
+import { completeGuitarDemonstration, savePortfolioItem } from '../../services/api'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
 
 const PROMPTS = [
@@ -39,7 +39,10 @@ export default function GuitarLevel2DemonstratePage() {
       submittedRef.current = true
       const didPass = correctCountRef.current >= REQUIRED_CORRECT
       setPassed(didPass)
-      if (!isPreviewMode) { completeGuitarDemonstration(2, didPass).then(() => reload()).catch(() => {}) }
+      if (!isPreviewMode) {
+        completeGuitarDemonstration(2, didPass).then(() => reload()).catch(() => {})
+        if (didPass) savePortfolioItem({ discipline: 'guitar', title: 'Guitar Level 2 Demonstration', fileType: 'result', fileData: `Passed ${correctCountRef.current} of ${TOTAL_PROMPTS} prompts`, durationMinutes: 0 }).catch(() => {})
+      }
       setPhase('results')
     } else {
       setPromptIdx(promptIdxRef.current)

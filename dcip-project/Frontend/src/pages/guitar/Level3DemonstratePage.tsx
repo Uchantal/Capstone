@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
-import { completeGuitarDemonstration } from '../../services/api'
+import { completeGuitarDemonstration, savePortfolioItem } from '../../services/api'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
 
 const KNOWN_CHORDS = ['Em', 'Am', 'G', 'C'] as const
@@ -65,7 +65,10 @@ export default function GuitarLevel3DemonstratePage() {
       submittedRef.current = true
       const didPass = correctCountRef.current >= REQUIRED_CORRECT
       setPassed(didPass)
-      if (!isPreviewMode) { completeGuitarDemonstration(3, didPass).then(() => reload()).catch(() => {}) }
+      if (!isPreviewMode) {
+        completeGuitarDemonstration(3, didPass).then(() => reload()).catch(() => {})
+        if (didPass) savePortfolioItem({ discipline: 'guitar', title: 'Guitar Level 3 Demonstration', fileType: 'result', fileData: `Passed ${correctCountRef.current} of ${KNOWN_CHORDS.length} chords`, durationMinutes: 0 }).catch(() => {})
+      }
       setPhase('results')
     } else {
       setPromptIdx(promptIdxRef.current)

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, exportDesignToDataUrl, type DesignElement } from '../../components/graphic-design/PosterSurface'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
-import { completeGDDemonstration, fetchEngagementScores } from '../../services/api'
+import { completeGDDemonstration, fetchEngagementScores, savePortfolioItem } from '../../services/api'
 import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
 import { useGDEngagement } from '../../hooks/useCanvasEngagement'
 
@@ -92,6 +92,7 @@ export default function GDLevel2DemonstratePage() {
         const snapshot = JSON.stringify({ elements, bgColor })
         const imageData = await exportDesignToDataUrl(elements, bgColor, exportW, exportH)
         await completeGDDemonstration(2, true, snapshot, imageData)
+        savePortfolioItem({ discipline: 'graphic-design', title: 'Graphic Design Level 2 Demonstration', fileType: 'image/png', fileData: imageData, durationMinutes: 0 }).catch(() => {})
         reload()
       }
     } catch {

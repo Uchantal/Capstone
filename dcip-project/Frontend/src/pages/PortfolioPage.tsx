@@ -26,23 +26,14 @@ const DISCIPLINE_META = {
   music: {
     label: 'Music',
     sub: 'Piano, Guitar and Voice',
-    cardBg: 'bg-primary-light',
-    cardBorder: 'border-primary/30',
-    countColor: 'text-primary',
   },
   'visual-arts': {
     label: 'Visual Arts',
     sub: 'Drawing, Painting and Mixed media',
-    cardBg: 'bg-secondary/10',
-    cardBorder: 'border-secondary/30',
-    countColor: 'text-secondary',
   },
   'graphic-design': {
     label: 'Graphic Design',
     sub: 'Posters, Layouts and Typography',
-    cardBg: 'bg-surface-warm',
-    cardBorder: 'border-surface-border',
-    countColor: 'text-text-secondary',
   },
 } as const
 
@@ -88,6 +79,16 @@ function Breadcrumb({ parts }: { parts: { label: string; onClick?: () => void }[
 
 type View = 'disciplines' | 'months' | 'items'
 
+function buildCalendar(year: number, month: number) {
+  const firstDay = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const cells: (number | null)[] = Array(firstDay).fill(null)
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+  while (cells.length % 7 !== 0) cells.push(null)
+  return cells
+}
+
+
 export default function PortfolioPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -100,6 +101,7 @@ export default function PortfolioPage() {
   const [view, setView] = useState<View>('disciplines')
   const [activeDiscipline, setActiveDiscipline] = useState<DisciplineKey | null>(null)
   const [activeMonth, setActiveMonth] = useState<string | null>(null)
+  const [selectedDay, setSelectedDay] = useState<number | null>(null)
 
   useEffect(() => {
     if (!user) { navigate('/login'); return }
@@ -162,6 +164,7 @@ export default function PortfolioPage() {
   const goToItems = (month: string) => {
     setActiveMonth(month)
     setSelected(null)
+    setSelectedDay(null)
     setView('items')
   }
 
@@ -226,13 +229,13 @@ export default function PortfolioPage() {
                       key={key}
                       onClick={() => count > 0 && goToMonths(key)}
                       disabled={count === 0}
-                      className={`text-left border rounded-2xl p-6 transition-all ${meta.cardBg} ${meta.cardBorder} ${
-                        count > 0 ? 'hover:shadow-md cursor-pointer' : 'opacity-40 cursor-not-allowed'
+                      className={`text-left bg-white border border-surface-border rounded-2xl p-6 transition-all ${
+                        count > 0 ? 'hover:shadow-md hover:border-primary cursor-pointer' : 'opacity-40 cursor-not-allowed'
                       }`}
                     >
                       <p className="text-text-primary font-bold text-base mb-1">{meta.label}</p>
                       <p className="text-text-secondary text-xs mb-4">{meta.sub}</p>
-                      <p className={`text-sm font-semibold ${meta.countColor}`}>
+                      <p className="text-sm font-semibold text-primary">
                         {count} item{count !== 1 ? 's' : ''}
                       </p>
                     </button>
@@ -268,95 +271,141 @@ export default function PortfolioPage() {
               </>
             )}
 
-            {/* Level 3: Items */}
-            {view === 'items' && activeDiscipline && activeMonth && (
-              <>
-                <Breadcrumb parts={[
-                  { label: 'My Portfolio', onClick: goToDisciplines },
-                  { label: DISCIPLINE_META[activeDiscipline].label, onClick: () => goToMonths(activeDiscipline) },
-                  { label: formatMonthLabel(activeMonth) },
-                ]} />
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    {itemsForMonth(activeDiscipline, activeMonth).map(item => (
-                      <div
-                        key={item._id}
-                        onClick={() => handleView(item._id)}
-                        className="bg-white border border-surface-border rounded-xl px-5 py-4 flex items-center gap-3 hover:border-primary transition-colors cursor-pointer"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="text-text-primary font-semibold text-sm truncate">{item.title}</p>
-                          <p className="text-text-secondary text-xs mt-0.5">
-                            {disciplineLabel(item.discipline)}, {new Date(item.createdAt).toLocaleDateString('en', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                          </p>
-                          {item.syncStatus && (
-                            <span className={`inline-block mt-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                              item.syncStatus === 'synced'
-                                ? 'bg-secondary/10 text-secondary'
-                                : 'bg-primary-light text-primary'
-                            }`}>
-                              {item.syncStatus === 'synced' ? 'Synced' : 'Pending'}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 shrink-0">
+            {/* Level 3: Items with calendar */}
+            {view === 'items' && activeDiscipline && activeMonth && (() => {
+              const [yr, mo] = activeMonth.split('-').map(Number)
+              const calCells = buildCalendar(yr, mo - 1)
+              const monthItems = itemsForMonth(activeDiscipline, activeMonth)
+              const daysWithItems = new Set(monthItems.map(i => new Date(i.createdAt).getDate()))
+              const displayedItems = selectedDay
+                ? monthItems.filter(i => new Date(i.createdAt).getDate() === selectedDay)
+                : monthItems
+              const DAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+
+              return (
+                <>
+                  <Breadcrumb parts={[
+                    { label: 'My Portfolio', onClick: goToDisciplines },
+                    { label: DISCIPLINE_META[activeDiscipline].label, onClick: () => goToMonths(activeDiscipline) },
+                    { label: formatMonthLabel(activeMonth) },
+                  ]} />
+
+                  {/* Mini calendar */}
+                  <div className="bg-white border border-surface-border rounded-xl p-5 mb-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-text-primary font-bold text-sm">{formatMonthLabel(activeMonth)}</p>
+                      {selectedDay && (
+                        <button onClick={() => { setSelectedDay(null); setSelected(null) }} className="text-xs text-primary hover:underline">
+                          Show all
+                        </button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-7 gap-1 text-center mb-1">
+                      {DAY_LABELS.map(d => (
+                        <span key={d} className="text-text-muted text-[10px] font-medium py-1">{d}</span>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-7 gap-1 text-center">
+                      {calCells.map((day, idx) => {
+                        if (!day) return <span key={idx} />
+                        const hasItems = daysWithItems.has(day)
+                        const isSelected = selectedDay === day
+                        return (
                           <button
-                            onClick={e => handleDownload(item, e)}
-                            className="text-secondary text-xs font-semibold hover:underline"
+                            key={idx}
+                            onClick={() => { setSelectedDay(isSelected ? null : day); setSelected(null) }}
+                            disabled={!hasItems}
+                            className={`relative text-xs py-1.5 rounded-lg transition-colors font-medium
+                              ${isSelected ? 'bg-primary text-white' : hasItems ? 'text-text-primary hover:bg-primary/10' : 'text-text-muted cursor-default opacity-40'}`}
                           >
-                            Download
+                            {day}
+                            {hasItems && !isSelected && (
+                              <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                            )}
                           </button>
-                          <span className="text-primary text-xs font-semibold">View</span>
-                        </div>
-                      </div>
-                    ))}
+                        )
+                      })}
+                    </div>
                   </div>
 
-                  {/* Preview panel */}
-                  {selected && (
-                    <div className="bg-white border border-surface-border rounded-xl p-5 sticky top-6 h-fit">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <p className="text-text-primary font-semibold text-sm">{selected.title}</p>
-                          <p className="text-text-secondary text-xs">
-                            {disciplineLabel(selected.discipline)} · {new Date(selected.createdAt).toLocaleDateString()}
-                          </p>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      {displayedItems.length === 0 ? (
+                        <div className="bg-white border border-surface-border rounded-xl p-8 text-center">
+                          <p className="text-text-primary font-semibold text-sm mb-1">No saved work on this date</p>
+                          <p className="text-text-muted text-xs">Try selecting a different day or click Show all.</p>
                         </div>
-                        <button onClick={() => setSelected(null)} className="text-text-secondary text-xl leading-none hover:text-text-primary">x</button>
-                      </div>
-
-                      {selected.fileType?.startsWith('image') && (
-                        <img src={selected.fileData} alt={selected.title} className="w-full rounded-lg border border-surface-border mb-4" />
-                      )}
-                      {selected.fileType?.startsWith('audio') && (
-                        <audio controls src={selected.fileData} className="w-full mb-4" />
-                      )}
-                      {(!selected.fileType || selected.fileType === 'audio/wav') && !selected.fileData?.startsWith('data:') && (
-                        <div className="bg-surface-warm rounded-lg p-4 text-center text-text-secondary text-sm mb-4">
-                          Audio session recorded
+                      ) : displayedItems.map(item => (
+                        <div
+                          key={item._id}
+                          onClick={() => handleView(item._id)}
+                          className="bg-white border border-surface-border rounded-xl px-5 py-4 flex items-center gap-3 hover:border-primary transition-colors cursor-pointer"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-text-primary font-semibold text-sm truncate">{item.title}</p>
+                            <p className="text-text-secondary text-xs mt-0.5">
+                              {disciplineLabel(item.discipline)}, {new Date(item.createdAt).toLocaleDateString('en', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                            {item.syncStatus && (
+                              <span className={`inline-block mt-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                                item.syncStatus === 'synced' ? 'bg-secondary/10 text-secondary' : 'bg-primary-light text-primary'
+                              }`}>
+                                {item.syncStatus === 'synced' ? 'Synced' : 'Pending'}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-primary text-xs font-semibold shrink-0">View</span>
                         </div>
-                      )}
-
-                      <div className="flex items-center gap-4">
-                        <button
-                          onClick={e => handleDownload(selected, e)}
-                          className="text-secondary text-xs font-semibold hover:underline"
-                        >
-                          Download
-                        </button>
-                        <button
-                          onClick={() => handleDelete(selected._id)}
-                          disabled={deleting}
-                          className="text-accent text-xs hover:underline disabled:opacity-40"
-                        >
-                          Delete this item
-                        </button>
-                      </div>
+                      ))}
                     </div>
-                  )}
-                </div>
-              </>
-            )}
+
+                    {/* Preview panel */}
+                    {selected && (
+                      <div className="bg-white border border-surface-border rounded-xl p-5 sticky top-6 h-fit">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <p className="text-text-primary font-semibold text-sm">{selected.title}</p>
+                            <p className="text-text-secondary text-xs">
+                              {disciplineLabel(selected.discipline)} · {new Date(selected.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <button onClick={() => setSelected(null)} className="text-text-secondary text-xl leading-none hover:text-text-primary">x</button>
+                        </div>
+
+                        {selected.fileType === 'result' && (
+                          <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-4 text-center mb-4">
+                            <p className="text-secondary font-semibold text-sm mb-1">Demonstration Passed</p>
+                            <p className="text-text-secondary text-xs">{selected.fileData}</p>
+                          </div>
+                        )}
+                        {selected.fileType?.startsWith('image') && (
+                          <img src={selected.fileData} alt={selected.title} className="w-full rounded-lg border border-surface-border mb-4" />
+                        )}
+                        {selected.fileType?.startsWith('audio') && (
+                          <audio controls src={selected.fileData} className="w-full mb-4" />
+                        )}
+                        {(!selected.fileType || selected.fileType === 'audio/wav') && !selected.fileData?.startsWith('data:') && (
+                          <div className="bg-surface-warm rounded-lg p-4 text-center text-text-secondary text-sm mb-4">
+                            Audio session recorded
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-4">
+                          {selected.fileType !== 'result' && (
+                            <button onClick={e => handleDownload(selected, e)} className="text-secondary text-xs font-semibold hover:underline">
+                              Download
+                            </button>
+                          )}
+                          <button onClick={() => handleDelete(selected._id)} disabled={deleting} className="text-accent text-xs hover:underline disabled:opacity-40">
+                            Delete this item
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )
+            })()}
 
           </div>
         )}

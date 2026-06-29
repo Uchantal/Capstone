@@ -201,20 +201,31 @@ function MilestoneDots({ discKey, completedStages }: { discKey: string; complete
   )
 }
 
-function DisciplineCard({ disc, onContinue }: { disc: DisciplineSummary; onContinue: (url: string) => void }) {
+function DisciplineCard({ disc, onContinue, onViewDetail }: { disc: DisciplineSummary; onContinue: (url: string) => void; onViewDetail: (key: string) => void }) {
   const continueUrl = computeContinueUrl(disc)
+  const totalStages = STAGE_URLS[disc.key]?.length ?? 1
+  const pct = Math.min(Math.round((disc.completedStages.length / totalStages) * 100), 100)
+
   return (
-    <div className="bg-white border border-surface-border rounded-2xl p-5">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-text-primary font-semibold text-sm">{disc.label}</p>
+    <div
+      onClick={() => onViewDetail(disc.key)}
+      className="bg-white border border-surface-border rounded-2xl p-5 cursor-pointer hover:shadow-md hover:border-primary transition-all"
+    >
+      <div className="flex items-start justify-between mb-3">
+        <p className="text-text-primary font-bold text-sm">{disc.label}</p>
         <span className={`text-xs ${skillLabelClass(disc.skillLevel)}`}>{formatSkillLevel(disc.skillLevel)}</span>
       </div>
-      <div className="mb-4">
-        <MilestoneDots discKey={disc.key} completedStages={disc.completedStages} />
+      <div className="flex justify-between text-[10px] text-text-muted mb-1">
+        <span>Progress</span>
+        <span>{disc.completedStages.length} / {totalStages} stages</span>
       </div>
+      <div className="h-1.5 bg-surface-warm rounded-full overflow-hidden mb-4">
+        <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
+      </div>
+      <MilestoneDots discKey={disc.key} completedStages={disc.completedStages} />
       <button
-        onClick={() => onContinue(continueUrl)}
-        className="w-full border border-primary text-primary text-xs font-semibold py-2 rounded-lg hover:bg-primary/5 transition-colors"
+        onClick={e => { e.stopPropagation(); onContinue(continueUrl) }}
+        className="mt-4 w-full bg-primary text-white text-xs font-semibold py-2.5 rounded-xl hover:bg-primary-dark transition-colors"
       >
         Continue
       </button>
@@ -294,6 +305,7 @@ const DISC_LABEL: Record<string, string> = {
   'visual-arts': 'Visual Arts', 'graphic-design': 'Graphic Design',
 }
 
+
 export default function DashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -332,19 +344,35 @@ export default function DashboardPage() {
     <MainLayout>
       <div className="max-w-6xl mx-auto px-6 py-8">
 
-        <div className="mb-8">
-          <h1 className="text-text-primary font-bold text-2xl">
-            Welcome back, {user.fullName.split(' ')[0]}
-          </h1>
-          <p className="text-text-secondary text-sm mt-1">
-            {user.school?.name}{user.school?.district ? ` · ${user.school.district}` : ''}
-          </p>
+        {/* Header */}
+        <div className="flex items-start justify-between mb-6 gap-4">
+          <div>
+            <h1 className="text-text-primary font-bold text-2xl">Dashboard</h1>
+            <p className="text-text-secondary text-sm mt-1">
+              {user.fullName} · {user.school?.name}{user.school?.district ? `, ${user.school.district}` : ''}
+            </p>
+          </div>
+          <div className="flex gap-3 flex-shrink-0">
+            <div className="bg-white border border-surface-border rounded-xl px-4 py-2.5 text-center min-w-[70px]">
+              <p className="text-primary font-bold text-lg leading-none">{totalHours}</p>
+              <p className="text-text-muted text-[10px] mt-0.5">hrs practice</p>
+            </div>
+            <div className="bg-white border border-surface-border rounded-xl px-4 py-2.5 text-center min-w-[70px]">
+              <p className="text-primary font-bold text-lg leading-none">{disciplines.length}</p>
+              <p className="text-text-muted text-[10px] mt-0.5">disciplines</p>
+            </div>
+            <div className="bg-white border border-surface-border rounded-xl px-4 py-2.5 text-center min-w-[70px]">
+              <p className="text-primary font-bold text-lg leading-none">{levelsCompleted}</p>
+              <p className="text-text-muted text-[10px] mt-0.5">levels done</p>
+            </div>
+          </div>
         </div>
 
-        <div className="bg-dark-mid rounded-2xl px-6 py-5 mb-6 flex items-center justify-between gap-4">
+        {/* Studio banner */}
+        <div className="bg-white rounded-2xl px-6 py-5 mb-8 flex items-center justify-between gap-4">
           <div>
-            <p className="text-white font-bold text-sm">DCIP Studio</p>
-            <p className="text-white/70 text-xs mt-0.5">
+            <p className="text-text-primary font-bold text-sm">DCIP Studio</p>
+            <p className="text-text-muted text-xs mt-0.5">
               Unlock the studio, access virtual space and create serious work.
             </p>
           </div>
@@ -356,94 +384,83 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-8 md:grid-cols-1 lg:grid-cols-3">
-          <div className="bg-white border border-surface-border rounded-2xl p-6">
-            <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Total Practice</p>
-            <p className="text-primary font-bold text-3xl">
-              {totalHours}<span className="text-base font-normal text-text-secondary ml-1">hrs</span>
-            </p>
-          </div>
-          <div className="bg-white border border-surface-border rounded-2xl p-6">
-            <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Disciplines Active</p>
-            <p className="text-primary font-bold text-3xl">{disciplines.length}</p>
-          </div>
-          <div className="bg-white border border-surface-border rounded-2xl p-6">
-            <p className="text-text-muted text-xs uppercase tracking-wide mb-1">Levels Completed</p>
-            <p className="text-primary font-bold text-3xl">{levelsCompleted}</p>
-          </div>
+        {/* Disciplines */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-text-primary font-bold text-base">Your Disciplines</h2>
+          <button
+            onClick={() => navigate('/disciplines')}
+            className="text-xs text-primary font-medium hover:underline"
+          >
+            Browse all disciplines
+          </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-6 lg:grid-cols-1">
-
-          <div className="col-span-2 lg:col-span-1">
-            <h2 className="text-text-primary font-bold text-base mb-4">Your Disciplines</h2>
-            {loading ? (
-              <div className="bg-white border border-surface-border rounded-2xl p-6">
-                <p className="text-text-secondary text-sm">Loading progress...</p>
-              </div>
-            ) : disciplines.length === 0 ? (
-              <div className="bg-white border border-surface-border rounded-2xl p-6 text-center">
-                <p className="text-text-primary font-semibold text-sm mb-1">No activity yet</p>
-                <p className="text-text-secondary text-xs">
-                  Choose a discipline to begin your creative journey.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {disciplines.map(disc => (
-                  <DisciplineCard key={disc.key} disc={disc} onContinue={navigate} />
-                ))}
-              </div>
-            )}
+        {loading ? (
+          <div className="bg-white border border-surface-border rounded-2xl p-8 text-center">
+            <p className="text-text-muted text-sm">Loading your progress...</p>
           </div>
+        ) : disciplines.length === 0 ? (
+          <div className="bg-white border border-surface-border rounded-2xl p-10 text-center">
+            <p className="text-text-primary font-semibold text-sm mb-2">No activity yet</p>
+            <p className="text-text-muted text-xs mb-4">Choose a discipline to begin your creative journey.</p>
+            <button
+              onClick={() => navigate('/disciplines')}
+              className="bg-primary text-white text-xs font-semibold px-5 py-2.5 rounded-xl hover:bg-primary-dark transition-colors"
+            >
+              Start a Discipline
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {disciplines.map(disc => (
+              <DisciplineCard
+                key={disc.key}
+                disc={disc}
+                onContinue={navigate}
+                onViewDetail={key => navigate(`/discipline/${key}`)}
+              />
+            ))}
+          </div>
+        )}
 
-          <div className="col-span-1 space-y-4 lg:col-span-1">
-            <div className="bg-white border border-surface-border rounded-2xl p-6">
-              <h2 className="text-text-primary font-bold text-base mb-4">Quick Actions</h2>
-              <div className="space-y-3">
-                <button
-                  onClick={() => navigate('/studio')}
-                  className="w-full bg-primary text-white font-semibold text-sm py-3 rounded-xl hover:bg-primary-dark transition-colors"
-                >
-                  Open Studio
-                </button>
-                <button
-                  onClick={() => navigate('/disciplines')}
-                  className="w-full bg-white border border-surface-border text-text-primary font-semibold text-sm py-3 rounded-xl hover:bg-gray-50 transition-colors"
-                >
-                  Go to Disciplines
-                </button>
-                <button
-                  onClick={() => navigate('/portfolio')}
-                  className="w-full bg-white border border-surface-border text-text-primary font-semibold text-sm py-3 rounded-xl hover:bg-gray-50 transition-colors"
-                >
-                  View Portfolio
-                </button>
-                <button
-                  onClick={() => navigate('/skill-summary')}
-                  className="w-full bg-white border border-surface-border text-text-primary font-semibold text-sm py-3 rounded-xl hover:bg-gray-50 transition-colors"
-                >
-                  View Skill Summary
-                </button>
-              </div>
+
+        {/* Skill Summary — visible when student has more than one discipline */}
+        {disciplines.length > 1 && (
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-text-primary font-bold text-base">Skill Summary</h2>
+              <button
+                onClick={() => navigate('/skill-summary')}
+                className="text-xs text-primary font-medium hover:underline"
+              >
+                View full report
+              </button>
             </div>
-
-            {disciplines.length > 0 && (
-              <div>
-                <h2 className="text-text-primary font-bold text-base mb-3">My Grades</h2>
-                <div className="space-y-4">
-                  {disciplines.map(disc => (
-                    <GradesCard
-                      key={disc.key}
-                      discKey={disc.key}
-                      discLabel={DISC_LABEL[disc.key] ?? disc.label}
-                    />
-                  ))}
+            <div className="bg-white border border-surface-border rounded-2xl overflow-hidden">
+              {disciplines.map((disc, i) => (
+                <div
+                  key={disc.key}
+                  className={`flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-surface-warm transition-colors ${i < disciplines.length - 1 ? 'border-b border-surface-border' : ''}`}
+                  onClick={() => navigate(`/discipline/${disc.key}`)}
+                >
+                  <p className="text-text-primary font-semibold text-sm">{disc.label}</p>
+                  <div className="flex items-center gap-6">
+                    <div className="w-32 h-1.5 bg-surface-warm rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full"
+                        style={{ width: `${Math.min(Math.round((disc.completedStages.length / (STAGE_URLS[disc.key]?.length ?? 1)) * 100), 100)}%` }}
+                      />
+                    </div>
+                    <span className={`text-xs w-28 text-right ${skillLabelClass(disc.skillLevel)}`}>
+                      {formatSkillLevel(disc.skillLevel)}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
       </div>
     </MainLayout>
   )

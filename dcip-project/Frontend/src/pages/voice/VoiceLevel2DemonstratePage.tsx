@@ -6,7 +6,7 @@ import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, drawWaveform, DEMO_TOLERANCE, type PitchStatus } from '../../utils/voicePitch'
-import { completeVoiceDemonstration } from '../../services/api'
+import { completeVoiceDemonstration, savePortfolioItem } from '../../services/api'
 
 const DEMO_SCALE = [
   { label: 'C4', note: 'C', freq: 261.63 },
@@ -57,7 +57,10 @@ export default function VoiceLevel2DemonstratePage() {
       cancelAnimationFrame(rafRef.current)
       const didPass = correctCountRef.current >= REQUIRED_CORRECT
       if (didPass) {
-        if (!isPreviewMode) { try { await completeVoiceDemonstration(2, true) } catch { /* best-effort */ } }
+        if (!isPreviewMode) {
+          try { await completeVoiceDemonstration(2, true) } catch { /* best-effort */ }
+          savePortfolioItem({ discipline: 'voice', title: 'Voice Level 2 Demonstration', fileType: 'result', fileData: 'Passed', durationMinutes: 0 }).catch(() => {})
+        }
         reload()
       }
       setFinalCorrect(correctCountRef.current)
