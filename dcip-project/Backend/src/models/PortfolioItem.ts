@@ -7,6 +7,7 @@ export interface IPortfolioItem extends Document {
   title: string
   fileType: string
   fileData: string
+  snapshot?: string  // raw canvas state for re-editing (VA and GD only)
   syncStatus: 'synced' | 'pending'
   createdAt: Date
 }
@@ -18,6 +19,7 @@ const portfolioItemSchema = new Schema<IPortfolioItem>({
   title: { type: String, required: true },
   fileType: { type: String, default: 'image/png' },
   fileData: { type: String, required: true },
+  snapshot: { type: String },
   syncStatus: { type: String, enum: ['synced', 'pending'], default: 'synced' },
   createdAt: { type: Date, default: Date.now },
 })

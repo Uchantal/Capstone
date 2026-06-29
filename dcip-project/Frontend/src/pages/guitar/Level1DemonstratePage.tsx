@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { noteAt } from '../../components/guitar/GuitarLevelScreen'
-import { completeGuitarDemonstration, savePortfolioItem } from '../../services/api'
+import { completeGuitarDemonstration } from '../../services/api'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
+import DcipLogoLink from '../../components/DcipLogoLink'
 
 const TOTAL_PROMPTS = 3
 const REQUIRED_CORRECT = 2
@@ -38,7 +39,6 @@ export default function GuitarLevel1DemonstratePage() {
       setPassed(didPass)
       if (!isPreviewMode) {
         completeGuitarDemonstration(1, didPass).then(() => reload()).catch(() => {})
-        if (didPass) savePortfolioItem({ discipline: 'guitar', title: 'Guitar Level 1 Demonstration', fileType: 'result', fileData: `Passed ${correctCountRef.current} of ${TOTAL_PROMPTS} prompts`, durationMinutes: 0 }).catch(() => {})
       }
       setPhase('results')
     } else {
@@ -84,7 +84,8 @@ export default function GuitarLevel1DemonstratePage() {
   if (phase === 'results') {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+          <DcipLogoLink />
           <div className="flex items-center gap-2 text-xs text-text-muted">
             <button onClick={() => navigate('/guitar/virtual-instrument')} className="hover:text-text-primary transition-colors">Guitar</button>
             <span>/</span>
@@ -154,7 +155,8 @@ export default function GuitarLevel1DemonstratePage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+        <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button onClick={() => navigate('/guitar/virtual-instrument')} className="hover:text-text-primary transition-colors">Guitar</button>
           <span>/</span>

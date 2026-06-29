@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
+import DcipLogoLink from '../../components/DcipLogoLink'
 
 const D_POSITIONS = [
   { stringIdx: 3, fret: 0, label: 'D', stringName: 'D string', fretLabel: 'open' },
@@ -36,7 +37,8 @@ export default function GuitarLevel3PractisePage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+        <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button onClick={() => navigate('/guitar/virtual-instrument')} className="hover:text-text-primary transition-colors">Guitar</button>
           <span>/</span>

@@ -6,7 +6,7 @@ import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, drawWaveform, DEMO_TOLERANCE, type PitchStatus } from '../../utils/voicePitch'
-import { completeVoiceDemonstration, savePortfolioItem } from '../../services/api'
+import { completeVoiceDemonstration } from '../../services/api'
 
 // 4 prompts: A4 sustained 3s, C4 1.5s, G4 1.5s, C4 1.5s. 3/4 required to pass.
 const PROMPTS = [
@@ -58,7 +58,6 @@ export default function VoiceLevel3DemonstratePage() {
       if (didPass) {
         if (!isPreviewMode) {
           try { await completeVoiceDemonstration(3, true) } catch { /* best-effort */ }
-          savePortfolioItem({ discipline: 'voice', title: 'Voice Level 3 Demonstration', fileType: 'result', fileData: 'Passed', durationMinutes: 0 }).catch(() => {})
         }
         reload()
       }

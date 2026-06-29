@@ -5,6 +5,7 @@ import GuitarStudio, { GuitarStudioHandle } from '../components/studio/GuitarStu
 import VoiceStudio, { VoiceStudioHandle } from '../components/studio/VoiceStudio'
 import PianoStudio, { PianoStudioHandle } from '../components/studio/PianoStudio'
 import api from '../services/api'
+import DcipLogoLink from '../components/DcipLogoLink'
 
 // Shared handle interface — all studio components expose these methods
 interface StudioHandle {
@@ -25,11 +26,13 @@ interface StudioWorkMeta {
   width: number
   height: number
   fileType: string
+  fileUrl?: string
   createdAt: string
 }
 
 interface StudioWorkFull extends StudioWorkMeta {
-  fileData: string
+  fileData?: string
+  fileUrl?: string
 }
 
 function fetchWorks(): Promise<StudioWorkMeta[]> {
@@ -240,7 +243,11 @@ function LibraryView({ works, loading, onDelete, onDownload }: LibraryViewProps)
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => downloadFile(previewWork.fileData, `${previewWork.title.replace(/\s+/g, '-')}.png`)}
+                  onClick={() => {
+                    const src = previewWork.fileUrl ?? previewWork.fileData ?? ''
+                    const ext = previewWork.fileType?.startsWith('audio/') ? 'wav' : 'png'
+                    downloadFile(src, `${previewWork.title.replace(/\s+/g, '-')}.${ext}`)
+                  }}
                   className="bg-primary text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-primary-dark transition-colors"
                 >
                   Download
@@ -263,7 +270,7 @@ function LibraryView({ works, loading, onDelete, onDownload }: LibraryViewProps)
                   </div>
                   <audio
                     controls
-                    src={previewWork.fileData}
+                    src={previewWork.fileUrl ?? previewWork.fileData}
                     className="w-full max-w-lg"
                   />
                   <p className="text-text-muted text-sm text-center">
@@ -272,7 +279,7 @@ function LibraryView({ works, loading, onDelete, onDownload }: LibraryViewProps)
                 </div>
               ) : (
                 <img
-                  src={previewWork.fileData}
+                  src={previewWork.fileUrl ?? previewWork.fileData}
                   alt={previewWork.title}
                   className="max-w-full max-h-[70vh] object-contain mx-auto rounded-lg shadow"
                 />
@@ -388,7 +395,8 @@ export default function StudioPage() {
     const ext = work.fileType?.startsWith('audio/')
       ? (work.fileType.includes('wav') ? 'wav' : work.fileType.includes('ogg') ? 'ogg' : 'webm')
       : 'png'
-    downloadFile(work.fileData, `${title.replace(/\s+/g, '-')}.${ext}`)
+    const src = work.fileUrl ?? work.fileData ?? ''
+    downloadFile(src, `${title.replace(/\s+/g, '-')}.${ext}`)
   }
 
   // Delete a saved work
@@ -410,6 +418,7 @@ export default function StudioPage() {
     <div className="h-screen flex flex-col overflow-hidden">
       {/* Top bar */}
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+        <DcipLogoLink />
         {/* Left: breadcrumb + active discipline */}
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <button

@@ -9,6 +9,7 @@ interface FeedbackItem {
   feedbackType: string
   discipline?: string
   message: string
+  screenshotData?: string
   submittedAt: string
 }
 
@@ -21,6 +22,7 @@ function formatDate(iso: string): string {
 export default function AdminFeedbackPage() {
   const [items, setItems] = useState<FeedbackItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [lightbox, setLightbox] = useState<string | null>(null)
 
   useEffect(() => {
     getAdminFeedback()
@@ -31,7 +33,7 @@ export default function AdminFeedbackPage() {
 
   return (
     <AdminLayout>
-      <main className="max-w-5xl mx-auto px-6 py-8 space-y-6">
+      <main className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         <div>
           <h1 className="text-text-primary font-bold text-2xl mb-1">Feedback Submissions</h1>
           <p className="text-text-secondary text-sm">
@@ -56,6 +58,7 @@ export default function AdminFeedbackPage() {
                     <th className="text-left px-4 py-3 text-text-muted text-xs font-semibold">Type</th>
                     <th className="text-left px-4 py-3 text-text-muted text-xs font-semibold">Discipline</th>
                     <th className="text-left px-4 py-3 text-text-muted text-xs font-semibold">Message</th>
+                    <th className="text-left px-4 py-3 text-text-muted text-xs font-semibold">Screenshot</th>
                     <th className="text-left px-4 py-3 text-text-muted text-xs font-semibold">Date</th>
                   </tr>
                 </thead>
@@ -75,6 +78,23 @@ export default function AdminFeedbackPage() {
                       <td className="px-4 py-3 text-text-secondary max-w-xs">
                         <p className="line-clamp-2">{item.message}</p>
                       </td>
+                      <td className="px-4 py-3">
+                        {item.screenshotData ? (
+                          <button
+                            onClick={() => setLightbox(item.screenshotData!)}
+                            className="block"
+                            title="Click to view full screenshot"
+                          >
+                            <img
+                              src={item.screenshotData}
+                              alt="Screenshot"
+                              className="w-16 h-11 object-cover rounded border border-surface-border hover:border-primary hover:opacity-90 transition-all"
+                            />
+                          </button>
+                        ) : (
+                          <span className="text-text-muted text-xs">None</span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 text-text-secondary whitespace-nowrap">
                         {formatDate(item.submittedAt)}
                       </td>
@@ -86,6 +106,36 @@ export default function AdminFeedbackPage() {
           </div>
         )}
       </main>
+
+      {/* Screenshot lightbox */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <div
+            className="bg-white rounded-2xl overflow-hidden shadow-2xl max-w-4xl w-full"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-3 border-b border-surface-border">
+              <p className="text-text-primary font-semibold text-sm">Attached Screenshot</p>
+              <button
+                onClick={() => setLightbox(null)}
+                className="text-text-secondary text-xs px-3 py-1.5 rounded-lg border border-surface-border hover:bg-surface-warm transition-colors"
+              >
+                Close
+              </button>
+            </div>
+            <div className="p-4 bg-surface-warm/40">
+              <img
+                src={lightbox}
+                alt="User screenshot"
+                className="max-w-full max-h-[75vh] object-contain mx-auto rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   )
 }

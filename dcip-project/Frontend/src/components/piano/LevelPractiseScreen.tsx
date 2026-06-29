@@ -4,6 +4,7 @@ import { usePreviewMode } from '../../hooks/usePreviewMode'
 import PianoKeyboard from './PianoKeyboard'
 import { buildChord, type ChordType } from '../../utils/pianoTheory'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
+import DcipLogoLink from '../DcipLogoLink'
 
 interface ChordDef {
   symbol: string
@@ -97,7 +98,8 @@ export default function LevelPractiseScreen({
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+        <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
             onClick={() => navigate('/session/music-piano')}

@@ -59,6 +59,7 @@ export const savePortfolioItem = (data: {
   fileType: string
   fileData: string
   durationMinutes: number
+  snapshot?: string
 }) => api.post('/portfolio', data)
 
 export const fetchPortfolio = () => api.get('/portfolio')
@@ -244,5 +245,15 @@ export const fetchEngagementScores = (discipline: string) =>
 
 export const fetchAdminStudentProfile = (id: string) =>
   api.get(`/admin/students/${id}/profile`)
+
+// Drafts — one slot per student per discipline (visual-arts | graphic-design)
+export const saveDraft = (data: { discipline: string; snapshot: string; thumbnailData?: string }) =>
+  api.post('/drafts', data)
+
+export const fetchDraft = (discipline: string) =>
+  api.get(`/drafts/${discipline}`)
+
+export const deleteDraft = (discipline: string) =>
+  api.delete(`/drafts/${discipline}`)
 
 export default api

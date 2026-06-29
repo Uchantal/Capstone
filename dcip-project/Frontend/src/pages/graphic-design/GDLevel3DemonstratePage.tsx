@@ -3,9 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, exportDesignToDataUrl, type DesignElement } from '../../components/graphic-design/PosterSurface'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
-import { completeGDDemonstration, fetchEngagementScores, savePortfolioItem } from '../../services/api'
+import { completeGDDemonstration, fetchEngagementScores } from '../../services/api'
 import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
 import { useGDEngagement } from '../../hooks/useCanvasEngagement'
+import DcipLogoLink from '../../components/DcipLogoLink'
 
 const PLACEHOLDERS = ['New text', 'Your heading', 'Phone: \nEmail: \nWebsite: ', 'Your contact info']
 
@@ -99,7 +100,6 @@ export default function GDLevel3DemonstratePage() {
         const snapshot = JSON.stringify({ elements, bgColor })
         const imageData = await exportDesignToDataUrl(elements, bgColor, exportW, exportH)
         await completeGDDemonstration(3, true, snapshot, imageData)
-        savePortfolioItem({ discipline: 'graphic-design', title: 'Graphic Design Level 3 Demonstration', fileType: 'image/png', fileData: imageData, durationMinutes: 0 }).catch(() => {})
         reload()
       }
     } catch {
@@ -129,7 +129,8 @@ export default function GDLevel3DemonstratePage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-white">
-      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+        <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted">
           <button onClick={() => navigate('/graphic-design/virtual-studio')} className="hover:text-text-primary transition-colors">
             Graphic Design

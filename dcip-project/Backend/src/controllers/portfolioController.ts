@@ -22,7 +22,7 @@ function formatDiscipline(d: string): string {
 
 export const savePortfolioItem = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { discipline, title, fileType, fileData, durationMinutes } = req.body
+    const { discipline, title, fileType, fileData, durationMinutes, snapshot } = req.body
 
     if (!discipline || !title || !fileData) {
       res.status(400).json({ message: 'discipline, title, and fileData are required' })
@@ -39,7 +39,7 @@ export const savePortfolioItem = async (req: AuthRequest, res: Response): Promis
       syncStatus: 'synced',
     })
 
-    const item = await PortfolioItem.create({
+    const itemData: Record<string, unknown> = {
       user: req.userId,
       session: session._id,
       discipline,
@@ -47,7 +47,10 @@ export const savePortfolioItem = async (req: AuthRequest, res: Response): Promis
       fileType: fileType || 'image/png',
       fileData,
       syncStatus: 'synced',
-    })
+    }
+    if (snapshot) itemData.snapshot = snapshot
+
+    const item = await PortfolioItem.create(itemData)
 
     // Milestone pre-checks (before updating progress)
     const [existingProgressCount, prevDeepCount, totalSessionsNow] = await Promise.all([

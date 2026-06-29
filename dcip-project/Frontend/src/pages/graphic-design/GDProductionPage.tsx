@@ -1,9 +1,9 @@
-﻿import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+﻿import { useEffect, useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, exportDesignToDataUrl, DesignElement } from '../../components/graphic-design/PosterSurface'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
-import { saveGDProductionResult, savePortfolioItem, completeGDProduction } from '../../services/api'
+import { saveGDProductionResult, savePortfolioItem, completeGDProduction, fetchDraft, deleteDraft } from '../../services/api'
 import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
 import { useGDEngagement } from '../../hooks/useCanvasEngagement'
 
@@ -39,11 +39,18 @@ function MinimalNav({ onExit }: { onExit: () => void }) {
 
 export default function GDProductionPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const editSnapshotRaw = (location.state as { editSnapshot?: string } | null)?.editSnapshot ?? null
+  const editParsed = editSnapshotRaw ? (() => {
+    try { return JSON.parse(editSnapshotRaw) as { elements: DesignElement[]; bgColor: string } }
+    catch { return null }
+  })() : null
+
   const isPreviewMode = usePreviewMode()
   const { loading, markStageVisited } = useGDDemonstrationProgress()
-  const [phase, setPhase] = useState<Phase>('intro')
-  const [elements, setElements] = useState<DesignElement[]>(DEFAULT_ELEMENTS)
-  const [bgColor, setBgColor] = useState(DEFAULT_BG_COLOR)
+  const [phase, setPhase] = useState<Phase>(editParsed ? 'working' : 'intro')
+  const [elements, setElements] = useState<DesignElement[]>(editParsed?.elements ?? DEFAULT_ELEMENTS)
+  const [bgColor, setBgColor] = useState(editParsed?.bgColor ?? DEFAULT_BG_COLOR)
   const [canvasKey] = useState(0)
   const [exportW, setExportW] = useState(595)
   const [exportH, setExportH] = useState(842)
@@ -55,6 +62,20 @@ export default function GDProductionPage() {
   const { recordInteraction, recordElementChange, computeAndSave } =
     useGDEngagement('graphic-design', 'production')
 
+  const [draftEls, setDraftEls] = useState<DesignElement[] | null>(null)
+  const [draftBg, setDraftBg] = useState<string | null>(null)
+  const [draftChecked, setDraftChecked] = useState(false)
+
+  useEffect(() => {
+    fetchDraft('graphic-design')
+      .then(res => {
+        const d = JSON.parse(res.data.snapshot) as { elements: DesignElement[]; bgColor: string }
+        if (d.elements) setDraftEls(d.elements)
+        if (d.bgColor) setDraftBg(d.bgColor)
+      })
+      .catch(() => {})
+      .finally(() => setDraftChecked(true))
+  }, [])
 
   const allChecked = CHECKLIST.every(item => checked.has(item.id))
   const canSubmit = allChecked && reasoning.trim().length > 0 && !submitting
@@ -103,11 +124,13 @@ export default function GDProductionPage() {
         fileType: 'image/png',
         fileData: imageData,
         durationMinutes: 0,
+        snapshot: JSON.stringify({ elements, bgColor }),
       })
       setPortfolioId(portfolioRes.data?._id ?? null)
 
       await markStageVisited('gd-production')
       completeGDProduction(true).catch(() => {})
+      deleteDraft('graphic-design').catch(() => {})
       setPhase('done')
     } catch {
       setPhase('done')
@@ -217,11 +240,25 @@ export default function GDProductionPage() {
                   <li className="text-text-secondary text-xs">One short sentence describing who the poster is for and why your choices suit that audience</li>
                 </ul>
               </div>
+              {draftChecked && draftEls && (
+                <div className="bg-surface-warm border border-surface-border rounded-xl p-4 mb-4 flex items-center justify-between gap-4 text-left">
+                  <div>
+                    <p className="text-text-primary font-semibold text-sm">You have a saved draft</p>
+                    <p className="text-text-secondary text-xs mt-0.5">Continue from where you left off, or start with a fresh canvas.</p>
+                  </div>
+                  <button
+                    onClick={() => setPhase('working')}
+                    className="bg-secondary text-white font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity text-sm flex-shrink-0"
+                  >
+                    Load Draft
+                  </button>
+                </div>
+              )}
               <button
-                onClick={() => setPhase('working')}
+                onClick={() => { setDraftEls(null); setDraftBg(null); setPhase('working') }}
                 className="bg-primary text-white font-semibold px-10 py-3 rounded-xl hover:bg-primary-dark transition-colors"
               >
-                Begin
+                {draftEls ? 'Start Fresh' : 'Begin'}
               </button>
             </div>
           </div>
@@ -298,8 +335,8 @@ export default function GDProductionPage() {
 
         <DesignCanvas
           key={canvasKey}
-          defaultElements={DEFAULT_ELEMENTS}
-          defaultBgColor={DEFAULT_BG_COLOR}
+          defaultElements={editParsed?.elements ?? draftEls ?? DEFAULT_ELEMENTS}
+          defaultBgColor={editParsed?.bgColor ?? draftBg ?? DEFAULT_BG_COLOR}
           onChange={(els, bg) => { setElements(els); setBgColor(bg); recordElementChange(els) }}
           onInteraction={recordInteraction}
           onDimensionsChange={(w, h) => { setExportW(w); setExportH(h) }}

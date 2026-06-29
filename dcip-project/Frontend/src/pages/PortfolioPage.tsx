@@ -10,6 +10,7 @@ interface PortfolioItem {
   title: string
   fileType: string
   fileData: string
+  snapshot?: string
   durationMinutes: number
   syncStatus?: 'synced' | 'pending'
   createdAt: string
@@ -145,6 +146,26 @@ export default function PortfolioPage() {
     link.href = fileData
     link.download = `${item.title}.${ext}`
     link.click()
+  }
+
+  const handleEdit = async (item: PortfolioItem, e: React.MouseEvent) => {
+    e.stopPropagation()
+    let full = item
+    if (!item.fileData || (!item.snapshot && item.discipline === 'graphic-design')) {
+      try { full = (await fetchPortfolioItem(item._id)).data } catch { return }
+    }
+    if (item.discipline === 'visual-arts') {
+      // Reconstruct snapshot from the composite PNG so the student can continue drawing
+      const editSnapshot = JSON.stringify({
+        drawData: full.fileData ?? '',
+        eraseData: '',
+        bgColor: '#F9F7F4',
+        shapes: [],
+      })
+      navigate('/visual-arts/production', { state: { editSnapshot } })
+    } else if (item.discipline === 'graphic-design') {
+      navigate('/graphic-design/production', { state: { editSnapshot: full.snapshot ?? null } })
+    }
   }
 
   const goToDisciplines = () => {
@@ -339,22 +360,50 @@ export default function PortfolioPage() {
                         <div
                           key={item._id}
                           onClick={() => handleView(item._id)}
-                          className="bg-white border border-surface-border rounded-xl px-5 py-4 flex items-center gap-3 hover:border-primary transition-colors cursor-pointer"
+                          className="bg-white border border-surface-border rounded-xl px-5 py-4 hover:border-primary transition-colors cursor-pointer"
                         >
-                          <div className="flex-1 min-w-0">
-                            <p className="text-text-primary font-semibold text-sm truncate">{item.title}</p>
-                            <p className="text-text-secondary text-xs mt-0.5">
-                              {disciplineLabel(item.discipline)}, {new Date(item.createdAt).toLocaleDateString('en', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                            </p>
-                            {item.syncStatus && (
-                              <span className={`inline-block mt-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                                item.syncStatus === 'synced' ? 'bg-secondary/10 text-secondary' : 'bg-primary-light text-primary'
-                              }`}>
-                                {item.syncStatus === 'synced' ? 'Synced' : 'Pending'}
-                              </span>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-text-primary font-semibold text-sm truncate">{item.title}</p>
+                              <p className="text-text-secondary text-xs mt-0.5">
+                                {disciplineLabel(item.discipline)}, {new Date(item.createdAt).toLocaleDateString('en', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                              {item.syncStatus && (
+                                <span className={`inline-block mt-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                                  item.syncStatus === 'synced' ? 'bg-secondary/10 text-secondary' : 'bg-primary-light text-primary'
+                                }`}>
+                                  {item.syncStatus === 'synced' ? 'Synced' : 'Pending'}
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-primary text-xs font-semibold shrink-0">View</span>
+                          </div>
+                          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-surface-border">
+                            {(item.discipline === 'visual-arts' || item.discipline === 'graphic-design') && (
+                              <button
+                                onClick={e => handleEdit(item, e)}
+                                className="bg-secondary text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
+                              >
+                                Edit
+                              </button>
+                            )}
+                            {item.fileType?.startsWith('image') && (
+                              <button
+                                onClick={e => handleDownload(item, e)}
+                                className="border border-surface-border text-text-secondary text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+                              >
+                                Download
+                              </button>
+                            )}
+                            {item.fileType?.startsWith('audio') && (
+                              <button
+                                onClick={e => handleDownload(item, e)}
+                                className="border border-surface-border text-text-secondary text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+                              >
+                                Download
+                              </button>
                             )}
                           </div>
-                          <span className="text-primary text-xs font-semibold shrink-0">View</span>
                         </div>
                       ))}
                     </div>

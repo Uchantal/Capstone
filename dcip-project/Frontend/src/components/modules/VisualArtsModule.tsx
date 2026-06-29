@@ -8,10 +8,13 @@ interface Props {
   onColourUsed?: (colour: string) => void
   onToolChange?: (tool: string) => void
   sidebarFooter?: React.ReactNode
+  initialSnapshot?: string
 }
 
 export interface VisualArtsModuleHandle {
   captureCleanImage: () => string
+  getSnapshot: () => string
+  loadSnapshot: (data: string) => void
 }
 
 export type Tool = 'brush' | 'eraser' | 'line' | 'rect' | 'circle' | 'select' | 'ruler'
@@ -135,7 +138,7 @@ function hitTestShape(s: Shape, x: number, y: number, pad = 8): boolean {
 }
 
 const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function VisualArtsModule({
-  step: _step, onInteraction, onColourUsed, onToolChange, sidebarFooter,
+  step: _step, onInteraction, onColourUsed, onToolChange, sidebarFooter, initialSnapshot,
 }, ref) {
   const [panelCollapsed, setPanelCollapsed] = useState(false)
   const [tool,        setTool]        = useState<Tool>('brush')
@@ -638,6 +641,64 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
     return 'crosshair'
   }
 
+  const loadSnapshotInternal = useCallback((data: string) => {
+    try {
+      const s = JSON.parse(data) as { drawData: string; eraseData: string; bgColor: string; shapes: Shape[] }
+
+      // Restore background color
+      setBgColour(s.bgColor)
+      bgRef.current = s.bgColor
+      const bgCanvas = bgCanvasRef.current
+      if (bgCanvas) {
+        const bgCtx = bgCanvas.getContext('2d')
+        if (bgCtx) { bgCtx.fillStyle = s.bgColor; bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height) }
+      }
+
+      // Restore shapes
+      shapesRef.current = s.shapes ?? []
+      const shapeCanvas = shapeCanvasRef.current
+      if (shapeCanvas) {
+        const shapeCtx = shapeCanvas.getContext('2d')
+        if (shapeCtx) {
+          shapeCtx.clearRect(0, 0, shapeCanvas.width, shapeCanvas.height)
+          for (const shape of shapesRef.current) paintShape(shapeCtx, shape)
+        }
+      }
+
+      // Restore freehand draw layer
+      if (s.drawData && drawCanvasRef.current) {
+        const img = new Image()
+        img.onload = () => {
+          const ctx = drawCanvasRef.current?.getContext('2d')
+          if (ctx && drawCanvasRef.current) {
+            ctx.clearRect(0, 0, drawCanvasRef.current.width, drawCanvasRef.current.height)
+            ctx.drawImage(img, 0, 0)
+          }
+        }
+        img.src = s.drawData
+      }
+
+      // Restore erase layer
+      if (s.eraseData && eraseCanvasRef.current) {
+        const img = new Image()
+        img.onload = () => {
+          const ctx = eraseCanvasRef.current?.getContext('2d')
+          if (ctx && eraseCanvasRef.current) {
+            ctx.clearRect(0, 0, eraseCanvasRef.current.width, eraseCanvasRef.current.height)
+            ctx.drawImage(img, 0, 0)
+          }
+        }
+        img.src = s.eraseData
+      }
+    } catch { /* ignore malformed snapshot */ }
+  }, [])
+
+  useEffect(() => {
+    if (!initialSnapshot) return
+    const t = setTimeout(() => loadSnapshotInternal(initialSnapshot), 100)
+    return () => clearTimeout(t)
+  }, [initialSnapshot, loadSnapshotInternal])
+
   useImperativeHandle(ref, () => ({
     captureCleanImage: () => {
       const bg    = bgCanvasRef.current
@@ -670,6 +731,17 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
       ctx.drawImage(draw, 0, 0)
       return out.toDataURL('image/png')
     },
+    getSnapshot: () => {
+      const drawCanvas = drawCanvasRef.current
+      const eraseCanvas = eraseCanvasRef.current
+      return JSON.stringify({
+        drawData:  drawCanvas  ? drawCanvas.toDataURL('image/png')  : '',
+        eraseData: eraseCanvas ? eraseCanvas.toDataURL('image/png') : '',
+        bgColor:   bgRef.current,
+        shapes:    shapesRef.current,
+      })
+    },
+    loadSnapshot: loadSnapshotInternal,
   }))
 
   return (

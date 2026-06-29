@@ -7,8 +7,9 @@ import {
   buildChord,
   type ChordType,
 } from '../../utils/pianoTheory'
-import { completePianoDemonstration, savePortfolioItem } from '../../services/api'
+import { completePianoDemonstration } from '../../services/api'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
+import DcipLogoLink from '../DcipLogoLink'
 
 interface ChordDef {
   symbol: string
@@ -97,13 +98,6 @@ export default function LevelDemonstrateScreen({
       const didPass = correctCountRef.current >= requiredCorrect
       if (didPass && !isPreviewMode) {
         try { await completePianoDemonstration(levelNumber, true) } catch {}
-        savePortfolioItem({
-          discipline: 'piano',
-          title: `Piano Level ${levelNumber} Demonstration`,
-          fileType: 'result',
-          fileData: `Passed ${correctCountRef.current} of ${testChords.length} chords`,
-          durationMinutes: 0,
-        }).catch(() => {})
       }
       setFinalCorrect(correctCountRef.current)
       setPassed(didPass)
@@ -166,7 +160,8 @@ export default function LevelDemonstrateScreen({
   if (phase === 'results') {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+        <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+          <DcipLogoLink />
           <div className="flex items-center gap-2 text-xs text-text-muted">
             <button
               onClick={() => navigate('/session/music-piano')}
@@ -250,7 +245,8 @@ export default function LevelDemonstrateScreen({
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+        <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
             onClick={() => navigate('/session/music-piano')}

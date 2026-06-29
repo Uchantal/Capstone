@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule, { VisualArtsModuleHandle } from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
-import { completeVisualArtsDemonstration, fetchEngagementScores, savePortfolioItem } from '../../services/api'
+import { completeVisualArtsDemonstration, fetchEngagementScores } from '../../services/api'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
+import DcipLogoLink from '../../components/DcipLogoLink'
 
 const TASK =
   'Draw one circle and shade it. Your circle must have at least two visible tones: a lighter area ' +
@@ -88,7 +89,6 @@ export default function VALevel2DemonstratePage() {
     try {
       if (combined >= 60) {
         await completeVisualArtsDemonstration(2, true, snapshot)
-        if (snapshot) savePortfolioItem({ discipline: 'visual-arts', title: 'Visual Arts Level 2 Demonstration', fileType: 'image/png', fileData: snapshot, durationMinutes: 0 }).catch(() => {})
       }
     } catch {
       // ignore
@@ -151,7 +151,8 @@ export default function VALevel2DemonstratePage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+        <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
             onClick={() => navigate('/visual-arts/virtual-canvas')}
@@ -160,7 +161,12 @@ export default function VALevel2DemonstratePage() {
             Visual Arts
           </button>
           <span>/</span>
-          <span>Level 2</span>
+          <button
+            onClick={() => navigate('/visual-arts/level-2/practise')}
+            className="hover:text-text-primary transition-colors"
+          >
+            Level 2
+          </button>
           <span>/</span>
           <span className="text-text-primary">Demonstrate</span>
         </div>

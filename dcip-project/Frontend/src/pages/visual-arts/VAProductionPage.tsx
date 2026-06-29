@@ -1,9 +1,9 @@
-﻿import { useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+﻿import { useEffect, useRef, useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import VisualArtsModule, { VisualArtsModuleHandle } from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
-import { saveVAProductionResult, savePortfolioItem, completeVisualArtsProduction } from '../../services/api'
+import { saveVAProductionResult, savePortfolioItem, completeVisualArtsProduction, fetchDraft, deleteDraft } from '../../services/api'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 
 const PRODUCTION_CHECKLIST = [
@@ -17,10 +17,12 @@ type Phase = 'intro' | 'working' | 'done'
 
 export default function VAProductionPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const editSnapshot = (location.state as { editSnapshot?: string } | null)?.editSnapshot ?? null
   const isPreviewMode = usePreviewMode()
   const moduleRef = useRef<VisualArtsModuleHandle>(null)
   const { loading, markStageVisited } = useVisualArtsDemonstrationProgress()
-  const [phase, setPhase] = useState<Phase>('intro')
+  const [phase, setPhase] = useState<Phase>(editSnapshot ? 'working' : 'intro')
   const [checked, setChecked] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
   const [portfolioId, setPortfolioId] = useState<string | null>(null)
@@ -28,6 +30,15 @@ export default function VAProductionPage() {
   const { recordInteraction, recordColour, recordTool, computeAndSave } =
     useVAEngagement('visual-arts', 'production')
 
+  const [draftSnapshot, setDraftSnapshot] = useState<string | null>(null)
+  const [draftChecked, setDraftChecked] = useState(false)
+
+  useEffect(() => {
+    fetchDraft('visual-arts')
+      .then(res => setDraftSnapshot(res.data.snapshot))
+      .catch(() => {})
+      .finally(() => setDraftChecked(true))
+  }, [])
 
   const allChecked = PRODUCTION_CHECKLIST.every(item => checked.has(item.id))
 
@@ -48,6 +59,7 @@ export default function VAProductionPage() {
     const score = await computeAndSave()
     setEngagementScore(score)
     const imageData = moduleRef.current?.captureCleanImage() ?? ''
+    const snapshot = moduleRef.current?.getSnapshot() ?? ''
 
     try {
       await saveVAProductionResult({
@@ -66,11 +78,13 @@ export default function VAProductionPage() {
         fileType: 'image/png',
         fileData: imageData,
         durationMinutes: 0,
+        ...(snapshot ? { snapshot } : {}),
       })
 
       setPortfolioId(portfolioRes.data?._id ?? null)
       await markStageVisited('va-production')
       completeVisualArtsProduction(true).catch(() => {})
+      deleteDraft('visual-arts').catch(() => {})
       setPhase('done')
     } catch {
       setPhase('done')
@@ -206,11 +220,28 @@ export default function VAProductionPage() {
                   <li className="text-text-secondary text-xs">An original subject of your choosing</li>
                 </ul>
               </div>
+              {draftChecked && draftSnapshot && (
+                <div className="bg-surface-warm border border-surface-border rounded-xl p-4 mb-4 flex items-center justify-between gap-4 text-left">
+                  <div>
+                    <p className="text-text-primary font-semibold text-sm">You have a saved draft</p>
+                    <p className="text-text-secondary text-xs mt-0.5">Continue from where you left off, or start with a fresh canvas.</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setPhase('working')
+                      setTimeout(() => moduleRef.current?.loadSnapshot(draftSnapshot), 150)
+                    }}
+                    className="bg-secondary text-white font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity text-sm flex-shrink-0"
+                  >
+                    Load Draft
+                  </button>
+                </div>
+              )}
               <button
                 onClick={() => setPhase('working')}
                 className="bg-primary text-white font-semibold px-10 py-3 rounded-xl hover:bg-primary-dark transition-colors"
               >
-                Begin
+                {draftSnapshot ? 'Start Fresh' : 'Begin'}
               </button>
             </div>
           </div>
@@ -283,6 +314,7 @@ export default function VAProductionPage() {
         onColourUsed={recordColour}
         onToolChange={recordTool}
         sidebarFooter={sidebarFooter}
+        initialSnapshot={editSnapshot ?? undefined}
       />
     </div>
   )
