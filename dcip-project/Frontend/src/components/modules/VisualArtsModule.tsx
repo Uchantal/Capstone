@@ -140,7 +140,7 @@ function hitTestShape(s: Shape, x: number, y: number, pad = 8): boolean {
 const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function VisualArtsModule({
   step: _step, onInteraction, onColourUsed, onToolChange, sidebarFooter, initialSnapshot,
 }, ref) {
-  const [panelCollapsed, setPanelCollapsed] = useState(false)
+  const [panelCollapsed, setPanelCollapsed] = useState(() => window.innerWidth < 640)
   const [tool,        setTool]        = useState<Tool>('brush')
   const [colour,      setColour]      = useState('#1A1A1A')
   const [bgColour,    setBgColour]    = useState('#EFEFEF')
@@ -177,6 +177,12 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
   const previewBaseRef    = useRef<ImageData | null>(null) // shapeCanvas state before preview
   const isDraggingShape   = useRef(false)
   const dragOffset        = useRef({ x: 0, y: 0 })
+
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth < 640) setPanelCollapsed(true) }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   useEffect(() => { toolRef.current      = tool      }, [tool])
   useEffect(() => { colourRef.current    = colour    }, [colour])
@@ -776,7 +782,7 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
         {sidebarFooter && (
           <div
             className="flex-shrink-0 bg-white border-r border-surface-border flex flex-col overflow-hidden"
-            style={{ width: panelCollapsed ? '2rem' : '40%', minWidth: panelCollapsed ? 'auto' : '320px', transition: 'width 200ms ease' }}
+            style={{ width: panelCollapsed ? '2rem' : 'min(40%, 420px)', minWidth: panelCollapsed ? 'auto' : 'min(320px, 50vw)', transition: 'width 200ms ease' }}
           >
             <div className="h-8 flex-shrink-0 flex items-center justify-end px-1 border-b border-surface-border">
               <button

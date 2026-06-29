@@ -345,7 +345,7 @@ export default function DashboardPage() {
       <div className="max-w-6xl mx-auto px-6 py-8">
 
         {/* Header */}
-        <div className="flex items-start justify-between mb-6 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-6 gap-4">
           <div>
             <h1 className="text-text-primary font-bold text-2xl">Dashboard</h1>
             <p className="text-text-secondary text-sm mt-1">
@@ -369,7 +369,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Studio banner */}
-        <div className="bg-white rounded-2xl px-6 py-5 mb-8 flex items-center justify-between gap-4">
+        <div className="bg-white rounded-2xl px-6 py-5 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p className="text-text-primary font-bold text-sm">DCIP Studio</p>
             <p className="text-text-muted text-xs mt-0.5">
@@ -411,7 +411,7 @@ export default function DashboardPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {disciplines.map(disc => (
               <DisciplineCard
                 key={disc.key}
