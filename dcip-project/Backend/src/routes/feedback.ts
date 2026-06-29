@@ -8,7 +8,7 @@ const router = Router()
 // Public: submit feedback
 router.post('/', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, feedbackType, discipline, message } = req.body
+    const { name, email, feedbackType, discipline, message, screenshotData } = req.body
 
     if (!feedbackType) {
       res.status(400).json({ message: 'Feedback type is required.' })
@@ -25,6 +25,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       feedbackType,
       discipline: discipline || undefined,
       message: message.trim(),
+      screenshotData: screenshotData || undefined,
       userAgent: req.headers['user-agent'],
     })
 

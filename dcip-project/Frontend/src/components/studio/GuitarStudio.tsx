@@ -482,11 +482,14 @@ const GuitarStudio = forwardRef<GuitarStudioHandle, { onDirty: () => void }>(({ 
 
   const handleChordClick = useCallback((chord: Chord) => {
     strum(chord)
-    if (recordingRef.current) {
-      const timestamp = Date.now() - recordingStart.current
-      setProgression(prev => [...prev, { chord, timestamp }])
-      onDirty()
+    if (!recordingRef.current) {
+      recordingStart.current = Date.now()
+      recordingRef.current = true
+      setRecording(true)
     }
+    const timestamp = Date.now() - recordingStart.current
+    setProgression(prev => [...prev, { chord, timestamp }])
+    onDirty()
   }, [onDirty])
 
   function playProgression() {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Footer from '../components/Footer'
 import { submitFeedback } from '../services/api'
@@ -28,11 +28,31 @@ export default function FeedbackPage() {
   const [feedbackType, setFeedbackType] = useState('General Feedback')
   const [discipline, setDiscipline] = useState('')
   const [message, setMessage] = useState('')
+  const [screenshotData, setScreenshotData] = useState<string | null>(null)
+  const [screenshotName, setScreenshotName] = useState<string | null>(null)
   const [status, setStatus] = useState<Status>('idle')
   const [submitting, setSubmitting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isDisciplineFeedback = feedbackType === 'Discipline Feedback'
   const canSubmit = message.trim().length > 0 && !submitting
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      setScreenshotData(reader.result as string)
+      setScreenshotName(file.name)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const removeScreenshot = () => {
+    setScreenshotData(null)
+    setScreenshotName(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,6 +65,7 @@ export default function FeedbackPage() {
         feedbackType,
         discipline: isDisciplineFeedback && discipline ? discipline : undefined,
         message: message.trim(),
+        screenshotData: screenshotData ?? undefined,
       })
       setStatus('success')
     } catch {
@@ -60,6 +81,8 @@ export default function FeedbackPage() {
     setFeedbackType('General Feedback')
     setDiscipline('')
     setMessage('')
+    setScreenshotData(null)
+    setScreenshotName(null)
     setStatus('idle')
   }
 
@@ -179,6 +202,50 @@ export default function FeedbackPage() {
                 placeholder="Tell us what you think..."
                 className="w-full border border-[#E8E4DC] rounded-lg px-4 py-3 text-sm text-[#1A1A1A] placeholder-gray-400 focus:outline-none focus:border-primary resize-y"
               />
+            </div>
+
+            <div>
+              <label className="text-[#1A1A1A] text-sm font-medium block mb-1.5">
+                Attach Screenshot (optional)
+              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+                id="screenshot-upload"
+              />
+              {!screenshotData ? (
+                <label
+                  htmlFor="screenshot-upload"
+                  className="flex items-center justify-center w-full border border-dashed border-[#E8E4DC] rounded-lg px-4 py-5 cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors"
+                >
+                  <div className="text-center">
+                    <p className="text-[#555555] text-sm">Click to attach an image or screenshot</p>
+                    <p className="text-[#888888] text-xs mt-1">PNG, JPG, WEBP up to 5 MB</p>
+                  </div>
+                </label>
+              ) : (
+                <div className="border border-[#E8E4DC] rounded-lg p-3 flex items-start gap-3">
+                  <img
+                    src={screenshotData}
+                    alt="Screenshot preview"
+                    className="w-24 h-16 object-cover rounded border border-[#E8E4DC] flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[#1A1A1A] text-sm font-medium truncate">{screenshotName}</p>
+                    <p className="text-[#888888] text-xs mt-0.5">Ready to attach</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={removeScreenshot}
+                    className="text-[#888888] hover:text-accent text-xs font-medium flex-shrink-0 transition-colors"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
             </div>
 
             {status === 'error' && (

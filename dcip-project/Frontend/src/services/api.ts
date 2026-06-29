@@ -229,6 +229,7 @@ export const submitFeedback = (data: {
   feedbackType: string
   discipline?: string
   message: string
+  screenshotData?: string
 }) => api.post('/feedback', data)
 
 export const getAdminFeedback = () => api.get('/feedback')
