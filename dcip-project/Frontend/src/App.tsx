@@ -94,11 +94,12 @@ import AdminFeedbackPage from './pages/admin/AdminFeedbackPage'
 import FeedbackPage from './pages/FeedbackPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import VerifyEmailPage from './pages/VerifyEmailPage'
 import StudioPage from './pages/StudioPage'
 import AdminPreviewPage from './pages/admin/AdminPreviewPage'
 import AdminStudioPage from './pages/admin/AdminStudioPage'
 import PreviewNavBar from './components/PreviewNavBar'
-import { useAuth } from './hooks/useAuth'
+import { useAuth, AuthProvider } from './hooks/useAuth'
 
 const PreviewContext = createContext(false)
 
@@ -178,6 +179,7 @@ function AppContent() {
         <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
         <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
         <Route path="/reset-password" element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
 
         <Route path="/dashboard" element={<StudentRoute><DashboardPage /></StudentRoute>} />
         <Route path="/select-school" element={<StudentRoute><SelectSchoolPage /></StudentRoute>} />
@@ -298,10 +300,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <PreviewProvider>
-        <AppContent />
-      </PreviewProvider>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PreviewProvider>
+          <AppContent />
+        </PreviewProvider>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }

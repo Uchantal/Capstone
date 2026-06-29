@@ -17,6 +17,9 @@ export interface IUser extends Document {
   graduatedDisciplines: string[]
   passwordResetToken: string | undefined
   passwordResetExpires: Date | undefined
+  isEmailVerified: boolean
+  emailVerificationToken: string | undefined
+  emailVerificationExpires: Date | undefined
   createdAt: Date
 }
 
@@ -43,6 +46,9 @@ const userSchema = new Schema<IUser>({
   graduatedDisciplines:  [{ type: String }],
   passwordResetToken:    { type: String },
   passwordResetExpires:  { type: Date },
+  isEmailVerified:       { type: Boolean, default: false },
+  emailVerificationToken:    { type: String },
+  emailVerificationExpires:  { type: Date },
   createdAt:             { type: Date, default: Date.now },
 })
 

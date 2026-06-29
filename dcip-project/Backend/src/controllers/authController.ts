@@ -16,12 +16,26 @@ const generateToken = (id: string, role: string): string => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET as string, { expiresIn: '7d' })
 }
 
+const isStrongPassword = (pw: string): string | null => {
+  if (pw.length < 8)           return 'Password must be at least 8 characters.'
+  if (!/[A-Z]/.test(pw))       return 'Password must contain at least one uppercase letter.'
+  if (!/[0-9]/.test(pw))       return 'Password must contain at least one number.'
+  if (!/[^A-Za-z0-9]/.test(pw)) return 'Password must contain at least one special character.'
+  return null
+}
+
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     const { fullName, username, email, password, schoolId } = req.body
 
     if (!fullName || !username || !email || !password || !schoolId) {
       res.status(400).json({ message: 'All fields are required' })
+      return
+    }
+
+    const pwError = isStrongPassword(password)
+    if (pwError) {
+      res.status(400).json({ message: pwError })
       return
     }
 
@@ -33,14 +47,30 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     const existingUsername = await User.findOne({ username: username.toLowerCase() })
     if (existingUsername) {
-      res.status(400).json({ message: 'Username already taken' })
-      return
+      const isExpiredUnverified =
+        !existingUsername.isEmailVerified &&
+        existingUsername.emailVerificationExpires instanceof Date &&
+        existingUsername.emailVerificationExpires < new Date()
+      if (isExpiredUnverified) {
+        await User.findByIdAndDelete(existingUsername._id)
+      } else {
+        res.status(400).json({ message: 'Username already taken' })
+        return
+      }
     }
 
     const existingEmail = await User.findOne({ email: email.toLowerCase() })
     if (existingEmail) {
-      res.status(400).json({ message: 'An account with this email already exists' })
-      return
+      const isExpiredUnverified =
+        !existingEmail.isEmailVerified &&
+        existingEmail.emailVerificationExpires instanceof Date &&
+        existingEmail.emailVerificationExpires < new Date()
+      if (isExpiredUnverified) {
+        await User.findByIdAndDelete(existingEmail._id)
+      } else {
+        res.status(400).json({ message: 'An account with this email already exists' })
+        return
+      }
     }
 
     const hashed = await bcrypt.hash(password, 10)
@@ -51,6 +81,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       password: hashed,
       school: school._id,
       role: 'student',
+      isEmailVerified: false,
     })
 
     // Explicitly ensure school is persisted (belt-and-suspenders for Mongoose casting edge cases)
@@ -59,18 +90,49 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       user.school = school._id
     }
 
-    res.status(201).json({
-      token: generateToken(user._id.toString(), user.role),
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        username: user.username,
-        role: user.role,
-        school: user.school ? { id: school._id, name: school.name, district: school.district } : null,
-        discipline: user.discipline,
-        subDiscipline: user.subDiscipline,
-      },
+    // Send email verification link
+    const plainToken = crypto.randomBytes(32).toString('hex')
+    const hashedToken = crypto.createHash('sha256').update(plainToken).digest('hex')
+    user.emailVerificationToken = hashedToken
+    user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+    await user.save()
+
+    const verifyUrl = `${process.env.FRONTEND_URL}/verify-email?token=${plainToken}`
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
     })
+    try {
+      await transporter.sendMail({
+        from: `"DCIP Platform" <${process.env.EMAIL_USER}>`,
+        to: user.email,
+        subject: 'Verify your DCIP email address',
+        html: `
+          <div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px 24px;border:1px solid #e5e7eb;border-radius:12px;">
+            <h2 style="color:#1a1a1a;margin-bottom:8px;">Verify your email</h2>
+            <p style="color:#6b7280;font-size:14px;margin-bottom:24px;">
+              Hello ${user.fullName},<br/>
+              Thanks for registering on the DCIP Platform.
+              Click the button below to verify your email address.
+              The link is valid for <strong>24 hours</strong>.
+            </p>
+            <a href="${verifyUrl}" style="display:inline-block;background:#C8960C;color:#fff;font-weight:600;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none;">
+              Verify Email
+            </a>
+            <p style="color:#9ca3af;font-size:12px;margin-top:24px;">
+              If you did not create an account, you can safely ignore this email.
+            </p>
+          </div>
+        `,
+      })
+    } catch (emailError) {
+      await User.findByIdAndDelete(user._id)
+      console.error('Registration email failed:', emailError)
+      res.status(500).json({ message: 'Registration failed because the verification email could not be sent. Please try again.' })
+      return
+    }
+
+    res.status(201).json({ message: 'Account created. Please check your email to verify your address before logging in.' })
   } catch (error) {
     console.error('Registration error:', error)
     res.status(500).json({ message: 'Server error during registration' })
@@ -95,6 +157,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const match = await bcrypt.compare(password, user.password)
     if (!match) {
       res.status(400).json({ message: 'Invalid username or password' })
+      return
+    }
+
+    if (user.role === 'student' && user.isEmailVerified === false) {
+      res.status(403).json({ message: 'Please verify your email address before logging in. Check your inbox for the verification link.' })
       return
     }
 
@@ -129,8 +196,9 @@ export const changePassword = async (req: AuthRequest, res: Response): Promise<v
       res.status(400).json({ message: 'Both current and new password are required.' })
       return
     }
-    if (newPassword.length < 8) {
-      res.status(400).json({ message: 'New password must be at least 8 characters.' })
+    const pwError = isStrongPassword(newPassword)
+    if (pwError) {
+      res.status(400).json({ message: pwError })
       return
     }
     const user = await User.findById(req.userId)
@@ -149,6 +217,33 @@ export const changePassword = async (req: AuthRequest, res: Response): Promise<v
   } catch (error) {
     console.error('Change password error:', error)
     res.status(500).json({ message: 'Server error.' })
+  }
+}
+
+export const verifyEmail = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token } = req.body
+    if (!token) {
+      res.status(400).json({ message: 'Verification token is required.' })
+      return
+    }
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+    const user = await User.findOne({
+      emailVerificationToken: hashedToken,
+      emailVerificationExpires: { $gt: new Date() },
+    })
+    if (!user) {
+      res.status(400).json({ message: 'Verification link is invalid or has expired.' })
+      return
+    }
+    user.isEmailVerified = true
+    user.emailVerificationToken = undefined
+    user.emailVerificationExpires = undefined
+    await user.save()
+    res.json({ message: 'Email verified successfully. You can now log in.' })
+  } catch (error) {
+    console.error('Verify email error:', error)
+    res.status(500).json({ message: 'Could not verify email. Please try again.' })
   }
 }
 
@@ -274,19 +369,18 @@ export const updateSchool = async (req: AuthRequest, res: Response): Promise<voi
   try {
     const { schoolId } = req.body
     if (!schoolId) { res.status(400).json({ message: 'schoolId is required' }); return }
-    const school = await School.findById(schoolId)
+
+    // Select only what we need — avoids fetching the full document
+    const school = await School.findById(schoolId).select('name district isActive')
     if (!school || !school.isActive) { res.status(400).json({ message: 'School not found' }); return }
-    const user = await User.findByIdAndUpdate(req.userId, { school: schoolId }, { new: true }).populate('school')
+
+    // new: false — we don't need the updated document back; school was already fetched above
+    const user = await User.findByIdAndUpdate(req.userId, { school: schoolId }, { new: false })
     if (!user) { res.status(404).json({ message: 'User not found' }); return }
-    const schoolDoc = user.school ? (user.school as unknown as ISchool) : null
+
+    // Return only what the frontend needs — no populate query needed
     res.json({
-      id: user._id,
-      fullName: user.fullName,
-      username: user.username,
-      role: user.role,
-      school: schoolDoc ? { id: schoolDoc._id, name: schoolDoc.name, district: schoolDoc.district } : null,
-      discipline: user.discipline,
-      subDiscipline: user.subDiscipline,
+      school: { id: school._id, name: school.name, district: school.district },
     })
   } catch {
     res.status(500).json({ message: 'Could not update school' })
@@ -365,8 +459,9 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
       res.status(400).json({ message: 'Token and new password are required.' })
       return
     }
-    if (newPassword.length < 8) {
-      res.status(400).json({ message: 'Password must be at least 8 characters.' })
+    const pwError = isStrongPassword(newPassword)
+    if (pwError) {
+      res.status(400).json({ message: pwError })
       return
     }
 

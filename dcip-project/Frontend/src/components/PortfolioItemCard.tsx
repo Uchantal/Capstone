@@ -22,7 +22,7 @@ export default function PortfolioItemCard({
 
   return (
     <div className="bg-white border border-surface-border rounded-xl p-4 flex items-start gap-4">
-      <div className="bg-[#F9F7F4] rounded-xl w-16 h-16 flex items-center justify-center flex-shrink-0">
+      <div className="bg-white border border-surface-border rounded-xl w-16 h-16 flex items-center justify-center flex-shrink-0">
       </div>
 
       <div className="flex-1 min-w-0">

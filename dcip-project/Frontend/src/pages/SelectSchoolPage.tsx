@@ -21,6 +21,8 @@ export default function SelectSchoolPage() {
   const [slow, setSlow] = useState(false)
   const [loadingSchools, setLoadingSchools] = useState(true)
   const [error, setError] = useState('')
+  const [confirmed, setConfirmed] = useState(false)
+  const [confirmedSchoolName, setConfirmedSchoolName] = useState('')
   const schoolRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -49,28 +51,59 @@ export default function SelectSchoolPage() {
     setSlow(false)
     setError('')
 
-    // After 8 s with no response, tell the student to keep waiting instead of
-    // letting them think the platform crashed.
-    const slowTimer = setTimeout(() => setSlow(true), 8000)
+    // Show a "still working" nudge after 2 s so students don't think it froze
+    const slowTimer = setTimeout(() => setSlow(true), 2000)
 
     try {
       const res = await updateUserSchool(schoolId)
       clearTimeout(slowTimer)
+      setSlow(false)
+
+      // Update auth context immediately so the guard passes
       updateUser({ school: res.data.school })
-      navigate('/dashboard', { replace: true })
+
+      // Show a clear success confirmation for 1.5 s before navigating
+      setConfirmedSchoolName(res.data.school.name)
+      setConfirmed(true)
+      setTimeout(() => navigate('/dashboard', { replace: true }), 1500)
     } catch {
       clearTimeout(slowTimer)
       setSlow(false)
-      setError('Could not save your school. Please try again.')
-    } finally {
       setSubmitting(false)
+      setError('Could not save your school. Please try again.')
     }
   }, [schoolId, updateUser, navigate])
 
   const selected = schools.find(s => s._id === schoolId)
 
+  // ── Success state ──────────────────────────────────────────────────────────
+  if (confirmed) {
+    return (
+      <div className="min-h-screen bg-[#F9F7F4] flex items-center justify-center p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-surface-border w-full max-w-md p-8 flex flex-col items-center text-center">
+          <div className="flex items-center justify-center w-14 h-14 rounded-full bg-secondary/10 mb-5">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="text-text-primary font-bold text-xl mb-1">School confirmed!</h2>
+          <p className="text-text-secondary text-sm mb-1">Your account is now linked to</p>
+          <p className="text-text-primary font-semibold text-base mb-5">{confirmedSchoolName}</p>
+          <div className="flex items-center gap-2 text-text-muted text-xs">
+            <svg className="animate-spin w-3.5 h-3.5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+            </svg>
+            Taking you to your dashboard…
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Form state ─────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#F9F7F4] flex items-center justify-center p-6">
+    <div className="min-h-screen bg-white flex items-center justify-center p-6">
       <div className="bg-white rounded-2xl shadow-sm border border-surface-border w-full max-w-md p-8">
         <div className="mb-6">
           <h1 className="text-text-primary font-bold text-2xl mb-1">Select your school</h1>
@@ -145,10 +178,14 @@ export default function SelectSchoolPage() {
 
         {error && <p className="text-accent text-xs mb-4">{error}</p>}
 
-        {slow && (
-          <p className="text-text-secondary text-xs mb-3 text-center">
-            Still saving — the server is warming up, please don't close this page…
-          </p>
+        {slow && !error && (
+          <div className="flex items-center gap-2 bg-surface-warm border border-surface-border rounded-lg px-3 py-2.5 mb-4">
+            <svg className="animate-spin w-3.5 h-3.5 text-primary flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+            </svg>
+            <p className="text-text-secondary text-xs">Saving your school — please wait, do not close or refresh this page.</p>
+          </div>
         )}
 
         <button

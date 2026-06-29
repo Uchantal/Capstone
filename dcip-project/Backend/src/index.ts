@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import { connectDB } from './config/db'
+import User from './models/User'
 import authRoutes from './routes/auth'
 import sessionRoutes from './routes/sessions'
 import portfolioRoutes from './routes/portfolio'
@@ -66,6 +67,13 @@ app.use('/api/studio', studioRoutes)
 
 const PORT = process.env.PORT || 5000
 
-connectDB().then(() => {
+connectDB().then(async () => {
+  const deleted = await User.deleteMany({
+    isEmailVerified: false,
+    emailVerificationExpires: { $lt: new Date() },
+  })
+  if (deleted.deletedCount > 0) {
+    console.log(`Cleaned up ${deleted.deletedCount} expired unverified account(s)`)
+  }
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
 })

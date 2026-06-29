@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { registerUser, fetchSchools } from '../services/api'
-import { useAuth } from '../hooks/useAuth'
 import Footer from '../components/Footer'
 
 interface School {
@@ -12,8 +11,6 @@ interface School {
 }
 
 export default function RegisterPage() {
-  const navigate = useNavigate()
-  const { saveAuth } = useAuth()
   const [schools, setSchools] = useState<School[]>([])
   const [form, setForm] = useState({
     fullName: '',
@@ -28,6 +25,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [registered, setRegistered] = useState(false)
 
   // School searchable dropdown
   const [schoolOpen, setSchoolOpen]     = useState(false)
@@ -60,6 +58,13 @@ export default function RegisterPage() {
     setSubmitError('')
   }
 
+  const pwRules = [
+    { label: 'At least 8 characters',        test: (p: string) => p.length >= 8 },
+    { label: 'One uppercase letter (A-Z)',    test: (p: string) => /[A-Z]/.test(p) },
+    { label: 'One number (0-9)',              test: (p: string) => /[0-9]/.test(p) },
+    { label: 'One special character (!@#...)',test: (p: string) => /[^A-Za-z0-9]/.test(p) },
+  ]
+
   const validate = () => {
     const next: Record<string, string> = {}
 
@@ -73,8 +78,9 @@ export default function RegisterPage() {
       next.email = 'Please enter a valid email address.'
     }
 
-    if (form.password.length < 8) {
-      next.password = 'Password must be at least 8 characters.'
+    const allPwRulesMet = pwRules.every(r => r.test(form.password))
+    if (!allPwRulesMet) {
+      next.password = 'Please meet all password requirements shown below.'
     }
 
     if (form.password !== form.confirmPassword) {
@@ -103,9 +109,8 @@ export default function RegisterPage() {
 
     setLoading(true)
     try {
-      const res = await registerUser({ fullName: form.fullName, username: form.username, email: form.email, password: form.password, schoolId: form.schoolId })
-      saveAuth(res.data.token, res.data.user)
-      navigate('/disciplines')
+      await registerUser({ fullName: form.fullName, username: form.username, email: form.email, password: form.password, schoolId: form.schoolId })
+      setRegistered(true)
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err
@@ -123,6 +128,36 @@ export default function RegisterPage() {
       {/* Right panel */}
       <div className="flex-1 flex items-center justify-center px-8 py-12">
         <div className="w-full max-w-md">
+
+          {registered ? (
+            /* ── Check-email success state ── */
+            <div>
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-secondary/10 mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h1 className="text-text-primary font-bold text-2xl mb-1">Check your email</h1>
+              <p className="text-text-secondary text-sm mb-6">
+                We sent a verification link to{' '}
+                <span className="text-text-primary font-medium">{form.email}</span>.
+                Click the link in that email to activate your account. The link expires in 24 hours.
+              </p>
+              <div className="bg-surface-warm border border-surface-border rounded-lg px-4 py-3 mb-6">
+                <p className="text-text-secondary text-sm">
+                  Didn't receive anything? Check your spam folder or contact your school supervisor for assistance.
+                </p>
+              </div>
+              <Link
+                to="/login"
+                className="w-full bg-primary text-white font-semibold text-sm py-3.5 rounded-xl hover:bg-primary-dark transition-colors flex items-center justify-center"
+              >
+                Back to Login
+              </Link>
+            </div>
+          ) : (
+            /* ── Registration form ── */
+            <>
           <h1 className="text-text-primary font-bold text-2xl mb-1">Create your account</h1>
           <p className="text-text-secondary text-sm mb-8">
             Already have an account?{' '}
@@ -201,6 +236,44 @@ export default function RegisterPage() {
                   )}
                 </button>
               </div>
+
+              {/* Live strength meter — shown as soon as user starts typing */}
+              {form.password.length > 0 && (
+                <div className="mt-2.5 space-y-1.5">
+                  {/* 4-segment progress bar */}
+                  <div className="flex gap-1">
+                    {pwRules.map((r, i) => (
+                      <div
+                        key={i}
+                        className={`h-1 flex-1 rounded-full transition-colors duration-200 ${
+                          r.test(form.password) ? 'bg-secondary' : 'bg-gray-200'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  {/* Individual rule indicators */}
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                    {pwRules.map((r, i) => {
+                      const ok = r.test(form.password)
+                      return (
+                        <div key={i} className="flex items-center gap-1.5">
+                          {ok ? (
+                            <svg className="w-3.5 h-3.5 text-secondary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          ) : (
+                            <svg className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <circle cx="12" cy="12" r="9" />
+                            </svg>
+                          )}
+                          <span className={`text-xs ${ok ? 'text-secondary' : 'text-text-muted'}`}>{r.label}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
               {errors.password && (
                 <p className="text-accent text-xs mt-1.5">{errors.password}</p>
               )}
@@ -358,6 +431,8 @@ export default function RegisterPage() {
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
+          </>
+          )}
         </div>
       </div>
       </div>

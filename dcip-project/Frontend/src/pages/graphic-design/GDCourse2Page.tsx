@@ -87,7 +87,7 @@ export default function GDCourse2Page() {
                 <p className="text-[#C8960C] font-bold text-lg leading-tight">CREATIVE NIGHT</p>
                 <p className="text-gray-300 text-sm mt-1">Creative Event, School Main Hall</p>
               </div>
-              <div className="bg-[#F9F7F4] px-4 py-2 border-t border-surface-border">
+              <div className="px-4 py-2 border-t border-surface-border">
                 <p className="text-secondary text-xs font-medium">Strong contrast: easy to read</p>
               </div>
             </div>
@@ -96,7 +96,7 @@ export default function GDCourse2Page() {
                 <p className="text-[#888888] font-bold text-lg leading-tight">CREATIVE NIGHT</p>
                 <p className="text-[#666666] text-sm mt-1">Creative Event, School Main Hall</p>
               </div>
-              <div className="bg-[#F9F7F4] px-4 py-2 border-t border-surface-border">
+              <div className="px-4 py-2 border-t border-surface-border">
                 <p className="text-accent text-xs font-medium">Weak contrast: hard to read</p>
               </div>
             </div>
@@ -149,7 +149,7 @@ export default function GDCourse2Page() {
                   <div key={i} className="h-2 bg-gray-600 rounded" style={{ width: `${70 + Math.sin(i) * 20}%` }} />
                 ))}
               </div>
-              <div className="bg-[#F9F7F4] px-4 py-2 border-t border-surface-border">
+              <div className="px-4 py-2 border-t border-surface-border">
                 <p className="text-accent text-xs font-medium">Cluttered: too many elements</p>
               </div>
             </div>
@@ -158,7 +158,7 @@ export default function GDCourse2Page() {
                 <div className="h-3 bg-[#C8960C] rounded w-3/4" />
                 <div className="h-2 bg-gray-500 rounded w-1/2" />
               </div>
-              <div className="bg-[#F9F7F4] px-4 py-2 border-t border-surface-border">
+              <div className="px-4 py-2 border-t border-surface-border">
                 <p className="text-secondary text-xs font-medium">Balanced: space gives the title room</p>
               </div>
             </div>

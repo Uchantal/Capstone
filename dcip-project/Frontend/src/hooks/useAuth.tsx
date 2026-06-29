@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { createContext, useContext, useState, ReactNode } from 'react'
 
 export type UserRole = 'student' | 'supervisor' | 'admin'
 
@@ -27,13 +27,22 @@ const loadUser = (): AuthUser | null => {
   }
 }
 
-export const useAuth = () => {
+interface AuthContextValue {
+  user: AuthUser | null
+  token: string | null
+  loading: false
+  saveAuth: (newToken: string, userData: AuthUser) => void
+  logout: () => void
+  updateUser: (updated: Partial<AuthUser>) => void
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null)
+
+export function AuthProvider({ children }: { children: ReactNode }) {
   // Both token and user are read synchronously so they are available on the
   // very first render; prevents redirect loops in route guards.
   const [token, setToken] = useState<string | null>(loadToken)
   const [user, setUser] = useState<AuthUser | null>(loadUser)
-
-  const loading = false
 
   const saveAuth = (newToken: string, userData: AuthUser) => {
     localStorage.setItem('token', newToken)
@@ -50,11 +59,23 @@ export const useAuth = () => {
   }
 
   const updateUser = (updated: Partial<AuthUser>) => {
-    if (!user) return
-    const merged = { ...user, ...updated }
-    localStorage.setItem('user', JSON.stringify(merged))
-    setUser(merged)
+    setUser(prev => {
+      if (!prev) return prev
+      const merged = { ...prev, ...updated }
+      localStorage.setItem('user', JSON.stringify(merged))
+      return merged
+    })
   }
 
-  return { user, token, loading, saveAuth, logout, updateUser }
+  return (
+    <AuthContext.Provider value={{ user, token, loading: false, saveAuth, logout, updateUser }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export const useAuth = (): AuthContextValue => {
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+  return ctx
 }

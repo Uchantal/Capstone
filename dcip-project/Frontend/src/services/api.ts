@@ -41,6 +41,9 @@ export const forgotPassword = (email: string) =>
 export const resetPassword = (token: string, newPassword: string) =>
   api.post('/auth/reset-password', { token, newPassword })
 
+export const verifyEmail = (token: string) =>
+  api.post('/auth/verify-email', { token })
+
 // Sessions
 export const createSession = (data: { discipline: string; durationMinutes: number }) =>
   api.post('/sessions', data)
