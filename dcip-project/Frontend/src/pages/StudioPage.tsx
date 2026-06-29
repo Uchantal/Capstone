@@ -289,6 +289,52 @@ function LibraryView({ works, loading, onDelete, onDownload }: LibraryViewProps)
 // Discipline definitions (module-level constant)
 // ---------------------------------------------------------------------------
 
+function DisciplineIcon({ discipline }: { discipline: string }) {
+  const p = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+  if (discipline === 'visual-arts') return (
+    <svg {...p}>
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1-.23-.27-.38-.62-.38-1 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8z"/>
+      <circle cx="6.5" cy="11.5" r="1.5" fill="currentColor" stroke="none"/>
+      <circle cx="9.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/>
+      <circle cx="14.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/>
+      <circle cx="17.5" cy="11.5" r="1.5" fill="currentColor" stroke="none"/>
+    </svg>
+  )
+  if (discipline === 'graphic-design') return (
+    <svg {...p}>
+      <path d="M17 3a2.83 2.83 0 0 1 4 4L7.5 20.5l-5 1 1-5L17 3z"/>
+      <path d="M15 5l4 4"/>
+    </svg>
+  )
+  if (discipline === 'guitar') return (
+    <svg {...p}>
+      <path d="M9.5 2.5h5l.5 5"/>
+      <path d="M9.5 2.5l-.5 5"/>
+      <ellipse cx="12" cy="14.5" rx="5" ry="5.5"/>
+      <path d="M12 7.5v2"/>
+      <path d="M9.5 14.5h5"/>
+      <circle cx="12" cy="14.5" r="1.5" fill="currentColor" stroke="none"/>
+    </svg>
+  )
+  if (discipline === 'voice') return (
+    <svg {...p}>
+      <rect x="9" y="2" width="6" height="11" rx="3"/>
+      <path d="M5 10a7 7 0 0 0 14 0"/>
+      <path d="M12 17v4M9 21h6"/>
+    </svg>
+  )
+  if (discipline === 'piano') return (
+    <svg {...p}>
+      <rect x="2" y="5" width="20" height="14" rx="1.5"/>
+      <path d="M7 5v8M12 5v8M17 5v8"/>
+      <rect x="4.5" y="5" width="3.5" height="7" rx="0.5" fill="currentColor" stroke="none"/>
+      <rect x="9.5" y="5" width="3.5" height="7" rx="0.5" fill="currentColor" stroke="none"/>
+      <rect x="14.5" y="5" width="3.5" height="7" rx="0.5" fill="currentColor" stroke="none"/>
+    </svg>
+  )
+  return null
+}
+
 const DISCIPLINES = [
   { value: 'visual-arts',    label: 'Visual Arts',    description: 'Painting, drawing, mixed media, and visual composition' },
   { value: 'graphic-design', label: 'Graphic Design', description: 'Layouts, branding, typography, and digital design' },
@@ -512,21 +558,24 @@ export default function StudioPage() {
 
         {/* Discipline selection screen */}
         {view === 'choose' && (
-          <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center p-8">
-            <div className="max-w-2xl w-full">
-              <h2 className="text-text-primary font-bold text-xl mb-1 text-center">Choose Your Studio</h2>
-              <p className="text-text-secondary text-sm text-center mb-8">
-                Select the discipline you are working in for this session.
+          <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center p-8 bg-surface-warm">
+            <div className="w-full max-w-3xl">
+              <h2 className="text-text-primary font-bold text-2xl mb-2 text-center">Choose Your Studio</h2>
+              <p className="text-text-muted text-sm text-center mb-10">
+                Select a discipline to begin your session.
               </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {DISCIPLINES.map(d => (
+              <div className="grid grid-cols-6 gap-5">
+                {DISCIPLINES.map((d, i) => (
                   <button
                     key={d.value}
                     onClick={() => { setDiscipline(d.value); setView('workspace') }}
-                    className="bg-white border border-surface-border rounded-2xl p-6 text-left hover:border-primary hover:shadow-sm transition-all"
+                    className={`${i < 3 ? 'col-span-2' : 'col-span-3'} bg-white border border-surface-border rounded-2xl p-6 text-left hover:border-primary hover:shadow-lg transition-all group`}
                   >
+                    <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4 text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                      <DisciplineIcon discipline={d.value} />
+                    </div>
                     <p className="text-text-primary font-bold text-sm mb-1">{d.label}</p>
-                    <p className="text-text-secondary text-xs leading-relaxed">{d.description}</p>
+                    <p className="text-text-muted text-xs leading-relaxed">{d.description}</p>
                   </button>
                 ))}
               </div>
