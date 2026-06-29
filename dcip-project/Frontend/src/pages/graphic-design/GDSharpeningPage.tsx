@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../../hooks/useAuth'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, type DesignElement } from '../../components/graphic-design/PosterSurface'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
 import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
@@ -36,8 +37,27 @@ export default function GDSharpeningPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
+  const { user } = useAuth()
+  const draftKey = `${user?.id ?? 'anon'}:gd:sharpening`
+
+  const _draftInit = useRef<{ elements: DesignElement[]; bgColor: string } | null>(null)
+  const _draftChecked = useRef(false)
+  if (!_draftChecked.current) {
+    _draftChecked.current = true
+    try { const r = localStorage.getItem(`dcip:draft:${draftKey}`); if (r) _draftInit.current = JSON.parse(r) } catch { /* ignore */ }
+  }
+
   const { loading, markStageVisited } = useGDDemonstrationProgress()
-  const [elements, setElements] = useState<DesignElement[]>(DEFAULT_ELEMENTS)
+  const [elements, setElements] = useState<DesignElement[]>(() => _draftInit.current?.elements ?? DEFAULT_ELEMENTS)
+  const [bgColor, setBgColor] = useState<string>(() => _draftInit.current?.bgColor ?? DEFAULT_BG_COLOR)
+  const saveDraftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function saveDraft(els: DesignElement[], bg: string) {
+    if (saveDraftTimerRef.current) clearTimeout(saveDraftTimerRef.current)
+    saveDraftTimerRef.current = setTimeout(() => {
+      try { localStorage.setItem(`dcip:draft:${draftKey}`, JSON.stringify({ elements: els, bgColor: bg })) } catch { /* ignore */ }
+    }, 1500)
+  }
   const { recordInteraction, recordElementChange, computeAndSave } =
     useGDEngagement('graphic-design', 'sharpening')
 
@@ -106,9 +126,9 @@ export default function GDSharpeningPage() {
         </CanvasInstructionPanel>
 
         <DesignCanvas
-          defaultElements={DEFAULT_ELEMENTS}
-          defaultBgColor={DEFAULT_BG_COLOR}
-          onChange={(els) => { setElements(els); recordElementChange(els) }}
+          defaultElements={_draftInit.current?.elements ?? DEFAULT_ELEMENTS}
+          defaultBgColor={_draftInit.current?.bgColor ?? DEFAULT_BG_COLOR}
+          onChange={(els, bg) => { setElements(els); setBgColor(bg); recordElementChange(els); saveDraft(els, bg) }}
           onInteraction={recordInteraction}
         />
       </div>

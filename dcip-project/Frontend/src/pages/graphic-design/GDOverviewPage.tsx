@@ -27,7 +27,7 @@ export default function GDOverviewPage() {
             You will work with real design formats used in schools, communities, and professional settings.
             Each format has its own rules, proportions, and purpose.
           </p>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { label: 'Posters',        desc: 'A4 and A5 formats for events, announcements, and campaigns' },
               { label: 'Social Media',   desc: 'Instagram posts and stories formatted for digital sharing' },
@@ -44,7 +44,7 @@ export default function GDOverviewPage() {
         {/* Card B: The tools */}
         <div className="bg-white border border-surface-border rounded-2xl p-4 md:p-6 mb-5">
           <h2 className="text-text-primary font-bold text-base mb-3">The Tools You Will Use</h2>
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <p className="text-text-primary font-semibold text-sm mb-2">Layout and Typography</p>
               <p className="text-text-secondary text-sm leading-relaxed">

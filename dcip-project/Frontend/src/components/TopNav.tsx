@@ -340,7 +340,7 @@ export default function TopNav() {
                   onClick={() => go('/studio')}
                   className="px-4 py-3 flex flex-col gap-0.5 hover:bg-[#F9F7F4] cursor-pointer transition-colors duration-100 border-b border-surface-border"
                 >
-                  <span className="text-sm font-medium text-primary">DCIP Studio</span>
+                  <span className="text-sm font-medium text-text-primary">DCIP Studio</span>
                   <span className="text-xs text-text-secondary">Professional creative workspace</span>
                 </div>
 

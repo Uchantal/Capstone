@@ -81,7 +81,7 @@ export default function GDCourse2Page() {
             A light background demands dark text. Low contrast does not just look weak, it makes your message
             inaccessible to anyone who is not reading in ideal conditions.
           </p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="rounded-xl overflow-hidden border border-surface-border">
               <div className="bg-[#1A1A1A] px-5 py-4">
                 <p className="text-[#C8960C] font-bold text-lg leading-tight">CREATIVE NIGHT</p>
@@ -109,7 +109,7 @@ export default function GDCourse2Page() {
           <p className="text-text-secondary text-sm mb-5 leading-relaxed">
             Colours carry emotional weight that affects how a viewer feels before they read a single word.
           </p>
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <p className="text-text-primary font-semibold text-sm mb-2">Warm colours</p>
               <div className="flex gap-2 mb-3">
@@ -142,7 +142,7 @@ export default function GDCourse2Page() {
             Empty space is not wasted space. Whitespace gives a design room to breathe and directs attention
             to what matters. Cluttered designs overwhelm the viewer. Balanced designs guide the eye clearly.
           </p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="rounded-xl overflow-hidden border border-surface-border">
               <div className="bg-[#1A1A1A] px-4 py-3 space-y-1">
                 {Array.from({ length: 7 }).map((_, i) => (

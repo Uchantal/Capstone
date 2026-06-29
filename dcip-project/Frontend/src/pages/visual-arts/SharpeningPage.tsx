@@ -1,5 +1,6 @@
 ﻿import { useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../../hooks/useAuth'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
@@ -27,6 +28,7 @@ const SHADING_ZONES = [
 export default function SharpeningPage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { user } = useAuth()
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
   const { loading, markStageVisited } = useVisualArtsDemonstrationProgress()
   const { recordInteraction, recordColour, recordTool, computeAndSave } =
@@ -116,6 +118,7 @@ export default function SharpeningPage() {
         onColourUsed={recordColour}
         onToolChange={recordTool}
         sidebarFooter={sidebarFooter}
+        draftKey={`${user?.id ?? 'anon'}:va:sharpening`}
       />
     </div>
   )

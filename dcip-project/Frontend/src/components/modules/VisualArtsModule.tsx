@@ -9,12 +9,14 @@ interface Props {
   onToolChange?: (tool: string) => void
   sidebarFooter?: React.ReactNode
   initialSnapshot?: string
+  draftKey?: string
 }
 
 export interface VisualArtsModuleHandle {
   captureCleanImage: () => string
   getSnapshot: () => string
   loadSnapshot: (data: string) => void
+  clearDraft: () => void
 }
 
 export type Tool = 'brush' | 'eraser' | 'line' | 'rect' | 'circle' | 'select' | 'ruler'
@@ -138,7 +140,7 @@ function hitTestShape(s: Shape, x: number, y: number, pad = 8): boolean {
 }
 
 const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function VisualArtsModule({
-  step: _step, onInteraction, onColourUsed, onToolChange, sidebarFooter, initialSnapshot,
+  step: _step, onInteraction, onColourUsed, onToolChange, sidebarFooter, initialSnapshot, draftKey,
 }, ref) {
   const [panelCollapsed, setPanelCollapsed] = useState(() => window.innerWidth < 640)
   const [tool,        setTool]        = useState<Tool>('brush')
@@ -167,6 +169,9 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
   const historyRef        = useRef<HistoryEntry[]>([])
   const historyIdx        = useRef(-1)
   const bgRef             = useRef('#EFEFEF')
+  const draftKeyRef       = useRef(draftKey)
+  const saveDraftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => { draftKeyRef.current = draftKey }, [draftKey])
   const toolRef           = useRef<Tool>('brush')
   const colourRef         = useRef('#1A1A1A')
   const sizeRef           = useRef(6)
@@ -267,6 +272,20 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
     historyIdx.current = next.length - 1
     setCanUndo(historyIdx.current > 0)
     setCanRedo(false)
+    if (draftKeyRef.current) {
+      if (saveDraftTimerRef.current) clearTimeout(saveDraftTimerRef.current)
+      saveDraftTimerRef.current = setTimeout(() => {
+        try {
+          const snapshot = JSON.stringify({
+            drawData:  draw.toDataURL('image/jpeg', 0.65),
+            eraseData: erase ? erase.toDataURL() : '',
+            bgColor:   bgRef.current,
+            shapes:    shapesRef.current,
+          })
+          localStorage.setItem(`dcip:draft:${draftKeyRef.current}`, snapshot)
+        } catch { /* storage full — skip */ }
+      }, 1500)
+    }
   }, [])
 
   const applyHistoryEntry = useCallback((entry: HistoryEntry) => {
@@ -463,7 +482,7 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
 
     // ── Ruler: live distance overlay ─────────────────────────────────────
     if (t === 'ruler') {
-      const dist = Math.round(Math.hypot(pos.x - startPos.current.x, pos.y - startPos.current.y))
+      const dist = parseFloat((Math.hypot(pos.x - startPos.current.x, pos.y - startPos.current.y) * 2.54 / 96).toFixed(2))
       setRulerLine({ x1: startPos.current.x, y1: startPos.current.y, x2: pos.x, y2: pos.y, dist })
       return
     }
@@ -700,10 +719,12 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
   }, [])
 
   useEffect(() => {
-    if (!initialSnapshot) return
-    const t = setTimeout(() => loadSnapshotInternal(initialSnapshot), 100)
+    const snap = initialSnapshot ?? (draftKey ? (() => { try { return localStorage.getItem(`dcip:draft:${draftKey}`) ?? undefined } catch { return undefined } })() : undefined)
+    if (!snap) return
+    const t = setTimeout(() => loadSnapshotInternal(snap), 100)
     return () => clearTimeout(t)
-  }, [initialSnapshot, loadSnapshotInternal])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useImperativeHandle(ref, () => ({
     captureCleanImage: () => {
@@ -748,6 +769,12 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
       })
     },
     loadSnapshot: loadSnapshotInternal,
+    clearDraft: () => {
+      if (draftKeyRef.current) {
+        if (saveDraftTimerRef.current) clearTimeout(saveDraftTimerRef.current)
+        try { localStorage.removeItem(`dcip:draft:${draftKeyRef.current}`) } catch { /* ignore */ }
+      }
+    },
   }))
 
   return (
@@ -871,9 +898,9 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
                 <circle cx={rulerLine.x2} cy={rulerLine.y2} r="3" fill="#C8960C" />
                 {/* Distance label */}
                 <rect
-                  x={(rulerLine.x1 + rulerLine.x2) / 2 - 28}
+                  x={(rulerLine.x1 + rulerLine.x2) / 2 - 36}
                   y={(rulerLine.y1 + rulerLine.y2) / 2 - 12}
-                  width="56" height="20" rx="4"
+                  width="72" height="20" rx="4"
                   fill="rgba(255,255,255,0.92)"
                 />
                 <text
@@ -886,7 +913,7 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
                   fill="#C8960C"
                   fontFamily="sans-serif"
                 >
-                  {rulerLine.dist}px
+                  {rulerLine.dist} cm
                 </text>
               </svg>
             )}

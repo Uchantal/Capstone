@@ -1,6 +1,7 @@
 ﻿import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
+import { useAuth } from '../../hooks/useAuth'
 import VisualArtsModule, { VisualArtsModuleHandle } from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { saveVAProductionResult, savePortfolioItem, completeVisualArtsProduction, fetchDraft, deleteDraft } from '../../services/api'
@@ -18,6 +19,7 @@ type Phase = 'intro' | 'working' | 'done'
 export default function VAProductionPage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { user } = useAuth()
   const editSnapshot = (location.state as { editSnapshot?: string } | null)?.editSnapshot ?? null
   const isPreviewMode = usePreviewMode()
   const moduleRef = useRef<VisualArtsModuleHandle>(null)
@@ -85,6 +87,7 @@ export default function VAProductionPage() {
       await markStageVisited('va-production')
       completeVisualArtsProduction(true).catch(() => {})
       deleteDraft('visual-arts').catch(() => {})
+      moduleRef.current?.clearDraft()
       setPhase('done')
     } catch {
       setPhase('done')
@@ -315,6 +318,7 @@ export default function VAProductionPage() {
         onToolChange={recordTool}
         sidebarFooter={sidebarFooter}
         initialSnapshot={editSnapshot ?? undefined}
+        draftKey={editSnapshot ? undefined : `${user?.id ?? 'anon'}:va:production`}
       />
     </div>
   )

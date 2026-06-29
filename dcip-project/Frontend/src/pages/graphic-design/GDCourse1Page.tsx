@@ -92,7 +92,7 @@ export default function GDCourse1Page() {
             text should be clearly smaller. This is called visual hierarchy, and it is the first thing every graphic
             designer learns.
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-4">
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-[#1A1A1A] rounded-xl p-4 flex flex-col gap-2">
               <div className="text-[#C8960C] font-bold text-xl leading-tight">CREATIVE NIGHT</div>
               <div className="text-gray-400 text-xs">Creative Event, School Main Hall</div>

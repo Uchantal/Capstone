@@ -48,7 +48,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <div className="flex-1 flex items-center justify-center px-6">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 sm:py-16">
       <div className="w-full max-w-md">
         <div className="flex items-center gap-3 mb-8">
           <div className="bg-primary rounded-lg w-9 h-9 flex items-center justify-center">

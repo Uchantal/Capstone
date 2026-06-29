@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 import StudioCanvas, { CANVAS_FORMATS, StudioCanvasHandle } from '../components/studio/StudioCanvas'
 import GuitarStudio, { GuitarStudioHandle } from '../components/studio/GuitarStudio'
 import VoiceStudio, { VoiceStudioHandle } from '../components/studio/VoiceStudio'
 import PianoStudio, { PianoStudioHandle } from '../components/studio/PianoStudio'
 import api from '../services/api'
 import DcipLogoLink from '../components/DcipLogoLink'
+import Footer from '../components/Footer'
 
 // Shared handle interface — all studio components expose these methods
 interface StudioHandle {
@@ -136,11 +138,13 @@ interface LibraryViewProps {
   onRefresh: () => void
   onDelete: (id: string) => void
   onDownload: (id: string, title: string) => void
+  onEdit: (work: StudioWorkFull) => void
 }
 
-function LibraryView({ works, loading, onDelete, onDownload }: LibraryViewProps) {
+function LibraryView({ works, loading, onDelete, onDownload, onEdit }: LibraryViewProps) {
   const [previewWork, setPreviewWork] = useState<StudioWorkFull | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
+  const [editLoading, setEditLoading] = useState<string | null>(null)
 
   async function handlePreview(id: string) {
     setPreviewLoading(true)
@@ -149,6 +153,16 @@ function LibraryView({ works, loading, onDelete, onDownload }: LibraryViewProps)
       setPreviewWork(work)
     } finally {
       setPreviewLoading(false)
+    }
+  }
+
+  async function handleEdit(id: string) {
+    setEditLoading(id)
+    try {
+      const work = await fetchWork(id)
+      onEdit(work)
+    } finally {
+      setEditLoading(null)
     }
   }
 
@@ -208,6 +222,15 @@ function LibraryView({ works, loading, onDelete, onDownload }: LibraryViewProps)
               <p className="text-text-primary font-semibold text-xs leading-snug truncate">{work.title}</p>
               <p className="text-text-muted text-[10px] mt-0.5">{work.format} &middot; {formatDate(work.createdAt)}</p>
               <div className="flex gap-1 mt-2">
+                {!work.fileType?.startsWith('audio/') && (
+                  <button
+                    onClick={() => handleEdit(work._id)}
+                    disabled={editLoading === work._id}
+                    className="flex-1 text-[10px] py-1 rounded bg-secondary/10 text-secondary hover:bg-secondary hover:text-white transition-colors font-medium disabled:opacity-50"
+                  >
+                    {editLoading === work._id ? '...' : 'Edit'}
+                  </button>
+                )}
                 <button
                   onClick={() => onDownload(work._id, work.title)}
                   className="flex-1 text-[10px] py-1 rounded bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors font-medium"
@@ -242,6 +265,14 @@ function LibraryView({ works, loading, onDelete, onDownload }: LibraryViewProps)
                 <p className="text-text-muted text-xs">{previewWork.format} &middot; {new Date(previewWork.createdAt).toLocaleDateString()}</p>
               </div>
               <div className="flex gap-2">
+                {!previewWork.fileType?.startsWith('audio/') && (
+                  <button
+                    onClick={() => { onEdit(previewWork); setPreviewWork(null) }}
+                    className="bg-secondary text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
+                  >
+                    Edit
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     const src = previewWork.fileUrl ?? previewWork.fileData ?? ''
@@ -312,6 +343,7 @@ type StudioView = 'choose' | 'workspace' | 'library'
 
 export default function StudioPage() {
   const navigate     = useNavigate()
+  const { user }     = useAuth()
   // Separate typed refs per studio type — React forwardRef requires concrete types
   const canvasRef    = useRef<StudioCanvasHandle>(null)
   const guitarRef    = useRef<GuitarStudioHandle>(null)
@@ -334,6 +366,15 @@ export default function StudioPage() {
   const [works,        setWorks]         = useState<StudioWorkMeta[]>([])
   const [worksLoading, setWorksLoading]  = useState(false)
   const [discipline,   setDiscipline]    = useState('')
+  const [editWork,     setEditWork]      = useState<{ src: string; format: typeof CANVAS_FORMATS[number] } | null>(null)
+
+  function handleEditWork(work: StudioWorkFull) {
+    const fmt = CANVAS_FORMATS.find(f => f.label === work.format) ?? CANVAS_FORMATS[0]
+    const src = work.fileUrl ?? work.fileData ?? ''
+    setDiscipline(work.discipline)
+    setEditWork({ src, format: fmt })
+    setView('workspace')
+  }
 
   const disciplineLabel = DISCIPLINES.find(d => d.value === discipline)?.label ?? discipline
 
@@ -384,6 +425,7 @@ export default function StudioPage() {
       setIsDirty(false)
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
+      canvasRef.current?.clearDraft()
     } finally {
       setSaving(false)
     }
@@ -436,7 +478,7 @@ export default function StudioPage() {
           {view === 'workspace' && (
             <>
               <button
-                onClick={() => setView('choose')}
+                onClick={() => { setView('choose'); setEditWork(null) }}
                 className="text-xs text-text-muted hover:text-text-primary transition-colors"
               >
                 Studio
@@ -521,30 +563,31 @@ export default function StudioPage() {
 
         {/* Discipline selection screen */}
         {view === 'choose' && (
-          <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center p-8 bg-surface-warm">
-            <div className="w-full max-w-3xl">
-              <h2 className="text-text-primary font-bold text-2xl mb-2 text-center">Choose Your Studio</h2>
-              <p className="text-text-muted text-sm text-center mb-10">
+          <div className="flex-1 overflow-y-auto bg-surface-warm">
+            <div className="w-full px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24 pt-10 pb-6">
+              <h2 className="text-text-primary font-bold text-2xl sm:text-3xl mb-2">Choose Your Studio</h2>
+              <p className="text-text-secondary text-sm sm:text-base">
                 Select a discipline to begin your session.
               </p>
-              <div className="grid grid-cols-6 gap-5">
-                {DISCIPLINES.map((d, i) => (
+            </div>
+            <div className="w-full px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24 pb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
+                {DISCIPLINES.map((d) => (
                   <button
                     key={d.value}
                     onClick={() => { setDiscipline(d.value); setView('workspace') }}
-                    className={`${i < 3 ? 'col-span-2' : 'col-span-3'} bg-white border border-surface-border rounded-2xl overflow-hidden text-left hover:border-primary hover:shadow-lg transition-all group`}
+                    className="bg-white border border-surface-border rounded-2xl overflow-hidden text-left hover:border-primary hover:shadow-lg transition-all group"
                   >
-                    <div className="h-32 w-full overflow-hidden">
-                      <img src={d.image} alt={d.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    </div>
-                    <div className="p-5">
-                      <p className="text-text-primary font-bold text-sm mb-1">{d.label}</p>
-                      <p className="text-text-muted text-xs leading-relaxed">{d.description}</p>
+                    <div className="h-1 w-full bg-primary group-hover:bg-primary transition-colors" />
+                    <div className="p-6 lg:p-8">
+                      <p className="text-text-primary font-bold text-base lg:text-lg mb-2">{d.label}</p>
+                      <p className="text-text-secondary text-sm leading-relaxed">{d.description}</p>
                     </div>
                   </button>
                 ))}
               </div>
             </div>
+            <Footer />
           </div>
         )}
 
@@ -560,8 +603,10 @@ export default function StudioPage() {
         {view === 'workspace' && (discipline === 'visual-arts' || discipline === 'graphic-design') && (
           <StudioCanvas
             ref={canvasRef}
-            initialFormat={CANVAS_FORMATS[0]}
+            initialFormat={editWork?.format ?? CANVAS_FORMATS[0]}
             onDirty={() => setIsDirty(true)}
+            draftKey={editWork ? undefined : `${user?.id ?? 'anon'}:studio:${discipline}`}
+            initialDrawImage={editWork?.src}
           />
         )}
 
@@ -579,6 +624,7 @@ export default function StudioPage() {
               onRefresh={loadWorks}
               onDelete={handleDelete}
               onDownload={handleDownload}
+              onEdit={handleEditWork}
             />
           </div>
         )}

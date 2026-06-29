@@ -389,11 +389,7 @@ const PianoStudio = forwardRef<PianoStudioHandle, { onDirty: () => void }>(({ on
     playNoteSound(note.freq)
     setActiveNote(note.name)
     setTimeout(() => setActiveNote(n => n === note.name ? null : n), 220)
-    if (!recordingRef.current) {
-      recordingStart.current = Date.now()
-      recordingRef.current = true
-      setRecording(true)
-    }
+    if (!recordingRef.current) return
     const timestamp = Date.now() - recordingStart.current
     setSequence(prev => [...prev, { note, timestamp }])
     onDirty()

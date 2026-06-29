@@ -1,6 +1,7 @@
 ﻿import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
+import { useAuth } from '../../hooks/useAuth'
 import VisualArtsModule, { VisualArtsModuleHandle } from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { completeVisualArtsDemonstration, fetchEngagementScores } from '../../services/api'
@@ -38,6 +39,7 @@ function levelAverage(scores: Record<string, number | null>, keys: string[]): nu
 export default function VALevel3DemonstratePage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
+  const { user } = useAuth()
   const { loading } = useVisualArtsDemonstrationProgress()
   const moduleRef = useRef<VisualArtsModuleHandle>(null)
   const [resetKey, setResetKey] = useState(0)
@@ -95,6 +97,7 @@ export default function VALevel3DemonstratePage() {
     } catch {
       // ignore
     } finally {
+      moduleRef.current?.clearDraft()
       setPassed(true)
       setSubmitting(false)
     }
@@ -198,6 +201,7 @@ export default function VALevel3DemonstratePage() {
         onColourUsed={handleColourUsed}
         onToolChange={recordTool}
         sidebarFooter={sidebarFooter}
+        draftKey={`${user?.id ?? 'anon'}:va:level3-demonstrate`}
       />
 
       {passed && (() => {

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
+import { useAuth } from '../../hooks/useAuth'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, exportDesignToDataUrl, type DesignElement } from '../../components/graphic-design/PosterSurface'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
 import { completeGDDemonstration, fetchEngagementScores } from '../../services/api'
@@ -47,11 +48,34 @@ export default function GDLevel2DemonstratePage() {
   const navigate = useNavigate()
   const isPreviewMode = usePreviewMode()
   const location = useLocation()
+  const { user } = useAuth()
+  const draftKey = `${user?.id ?? 'anon'}:gd:level2-demonstrate`
   const lockedMessage = (location.state as { lockedMessage?: string } | null)?.lockedMessage
 
   const { loading, reload } = useGDDemonstrationProgress()
-  const [elements, setElements] = useState(DEFAULT_ELEMENTS)
-  const [bgColor, setBgColor] = useState(DEFAULT_BG_COLOR)
+
+  const _draftInit = useRef<{ elements: DesignElement[]; bgColor: string } | null>(null)
+  const _draftChecked = useRef(false)
+  if (!_draftChecked.current) {
+    _draftChecked.current = true
+    try { const r = localStorage.getItem(`dcip:draft:${draftKey}`); if (r) _draftInit.current = JSON.parse(r) } catch { /* ignore */ }
+  }
+
+  const [elements, setElements] = useState<DesignElement[]>(() => _draftInit.current?.elements ?? DEFAULT_ELEMENTS)
+  const [bgColor, setBgColor] = useState<string>(() => _draftInit.current?.bgColor ?? DEFAULT_BG_COLOR)
+  const saveDraftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function saveDraft(els: DesignElement[], bg: string) {
+    if (saveDraftTimerRef.current) clearTimeout(saveDraftTimerRef.current)
+    saveDraftTimerRef.current = setTimeout(() => {
+      try { localStorage.setItem(`dcip:draft:${draftKey}`, JSON.stringify({ elements: els, bgColor: bg })) } catch { /* ignore */ }
+    }, 1500)
+  }
+
+  function clearDraft() {
+    if (saveDraftTimerRef.current) clearTimeout(saveDraftTimerRef.current)
+    try { localStorage.removeItem(`dcip:draft:${draftKey}`) } catch { /* ignore */ }
+  }
   const [canvasKey, setCanvasKey] = useState(0)
   const [exportW, setExportW] = useState(595)
   const [exportH, setExportH] = useState(842)
@@ -98,12 +122,14 @@ export default function GDLevel2DemonstratePage() {
     } catch {
       // ignore
     } finally {
+      clearDraft()
       setPassed(true)
       setSubmitting(false)
     }
   }
 
   const handleReset = () => {
+    clearDraft()
     setPassed(false)
     setCheckResult(null)
     interactionCount.current = 0
@@ -188,9 +214,9 @@ export default function GDLevel2DemonstratePage() {
 
         <DesignCanvas
           key={canvasKey}
-          defaultElements={DEFAULT_ELEMENTS}
-          defaultBgColor={DEFAULT_BG_COLOR}
-          onChange={(els, bg) => { setElements(els); setBgColor(bg); recordElementChange(els) }}
+          defaultElements={_draftInit.current?.elements ?? DEFAULT_ELEMENTS}
+          defaultBgColor={_draftInit.current?.bgColor ?? DEFAULT_BG_COLOR}
+          onChange={(els, bg) => { setElements(els); setBgColor(bg); recordElementChange(els); saveDraft(els, bg) }}
           onInteraction={recordInteraction}
           onDimensionsChange={(w, h) => { setExportW(w); setExportH(h) }}
         />

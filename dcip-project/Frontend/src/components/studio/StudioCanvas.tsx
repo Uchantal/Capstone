@@ -14,7 +14,7 @@ import {
 
 export type StudioTool =
   | 'brush' | 'eraser' | 'line' | 'rect' | 'ellipse'
-  | 'text' | 'image' | 'select'
+  | 'text' | 'image' | 'select' | 'ruler'
 
 interface BaseShape {
   id: string
@@ -76,12 +76,6 @@ export const CANVAS_FORMATS: CanvasFormat[] = [
   { id: 'sq',  label: 'Square 1:1',     width: 1080, height: 1080 },
   { id: 'a3p', label: 'A3 Portrait',    width: 1123, height: 1587 },
 ]
-
-// ---------------------------------------------------------------------------
-// Ruler size constant
-// ---------------------------------------------------------------------------
-
-const RULER_SIZE = 18
 
 // ---------------------------------------------------------------------------
 // Preset color palette for the color swatches
@@ -188,51 +182,14 @@ function ToolIcon({ tool }: { tool: StudioTool }) {
       {tool === 'select' && (
         <path d="M5 3l13 9-7.5 1.5-3.5 6.5L5 3z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       )}
-    </svg>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Ruler bars
-// ---------------------------------------------------------------------------
-
-function HRuler({ logicalWidth, scale, displayW }: { logicalWidth: number; scale: number; displayW: number }) {
-  const interval = scale < 0.35 ? 200 : scale < 0.7 ? 100 : 50
-  const ticks = Array.from({ length: Math.floor(logicalWidth / interval) + 1 }, (_, i) => i * interval)
-  return (
-    <svg width={displayW} height={RULER_SIZE} style={{ display: 'block', flexShrink: 0 }}>
-      <rect width={displayW} height={RULER_SIZE} fill="#1E1E1E"/>
-      {ticks.map(lx => {
-        const x = Math.round(lx * scale)
-        const isMajor = (lx / interval) % 2 === 0
-        return (
-          <g key={lx}>
-            <line x1={x} y1={RULER_SIZE} x2={x} y2={isMajor ? RULER_SIZE - 8 : RULER_SIZE - 4} stroke="#555" strokeWidth={1}/>
-            {isMajor && lx > 0 && (
-              <text x={x + 2} y={8} fontSize={7} fill="#888" fontFamily="monospace">{lx}</text>
-            )}
-          </g>
-        )
-      })}
-    </svg>
-  )
-}
-
-function VRuler({ logicalHeight, scale, displayH }: { logicalHeight: number; scale: number; displayH: number }) {
-  const interval = scale < 0.35 ? 200 : scale < 0.7 ? 100 : 50
-  const ticks = Array.from({ length: Math.floor(logicalHeight / interval) + 1 }, (_, i) => i * interval)
-  return (
-    <svg width={RULER_SIZE} height={displayH} style={{ display: 'block', flexShrink: 0 }}>
-      <rect width={RULER_SIZE} height={displayH} fill="#1E1E1E"/>
-      {ticks.map(ly => {
-        const y = Math.round(ly * scale)
-        const isMajor = (ly / interval) % 2 === 0
-        return (
-          <g key={ly}>
-            <line x1={RULER_SIZE} y1={y} x2={isMajor ? RULER_SIZE - 8 : RULER_SIZE - 4} y2={y} stroke="#555" strokeWidth={1}/>
-          </g>
-        )
-      })}
+      {tool === 'ruler' && (
+        <>
+          <line x1="3" y1="19" x2="19" y2="3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="3" y1="15" x2="7" y2="19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="7.5" y1="11" x2="11" y2="14.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="12" y1="7" x2="15.5" y2="10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </>
+      )}
     </svg>
   )
 }
@@ -240,11 +197,14 @@ function VRuler({ logicalHeight, scale, displayH }: { logicalHeight: number; sca
 export interface StudioCanvasHandle {
   captureImage: () => string
   getFormat: () => CanvasFormat
+  clearDraft: () => void
 }
 
 interface Props {
   initialFormat?: CanvasFormat
   onDirty?: () => void
+  draftKey?: string
+  initialDrawImage?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -392,7 +352,7 @@ function removeImageBackground(src: string, tolerance = 40): Promise<string> {
 // ---------------------------------------------------------------------------
 
 const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas(
-  { initialFormat = CANVAS_FORMATS[0], onDirty },
+  { initialFormat = CANVAS_FORMATS[0], onDirty, draftKey, initialDrawImage },
   ref,
 ) {
   const [format, setFormat] = useState<CanvasFormat>(initialFormat)
@@ -443,6 +403,12 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   const brushSizeRef    = useRef(4)
   const fontSizeRef     = useRef(32)
   const fontFamilyRef   = useRef('Arial')
+  const bgColorRef      = useRef('#FFFFFF')
+  const saveDraftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // --- Ruler tool state ---
+  const [rulerLine, setRulerLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null)
+  const rulerStartRef = useRef<{ x: number; y: number } | null>(null)
 
   // Keep refs in sync with state
   useEffect(() => { activeToolRef.current  = activeTool  }, [activeTool])
@@ -452,6 +418,7 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   useEffect(() => { brushSizeRef.current   = brushSize   }, [brushSize])
   useEffect(() => { fontSizeRef.current    = fontSize    }, [fontSize])
   useEffect(() => { fontFamilyRef.current  = fontFamily  }, [fontFamily])
+  useEffect(() => { bgColorRef.current     = bgColor     }, [bgColor])
 
   // --- Responsive display size ---
   const [containerSize, setContainerSize] = useState({ width: 800, height: 600 })
@@ -466,9 +433,9 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     return () => ro.disconnect()
   }, [])
 
-  const { displayW, displayH, scale } = useMemo(() => {
-    const availW = Math.max(containerSize.width  - RULER_SIZE, 100)
-    const availH = Math.max(containerSize.height - RULER_SIZE, 100)
+  const { displayW, displayH } = useMemo(() => {
+    const availW = Math.max(containerSize.width  - 16, 100)
+    const availH = Math.max(containerSize.height - 16, 100)
     const s = Math.min(availW / format.width, availH / format.height, 1)
     return { displayW: Math.round(format.width * s), displayH: Math.round(format.height * s), scale: s }
   }, [containerSize, format])
@@ -549,7 +516,22 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     historyRef.current    = slice
     historyIdxRef.current = slice.length - 1
     onDirty?.()
-  }, [onDirty])
+    if (draftKey) {
+      if (saveDraftTimerRef.current) clearTimeout(saveDraftTimerRef.current)
+      saveDraftTimerRef.current = setTimeout(() => {
+        try {
+          const drawDataUrl = drawCanvasRef.current?.toDataURL('image/jpeg', 0.65) ?? null
+          localStorage.setItem(`dcip:draft:${draftKey}`, JSON.stringify({
+            shapes:      JSON.parse(JSON.stringify(shapesRef.current)),
+            drawDataUrl,
+            bgColor:     bgColorRef.current,
+            formatId:    format.id,
+            savedAt:     Date.now(),
+          }))
+        } catch { /* storage quota exceeded — silently skip */ }
+      }, 1500)
+    }
+  }, [onDirty, draftKey, format.id])
 
   const restoreHistory = useCallback((entry: HistoryEntry) => {
     shapesRef.current = JSON.parse(JSON.stringify(entry.shapes))
@@ -678,6 +660,12 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
       return
     }
 
+    if (tool === 'ruler') {
+      rulerStartRef.current = pos
+      setRulerLine({ x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y })
+      return
+    }
+
     if (tool === 'select') {
       const hit = hitTest(pos.x, pos.y, shapesRef.current)
       shapesRef.current = shapesRef.current.map(s => ({ ...s, selected: s.id === hit?.id }))
@@ -705,6 +693,11 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     if (['line', 'rect', 'ellipse'].includes(tool) && isDrawingRef.current && startPosRef.current) {
       previewRef.current = buildPreview(tool, startPosRef.current, pos)
       renderShapes()
+      return
+    }
+
+    if (tool === 'ruler' && rulerStartRef.current) {
+      setRulerLine({ x1: rulerStartRef.current.x, y1: rulerStartRef.current.y, x2: pos.x, y2: pos.y })
       return
     }
 
@@ -847,6 +840,53 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     }
   })
 
+  // --- Draft restore on mount (skipped when editing an existing saved work) ---
+  useEffect(() => {
+    if (!draftKey || initialDrawImage) return
+    try {
+      const raw = localStorage.getItem(`dcip:draft:${draftKey}`)
+      if (!raw) return
+      const draft = JSON.parse(raw) as { shapes: Shape[]; drawDataUrl: string | null; bgColor: string; formatId: string }
+      const fmt = CANVAS_FORMATS.find(f => f.id === draft.formatId)
+      if (fmt) setFormat(fmt)
+      if (draft.bgColor) setBgColor(draft.bgColor)
+      const t = setTimeout(() => {
+        shapesRef.current = draft.shapes ?? []
+        for (const s of shapesRef.current) {
+          if (s.type === 'image') loadImageShape(s)
+        }
+        renderShapes()
+        if (draft.drawDataUrl) {
+          const img = new Image()
+          img.onload = () => {
+            const ctx = drawCanvasRef.current?.getContext('2d')
+            if (ctx && drawCanvasRef.current) {
+              ctx.drawImage(img, 0, 0, drawCanvasRef.current.width, drawCanvasRef.current.height)
+            }
+          }
+          img.src = draft.drawDataUrl
+        }
+      }, 150)
+      return () => clearTimeout(t)
+    } catch { /* corrupt draft — ignore */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // --- Load existing saved work image onto draw canvas ---
+  useEffect(() => {
+    if (!initialDrawImage) return
+    const t = setTimeout(() => {
+      const canvas = drawCanvasRef.current
+      const ctx = canvas?.getContext('2d')
+      if (!ctx || !canvas) return
+      const img = new Image()
+      img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      img.src = initialDrawImage
+    }, 150)
+    return () => clearTimeout(t)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // --- Expose imperative handle ---
   useImperativeHandle(ref, () => ({
     captureImage(): string {
@@ -870,7 +910,13 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
       return out.toDataURL('image/png')
     },
     getFormat(): CanvasFormat { return format },
-  }), [format])
+    clearDraft() {
+      if (draftKey) {
+        if (saveDraftTimerRef.current) clearTimeout(saveDraftTimerRef.current)
+        try { localStorage.removeItem(`dcip:draft:${draftKey}`) } catch { /* ignore */ }
+      }
+    },
+  }), [format, draftKey])
 
   // --- Format change ---
   function handleFormatChange(fmt: CanvasFormat) {
@@ -893,11 +939,21 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     { tool: 'text',    label: 'Text'    },
     { tool: 'image',   label: 'Image'   },
     { tool: 'select',  label: 'Select'  },
+    { tool: 'ruler',   label: 'Ruler'   },
   ]
 
   const cursor = activeTool === 'select' ? 'cursor-default'
     : activeTool === 'text' ? 'cursor-text'
+    : activeTool === 'ruler' ? 'cursor-crosshair'
     : 'cursor-crosshair'
+
+  const handleToolChange = (t: StudioTool) => {
+    setActiveTool(t)
+    if (t !== 'ruler') {
+      setRulerLine(null)
+      rulerStartRef.current = null
+    }
+  }
 
   return (
     <div className="flex h-full overflow-hidden bg-surface-warm">
@@ -931,7 +987,7 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
             {toolButtons.map(({ tool, label }) => (
               <button
                 key={tool}
-                onClick={() => setActiveTool(tool)}
+                onClick={() => handleToolChange(tool)}
                 title={label}
                 className={`py-2 rounded transition-colors flex flex-col items-center gap-0.5 ${
                   activeTool === tool
@@ -1078,36 +1134,51 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
         className="flex-1 flex items-center justify-center overflow-hidden p-2 relative"
         style={{ background: '#2B2B2B' }}
       >
-        {/* Ruler + canvas block */}
-        <div style={{ flexShrink: 0 }}>
-          {/* Top row: corner + horizontal ruler */}
-          <div className="flex">
-            <div style={{ width: RULER_SIZE, height: RULER_SIZE, background: '#141414', flexShrink: 0 }} />
-            <HRuler logicalWidth={format.width} scale={scale} displayW={displayW} />
-          </div>
-          {/* Main row: vertical ruler + canvas */}
-          <div className="flex">
-            <VRuler logicalHeight={format.height} scale={scale} displayH={displayH} />
-            <div
-              className="relative"
-              style={{ width: displayW, height: displayH, flexShrink: 0, boxShadow: '0 4px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.4)' }}
+        {/* Canvas block */}
+        <div
+          className="relative"
+          style={{ width: displayW, height: displayH, flexShrink: 0, boxShadow: '0 4px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.4)' }}
+        >
+          <canvas ref={bgCanvasRef}    width={format.width} height={format.height} className="absolute inset-0" style={{ width: displayW, height: displayH }} />
+          <canvas ref={shapeCanvasRef} width={format.width} height={format.height} className="absolute inset-0" style={{ width: displayW, height: displayH }} />
+          <canvas ref={drawCanvasRef}  width={format.width} height={format.height} className="absolute inset-0" style={{ width: displayW, height: displayH }} />
+          <canvas
+            ref={interactionRef}
+            width={format.width}
+            height={format.height}
+            className={`absolute inset-0 ${cursor}`}
+            style={{ width: displayW, height: displayH }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+          />
+          {/* Ruler measurement overlay */}
+          {activeTool === 'ruler' && rulerLine && (
+            <svg
+              className="absolute inset-0 pointer-events-none z-10"
+              style={{ width: displayW, height: displayH }}
+              viewBox={`0 0 ${format.width} ${format.height}`}
+              preserveAspectRatio="none"
             >
-              <canvas ref={bgCanvasRef}    width={format.width} height={format.height} className="absolute inset-0" style={{ width: displayW, height: displayH }} />
-              <canvas ref={shapeCanvasRef} width={format.width} height={format.height} className="absolute inset-0" style={{ width: displayW, height: displayH }} />
-              <canvas ref={drawCanvasRef}  width={format.width} height={format.height} className="absolute inset-0" style={{ width: displayW, height: displayH }} />
-              <canvas
-                ref={interactionRef}
-                width={format.width}
-                height={format.height}
-                className={`absolute inset-0 ${cursor}`}
-                style={{ width: displayW, height: displayH }}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
+              <line
+                x1={rulerLine.x1} y1={rulerLine.y1}
+                x2={rulerLine.x2} y2={rulerLine.y2}
+                stroke="#C8960C" strokeWidth="2" strokeDasharray="8 4"
               />
-            </div>
-          </div>
+              <circle cx={rulerLine.x1} cy={rulerLine.y1} r="5" fill="#C8960C" />
+              <circle cx={rulerLine.x2} cy={rulerLine.y2} r="5" fill="#C8960C" />
+              <text
+                x={(rulerLine.x1 + rulerLine.x2) / 2}
+                y={(rulerLine.y1 + rulerLine.y2) / 2 - 12}
+                fill="#C8960C" fontSize="18" fontWeight="bold" fontFamily="monospace"
+                textAnchor="middle"
+                stroke="#1A1A1A" strokeWidth="4" paintOrder="stroke"
+              >
+                {(Math.hypot(rulerLine.x2 - rulerLine.x1, rulerLine.y2 - rulerLine.y1) * 2.54 / 96).toFixed(2)} cm
+              </text>
+            </svg>
+          )}
         </div>
 
         {/* Floating text input */}
