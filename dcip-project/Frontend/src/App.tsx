@@ -121,7 +121,8 @@ function PreviewProvider({ children }: { children: React.ReactNode }) {
 const roleHome = (role?: string) => {
   if (role === 'admin') return '/admin/overview'
   if (role === 'supervisor') return '/supervisor'
-  return '/dashboard'
+  if (role === 'student') return '/disciplines'
+  return '/disciplines'
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }) {

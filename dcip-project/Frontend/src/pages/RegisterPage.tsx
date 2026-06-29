@@ -145,7 +145,7 @@ export default function RegisterPage() {
               </p>
               <div className="bg-surface-warm border border-surface-border rounded-lg px-4 py-3 mb-6">
                 <p className="text-text-secondary text-sm">
-                  Didn't receive anything? Check your spam folder or contact your school supervisor for assistance.
+                  Didn't receive anything? Check your spam folder, contact us for support, or send us feedback.
                 </p>
               </div>
               <Link

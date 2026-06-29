@@ -341,11 +341,11 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="bg-primary-light border border-primary/30 rounded-2xl px-6 py-5 mb-6 flex items-center justify-between gap-4">
+        <div className="bg-dark-mid rounded-2xl px-6 py-5 mb-6 flex items-center justify-between gap-4">
           <div>
-            <p className="text-primary font-bold text-sm">DCIP Studio</p>
-            <p className="text-primary/80 text-xs mt-0.5">
-              Your professional creative workspace. Create serious work, save it, and download it for your career or fellowships.
+            <p className="text-white font-bold text-sm">DCIP Studio</p>
+            <p className="text-white/70 text-xs mt-0.5">
+              Unlock the studio, access virtual space and create serious work.
             </p>
           </div>
           <button
