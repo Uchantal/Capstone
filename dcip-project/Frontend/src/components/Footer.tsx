@@ -55,7 +55,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/10 mt-8 pt-6 flex flex-col sm:flex-row justify-between gap-2">
-          <span className="text-white/40 text-xs">2025 DCIP By U.Chantal. All rights reserved.</span>
+          <span className="text-white/40 text-xs">2026 DCIP By U.Chantal. All rights reserved.</span>
           <span className="text-white/40 text-xs">Built for Rwanda's creative Students.</span>
         </div>
       </div>
