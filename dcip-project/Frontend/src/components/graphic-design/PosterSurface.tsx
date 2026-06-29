@@ -717,7 +717,7 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
-    <div className="flex-1 flex flex-row overflow-hidden">
+    <div className="flex-1 flex flex-col-reverse sm:flex-row overflow-hidden">
 
       {/* ── Icon toolbar ── */}
       <GraphicDesignToolbar

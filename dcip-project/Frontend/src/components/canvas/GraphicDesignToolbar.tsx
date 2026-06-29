@@ -36,13 +36,19 @@ export interface GraphicDesignToolbarProps {
   onTemplateChange: (t: CanvasTemplate) => void
 }
 
+// Vertical divider for horizontal (mobile) layout, horizontal divider for vertical (sm+)
 function Divider() {
-  return <div className="border-t border-surface-border w-8 my-1" />
+  return (
+    <>
+      <div className="block sm:hidden border-l border-surface-border h-5 mx-0.5 flex-shrink-0" />
+      <div className="hidden sm:block border-t border-surface-border w-6 lg:w-8 my-0.5 lg:my-1 flex-shrink-0" />
+    </>
+  )
 }
 
 function Tooltip({ label }: { label: string }) {
   return (
-    <span className="absolute left-12 top-1/2 -translate-y-1/2 bg-dark-base text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+    <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 bg-dark-base text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 hidden sm:block">
       {label}
     </span>
   )
@@ -63,10 +69,10 @@ export default function GraphicDesignToolbar({
   canRedo, onRedo,
   templates, activeTemplate, onTemplateChange,
 }: GraphicDesignToolbarProps) {
-  const [openPopup,    setOpenPopup]    = useState<OpenPopup>(null)
-  const [popupTop,     setPopupTop]     = useState(0)
-  const [localFontSz,  setLocalFontSz]  = useState<number>(selectedElement?.fontSize ?? 24)
-  const toolbarRef   = useRef<HTMLDivElement>(null)
+  const [openPopup,   setOpenPopup]   = useState<OpenPopup>(null)
+  const [popupStyle,  setPopupStyle]  = useState<React.CSSProperties>({})
+  const [localFontSz, setLocalFontSz] = useState<number>(selectedElement?.fontSize ?? 24)
+  const toolbarRef    = useRef<HTMLDivElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
 
   const isText      = selectedElement?.type === 'text'
@@ -76,12 +82,10 @@ export default function GraphicDesignToolbar({
   const isUnderline = selectedElement?.textDecoration === 'underline'
   const textAlign   = selectedElement?.textAlign ?? 'left'
 
-  // Sync local font size when selection changes
   useEffect(() => {
     setLocalFontSz(selectedElement?.fontSize ?? 24)
   }, [selectedElement?.id, selectedElement?.fontSize])
 
-  // Close popup on outside click
   useEffect(() => {
     if (!openPopup) return
     const handler = (e: MouseEvent) => {
@@ -96,7 +100,29 @@ export default function GraphicDesignToolbar({
   function togglePopup(name: OpenPopup, e: React.MouseEvent) {
     if (openPopup === name) { setOpenPopup(null); return }
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    setPopupTop(rect.top)
+    const isMobile = window.innerWidth < 640
+
+    if (isMobile) {
+      // Popup opens upward from the bottom toolbar
+      const popupW = 256
+      const left = Math.max(4, Math.min(rect.left + rect.width / 2 - popupW / 2, window.innerWidth - popupW - 4))
+      setPopupStyle({
+        position: 'fixed',
+        bottom: window.innerHeight - rect.top + 6,
+        left,
+        zIndex: 50,
+      })
+    } else {
+      // Popup opens rightward from the vertical sidebar
+      const toolbarRight = toolbarRef.current ? toolbarRef.current.getBoundingClientRect().right + 4 : 60
+      const clampedTop = Math.min(rect.top, window.innerHeight - 340)
+      setPopupStyle({
+        position: 'fixed',
+        top: clampedTop,
+        left: toolbarRight,
+        zIndex: 50,
+      })
+    }
     setOpenPopup(name)
   }
 
@@ -107,26 +133,45 @@ export default function GraphicDesignToolbar({
     setOpenPopup(null)
   }
 
+  // Button size: smaller on mobile row, normal on sm sidebar, slightly larger on lg+
   const iconBtn = (active = false, disabled = false) => {
-    if (active) return 'w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white'
-    if (disabled) return 'w-10 h-10 flex items-center justify-center rounded-lg text-text-secondary opacity-30 cursor-not-allowed'
-    return 'w-10 h-10 flex items-center justify-center rounded-lg text-text-secondary hover:bg-surface-warm hover:text-text-primary transition-colors duration-150'
+    const base = 'w-9 h-9 sm:w-8 sm:h-8 lg:w-10 lg:h-10 flex-shrink-0 flex items-center justify-center rounded-lg'
+    if (active) return `${base} bg-primary text-white`
+    if (disabled) return `${base} text-text-secondary opacity-30 cursor-not-allowed`
+    return `${base} text-text-secondary hover:bg-surface-warm hover:text-text-primary transition-colors duration-150`
   }
 
-  const redBtn = (disabled = false) =>
-    disabled
-      ? 'w-10 h-10 flex items-center justify-center rounded-lg text-accent opacity-30 cursor-not-allowed'
-      : 'w-10 h-10 flex items-center justify-center rounded-lg text-accent hover:bg-accent/10 transition-colors duration-150'
+  const redBtn = (disabled = false) => {
+    const base = 'w-9 h-9 sm:w-8 sm:h-8 lg:w-10 lg:h-10 flex-shrink-0 flex items-center justify-center rounded-lg'
+    return disabled
+      ? `${base} text-accent opacity-30 cursor-not-allowed`
+      : `${base} text-accent hover:bg-accent/10 transition-colors duration-150`
+  }
+
+  // Shared popup wrapper classes
+  const popupBase = 'bg-white border border-surface-border rounded-xl shadow-xl'
 
   return (
+    // Mobile: horizontal bar at bottom (full width, h-12, flex-row, x-scroll)
+    // sm+: vertical sidebar on left (fixed width, flex-col, y-scroll)
     <div
       ref={toolbarRef}
-      className="w-14 flex-shrink-0 bg-white border-r border-surface-border flex flex-col items-center py-3 gap-1 overflow-visible relative z-10"
+      className="
+        w-full h-12 sm:h-auto sm:w-12 lg:w-14
+        flex-shrink-0 bg-white
+        border-t sm:border-t-0 sm:border-r border-surface-border
+        flex flex-row sm:flex-col items-center
+        px-1 sm:px-0 sm:py-2 lg:py-3
+        gap-0.5
+        overflow-x-auto sm:overflow-x-visible sm:overflow-y-auto
+        relative z-10
+      "
+      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}
     >
-      {/* ── Canvas format ────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Canvas format ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={e => togglePopup('templates', e)} className={iconBtn(openPopup === 'templates')}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="7" height="7" rx="1"/>
             <rect x="14" y="3" width="7" height="7" rx="1"/>
             <rect x="3" y="14" width="7" height="7" rx="1"/>
@@ -138,10 +183,10 @@ export default function GraphicDesignToolbar({
 
       <Divider />
 
-      {/* ── Add text ─────────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Add text ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={onAddText} className={iconBtn()}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 7V4h16v3"/>
             <path d="M9 20h6"/>
             <line x1="12" y1="4" x2="12" y2="20"/>
@@ -150,10 +195,10 @@ export default function GraphicDesignToolbar({
         <Tooltip label="Add text" />
       </div>
 
-      {/* ── Add heading ──────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Add heading ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={onAddHeading} className={iconBtn()}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 7V4h16v3"/>
             <path d="M9 20h6"/>
             <line x1="12" y1="4" x2="12" y2="14"/>
@@ -163,10 +208,10 @@ export default function GraphicDesignToolbar({
         <Tooltip label="Add heading" />
       </div>
 
-      {/* ── Shapes ───────────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Shapes ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={e => togglePopup('shapes', e)} className={iconBtn(openPopup === 'shapes')}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="8" height="8" rx="1"/>
             <circle cx="17" cy="7" r="4"/>
           </svg>
@@ -174,10 +219,10 @@ export default function GraphicDesignToolbar({
         <Tooltip label="Add shape" />
       </div>
 
-      {/* ── Add image ────────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Add image ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={() => imageInputRef.current?.click()} className={iconBtn()}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2"/>
             <circle cx="8.5" cy="8.5" r="1.5"/>
             <polyline points="21 15 16 10 5 21"/>
@@ -187,10 +232,10 @@ export default function GraphicDesignToolbar({
         <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={onAddImage} />
       </div>
 
-      {/* ── Add details ──────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Add details ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={onAddDetails} className={iconBtn()}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <line x1="3" y1="6"  x2="21" y2="6"/>
             <line x1="3" y1="12" x2="15" y2="12"/>
             <line x1="3" y1="18" x2="12" y2="18"/>
@@ -201,19 +246,16 @@ export default function GraphicDesignToolbar({
 
       <Divider />
 
-      {/* ── Background colour ────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Background colour ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={e => togglePopup('background', e)} className={iconBtn()}>
-          <span
-            className="w-5 h-5 rounded-sm border border-surface-border flex-shrink-0"
-            style={{ backgroundColor: bgColour }}
-          />
+          <span className="w-5 h-5 rounded-sm border border-surface-border flex-shrink-0" style={{ backgroundColor: bgColour }} />
         </button>
         <Tooltip label="Poster background" />
       </div>
 
-      {/* ── Element colour ───────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Element colour ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={e => togglePopup('colour', e)} className={iconBtn()} disabled={!hasSelected}>
           <span
             className="w-5 h-5 rounded-full border border-text-primary/20 flex-shrink-0"
@@ -228,16 +270,14 @@ export default function GraphicDesignToolbar({
 
       <Divider />
 
-      {/* ── Font size ────────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Font size ── */}
+      <div className="relative group flex-shrink-0">
         <button
           onClick={e => isText ? togglePopup('fontsize', e) : undefined}
           disabled={!isText}
           className={iconBtn(openPopup === 'fontsize', !isText)}
-          title={isText ? `Font size: ${localFontSz}px` : 'Select a text element first'}
         >
-          {/* Large A with up/down arrows to indicate size control */}
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 20L12 4l8 16"/>
             <path d="M7 14h10"/>
             <line x1="20" y1="5"  x2="20" y2="1"/>
@@ -251,24 +291,24 @@ export default function GraphicDesignToolbar({
         <Tooltip label={isText ? `Font size (${localFontSz}px)` : 'Font size'} />
       </div>
 
-      {/* ── Bold ─────────────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Bold ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={isText ? onBoldToggle : undefined} disabled={!isText} className={iconBtn(isBold, !isText)}>
           <span className="text-sm font-bold leading-none">B</span>
         </button>
         <Tooltip label="Bold" />
       </div>
 
-      {/* ── Italic ───────────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Italic ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={isText ? onItalicToggle : undefined} disabled={!isText} className={iconBtn(isItalic, !isText)}>
           <span className="text-sm italic leading-none">I</span>
         </button>
         <Tooltip label="Italic" />
       </div>
 
-      {/* ── Underline ────────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Underline ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={isText ? onUnderlineToggle : undefined} disabled={!isText} className={iconBtn(isUnderline, !isText)}>
           <span className="text-sm underline leading-none">U</span>
         </button>
@@ -277,10 +317,10 @@ export default function GraphicDesignToolbar({
 
       <Divider />
 
-      {/* ── Align left ───────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Align left ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={isText ? () => onAlignChange('left') : undefined} disabled={!isText} className={iconBtn(isText && textAlign === 'left', !isText)}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <line x1="3" y1="6"  x2="21" y2="6"/>
             <line x1="3" y1="12" x2="15" y2="12"/>
             <line x1="3" y1="18" x2="12" y2="18"/>
@@ -289,10 +329,10 @@ export default function GraphicDesignToolbar({
         <Tooltip label="Align left" />
       </div>
 
-      {/* ── Align centre ─────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Align centre ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={isText ? () => onAlignChange('center') : undefined} disabled={!isText} className={iconBtn(isText && textAlign === 'center', !isText)}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <line x1="3"  y1="6"  x2="21" y2="6"/>
             <line x1="6"  y1="12" x2="18" y2="12"/>
             <line x1="9"  y1="18" x2="15" y2="18"/>
@@ -301,10 +341,10 @@ export default function GraphicDesignToolbar({
         <Tooltip label="Align centre" />
       </div>
 
-      {/* ── Align right ──────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Align right ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={isText ? () => onAlignChange('right') : undefined} disabled={!isText} className={iconBtn(isText && textAlign === 'right', !isText)}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <line x1="3"  y1="6"  x2="21" y2="6"/>
             <line x1="9"  y1="12" x2="21" y2="12"/>
             <line x1="12" y1="18" x2="21" y2="18"/>
@@ -315,66 +355,60 @@ export default function GraphicDesignToolbar({
 
       <Divider />
 
-      {/* ── Duplicate ────────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Duplicate ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={hasSelected ? onDuplicate : undefined} disabled={!hasSelected} className={iconBtn(false, !hasSelected)}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="8"  y="8"  width="13" height="13" rx="2"/>
             <rect x="3"  y="3"  width="13" height="13" rx="2"/>
           </svg>
         </button>
-        <Tooltip label="Duplicate element" />
+        <Tooltip label="Duplicate" />
       </div>
 
-      {/* ── Delete ───────────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Delete ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={hasSelected ? onDelete : undefined} disabled={!hasSelected} className={redBtn(!hasSelected)}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="3 6 5 6 21 6"/>
             <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
             <path d="M10 11v6M14 11v6"/>
             <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
           </svg>
         </button>
-        <Tooltip label="Delete element" />
+        <Tooltip label="Delete" />
       </div>
 
       <Divider />
 
-      {/* ── Undo ─────────────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Undo ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={onUndo} disabled={!canUndo} className={`${iconBtn()} disabled:opacity-40 disabled:cursor-not-allowed`}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 14L4 9l5-5"/>
             <path d="M4 9h10.5a5.5 5.5 0 010 11H11"/>
           </svg>
         </button>
-        <Tooltip label="Undo (Ctrl+Z)" />
+        <Tooltip label="Undo" />
       </div>
 
-      {/* ── Redo ─────────────────────────────────────────────── */}
-      <div className="relative group">
+      {/* ── Redo ── */}
+      <div className="relative group flex-shrink-0">
         <button onClick={onRedo} disabled={!canRedo} className={`${iconBtn()} disabled:opacity-40 disabled:cursor-not-allowed`}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M15 14l5-5-5-5"/>
             <path d="M20 9H9.5a5.5 5.5 0 000 11H13"/>
           </svg>
         </button>
-        <Tooltip label="Redo (Ctrl+Shift+Z)" />
+        <Tooltip label="Redo" />
       </div>
 
 
-      {/* ════════════════════════════════════════════════════════
-          POPUPS — fixed to viewport so parent overflow:hidden
-          does not clip them
-      ════════════════════════════════════════════════════════ */}
+      {/* ════ POPUPS — position: fixed, anchored via popupStyle ════ */}
 
-      {/* ── Shapes picker popup ──────────────────────────────── */}
+      {/* ── Shapes picker ── */}
       {openPopup === 'shapes' && (
-        <div
-          style={{ position: 'fixed', left: 56, top: popupTop }}
-          className="bg-white border border-surface-border rounded-xl shadow-xl p-3 z-50 w-64"
-        >
+        <div style={popupStyle} className={`${popupBase} p-3 w-64 max-h-[80vh] overflow-y-auto`}>
           <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-2">Add shape</p>
           <div className="grid grid-cols-3 gap-2">
             {PICKER_ITEMS.map(item => {
@@ -406,12 +440,9 @@ export default function GraphicDesignToolbar({
         </div>
       )}
 
-      {/* ── Background popup ─────────────────────────────────── */}
+      {/* ── Background colour ── */}
       {openPopup === 'background' && (
-        <div
-          style={{ position: 'fixed', left: 56, top: popupTop }}
-          className="bg-white border border-surface-border rounded-xl shadow-xl p-4 z-50 w-64"
-        >
+        <div style={popupStyle} className={`${popupBase} p-4 w-64`}>
           <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-2">Poster background</p>
           <label className="block mb-3 cursor-pointer">
             <input
@@ -438,12 +469,9 @@ export default function GraphicDesignToolbar({
         </div>
       )}
 
-      {/* ── Element colour popup ─────────────────────────────── */}
+      {/* ── Element colour ── */}
       {openPopup === 'colour' && hasSelected && (
-        <div
-          style={{ position: 'fixed', left: 56, top: popupTop }}
-          className="bg-white border border-surface-border rounded-xl shadow-xl p-4 z-50 w-64"
-        >
+        <div style={popupStyle} className={`${popupBase} p-4 w-64`}>
           <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-2">Element colour</p>
           <label className="block mb-3 cursor-pointer">
             <input
@@ -470,12 +498,9 @@ export default function GraphicDesignToolbar({
         </div>
       )}
 
-      {/* ── Canvas format popup ──────────────────────────────── */}
+      {/* ── Canvas format ── */}
       {openPopup === 'templates' && (
-        <div
-          style={{ position: 'fixed', left: 56, top: popupTop }}
-          className="bg-white border border-surface-border rounded-xl shadow-xl p-3 z-50 w-56"
-        >
+        <div style={popupStyle} className={`${popupBase} p-3 w-56`}>
           <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-2">Canvas format</p>
           <div className="flex flex-col gap-1">
             {templates.map(t => {
@@ -489,9 +514,7 @@ export default function GraphicDesignToolbar({
                   key={t.id}
                   onClick={() => { onTemplateChange(t); setOpenPopup(null) }}
                   className={`flex items-center gap-3 px-2 py-2 rounded-lg text-left transition-colors border ${
-                    isActive
-                      ? 'bg-primary/10 border-primary/30'
-                      : 'hover:bg-surface-warm border-transparent'
+                    isActive ? 'bg-primary/10 border-primary/30' : 'hover:bg-surface-warm border-transparent'
                   }`}
                 >
                   <div style={{ width: contW, height: contH, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -510,20 +533,13 @@ export default function GraphicDesignToolbar({
         </div>
       )}
 
-      {/* ── Font size popup ──────────────────────────────────── */}
+      {/* ── Font size ── */}
       {openPopup === 'fontsize' && isText && (
-        <div
-          style={{ position: 'fixed', left: 56, top: popupTop }}
-          className="bg-white border border-surface-border rounded-xl shadow-xl p-4 z-50 w-56"
-        >
+        <div style={popupStyle} className={`${popupBase} p-4 w-56`}>
           <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-3">Font size</p>
           <div className="flex items-center gap-1 mb-3">
             <button
-              onClick={() => {
-                const s = Math.max(8, localFontSz - 1)
-                setLocalFontSz(s)
-                onFontSizeChange(s)
-              }}
+              onClick={() => { const s = Math.max(8, localFontSz - 1); setLocalFontSz(s); onFontSizeChange(s) }}
               className="w-7 h-7 flex items-center justify-center rounded-lg border border-surface-border text-text-secondary hover:bg-surface-warm transition-colors text-sm font-bold"
             >
               -
@@ -541,11 +557,7 @@ export default function GraphicDesignToolbar({
               className="flex-1 border border-surface-border rounded-lg text-sm text-text-primary px-2 py-1.5 text-center focus:outline-none focus:border-primary bg-white font-medium"
             />
             <button
-              onClick={() => {
-                const s = Math.min(200, localFontSz + 1)
-                setLocalFontSz(s)
-                onFontSizeChange(s)
-              }}
+              onClick={() => { const s = Math.min(200, localFontSz + 1); setLocalFontSz(s); onFontSizeChange(s) }}
               className="w-7 h-7 flex items-center justify-center rounded-lg border border-surface-border text-text-secondary hover:bg-surface-warm transition-colors text-sm font-bold"
             >
               +

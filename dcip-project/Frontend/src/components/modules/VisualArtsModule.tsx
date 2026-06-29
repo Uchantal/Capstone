@@ -796,7 +796,7 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
         )}
 
         {/* ── Toolbar + Canvas ── */}
-        <div className="flex-1 flex flex-row overflow-hidden">
+        <div className="flex-1 flex flex-col-reverse sm:flex-row overflow-hidden">
           <VisualArtsToolbar
             activeTool={tool}
             onToolChange={(t) => { setTool(t); onToolChange?.(t) }}
