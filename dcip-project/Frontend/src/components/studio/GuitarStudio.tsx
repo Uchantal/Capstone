@@ -35,7 +35,7 @@ function encodeWavGuitar(buffer: AudioBuffer): Blob {
 async function renderProgressionToBlob(progression: ChordEntry[]): Promise<Blob> {
   const origin = progression[0].timestamp
   const lastTs = progression[progression.length - 1].timestamp
-  const duration = (lastTs - origin) / 1000 + 1.4
+  const duration = (lastTs - origin) / 1000 + 1.5
   const sr = 44100
   const offCtx = new OfflineAudioContext(2, Math.ceil(duration * sr), sr)
   progression.forEach(({ chord, timestamp }) => {
@@ -49,13 +49,25 @@ async function renderProgressionToBlob(progression: ChordEntry[]): Promise<Blob>
       osc.type = 'sawtooth'; osc.frequency.value = freq
       filter.type = 'lowpass'; filter.frequency.value = 2400; filter.Q.value = 1.2
       gain.gain.setValueAtTime(0, t)
-      gain.gain.linearRampToValueAtTime(0.14, t + 0.008)
-      gain.gain.exponentialRampToValueAtTime(0.055, t + 0.22)
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 1.0)
-      osc.start(t); osc.stop(t + 1.0)
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.008)
+      gain.gain.exponentialRampToValueAtTime(0.07, t + 0.22)
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 1.1)
+      osc.start(t); osc.stop(t + 1.1)
     })
   })
   const rendered = await offCtx.startRendering()
+  // Normalize to prevent clipping from overlapping chords
+  const ch0 = rendered.getChannelData(0)
+  const ch1 = rendered.getChannelData(1)
+  let peak = 0
+  for (let i = 0; i < ch0.length; i++) {
+    if (Math.abs(ch0[i]) > peak) peak = Math.abs(ch0[i])
+    if (Math.abs(ch1[i]) > peak) peak = Math.abs(ch1[i])
+  }
+  if (peak > 0.9) {
+    const scale = 0.9 / peak
+    for (let i = 0; i < ch0.length; i++) { ch0[i] *= scale; ch1[i] *= scale }
+  }
   return encodeWavGuitar(rendered)
 }
 

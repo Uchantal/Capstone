@@ -164,8 +164,8 @@ async function renderMelodyToBlob(sequence: SequenceEntry[]): Promise<Blob> {
     osc.type = 'triangle'
     osc.frequency.value = note.freq
     gain.gain.setValueAtTime(0, t)
-    gain.gain.linearRampToValueAtTime(0.3, t + 0.012)
-    gain.gain.exponentialRampToValueAtTime(0.12, t + 0.18)
+    gain.gain.linearRampToValueAtTime(0.35, t + 0.012)
+    gain.gain.exponentialRampToValueAtTime(0.18, t + 0.18)
     gain.gain.exponentialRampToValueAtTime(0.001, t + 1.4)
     osc.start(t); osc.stop(t + 1.4)
   })
@@ -389,11 +389,14 @@ const PianoStudio = forwardRef<PianoStudioHandle, { onDirty: () => void }>(({ on
     playNoteSound(note.freq)
     setActiveNote(note.name)
     setTimeout(() => setActiveNote(n => n === note.name ? null : n), 220)
-    if (recordingRef.current) {
-      const timestamp = Date.now() - recordingStart.current
-      setSequence(prev => [...prev, { note, timestamp }])
-      onDirty()
+    if (!recordingRef.current) {
+      recordingStart.current = Date.now()
+      recordingRef.current = true
+      setRecording(true)
     }
+    const timestamp = Date.now() - recordingStart.current
+    setSequence(prev => [...prev, { note, timestamp }])
+    onDirty()
   }, [onDirty])
 
   // Bind laptop keyboard keys to piano notes
