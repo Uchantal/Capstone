@@ -1,6 +1,8 @@
+import dotenv from 'dotenv'
+dotenv.config()
+
 import express from 'express'
 import cors from 'cors'
-import dotenv from 'dotenv'
 import { connectDB } from './config/db'
 import User from './models/User'
 import authRoutes from './routes/auth'
@@ -20,8 +22,6 @@ import feedbackRoutes from './routes/feedback'
 import engagementRoutes from './routes/engagement'
 import studioRoutes from './routes/studioRoutes'
 import draftRoutes from './routes/drafts'
-
-dotenv.config()
 
 if (!process.env.JWT_SECRET) {
   console.error('FATAL: JWT_SECRET is not set. Exiting.')
