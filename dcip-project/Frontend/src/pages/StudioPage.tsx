@@ -65,13 +65,19 @@ function deleteWork(id: string): Promise<void> {
 // Download helper
 // ---------------------------------------------------------------------------
 
-function downloadFile(dataUrl: string, filename: string) {
+async function downloadFile(src: string, filename: string) {
+  let href = src
+  if (src.startsWith('http')) {
+    const res = await fetch(src)
+    href = URL.createObjectURL(await res.blob())
+  }
   const a = document.createElement('a')
-  a.href     = dataUrl
+  a.href     = href
   a.download = filename
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
+  if (href !== src) URL.revokeObjectURL(href)
 }
 
 // ---------------------------------------------------------------------------
