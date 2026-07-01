@@ -235,8 +235,8 @@ export default function HomePage() {
           <FadeIn delay={0.15}>
             <div className="rounded-2xl overflow-hidden bg-[#1a2030] aspect-[4/3]">
               <img
-                src="https://pbs.twimg.com/media/EQu0eZTX0AIyQBU.jpg"
-                alt=""
+                src="/mudasobwa.jpg"
+                alt="Students in a school computer lab"
                 className="w-full h-full object-cover"
               />
             </div>
