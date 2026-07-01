@@ -59,6 +59,7 @@ export const savePortfolioItem = (data: {
   fileType: string
   fileData: string
   durationMinutes: number
+  snapshot?: string
 }) => api.post('/portfolio', data)
 
 export const fetchPortfolio = () => api.get('/portfolio')
@@ -229,6 +230,7 @@ export const submitFeedback = (data: {
   feedbackType: string
   discipline?: string
   message: string
+  screenshotData?: string
 }) => api.post('/feedback', data)
 
 export const getAdminFeedback = () => api.get('/feedback')
