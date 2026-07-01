@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const TERMS = [
   { term: 'Note', def: 'A single musical sound with a specific pitch. Notes are named C D E F G A B, then the pattern repeats.' },
@@ -21,6 +22,7 @@ export default function PianoGlossaryPage() {
 
   return (
     <MainLayout>
+      <AskAIHint discipline="Piano" context="Piano Glossary" />
       <div className="max-w-3xl mx-auto px-6 py-8">
         <div className="flex items-center gap-2 text-xs text-text-muted mb-6">
           <span>Piano</span>

@@ -6,6 +6,7 @@ import { useGDProgress, STAGE_PATHS, STAGE_NAMES } from '../../hooks/useGDProgre
 import { fetchGDLevelPoster, saveGDLevelPoster } from '../../services/api'
 import CanvasInstructionPanel from '../canvas/CanvasInstructionPanel'
 import { useGDEngagement } from '../../hooks/useCanvasEngagement'
+import AskAIHint from '../ai/AskAIHint'
 
 function stageIdToEngagementKey(stageId: string): string {
   if (stageId === 'gd-level-1') return 'level1Learn'
@@ -222,6 +223,7 @@ export default function GDLevelScreen({
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-white">
+      <AskAIHint discipline="Graphic Design" context={`${levelTitle} — Learn`} />
       {/* ── Top bar ── */}
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-6">
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">

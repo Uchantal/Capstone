@@ -1,4 +1,4 @@
-﻿import { useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import { useAuth } from '../../hooks/useAuth'
@@ -7,6 +7,8 @@ import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDem
 import { completeVisualArtsDemonstration, fetchEngagementScores } from '../../services/api'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 import DcipLogoLink from '../../components/DcipLogoLink'
+import { useCritiqueAI } from '../../hooks/useCritiqueAI'
+import AICritiqueModal from '../../components/ai/AICritiqueModal'
 
 const TASK =
   'Draw exactly three shapes using three different tools. Use the Rectangle tool for one shape, ' +
@@ -59,7 +61,8 @@ export default function VALevel1DemonstratePage() {
   const [combinedScore, setCombinedScore] = useState<number | null>(null)
   const { recordInteraction: recordEngInteraction, recordColour: recordEngColour, recordTool, computeAndSave } =
     useVAEngagement('visual-arts', 'level1Demonstrate')
-
+  const { state: critiqueState, runCritique, submitExplanation, skipCritique } = useCritiqueAI()
+  const pendingRef = useRef<{ imageData: string; combined: number } | null>(null)
 
   function recordInteraction() {
     recordEngInteraction()
@@ -86,32 +89,38 @@ export default function VALevel1DemonstratePage() {
   const handleSubmit = async () => {
     if (isPreviewMode) { setPassed(true); return }
     setSubmitting(true)
+    const snapshot = moduleRef.current?.captureCleanImage() ?? ''
     const score = await computeAndSave()
     setEngagementScore(score)
-    const snapshot = moduleRef.current?.captureCleanImage() ?? ''
     let combined = score
     try {
       const res = await fetchEngagementScores('visual-arts')
       const scores = res.data?.scores ?? {}
-      combined = levelAverage(scores, ['level1Learn', 'level1Practise', 'level1Demonstrate'])
-      // Override the demonstrate slot with the freshly computed score
       combined = levelAverage({ ...scores, level1Demonstrate: score }, ['level1Learn', 'level1Practise', 'level1Demonstrate'])
-    } catch {
-      // fall back to demonstrate score alone
-    }
-    setCombinedScore(combined)
-    try {
-      if (combined >= 60) {
-        await completeVisualArtsDemonstration(1, true, snapshot)
-      }
-    } catch {
-      // ignore
-    } finally {
+    } catch {}
+    pendingRef.current = { imageData: snapshot, combined }
+    setSubmitting(false)
+    runCritique(snapshot, 'visual-arts', 1)
+  }
+
+  useEffect(() => {
+    const s = critiqueState
+    if (!pendingRef.current) return
+    if (s.status !== 'done' && s.status !== 'skipped' && s.status !== 'error') return
+    const { imageData, combined } = pendingRef.current
+    pendingRef.current = null
+    const aiScore = s.status === 'done' ? s.score : null
+    ;(async () => {
+      const finalScore = aiScore !== null ? Math.round(aiScore * 0.7 + combined * 0.3) : combined
+      setCombinedScore(finalScore)
+      try {
+        if (finalScore >= 60) await completeVisualArtsDemonstration(1, true, imageData)
+      } catch {}
       moduleRef.current?.clearDraft()
       setPassed(true)
-      setSubmitting(false)
-    }
-  }
+    })()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [critiqueState.status])
 
   const handleReset = () => {
     setPassed(false)
@@ -195,10 +204,10 @@ export default function VALevel1DemonstratePage() {
         ) : (
           <button
             onClick={handleSubmit}
-            disabled={submitting}
+            disabled={submitting || critiqueState.status === 'loading'}
             className="bg-[#2D6A4F] text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed text-sm"
           >
-            {submitting ? 'Saving...' : 'Submit and Continue'}
+            {submitting ? 'Saving...' : critiqueState.status === 'loading' ? 'Analysing...' : 'Submit and Continue'}
           </button>
         )}
       </div>
@@ -214,6 +223,28 @@ export default function VALevel1DemonstratePage() {
         draftKey={`${user?.id ?? 'anon'}:va:level1-demonstrate`}
       />
 
+      {critiqueState.status === 'loading' && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-xs w-full mx-4 text-center shadow-2xl">
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <p className="text-text-primary font-semibold text-sm mb-1">AI is reviewing your work...</p>
+            <p className="text-text-muted text-xs">This takes a few seconds.</p>
+          </div>
+        </div>
+      )}
+
+      {critiqueState.status === 'needsExplanation' && (
+        <AICritiqueModal
+          question={critiqueState.question}
+          onSubmit={text => submitExplanation(pendingRef.current?.imageData ?? '', 'visual-arts', 1, text)}
+          onSkip={skipCritique}
+        />
+      )}
+
       {passed && (() => {
         const displayScore = combinedScore ?? engagementScore
         const levelPassed = isPreviewMode || displayScore === null || displayScore >= 60
@@ -222,7 +253,7 @@ export default function VALevel1DemonstratePage() {
           : displayScore >= 40 ? 'Fair' : 'Needs Improvement'
         return (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
+            <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl overflow-y-auto max-h-[90vh]">
               {levelPassed ? (
                 <>
                   <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -237,6 +268,21 @@ export default function VALevel1DemonstratePage() {
                       <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Level Score (Combined)</p>
                       <p className="text-2xl font-bold text-text-primary">{displayScore}<span className="text-sm font-normal text-text-muted">/100</span></p>
                       <p className="text-xs font-semibold mt-1 text-secondary">{gradeLabel}</p>
+                    </div>
+                  )}
+                  {critiqueState.status === 'done' && critiqueState.feedback && (
+                    <div className="mb-4 p-3 bg-[#F9F7F4] rounded-xl border border-surface-border text-left">
+                      <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">AI Feedback</p>
+                      <p className="text-xs text-text-secondary leading-relaxed">{critiqueState.feedback}</p>
+                      {critiqueState.suggestions.length > 0 && (
+                        <ul className="mt-2 space-y-1">
+                          {critiqueState.suggestions.map((s, i) => (
+                            <li key={i} className="text-xs text-text-secondary flex items-start gap-1.5">
+                              <span className="text-primary flex-shrink-0">•</span><span>{s}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
                   )}
                   <div className="inline-flex items-center bg-primary/10 text-primary text-xs font-semibold px-4 py-2 rounded-full mb-5">

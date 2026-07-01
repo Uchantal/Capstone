@@ -107,13 +107,12 @@ export default function MusicSelectPage() {
               className={`bg-white rounded-2xl border-2 border-surface-border border-t-4 ${path.accent} flex flex-col overflow-hidden group`}
             >
               {/* Image */}
-              <div className="relative h-44 overflow-hidden">
+              <div className="relative h-48 overflow-hidden bg-white">
                 <img
                   src={path.img}
                   alt={path.imgAlt}
-                  className={`w-full h-full object-cover ${path.imgPosition} transition-transform duration-500 group-hover:scale-105`}
+                  className={`w-full h-full object-contain ${path.imgPosition} transition-transform duration-500 group-hover:scale-105`}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
               </div>
 
               {/* Content */}

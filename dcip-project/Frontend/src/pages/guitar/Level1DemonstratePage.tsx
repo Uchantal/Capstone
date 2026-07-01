@@ -1,9 +1,9 @@
-﻿import { useCallback, useRef, useState } from 'react'
+﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { noteAt } from '../../components/guitar/GuitarLevelScreen'
-import { completeGuitarDemonstration } from '../../services/api'
+import api, { completeGuitarDemonstration } from '../../services/api'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
 import DcipLogoLink from '../../components/DcipLogoLink'
 
@@ -23,6 +23,9 @@ export default function GuitarLevel1DemonstratePage() {
   const [promptIdx, setPromptIdx] = useState(0)
   const [validState, setValidState] = useState<ValidState>('waiting')
   const [passed, setPassed] = useState(false)
+  const [finalCorrect, setFinalCorrect] = useState(0)
+  const [aiFeedback, setAiFeedback] = useState('')
+  const [aiFeedbackLoading, setAiFeedbackLoading] = useState(false)
 
   const correctCountRef = useRef(0)
   const promptIdxRef    = useRef(0)
@@ -37,6 +40,7 @@ export default function GuitarLevel1DemonstratePage() {
       submittedRef.current = true
       const didPass = correctCountRef.current >= REQUIRED_CORRECT
       setPassed(didPass)
+      setFinalCorrect(correctCountRef.current)
       if (!isPreviewMode) {
         completeGuitarDemonstration(1, didPass).then(() => reload()).catch(() => {})
       }
@@ -70,8 +74,23 @@ export default function GuitarLevel1DemonstratePage() {
     submittedRef.current    = false
     setPromptIdx(0)
     setValidState('waiting')
+    setFinalCorrect(0)
+    setAiFeedback('')
     setPhase('testing')
   }
+
+  useEffect(() => {
+    if (phase !== 'results') return
+    setAiFeedbackLoading(true)
+    api.post('/ai/hint', {
+      selectedText: `Guitar Level 1 Demonstrate: the student got ${finalCorrect} of ${TOTAL_PROMPTS} E note prompts correct. ${finalCorrect >= REQUIRED_CORRECT ? 'Passed.' : 'Did not pass.'}`,
+      discipline: 'Guitar',
+      context: 'Level 1 Demonstrate results',
+    })
+      .then((res: { data: { hint: string } }) => setAiFeedback(res.data.hint))
+      .catch(() => {})
+      .finally(() => setAiFeedbackLoading(false))
+  }, [phase, finalCorrect])
 
   if (!isPreviewMode && loading) {
     return (
@@ -103,13 +122,22 @@ export default function GuitarLevel1DemonstratePage() {
               </p>
               {passed ? (
                 <>
-                  <p className="text-text-secondary text-sm mb-4">You have earned the Beginner Guitar badge.</p>
-                  <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-2 rounded-full">
+                  <p className="text-text-secondary text-sm mb-1">You got {finalCorrect} of {TOTAL_PROMPTS} notes correct. You have earned the Beginner Guitar badge.</p>
+                  <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-2 rounded-full mb-3">
                     Beginner Guitar Badge
                   </div>
                 </>
               ) : (
-                <p className="text-text-secondary text-sm">Go back and practise, then try again.</p>
+                <p className="text-text-secondary text-sm mb-3">You got {finalCorrect} of {TOTAL_PROMPTS} notes correct. You need {REQUIRED_CORRECT} to pass. Go back and practise, then try again.</p>
+              )}
+              {aiFeedbackLoading && (
+                <p className="text-xs text-text-muted italic">AI is preparing your feedback...</p>
+              )}
+              {aiFeedback && (
+                <div className="bg-primary/5 border border-primary/20 rounded-xl p-3">
+                  <p className="text-xs text-primary font-semibold uppercase tracking-wide mb-1">Coach's note</p>
+                  <p className="text-text-secondary text-sm leading-relaxed">{aiFeedback}</p>
+                </div>
               )}
             </div>
             <div className="space-y-3">

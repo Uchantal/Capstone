@@ -22,6 +22,7 @@ import feedbackRoutes from './routes/feedback'
 import engagementRoutes from './routes/engagement'
 import studioRoutes from './routes/studioRoutes'
 import draftRoutes from './routes/drafts'
+import aiRoutes from './routes/aiRoutes'
 
 if (!process.env.JWT_SECRET) {
   console.error('FATAL: JWT_SECRET is not set. Exiting.')
@@ -66,6 +67,7 @@ app.use('/api/feedback', feedbackRoutes)
 app.use('/api/engagement', engagementRoutes)
 app.use('/api/studio', studioRoutes)
 app.use('/api/drafts', draftRoutes)
+app.use('/api/ai', aiRoutes)
 
 const PORT = process.env.PORT || 5000
 

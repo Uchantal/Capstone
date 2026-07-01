@@ -5,6 +5,7 @@ import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, playTone, drawWaveform, type PitchStatus } from '../../utils/voicePitch'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -113,6 +114,7 @@ export default function VoiceLevel2Page() {
 
   return (
     <MainLayout>
+      <AskAIHint discipline="Voice" context="Voice Level 2 — Learn" />
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
         {lockedMessage && (

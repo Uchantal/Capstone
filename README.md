@@ -25,8 +25,7 @@
 
 ## Overview
 
-DCIP addresses the lack of structured creative arts education in Rwandan secondary schools by delivering a browser-based platform that works on low-end devices and unreliable internet connections. Students progress through three levels in their chosen discipline, completing Learn, Practise, and Demonstrate stages to earn badges. An AI assistant provides real-time hints, image analysis, and artwork critique throughout.
-
+DCIP is a self-directed digital learning platform that gives identified talented youth in Rwandan secondary schools structured access to creative skill development in Music, Visual Arts, and Graphic Design — using the computer laboratories their schools already have. Students follow a guided journey through mandatory foundation courses and three progressive skill levels, each built around Learn, Practise, and Demonstrate stages that build real competency before unlocking the next level. An embedded AI assistant provides real-time hints, answers questions, and analyses submitted artwork to give students honest feedback on their composition and technique. Students who complete all three levels do not stop there,  they unlock open Production space "studio" where they can create freely, build a personal portfolio of their work, and develop at their own pace without structured constraints
 ---
 
 ## Core Features
@@ -41,8 +40,9 @@ DCIP addresses the lack of structured creative arts education in Rwandan seconda
 
 ### AI Integration
 - **Ask AI Assistant** — persistent chat panel on every course page; students can type questions, highlight confusing text to ask about it directly, or upload an image for analysis
-- **AI Artwork Critique** — on Demonstrate submission, AI grades VA and GD work using computer vision and blends an AI quality score (40%) with an engagement score (60%) into a final grade
+- **AI Artwork Critique** — on Demonstrate submission, AI grades Visual Arts and Graphic Design work using computer vision and blends an AI quality score (70%) with an engagement score (30%) into a final grade
 - **Two-step critique** — if the AI cannot assess intent from the image alone, it asks the student to explain their work before completing the assessment
+- **AI Coach's Note** — after Guitar, Piano, and Voice Demonstrate results (which are assessed programmatically), AI generates a personalised coaching message based on the student's score, offering encouragement if they passed or specific practice advice if they did not
 - **Model chain:** Gemini 3.1 Flash Lite (primary, 500 RPD, vision-capable) → OpenRouter fallback chain (google/gemma-4-31b-it, nvidia/nemotron, meta-llama, qwen)
 
 ### Creative Studios
@@ -56,7 +56,7 @@ DCIP addresses the lack of structured creative arts education in Rwandan seconda
 ### Engagement Scoring
 - Tracks time on canvas, tool clicks, and interactions (Perusall-inspired model)
 - Engagement score (0–100) blended with AI quality score to produce the final grade
-- Score formula: `finalScore = engagement × 0.6 + aiScore × 0.4`
+- Score formula: `finalScore = aiScore × 0.7 + engagement × 0.3` — AI quality is the dominant factor; engagement prevents passing on zero interaction alone
 
 ### Offline Support (PWA)
 - Service Worker with Cache-First strategy for the app shell and assets

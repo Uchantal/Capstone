@@ -19,8 +19,16 @@ if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register('/sw.js')
-        .then(() => {
+        .then((registration) => {
           console.log('Service Worker registered')
+          // Browsers only check for a new SW lazily (as rarely as once per 24h on
+          // plain navigation), so a returning student could be stuck on a stale
+          // bundle for up to a day after a deploy. Force a check immediately and
+          // every time the tab regains focus.
+          registration.update()
+          document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') registration.update()
+          })
           // When a new SW activates (skipWaiting fires after a deploy), reload so
           // the page always runs the latest JS bundle. Without this the old bundle
           // keeps running even though the new SW is controlling the page, which

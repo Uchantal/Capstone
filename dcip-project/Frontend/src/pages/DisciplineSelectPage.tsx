@@ -9,7 +9,7 @@ const disciplines = [
     name: 'Music',
     sub: 'Guitar · Piano · Voice & Singing',
     desc: 'Choose from Guitar, Piano, or Voice and Singing. Each instrument follows a structured path from theory and technique through progressive levels to a final recorded production saved to your portfolio.',
-    img: '/images/music.jpg',
+    img: '/new musci.jpg',
     imgAlt: 'Music instruments',
     imgPosition: 'object-center',
     accent: 'border-primary',
@@ -31,7 +31,7 @@ const disciplines = [
     name: 'Graphic Design',
     sub: 'Layouts · Typography · Posters',
     desc: 'Design real formats used in schools and professional settings. Learn typography, layout hierarchy, colour contrast, and composition, then apply them to posters, social media posts, and digital covers.',
-    img: '/images/graphic-design.jpg',
+    img: '/images/New Graphic design.png',
     imgAlt: 'Graphic design',
     imgPosition: 'object-center',
     accent: 'border-primary',
@@ -79,13 +79,12 @@ export default function DisciplineSelectPage() {
                 user?.discipline === d.id ? d.accent : 'border-surface-border hover:border-gray-300'
               }`}
             >
-              <div className="relative h-48 overflow-hidden bg-gray-100">
+              <div className="relative h-52 overflow-hidden bg-white">
                 <img
                   src={d.img}
                   alt={d.imgAlt}
-                  className={`w-full h-full object-cover ${d.imgPosition} transition-transform duration-500 group-hover:scale-105`}
+                  className={`w-full h-full object-contain ${d.imgPosition} transition-transform duration-500 group-hover:scale-105`}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 {user?.discipline === d.id && (
                   <div className="absolute top-3 right-3 bg-white/90 text-xs font-semibold text-secondary px-2.5 py-1 rounded-full">
                     ✓ Current

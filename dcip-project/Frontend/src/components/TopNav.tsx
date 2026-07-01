@@ -7,6 +7,7 @@ import { fetchProgressSummary } from '../services/api'
 const SITE_LINKS = [
   { label: 'Home',         to: '/' },
   { label: 'About',        to: '/#about' },
+  { label: 'Features',     to: '/#features' },
   { label: 'Disciplines',  to: '/disciplines' },
   { label: 'How It Works', to: '/#how-it-works' },
   { label: 'Feedback',     to: '/feedback' },

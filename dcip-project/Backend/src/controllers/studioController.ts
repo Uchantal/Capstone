@@ -1,6 +1,7 @@
 import { Response } from 'express'
 import { AuthRequest } from '../middleware/authMiddleware'
 import StudioWork from '../models/StudioWork'
+import StudioFolder from '../models/StudioFolder'
 import cloudinary from '../config/cloudinary'
 
 const CLOUDINARY_FOLDER = 'dcip-studio'
@@ -22,7 +23,15 @@ async function uploadToCloudinary(
 
 export async function saveStudioWork(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const { title, discipline, fileData, fileType, width, height, format } = req.body
+    const { title, discipline, fileData, fileType, width, height, format, folder, newFolderName } = req.body
+
+    let folderId: string | undefined = folder || undefined
+    if (newFolderName && String(newFolderName).trim()) {
+      const name = String(newFolderName).trim()
+      const existing = await StudioFolder.findOne({ user: req.userId, name })
+      const folderDoc = existing ?? await StudioFolder.create({ user: req.userId, name })
+      folderId = String(folderDoc._id)
+    }
 
     const cloudinaryConfigured =
       process.env.CLOUDINARY_CLOUD_NAME &&
@@ -53,6 +62,7 @@ export async function saveStudioWork(req: AuthRequest, res: Response): Promise<v
       width:              width     || 1920,
       height:             height    || 1080,
       format:             format    || 'HD 16:9',
+      folder:             folderId,
     })
 
     const { fileData: _omit, ...meta } = work.toObject()
@@ -65,12 +75,66 @@ export async function saveStudioWork(req: AuthRequest, res: Response): Promise<v
 
 export async function getStudioWorks(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const works = await StudioWork.find({ user: req.userId })
+    const { folder } = req.query
+    const query: Record<string, unknown> = { user: req.userId }
+    if (folder === 'none') query.folder = { $exists: false }
+    else if (typeof folder === 'string' && folder) query.folder = folder
+
+    const works = await StudioWork.find(query)
       .select('-fileData')
       .sort({ createdAt: -1 })
     res.json(works)
   } catch {
     res.status(500).json({ message: 'Failed to fetch studio works' })
+  }
+}
+
+export async function moveStudioWork(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const { folder } = req.body
+    const work = await StudioWork.findOne({ _id: req.params.id, user: req.userId })
+    if (!work) { res.status(404).json({ message: 'Not found' }); return }
+
+    work.folder = folder || undefined
+    await work.save()
+    res.json({ message: 'Moved' })
+  } catch {
+    res.status(500).json({ message: 'Failed to move studio work' })
+  }
+}
+
+export async function getFolders(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const folders = await StudioFolder.find({ user: req.userId }).sort({ name: 1 })
+    res.json(folders)
+  } catch {
+    res.status(500).json({ message: 'Failed to fetch folders' })
+  }
+}
+
+export async function createFolder(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const { name } = req.body
+    if (!name || !name.trim()) { res.status(400).json({ message: 'Folder name is required' }); return }
+
+    const folder = await StudioFolder.create({ user: req.userId, name: name.trim() })
+    res.status(201).json(folder)
+  } catch {
+    res.status(500).json({ message: 'Failed to create folder' })
+  }
+}
+
+export async function deleteFolder(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const folder = await StudioFolder.findOne({ _id: req.params.id, user: req.userId })
+    if (!folder) { res.status(404).json({ message: 'Not found' }); return }
+
+    // Works inside the folder are not deleted — they just become uncategorized
+    await StudioWork.updateMany({ user: req.userId, folder: folder._id }, { $unset: { folder: 1 } })
+    await folder.deleteOne()
+    res.json({ message: 'Deleted' })
+  } catch {
+    res.status(500).json({ message: 'Failed to delete folder' })
   }
 }
 

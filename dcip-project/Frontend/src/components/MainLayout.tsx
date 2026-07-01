@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useInactivityLogout } from '../hooks/useInactivityLogout'
 import TopNav from './TopNav'
 import Footer from './Footer'
 import OfflineBanner from './OfflineBanner'
@@ -115,6 +116,7 @@ export default function MainLayout({ children, background = 'bg-white' }: Props)
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { user } = useAuth()
+  const { showWarning, stayLoggedIn } = useInactivityLogout()
 
   const isStudent = user?.role === 'student'
   const showBack = isStudent && !NO_BACK_PATHS.has(pathname)
@@ -154,6 +156,29 @@ export default function MainLayout({ children, background = 'bg-white' }: Props)
       </div>
       <Footer />
       <SyncToast />
+
+      {/* Inactivity warning — shown 5 minutes before auto-logout */}
+      {showWarning && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center">
+            <div className="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+            </div>
+            <h2 className="text-text-primary font-bold text-lg mb-2">Still there?</h2>
+            <p className="text-text-secondary text-sm mb-6">
+              You have been inactive for 25 minutes. For security, you will be logged out in 5 minutes. Click below to stay logged in.
+            </p>
+            <button
+              onClick={stayLoggedIn}
+              className="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-dark transition-colors"
+            >
+              Stay Logged In
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

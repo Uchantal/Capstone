@@ -6,6 +6,7 @@ import { useVisualArtsProgress } from '../../hooks/useVisualArtsProgress'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 import { saveDraft, fetchDraft } from '../../services/api'
 import DcipLogoLink from '../DcipLogoLink'
+import AskAIHint from '../ai/AskAIHint'
 
 function stageIdToEngagementKey(stageId: string): string {
   if (stageId === 'va-level-1') return 'level1Learn'
@@ -164,6 +165,7 @@ export default function VisualArtsLevelScreen({
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
+      <AskAIHint discipline="Visual Arts" context={`${levelTitle} — Learn`} />
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
         <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">

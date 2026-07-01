@@ -4,6 +4,7 @@ import MainLayout from '../../components/MainLayout'
 import { useGDProgress } from '../../hooks/useGDProgress'
 import { saveGDLevelPoster } from '../../services/api'
 import { useReadingEngagement } from '../../hooks/useReadingEngagement'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -53,6 +54,7 @@ export default function GDCourse1Page() {
 
   return (
     <MainLayout>
+      <AskAIHint discipline="Graphic Design" context="Graphic Design Course 1" />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         {lockedMessage && (

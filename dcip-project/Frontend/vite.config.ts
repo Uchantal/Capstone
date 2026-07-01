@@ -10,9 +10,11 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       registerType: 'autoUpdate',
+      // Disabled: this used to inject its own dev-mode service worker (dev-sw.js),
+      // which fought against the explicit "unregister SW in dev" logic in main.tsx
+      // and kept serving stale cached bundles during local development.
       devOptions: {
-        enabled: true,
-        type: 'module',
+        enabled: false,
       },
       manifest: {
         name: 'Digital Creative Infrastructure Platform',

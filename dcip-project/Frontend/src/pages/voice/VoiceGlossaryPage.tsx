@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const TERMS = [
   { term: 'Pitch', def: 'How high or low a sound is. Singing in tune means producing the correct pitch for each note.' },
@@ -21,6 +22,7 @@ export default function VoiceGlossaryPage() {
 
   return (
     <MainLayout>
+      <AskAIHint discipline="Voice" context="Voice Glossary" />
       <div className="max-w-3xl mx-auto px-6 py-8">
         <div className="flex items-center gap-2 text-xs text-text-muted mb-6">
           <span>Voice and Singing</span>

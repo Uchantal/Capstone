@@ -1,8 +1,8 @@
-﻿import { useCallback, useRef, useState } from 'react'
+﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
-import { completeGuitarDemonstration } from '../../services/api'
+import api, { completeGuitarDemonstration } from '../../services/api'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
 import DcipLogoLink from '../../components/DcipLogoLink'
 
@@ -53,6 +53,9 @@ export default function GuitarLevel3DemonstratePage() {
   const [promptIdx, setPromptIdx]   = useState(0)
   const [validState, setValidState] = useState<ValidState>('waiting')
   const [passed, setPassed]         = useState(false)
+  const [finalCorrect, setFinalCorrect] = useState(0)
+  const [aiFeedback, setAiFeedback] = useState('')
+  const [aiFeedbackLoading, setAiFeedbackLoading] = useState(false)
 
   const correctCountRef = useRef(0)
   const promptIdxRef    = useRef(0)
@@ -66,6 +69,7 @@ export default function GuitarLevel3DemonstratePage() {
       submittedRef.current = true
       const didPass = correctCountRef.current >= REQUIRED_CORRECT
       setPassed(didPass)
+      setFinalCorrect(correctCountRef.current)
       if (!isPreviewMode) {
         completeGuitarDemonstration(3, didPass).then(() => reload()).catch(() => {})
       }
@@ -111,8 +115,23 @@ export default function GuitarLevel3DemonstratePage() {
     submittedRef.current    = false
     setPromptIdx(0)
     setValidState('waiting')
+    setFinalCorrect(0)
+    setAiFeedback('')
     setPhase('testing')
   }
+
+  useEffect(() => {
+    if (phase !== 'results') return
+    setAiFeedbackLoading(true)
+    api.post('/ai/hint', {
+      selectedText: `Guitar Level 3 Demonstrate: the student got ${finalCorrect} of ${TOTAL_PROMPTS} prompts correct (D notes and guitar chords). ${finalCorrect >= REQUIRED_CORRECT ? 'Passed.' : 'Did not pass.'}`,
+      discipline: 'Guitar',
+      context: 'Level 3 Demonstrate results',
+    })
+      .then((res: { data: { hint: string } }) => setAiFeedback(res.data.hint))
+      .catch(() => {})
+      .finally(() => setAiFeedbackLoading(false))
+  }, [phase, finalCorrect])
 
   if (!isPreviewMode && loading) {
     return (
@@ -143,11 +162,20 @@ export default function GuitarLevel3DemonstratePage() {
                 {passed ? 'Level 3 Demonstration passed.' : 'Not quite.'}
               </p>
               {passed ? (
-                <p className="text-text-secondary text-sm">
-                  You have earned the Intermediate Guitar badge. Complete Production to reach Advanced.
+                <p className="text-text-secondary text-sm mb-3">
+                  You got {finalCorrect} of {TOTAL_PROMPTS} prompts correct. You have earned the Intermediate Guitar badge. Complete Production to reach Advanced.
                 </p>
               ) : (
-                <p className="text-text-secondary text-sm">Go back and practise, then try again.</p>
+                <p className="text-text-secondary text-sm mb-3">You got {finalCorrect} of {TOTAL_PROMPTS} prompts correct. You need {REQUIRED_CORRECT} to pass. Go back and practise, then try again.</p>
+              )}
+              {aiFeedbackLoading && (
+                <p className="text-xs text-text-muted italic">AI is preparing your feedback...</p>
+              )}
+              {aiFeedback && (
+                <div className="bg-primary/5 border border-primary/20 rounded-xl p-3">
+                  <p className="text-xs text-primary font-semibold uppercase tracking-wide mb-1">Coach's note</p>
+                  <p className="text-text-secondary text-sm leading-relaxed">{aiFeedback}</p>
+                </div>
               )}
             </div>
             <div className="space-y-3">

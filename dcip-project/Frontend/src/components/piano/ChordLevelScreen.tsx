@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import PianoKeyboard from './PianoKeyboard'
+import AskAIHint from '../ai/AskAIHint'
 import { useChordValidation } from '../../hooks/useChordValidation'
 import {
   buildChord,
@@ -83,6 +84,7 @@ export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle,
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
+      <AskAIHint discipline="Piano" context="Piano — Learn" />
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
         <div className="flex items-center gap-2 text-xs text-text-muted">
           <button

@@ -27,9 +27,6 @@ export const fetchSchools = () => api.get('/auth/schools')
 export const updateDiscipline = (discipline: string, subDiscipline?: string) =>
   api.patch('/auth/discipline', { discipline, ...(subDiscipline ? { subDiscipline } : {}) })
 
-export const updateUserSchool = (schoolId: string) =>
-  api.patch('/auth/school', { schoolId })
-
 export const fetchMe = () => api.get('/auth/me')
 
 export const changePassword = (currentPassword: string, newPassword: string) =>
@@ -43,6 +40,9 @@ export const resetPassword = (token: string, newPassword: string) =>
 
 export const verifyEmail = (token: string) =>
   api.post('/auth/verify-email', { token })
+
+export const updateUserSchool = (schoolId: string) =>
+  api.patch('/auth/school', { schoolId })
 
 // Sessions
 export const createSession = (data: { discipline: string; durationMinutes: number }) =>
@@ -59,7 +59,6 @@ export const savePortfolioItem = (data: {
   fileType: string
   fileData: string
   durationMinutes: number
-  snapshot?: string
 }) => api.post('/portfolio', data)
 
 export const fetchPortfolio = () => api.get('/portfolio')
@@ -230,7 +229,6 @@ export const submitFeedback = (data: {
   feedbackType: string
   discipline?: string
   message: string
-  screenshotData?: string
 }) => api.post('/feedback', data)
 
 export const getAdminFeedback = () => api.get('/feedback')
@@ -246,7 +244,7 @@ export const fetchEngagementScores = (discipline: string) =>
 export const fetchAdminStudentProfile = (id: string) =>
   api.get(`/admin/students/${id}/profile`)
 
-// Drafts — one slot per student per discipline (visual-arts | graphic-design)
+// Drafts — one slot per student per discipline (VA and GD practise / production)
 export const saveDraft = (data: { discipline: string; snapshot: string; thumbnailData?: string }) =>
   api.post('/drafts', data)
 

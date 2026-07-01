@@ -19,6 +19,7 @@ import MainLayout from '../../components/MainLayout'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarProgress } from '../../hooks/useGuitarProgress'
 import { useReadingEngagement } from '../../hooks/useReadingEngagement'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -73,6 +74,7 @@ export default function ReadingFretboardPage() {
 
   return (
     <MainLayout>
+      <AskAIHint discipline="Guitar" context="Guitar — Reading the Fretboard" />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         {lockedMessage && (

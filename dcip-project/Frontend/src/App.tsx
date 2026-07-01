@@ -176,7 +176,7 @@ function AppContent() {
 
   const routes = (
     <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<PublicRoute><HomePage /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
         <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
         <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />

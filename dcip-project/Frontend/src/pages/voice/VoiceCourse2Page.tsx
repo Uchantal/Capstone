@@ -6,6 +6,7 @@ import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstration
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, playTone, SCALE_NOTES, type PitchStatus } from '../../utils/voicePitch'
 import { useReadingEngagement } from '../../hooks/useReadingEngagement'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -113,6 +114,7 @@ export default function VoiceCourse2Page() {
 
   return (
     <MainLayout>
+      <AskAIHint discipline="Voice" context="Voice Course 2 — Theory" />
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         {lockedMessage && (

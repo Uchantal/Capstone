@@ -6,7 +6,7 @@ import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, drawWaveform, DEMO_TOLERANCE, type PitchStatus } from '../../utils/voicePitch'
-import { completeVoiceDemonstration } from '../../services/api'
+import api, { completeVoiceDemonstration } from '../../services/api'
 
 const DEMO_SCALE = [
   { label: 'C4', note: 'C', freq: 261.63 },
@@ -32,6 +32,8 @@ export default function VoiceLevel2DemonstratePage() {
   const [pitchStatus,  setPitchStatus]  = useState<PitchStatus>('none')
   const [passed,       setPassed]       = useState(false)
   const [finalCorrect, setFinalCorrect] = useState(0)
+  const [aiFeedback, setAiFeedback] = useState('')
+  const [aiFeedbackLoading, setAiFeedbackLoading] = useState(false)
 
   const rafRef          = useRef<number>(0)
   const activeRef       = useRef(false)
@@ -114,10 +116,24 @@ export default function VoiceLevel2DemonstratePage() {
     setPitchStatus('none')
     setPassed(false)
     setFinalCorrect(0)
+    setAiFeedback('')
     setPhase('testing')
     activeRef.current = true
     rafRef.current = requestAnimationFrame(runLoop)
   }
+
+  useEffect(() => {
+    if (phase !== 'results') return
+    setAiFeedbackLoading(true)
+    api.post('/ai/hint', {
+      selectedText: `Voice Level 2 Demonstrate: the student sang ${finalCorrect} of ${DEMO_SCALE.length} C major scale notes correctly. ${finalCorrect >= REQUIRED_CORRECT ? 'Passed.' : 'Did not pass.'}`,
+      discipline: 'Voice and Singing',
+      context: 'Level 2 Demonstrate results',
+    })
+      .then((res: { data: { hint: string } }) => setAiFeedback(res.data.hint))
+      .catch(() => {})
+      .finally(() => setAiFeedbackLoading(false))
+  }, [phase, finalCorrect])
 
   if (loading) {
     return (
@@ -141,10 +157,10 @@ export default function VoiceLevel2DemonstratePage() {
               <>
                 <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Level 2 Demonstration</p>
                 <h1 className="text-text-primary font-bold text-2xl mb-2">Demonstration passed</h1>
-                <p className="text-text-secondary text-sm mb-4">
+                <p className="text-text-secondary text-sm mb-2">
                   You sang {finalCorrect} of {DEMO_SCALE.length} scale notes correctly. You have earned the Intermediate Voice badge.
                 </p>
-                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-2 rounded-full">
+                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-2 rounded-full mb-3">
                   Intermediate Voice Badge
                 </div>
               </>
@@ -152,11 +168,20 @@ export default function VoiceLevel2DemonstratePage() {
               <>
                 <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Level 2 Demonstration</p>
                 <h1 className="text-text-primary font-bold text-2xl mb-2">Keep practising</h1>
-                <p className="text-text-secondary text-sm">
+                <p className="text-text-secondary text-sm mb-3">
                   You sang {finalCorrect} of {DEMO_SCALE.length} notes correctly. You need {REQUIRED_CORRECT} to pass.
                   Keep practising. Your voice will get there with consistent work.
                 </p>
               </>
+            )}
+            {aiFeedbackLoading && (
+              <p className="text-xs text-text-muted italic">AI is preparing your feedback...</p>
+            )}
+            {aiFeedback && (
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-3">
+                <p className="text-xs text-primary font-semibold uppercase tracking-wide mb-1">Coach's note</p>
+                <p className="text-text-secondary text-sm leading-relaxed">{aiFeedback}</p>
+              </div>
             )}
           </div>
 

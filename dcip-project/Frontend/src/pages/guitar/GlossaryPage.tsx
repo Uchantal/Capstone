@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const TERMS = [
   { term: 'String', def: 'One of the six wires stretched across the guitar body and neck, tuned E A D G B e from lowest to highest pitch.' },
@@ -21,6 +22,7 @@ export default function GuitarGlossaryPage() {
 
   return (
     <MainLayout>
+      <AskAIHint discipline="Guitar" context="Guitar Glossary" />
       <div className="max-w-3xl mx-auto px-6 py-8">
         <div className="flex items-center gap-2 text-xs text-text-muted mb-6">
           <span>Guitar</span>

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
 import { useVisualArtsProgress } from '../../hooks/useVisualArtsProgress'
 import { useReadingEngagement } from '../../hooks/useReadingEngagement'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
   return (
@@ -81,6 +82,7 @@ export default function Course2Page() {
 
   return (
     <MainLayout>
+      <AskAIHint discipline="Visual Arts" context="Visual Arts Course 2" />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         {lockedMessage && (

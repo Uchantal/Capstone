@@ -5,6 +5,7 @@ import MainLayout from '../../components/MainLayout'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { playTone, drawWaveform, SCALE_NOTES } from '../../utils/voicePitch'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 export default function VoiceSharpeningPage() {
   const navigate  = useNavigate()
@@ -76,6 +77,7 @@ export default function VoiceSharpeningPage() {
 
   return (
     <MainLayout>
+      <AskAIHint discipline="Voice" context="Voice Sharpening" />
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
         {lockedMessage && (

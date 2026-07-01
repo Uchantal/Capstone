@@ -6,7 +6,7 @@ import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, drawWaveform, DEMO_TOLERANCE, type PitchStatus } from '../../utils/voicePitch'
-import { completeVoiceDemonstration } from '../../services/api'
+import api, { completeVoiceDemonstration } from '../../services/api'
 
 // 4 prompts: A4 sustained 3s, C4 1.5s, G4 1.5s, C4 1.5s. 3/4 required to pass.
 const PROMPTS = [
@@ -31,6 +31,8 @@ export default function VoiceLevel3DemonstratePage() {
   const [pitchStatus,  setPitchStatus]  = useState<PitchStatus>('none')
   const [passed,       setPassed]       = useState(false)
   const [finalCorrect, setFinalCorrect] = useState(0)
+  const [aiFeedback, setAiFeedback] = useState('')
+  const [aiFeedbackLoading, setAiFeedbackLoading] = useState(false)
 
   const rafRef          = useRef<number>(0)
   const activeRef       = useRef(false)
@@ -114,10 +116,24 @@ export default function VoiceLevel3DemonstratePage() {
     setPitchStatus('none')
     setPassed(false)
     setFinalCorrect(0)
+    setAiFeedback('')
     setPhase('testing')
     activeRef.current = true
     rafRef.current = requestAnimationFrame(runLoop)
   }
+
+  useEffect(() => {
+    if (phase !== 'results') return
+    setAiFeedbackLoading(true)
+    api.post('/ai/hint', {
+      selectedText: `Voice Level 3 Demonstrate: the student completed ${finalCorrect} of ${PROMPTS.length} pitch prompts correctly (A4 sustain, C4, G4, C4 return). ${finalCorrect >= REQUIRED_CORRECT ? 'Passed.' : 'Did not pass.'}`,
+      discipline: 'Voice and Singing',
+      context: 'Level 3 Demonstrate results',
+    })
+      .then((res: { data: { hint: string } }) => setAiFeedback(res.data.hint))
+      .catch(() => {})
+      .finally(() => setAiFeedbackLoading(false))
+  }, [phase, finalCorrect])
 
   if (loading) {
     return (
@@ -141,7 +157,7 @@ export default function VoiceLevel3DemonstratePage() {
               <>
                 <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Level 3 Demonstration</p>
                 <h1 className="text-text-primary font-bold text-2xl mb-2">Demonstration passed</h1>
-                <p className="text-text-secondary text-sm">
+                <p className="text-text-secondary text-sm mb-3">
                   You completed {finalCorrect} of {PROMPTS.length} prompts correctly. You are ready to sharpen your skills.
                 </p>
               </>
@@ -149,11 +165,20 @@ export default function VoiceLevel3DemonstratePage() {
               <>
                 <p className="text-text-muted text-xs uppercase tracking-wide mb-2">Level 3 Demonstration</p>
                 <h1 className="text-text-primary font-bold text-2xl mb-2">Keep practising</h1>
-                <p className="text-text-secondary text-sm">
+                <p className="text-text-secondary text-sm mb-3">
                   You completed {finalCorrect} of {PROMPTS.length} prompts correctly. You need {REQUIRED_CORRECT} to pass.
                   Keep practising. Your voice will get there with consistent work.
                 </p>
               </>
+            )}
+            {aiFeedbackLoading && (
+              <p className="text-xs text-text-muted italic">AI is preparing your feedback...</p>
+            )}
+            {aiFeedback && (
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-3">
+                <p className="text-xs text-primary font-semibold uppercase tracking-wide mb-1">Coach's note</p>
+                <p className="text-text-secondary text-sm leading-relaxed">{aiFeedback}</p>
+              </div>
             )}
           </div>
 

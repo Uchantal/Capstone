@@ -11,6 +11,7 @@ export interface IStudioWork extends Document {
   width: number
   height: number
   format: string
+  folder?: mongoose.Types.ObjectId
   createdAt: Date
   updatedAt: Date
 }
@@ -27,6 +28,7 @@ const studioWorkSchema = new Schema<IStudioWork>(
     width:               { type: Number, default: 1920 },
     height:              { type: Number, default: 1080 },
     format:              { type: String, default: 'HD 16:9' },
+    folder:              { type: Schema.Types.ObjectId, ref: 'StudioFolder' },
   },
   { timestamps: true },
 )

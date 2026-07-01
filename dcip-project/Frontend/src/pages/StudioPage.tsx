@@ -29,6 +29,7 @@ interface StudioWorkMeta {
   height: number
   fileType: string
   fileUrl?: string
+  folder?: string
   createdAt: string
 }
 
@@ -37,8 +38,14 @@ interface StudioWorkFull extends StudioWorkMeta {
   fileUrl?: string
 }
 
-function fetchWorks(): Promise<StudioWorkMeta[]> {
-  return api.get('/studio').then(r => r.data)
+interface StudioFolder {
+  _id: string
+  name: string
+}
+
+function fetchWorks(folder?: string | null): Promise<StudioWorkMeta[]> {
+  const params = folder === undefined ? {} : { folder: folder ?? 'none' }
+  return api.get('/studio', { params }).then(r => r.data)
 }
 
 function fetchWork(id: string): Promise<StudioWorkFull> {
@@ -53,12 +60,30 @@ function saveWork(payload: {
   width: number
   height: number
   format: string
+  folder?: string
+  newFolderName?: string
 }): Promise<StudioWorkFull> {
   return api.post('/studio', payload).then(r => r.data)
 }
 
 function deleteWork(id: string): Promise<void> {
   return api.delete(`/studio/${id}`).then(() => undefined)
+}
+
+function moveWork(id: string, folder: string | null): Promise<void> {
+  return api.patch(`/studio/${id}/folder`, { folder }).then(() => undefined)
+}
+
+function fetchFolders(): Promise<StudioFolder[]> {
+  return api.get('/studio/folders').then(r => r.data)
+}
+
+function createFolder(name: string): Promise<StudioFolder> {
+  return api.post('/studio/folders', { name }).then(r => r.data)
+}
+
+function deleteFolderApi(id: string): Promise<void> {
+  return api.delete(`/studio/folders/${id}`).then(() => undefined)
 }
 
 // ---------------------------------------------------------------------------
@@ -87,13 +112,29 @@ async function downloadFile(src: string, filename: string) {
 interface SaveDialogProps {
   discipline: string
   format: string
-  onSave: (title: string) => void
+  folders: StudioFolder[]
+  onSave: (title: string, folderOpts: { folder?: string; newFolderName?: string }) => void
   onCancel: () => void
   saving: boolean
 }
 
-function SaveDialog({ discipline, format, onSave, onCancel, saving }: SaveDialogProps) {
+function SaveDialog({ discipline, format, folders, onSave, onCancel, saving }: SaveDialogProps) {
   const [title, setTitle] = useState('')
+  // '' = Uncategorized, '__new__' = creating a new folder, otherwise an existing folder id
+  const [folderChoice, setFolderChoice] = useState('')
+  const [newFolderName, setNewFolderName] = useState('')
+
+  const creatingNew = folderChoice === '__new__'
+  const canSave = title.trim().length > 0 && (!creatingNew || newFolderName.trim().length > 0) && !saving
+
+  function submit() {
+    if (!canSave) return
+    const folderOpts = creatingNew
+      ? { newFolderName: newFolderName.trim() }
+      : folderChoice ? { folder: folderChoice } : {}
+    onSave(title.trim(), folderOpts)
+  }
+
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl">
@@ -108,12 +149,35 @@ function SaveDialog({ discipline, format, onSave, onCancel, saving }: SaveDialog
           type="text"
           value={title}
           onChange={e => setTitle(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && title.trim()) onSave(title.trim()) }}
+          onKeyDown={e => { if (e.key === 'Enter' && !creatingNew) submit() }}
           placeholder="e.g. Abstract Landscape Study"
-          className="w-full border border-surface-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-primary mb-4"
+          className="w-full border border-surface-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-primary mb-3"
           autoFocus
         />
-        <div className="flex gap-2">
+        <label className="block text-text-secondary text-xs font-medium mb-1">Folder</label>
+        <select
+          value={folderChoice}
+          onChange={e => setFolderChoice(e.target.value)}
+          className="w-full border border-surface-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-primary"
+        >
+          <option value="">Uncategorized</option>
+          {folders.map(f => (
+            <option key={f._id} value={f._id}>{f.name}</option>
+          ))}
+          <option value="__new__">+ Create new folder...</option>
+        </select>
+        {creatingNew && (
+          <input
+            type="text"
+            value={newFolderName}
+            onChange={e => setNewFolderName(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') submit() }}
+            placeholder="New folder name"
+            className="w-full border border-surface-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-primary mt-2"
+            autoFocus
+          />
+        )}
+        <div className="flex gap-2 mt-4">
           <button
             onClick={onCancel}
             disabled={saving}
@@ -122,8 +186,8 @@ function SaveDialog({ discipline, format, onSave, onCancel, saving }: SaveDialog
             Cancel
           </button>
           <button
-            onClick={() => { if (title.trim()) onSave(title.trim()) }}
-            disabled={!title.trim() || saving}
+            onClick={submit}
+            disabled={!canSave}
             className="flex-1 bg-primary text-white rounded-lg py-2 text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-40"
           >
             {saving ? 'Saving...' : 'Save Work'}
@@ -145,12 +209,66 @@ interface LibraryViewProps {
   onDelete: (id: string) => void
   onDownload: (id: string, title: string) => void
   onEdit: (work: StudioWorkFull) => void
+  folders: StudioFolder[]
+  activeFolder: string | null | undefined
+  onSelectFolder: (folder: string | null | undefined) => void
+  onCreateFolder: (name: string) => void
+  onDeleteFolder: (id: string) => void
+  onMove: (id: string, folder: string | null) => void
 }
 
-function LibraryView({ works, loading, onDelete, onDownload, onEdit }: LibraryViewProps) {
+function LibraryView({
+  works, loading, onDelete, onDownload, onEdit,
+  folders, activeFolder, onSelectFolder, onCreateFolder, onDeleteFolder, onMove,
+}: LibraryViewProps) {
   const [previewWork, setPreviewWork] = useState<StudioWorkFull | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
   const [editLoading, setEditLoading] = useState<string | null>(null)
+
+  function handleNewFolder() {
+    const name = window.prompt('Folder name:')
+    if (name && name.trim()) onCreateFolder(name.trim())
+  }
+
+  function handleDeleteFolderClick(folder: StudioFolder) {
+    if (window.confirm(`Delete folder "${folder.name}"? Works inside it will move to Uncategorized, not be deleted.`)) {
+      onDeleteFolder(folder._id)
+    }
+  }
+
+  const tabBase = 'text-xs font-medium px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap'
+  const tabActive   = `${tabBase} bg-primary text-white`
+  const tabInactive = `${tabBase} bg-surface-warm text-text-secondary hover:bg-surface-border`
+
+  const folderBar = (
+    <div className="flex items-center gap-2 px-6 pt-4 pb-2 overflow-x-auto flex-shrink-0">
+      <button onClick={() => onSelectFolder(undefined)} className={activeFolder === undefined ? tabActive : tabInactive}>
+        All Works
+      </button>
+      <button onClick={() => onSelectFolder(null)} className={activeFolder === null ? tabActive : tabInactive}>
+        Uncategorized
+      </button>
+      {folders.map(folder => (
+        <div key={folder._id} className="flex items-center gap-1">
+          <button onClick={() => onSelectFolder(folder._id)} className={activeFolder === folder._id ? tabActive : tabInactive}>
+            {folder.name}
+          </button>
+          {activeFolder === folder._id && (
+            <button
+              onClick={() => handleDeleteFolderClick(folder)}
+              className="text-text-muted hover:text-accent text-xs px-1"
+              title={`Delete folder "${folder.name}"`}
+            >
+              &times;
+            </button>
+          )}
+        </div>
+      ))}
+      <button onClick={handleNewFolder} className={`${tabBase} border border-dashed border-surface-border text-text-secondary hover:border-primary hover:text-primary`}>
+        + New Folder
+      </button>
+    </div>
+  )
 
   async function handlePreview(id: string) {
     setPreviewLoading(true)
@@ -178,27 +296,39 @@ function LibraryView({ works, loading, onDelete, onDownload, onEdit }: LibraryVi
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-text-muted text-sm">Loading your studio works...</p>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {folderBar}
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-text-muted text-sm">Loading your studio works...</p>
+        </div>
       </div>
     )
   }
 
   if (works.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8">
-        <div className="bg-surface-warm border border-surface-border rounded-2xl px-10 py-12 text-center max-w-sm">
-          <p className="text-text-primary font-semibold text-base mb-2">No studio works yet</p>
-          <p className="text-text-secondary text-sm leading-relaxed">
-            Your saved studio works will appear here. Create something and save it to build your professional archive.
-          </p>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {folderBar}
+        <div className="flex-1 flex flex-col items-center justify-center p-8">
+          <div className="bg-surface-warm border border-surface-border rounded-2xl px-10 py-12 text-center max-w-sm">
+            <p className="text-text-primary font-semibold text-base mb-2">
+              {activeFolder === undefined ? 'No studio works yet' : 'This folder is empty'}
+            </p>
+            <p className="text-text-secondary text-sm leading-relaxed">
+              {activeFolder === undefined
+                ? 'Your saved studio works will appear here. Create something and save it to build your professional archive.'
+                : 'Move some works into this folder, or switch to "All Works" to find them.'}
+            </p>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-6">
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {folderBar}
+      <div className="flex-1 overflow-y-auto p-6">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {works.map(work => (
           <div
@@ -227,6 +357,16 @@ function LibraryView({ works, loading, onDelete, onDownload, onEdit }: LibraryVi
             <div className="p-2.5">
               <p className="text-text-primary font-semibold text-xs leading-snug truncate">{work.title}</p>
               <p className="text-text-muted text-[10px] mt-0.5">{work.format} &middot; {formatDate(work.createdAt)}</p>
+              <select
+                value={work.folder ?? ''}
+                onChange={e => onMove(work._id, e.target.value || null)}
+                className="w-full mt-1.5 text-[10px] border border-surface-border rounded px-1.5 py-1 text-text-secondary bg-white"
+              >
+                <option value="">Uncategorized</option>
+                {folders.map(folder => (
+                  <option key={folder._id} value={folder._id}>{folder.name}</option>
+                ))}
+              </select>
               <div className="flex gap-1 mt-2">
                 {!work.fileType?.startsWith('audio/') && (
                   <button
@@ -253,6 +393,7 @@ function LibraryView({ works, loading, onDelete, onDownload, onEdit }: LibraryVi
             </div>
           </div>
         ))}
+      </div>
       </div>
 
       {/* Preview modal */}
@@ -371,6 +512,9 @@ export default function StudioPage() {
   const [saveSuccess,  setSaveSuccess]   = useState(false)
   const [works,        setWorks]         = useState<StudioWorkMeta[]>([])
   const [worksLoading, setWorksLoading]  = useState(false)
+  const [folders,      setFolders]       = useState<StudioFolder[]>([])
+  // undefined = All works, null = Uncategorized, string = a specific folder id
+  const [activeFolder, setActiveFolder]  = useState<string | null | undefined>(undefined)
   const [discipline,   setDiscipline]    = useState('')
   const [editWork,     setEditWork]      = useState<{ src: string; format: typeof CANVAS_FORMATS[number] } | null>(null)
 
@@ -384,18 +528,46 @@ export default function StudioPage() {
 
   const disciplineLabel = DISCIPLINES.find(d => d.value === discipline)?.label ?? discipline
 
-  // Fetch works when switching to library
+  // Fetch works (optionally scoped to a folder) and the folder list when switching to library
   const loadWorks = useCallback(async () => {
     setWorksLoading(true)
-    try { setWorks(await fetchWorks()) } finally { setWorksLoading(false) }
+    try { setWorks(await fetchWorks(activeFolder)) } finally { setWorksLoading(false) }
+  }, [activeFolder])
+
+  const loadFolders = useCallback(async () => {
+    setFolders(await fetchFolders())
   }, [])
 
   useEffect(() => {
     if (view === 'library') loadWorks()
   }, [view, loadWorks])
 
+  useEffect(() => {
+    if (view === 'library' || showSave) loadFolders()
+  }, [view, showSave, loadFolders])
+
+  async function handleCreateFolder(name: string) {
+    const folder = await createFolder(name)
+    setFolders(prev => [...prev, folder].sort((a, b) => a.name.localeCompare(b.name)))
+    setActiveFolder(folder._id)
+  }
+
+  async function handleDeleteFolder(id: string) {
+    await deleteFolderApi(id)
+    setFolders(prev => prev.filter(f => f._id !== id))
+    if (activeFolder === id) setActiveFolder(undefined)
+    else loadWorks()
+  }
+
+  async function handleMoveWork(id: string, folder: string | null) {
+    await moveWork(id, folder)
+    // The work no longer belongs in the currently active folder view (unless moved within "All")
+    if (activeFolder !== undefined) setWorks(prev => prev.filter(w => w._id !== id))
+    else loadWorks()
+  }
+
   // Save work — audio studios save audio when a recording exists, otherwise fall back to PNG
-  async function handleSave(title: string) {
+  async function handleSave(title: string, folderOpts: { folder?: string; newFolderName?: string }) {
     const studio = activeStudio()
     if (!studio) return
     setSaving(true)
@@ -426,12 +598,14 @@ export default function StudioPage() {
         width:  fmt.width,
         height: fmt.height,
         format: fmt.label,
+        ...folderOpts,
       })
       setShowSave(false)
       setIsDirty(false)
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
       canvasRef.current?.clearDraft()
+      if (folderOpts.newFolderName) loadFolders()
     } finally {
       setSaving(false)
     }
@@ -631,6 +805,12 @@ export default function StudioPage() {
               onDelete={handleDelete}
               onDownload={handleDownload}
               onEdit={handleEditWork}
+              folders={folders}
+              activeFolder={activeFolder}
+              onSelectFolder={setActiveFolder}
+              onCreateFolder={handleCreateFolder}
+              onDeleteFolder={handleDeleteFolder}
+              onMove={handleMoveWork}
             />
           </div>
         )}
@@ -641,6 +821,7 @@ export default function StudioPage() {
         <SaveDialog
           discipline={disciplineLabel}
           format={activeStudio()?.getFormat().label ?? ''}
+          folders={folders}
           onSave={handleSave}
           onCancel={() => setShowSave(false)}
           saving={saving}

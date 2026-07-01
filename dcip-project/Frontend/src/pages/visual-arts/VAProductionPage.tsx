@@ -6,6 +6,8 @@ import VisualArtsModule, { VisualArtsModuleHandle } from '../../components/modul
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { saveVAProductionResult, savePortfolioItem, completeVisualArtsProduction, fetchDraft, deleteDraft } from '../../services/api'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
+import { useCritiqueAI } from '../../hooks/useCritiqueAI'
+import AICritiqueModal from '../../components/ai/AICritiqueModal'
 
 const PRODUCTION_CHECKLIST = [
   { id: 'three-shapes', text: 'My composition contains at least three recognisable shapes or elements' },
@@ -29,8 +31,11 @@ export default function VAProductionPage() {
   const [submitting, setSubmitting] = useState(false)
   const [portfolioId, setPortfolioId] = useState<string | null>(null)
   const [engagementScore, setEngagementScore] = useState<number | null>(null)
+  const [combinedScore, setCombinedScore] = useState<number | null>(null)
   const { recordInteraction, recordColour, recordTool, computeAndSave } =
     useVAEngagement('visual-arts', 'production')
+  const { state: critiqueState, runCritique, submitExplanation, skipCritique } = useCritiqueAI()
+  const pendingRef = useRef<{ imageData: string; snapshot: string; engScore: number } | null>(null)
 
   const [draftSnapshot, setDraftSnapshot] = useState<string | null>(null)
   const [draftChecked, setDraftChecked] = useState(false)
@@ -57,44 +62,53 @@ export default function VAProductionPage() {
     if (!allChecked || submitting) return
     if (isPreviewMode) { setPhase('done'); return }
     setSubmitting(true)
-
-    const score = await computeAndSave()
-    setEngagementScore(score)
     const imageData = moduleRef.current?.captureCleanImage() ?? ''
     const snapshot = moduleRef.current?.getSnapshot() ?? ''
-
-    try {
-      await saveVAProductionResult({
-        finalImageData: imageData,
-        checklistConfirmed: {
-          hasThreeShapes: checked.has('three-shapes'),
-          usedColourIntentionally: checked.has('colour'),
-          hasVisibleShading: checked.has('shading'),
-          isOriginalWork: checked.has('original'),
-        },
-      })
-
-      const portfolioRes = await savePortfolioItem({
-        discipline: 'visual-arts',
-        title: 'Visual Arts Production',
-        fileType: 'image/png',
-        fileData: imageData,
-        durationMinutes: 0,
-        ...(snapshot ? { snapshot } : {}),
-      })
-
-      setPortfolioId(portfolioRes.data?._id ?? null)
-      await markStageVisited('va-production')
-      completeVisualArtsProduction(true).catch(() => {})
-      deleteDraft('visual-arts').catch(() => {})
-      moduleRef.current?.clearDraft()
-      setPhase('done')
-    } catch {
-      setPhase('done')
-    } finally {
-      setSubmitting(false)
-    }
+    const score = await computeAndSave()
+    setEngagementScore(score)
+    pendingRef.current = { imageData, snapshot, engScore: score }
+    setSubmitting(false)
+    runCritique(imageData, 'visual-arts', 3)
   }
+
+  useEffect(() => {
+    const s = critiqueState
+    if (!pendingRef.current) return
+    if (s.status !== 'done' && s.status !== 'skipped' && s.status !== 'error') return
+    const { imageData, snapshot, engScore } = pendingRef.current
+    pendingRef.current = null
+    const aiScore = s.status === 'done' ? s.score : null
+    const finalScore = aiScore !== null ? Math.round(aiScore * 0.7 + engScore * 0.3) : engScore
+    setCombinedScore(finalScore)
+    ;(async () => {
+      try {
+        await saveVAProductionResult({
+          finalImageData: imageData,
+          checklistConfirmed: {
+            hasThreeShapes: checked.has('three-shapes'),
+            usedColourIntentionally: checked.has('colour'),
+            hasVisibleShading: checked.has('shading'),
+            isOriginalWork: checked.has('original'),
+          },
+        })
+        const portfolioRes = await savePortfolioItem({
+          discipline: 'visual-arts',
+          title: 'Visual Arts Production',
+          fileType: 'image/png',
+          fileData: imageData,
+          durationMinutes: 0,
+          ...(snapshot ? { snapshot } : {}),
+        })
+        setPortfolioId(portfolioRes.data?._id ?? null)
+        await markStageVisited('va-production')
+        completeVisualArtsProduction(true).catch(() => {})
+        deleteDraft('visual-arts').catch(() => {})
+        moduleRef.current?.clearDraft()
+      } catch {}
+      setPhase('done')
+    })()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [critiqueState.status])
 
   if (!isPreviewMode && loading) {
     return (
@@ -104,11 +118,38 @@ export default function VAProductionPage() {
     )
   }
 
+  if (critiqueState.status === 'loading') {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center bg-white">
+        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 animate-pulse">
+          <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+        </div>
+        <p className="text-text-primary font-semibold text-sm mb-1">AI is reviewing your composition...</p>
+        <p className="text-text-muted text-xs">This takes a few seconds. Please wait.</p>
+      </div>
+    )
+  }
+
+  if (critiqueState.status === 'needsExplanation') {
+    return (
+      <div className="h-screen flex items-center justify-center bg-white">
+        <AICritiqueModal
+          question={critiqueState.question}
+          onSubmit={text => submitExplanation(pendingRef.current?.imageData ?? '', 'visual-arts', 3, text)}
+          onSkip={skipCritique}
+        />
+      </div>
+    )
+  }
+
   if (phase === 'done') {
-    const lowEngagement = engagementScore !== null && engagementScore < 60
-    const gradeLabel = engagementScore === null ? null
-      : engagementScore >= 80 ? 'Excellent' : engagementScore >= 60 ? 'Good'
-      : engagementScore >= 40 ? 'Fair' : 'Needs Improvement'
+    const displayScore = combinedScore ?? engagementScore
+    const lowEngagement = displayScore !== null && displayScore < 60
+    const gradeLabel = displayScore === null ? null
+      : displayScore >= 80 ? 'Excellent' : displayScore >= 60 ? 'Good'
+      : displayScore >= 40 ? 'Fair' : 'Needs Improvement'
 
     return (
       <div className="h-screen flex flex-col overflow-hidden">
@@ -138,16 +179,31 @@ export default function VAProductionPage() {
               <p className="text-text-secondary text-sm leading-relaxed mb-4">
                 Your composition has been saved to your portfolio.
               </p>
-              {engagementScore !== null && (
+              {displayScore !== null && (
                 <div className="mb-4 p-3 bg-white rounded-xl border border-surface-border">
-                  <p className="text-text-muted text-[10px] uppercase tracking-wide mb-1">Engagement Score</p>
-                  <p className="text-3xl font-bold text-text-primary">{engagementScore}<span className="text-sm font-normal text-text-muted">/100</span></p>
+                  <p className="text-text-muted text-[10px] uppercase tracking-wide mb-1">Quality Score</p>
+                  <p className="text-3xl font-bold text-text-primary">{displayScore}<span className="text-sm font-normal text-text-muted">/100</span></p>
                   <p className={`text-xs font-semibold mt-1 ${lowEngagement ? 'text-amber-600' : 'text-secondary'}`}>{gradeLabel}</p>
+                </div>
+              )}
+              {critiqueState.status === 'done' && critiqueState.feedback && (
+                <div className="mb-4 p-3 bg-white rounded-xl border border-surface-border text-left">
+                  <p className="text-text-muted text-[10px] uppercase tracking-wide mb-1">AI Feedback</p>
+                  <p className="text-xs text-text-secondary leading-relaxed">{critiqueState.feedback}</p>
+                  {critiqueState.suggestions.length > 0 && (
+                    <ul className="mt-2 space-y-1">
+                      {critiqueState.suggestions.map((s, i) => (
+                        <li key={i} className="text-xs text-text-secondary flex items-start gap-1.5">
+                          <span className="text-primary flex-shrink-0">•</span><span>{s}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
               {lowEngagement ? (
                 <p className="text-sm text-amber-700 leading-relaxed">
-                  Your engagement was too low to earn the badge. Spend more time exploring the tools, experimenting with shapes and colours, then try again.
+                  Your score was too low to earn the badge. Review the AI feedback above, spend more time on the canvas, then try again.
                 </p>
               ) : (
                 <>
@@ -161,7 +217,7 @@ export default function VAProductionPage() {
             <div className="flex flex-col gap-3">
               {lowEngagement && (
                 <button
-                  onClick={() => { setPhase('working'); setChecked(new Set()); setEngagementScore(null); setPortfolioId(null) }}
+                  onClick={() => { setPhase('working'); setChecked(new Set()); setEngagementScore(null); setCombinedScore(null); setPortfolioId(null) }}
                   className="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary-dark transition-colors text-sm"
                 >
                   Try Again

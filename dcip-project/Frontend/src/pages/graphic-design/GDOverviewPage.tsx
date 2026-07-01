@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '../../components/MainLayout'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 export default function GDOverviewPage() {
   const navigate = useNavigate()
 
   return (
     <MainLayout>
+      <AskAIHint discipline="Graphic Design" context="Graphic Design Overview" />
       <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-16 py-4 md:py-6">
 
         <div className="flex items-center gap-2 text-xs text-text-muted mb-5">

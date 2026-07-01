@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-[#080A0E]">
+    <footer className="w-full bg-[#0D1B35]">
       {/* Colour bar */}
       <div className="flex h-1 w-full">
         <div className="flex-1 bg-accent" />
@@ -32,6 +32,7 @@ export default function Footer() {
             <p className="text-white/40 text-xs font-semibold tracking-widest mb-3 uppercase">Platform</p>
             <div className="flex flex-col gap-2.5">
               <Link to="/#about"        className="text-white/70 text-sm hover:text-white transition-colors">About</Link>
+              <Link to="/#features"     className="text-white/70 text-sm hover:text-white transition-colors">Features</Link>
               <Link to="/#disciplines"  className="text-white/70 text-sm hover:text-white transition-colors">Disciplines</Link>
               <Link to="/#how-it-works" className="text-white/70 text-sm hover:text-white transition-colors">How It Works</Link>
               <Link to="/register"      className="text-white/70 text-sm hover:text-white transition-colors">Register</Link>
@@ -39,11 +40,14 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Support */}
+          {/* Features */}
           <div>
-            <p className="text-white/40 text-xs font-semibold tracking-widest mb-3 uppercase">Support</p>
+            <p className="text-white/40 text-xs font-semibold tracking-widest mb-3 uppercase">Features</p>
             <div className="flex flex-col gap-2.5">
-              <Link to="/feedback" className="text-white/70 text-sm hover:text-white transition-colors">Send us Feedback</Link>
+              <Link to="/studio"    className="text-white/70 text-sm hover:text-white transition-colors">DCIP Studio</Link>
+              <Link to="/#features" className="text-white/70 text-sm hover:text-white transition-colors">AI Learning</Link>
+              <Link to="/portfolio" className="text-white/70 text-sm hover:text-white transition-colors">Portfolio</Link>
+              <Link to="/feedback"  className="text-white/70 text-sm hover:text-white transition-colors">Send Feedback</Link>
             </div>
           </div>
 
