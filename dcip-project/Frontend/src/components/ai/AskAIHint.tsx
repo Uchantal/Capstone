@@ -141,9 +141,7 @@ export default function AskAIHint({ discipline, context }: Props) {
             onClick={() => handleBubbleClick(bubble.text)}
             className="flex items-center gap-1.5 bg-[#1B3A6E] text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap hover:opacity-90 transition-opacity"
           >
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
+            <img src="/2nd%20Ai%20icons.png" alt="" className="w-3 h-3 object-contain" />
             Ask AI
           </button>
         </div>
@@ -161,9 +159,7 @@ export default function AskAIHint({ discipline, context }: Props) {
             {/* Header */}
             <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 bg-[#1B3A6E]">
               <div className="flex items-center gap-2">
-                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
+                <img src="/2nd%20Ai%20icons.png" alt="" className="w-4 h-4 object-contain" />
                 <p className="text-white font-semibold text-sm">DCIP AI Assistant</p>
               </div>
               <div className="flex items-center gap-3">
@@ -287,9 +283,7 @@ export default function AskAIHint({ discipline, context }: Props) {
           className="flex items-center gap-2 bg-[#1B3A6E] text-white font-semibold px-4 py-2.5 rounded-full shadow-xl hover:opacity-90 transition-all"
           style={{ boxShadow: '0 4px 20px rgba(27,58,110,0.4)' }}
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
+          <img src="/2nd%20Ai%20icons.png" alt="" className="w-4 h-4 object-contain" />
           <span className="text-sm">Ask AI</span>
         </button>
       </div>

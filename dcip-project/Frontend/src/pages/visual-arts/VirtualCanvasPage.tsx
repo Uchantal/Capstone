@@ -69,23 +69,24 @@ export default function VirtualCanvasPage() {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
-        <div className="flex items-center gap-3 flex-1">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
           <button
             onClick={() => navigate('/disciplines')}
-            className="inline-flex items-center gap-1 text-text-secondary text-xs hover:text-text-primary transition-colors"
+            className="inline-flex items-center gap-1 text-text-secondary text-xs hover:text-text-primary transition-colors flex-shrink-0"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
             Back
           </button>
-          <span className="text-xs text-text-muted">Visual Arts / Virtual Canvas</span>
+          <span className="text-xs text-text-muted hidden sm:inline truncate">Visual Arts / Virtual Canvas</span>
         </div>
         <button
           onClick={handleContinue}
-          className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors text-sm"
+          className="bg-primary text-white font-semibold px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors text-sm flex-shrink-0"
         >
-          Continue to Door To Know Visual Arts
+          <span className="hidden sm:inline">Continue to Door To Know Visual Arts</span>
+          <span className="sm:hidden">Continue</span>
         </button>
       </div>
 

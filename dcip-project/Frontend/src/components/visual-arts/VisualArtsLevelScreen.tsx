@@ -166,34 +166,33 @@ export default function VisualArtsLevelScreen({
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <AskAIHint discipline="Visual Arts" context={`${levelTitle} — Learn`} />
-      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+      <div className="h-auto min-h-12 flex-shrink-0 bg-white border-b border-surface-border flex flex-wrap items-center px-4 py-2 gap-2">
         <DcipLogoLink />
-        <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
+        <div className="hidden sm:flex items-center gap-2 text-xs text-text-muted flex-1 min-w-0">
           <button
             onClick={() => navigate('/visual-arts/virtual-canvas')}
-            className="hover:text-text-primary transition-colors"
+            className="hover:text-text-primary transition-colors whitespace-nowrap"
           >
             Visual Arts
           </button>
           <span>/</span>
-          <span>Door To Know Visual Arts</span>
-          <span>/</span>
-          <span className="text-text-primary">{levelTitle}</span>
+          <span className="truncate">{levelTitle}</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 ml-auto">
           <button
             onClick={handleSaveDraft}
             disabled={draftSaving}
-            className="bg-secondary text-white font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity text-sm disabled:opacity-50"
+            className="bg-secondary text-white font-semibold px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity text-xs disabled:opacity-50"
           >
-            {draftSaving ? 'Saving...' : draftSaved ? 'Saved' : draftError ? 'Save failed' : 'Save Draft'}
+            {draftSaving ? 'Saving…' : draftSaved ? 'Saved' : draftError ? 'Failed' : 'Save'}
           </button>
           <button
             onClick={handleComplete}
             disabled={!canComplete}
-            className="bg-secondary text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+            className="bg-secondary text-white font-semibold px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed text-xs"
           >
-            Mark Level Complete
+            <span className="hidden sm:inline">Mark Level Complete</span>
+            <span className="sm:hidden">Complete</span>
           </button>
         </div>
       </div>

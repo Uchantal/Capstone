@@ -72,31 +72,18 @@ export default function VALevel3PractisePage() {
     <div className="h-screen flex flex-col overflow-hidden">
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
         <DcipLogoLink />
-        <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
-          <button
-            onClick={() => navigate('/visual-arts/virtual-canvas')}
-            className="hover:text-text-primary transition-colors"
-          >
-            Visual Arts
-          </button>
-          <span>/</span>
-          <span>Level 3</span>
-          <span>/</span>
+        <div className="hidden sm:flex items-center gap-2 text-xs text-text-muted flex-1">
+          <button onClick={() => navigate('/visual-arts/virtual-canvas')} className="hover:text-text-primary transition-colors">Visual Arts</button>
+          <span>/</span><span>Level 3</span><span>/</span>
           <span className="text-text-primary">Practise</span>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleSaveDraft}
-            disabled={draftSaving}
-            className="bg-secondary text-white font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity text-sm disabled:opacity-50"
-          >
-            {draftSaving ? 'Saving...' : draftSaved ? 'Saved' : draftError ? 'Save failed' : 'Save Draft'}
+        <div className="flex items-center gap-2 ml-auto">
+          <button onClick={handleSaveDraft} disabled={draftSaving} className="bg-secondary text-white font-semibold px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity text-xs disabled:opacity-50">
+            {draftSaving ? 'Saving…' : draftSaved ? 'Saved' : draftError ? 'Failed' : 'Save'}
           </button>
-          <button
-            onClick={handleReady}
-            className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors text-sm"
-          >
-            I am ready to demonstrate
+          <button onClick={handleReady} className="bg-primary text-white font-semibold px-3 py-1.5 rounded-lg hover:bg-primary-dark transition-colors text-xs">
+            <span className="hidden sm:inline">I am ready to demonstrate</span>
+            <span className="sm:hidden">Demonstrate</span>
           </button>
         </div>
       </div>

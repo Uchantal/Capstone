@@ -6,9 +6,12 @@ import GuitarDemonstrationProgress, { computeGuitarSkillLevel } from '../models/
 import VisualArtsDemonstrationProgress, { computeVisualArtsSkillLevel } from '../models/VisualArtsDemonstrationProgress'
 import GDDemonstrationProgress, { computeGDSkillLevel } from '../models/GDDemonstrationProgress'
 import VoiceDemonstrationProgress, { computeVoiceSkillLevel } from '../models/VoiceDemonstrationProgress'
-import StudentProgress from '../models/StudentProgress'
-
 const router = Router()
+
+// Estimate practice time from stages (createSession was never wired in frontend)
+function estimateFromStages(stages: string[]): { totalSessions: number; totalMinutes: number } {
+  return { totalSessions: stages.length, totalMinutes: stages.length * 12 }
+}
 
 // Stage IDs that count as a "level completed" for the summary stat.
 const LEVEL_STAGE_IDS = [
@@ -41,20 +44,14 @@ router.get('/summary', protect, async (req: AuthRequest, res) => {
   try {
     const userId = req.userId
 
-    const [journeyRecords, pianoDemo, guitarDemo, vaDemo, gdDemo, voiceDemo, allSessionProgress] = await Promise.all([
+    const [journeyRecords, pianoDemo, guitarDemo, vaDemo, gdDemo, voiceDemo] = await Promise.all([
       JourneyProgress.find({ user: userId }),
       PianoDemonstrationProgress.findOne({ user: userId }),
       GuitarDemonstrationProgress.findOne({ user: userId }),
       VisualArtsDemonstrationProgress.findOne({ user: userId }),
       GDDemonstrationProgress.findOne({ user: userId }),
       VoiceDemonstrationProgress.findOne({ user: userId }),
-      StudentProgress.find({ user: userId }),
     ])
-
-    const sessionByDisc = (key: string) => {
-      const sp = allSessionProgress.find(s => s.discipline === key)
-      return { totalSessions: sp?.totalSessions ?? 0, totalMinutes: sp?.totalMinutes ?? 0 }
-    }
 
     const disciplines: DisciplineResult[] = []
 
@@ -72,9 +69,8 @@ router.get('/summary', protect, async (req: AuthRequest, res) => {
     else if (pianoDemo?.level1DemonstrationPassed) pianoSkill = 'beginner'
     else if (pianoStages.length > 0) pianoSkill = 'getting-started'
 
-    const pianoSessions = sessionByDisc('music-piano')
-    if (pianoStages.length > 0 || pianoSessions.totalSessions > 0) {
-      disciplines.push({ key: 'piano', label: 'Piano', completedStages: pianoStages, skillLevel: pianoSkill, ...pianoSessions })
+    if (pianoStages.length > 0) {
+      disciplines.push({ key: 'piano', label: 'Piano', completedStages: pianoStages, skillLevel: pianoSkill, ...estimateFromStages(pianoStages) })
     }
 
     // ── Visual Arts ──────────────────────────────────────────────────────────
@@ -89,9 +85,8 @@ router.get('/summary', protect, async (req: AuthRequest, res) => {
     if (vaDemo) vaSkill = computeVisualArtsSkillLevel(vaDemo)
     else if (vaBaseStages.length > 0) vaSkill = 'getting-started'
 
-    const vaSessions = sessionByDisc('visual-arts')
-    if (vaBaseStages.length > 0 || vaSessions.totalSessions > 0) {
-      disciplines.push({ key: 'visual-arts', label: 'Visual Arts', completedStages: vaBaseStages, skillLevel: vaSkill, ...vaSessions })
+    if (vaBaseStages.length > 0) {
+      disciplines.push({ key: 'visual-arts', label: 'Visual Arts', completedStages: vaBaseStages, skillLevel: vaSkill, ...estimateFromStages(vaBaseStages) })
     }
 
     // ── Graphic Design ───────────────────────────────────────────────────────
@@ -106,10 +101,8 @@ router.get('/summary', protect, async (req: AuthRequest, res) => {
     if (gdDemo) gdSkill = computeGDSkillLevel(gdDemo)
     else if (gdBaseStages.length > 0) gdSkill = 'getting-started'
 
-    const gdSp = allSessionProgress.find(s => s.discipline === 'graphic-design' || s.discipline === 'music-graphic-design')
-    const gdSessions = { totalSessions: gdSp?.totalSessions ?? 0, totalMinutes: gdSp?.totalMinutes ?? 0 }
-    if (gdBaseStages.length > 0 || gdSessions.totalSessions > 0) {
-      disciplines.push({ key: 'graphic-design', label: 'Graphic Design', completedStages: gdBaseStages, skillLevel: gdSkill, ...gdSessions })
+    if (gdBaseStages.length > 0) {
+      disciplines.push({ key: 'graphic-design', label: 'Graphic Design', completedStages: gdBaseStages, skillLevel: gdSkill, ...estimateFromStages(gdBaseStages) })
     }
 
     // ── Guitar ───────────────────────────────────────────────────────────────
@@ -124,10 +117,8 @@ router.get('/summary', protect, async (req: AuthRequest, res) => {
     if (guitarDemo) guitarSkill = computeGuitarSkillLevel(guitarDemo)
     else if (guitarBaseStages.length > 0) guitarSkill = 'getting-started'
 
-    const guitarSp = allSessionProgress.find(s => s.discipline === 'guitar' || s.discipline === 'music-guitar')
-    const guitarSessions = { totalSessions: guitarSp?.totalSessions ?? 0, totalMinutes: guitarSp?.totalMinutes ?? 0 }
-    if (guitarBaseStages.length > 0 || guitarSessions.totalSessions > 0) {
-      disciplines.push({ key: 'guitar', label: 'Guitar', completedStages: guitarBaseStages, skillLevel: guitarSkill, ...guitarSessions })
+    if (guitarBaseStages.length > 0) {
+      disciplines.push({ key: 'guitar', label: 'Guitar', completedStages: guitarBaseStages, skillLevel: guitarSkill, ...estimateFromStages(guitarBaseStages) })
     }
 
     // ── Voice and Singing ────────────────────────────────────────────────────
@@ -142,23 +133,14 @@ router.get('/summary', protect, async (req: AuthRequest, res) => {
     if (voiceDemo) voiceSkill = computeVoiceSkillLevel(voiceDemo)
     else if (voiceBaseStages.length > 0) voiceSkill = 'getting-started'
 
-    const voiceSp = allSessionProgress.find(s => s.discipline === 'voice' || s.discipline === 'music-voice')
-    const voiceSessions = { totalSessions: voiceSp?.totalSessions ?? 0, totalMinutes: voiceSp?.totalMinutes ?? 0 }
-    if (voiceBaseStages.length > 0 || voiceSessions.totalSessions > 0) {
-      disciplines.push({ key: 'voice', label: 'Voice and Singing', completedStages: voiceBaseStages, skillLevel: voiceSkill, ...voiceSessions })
+    if (voiceBaseStages.length > 0) {
+      disciplines.push({ key: 'voice', label: 'Voice and Singing', completedStages: voiceBaseStages, skillLevel: voiceSkill, ...estimateFromStages(voiceBaseStages) })
     }
 
     const totalLevelsCompleted = disciplines.reduce((sum, d) =>
       sum + LEVEL_STAGE_IDS.filter(id => d.completedStages.includes(id)).length, 0)
 
-    const allCreatedAts = allSessionProgress
-      .map(s => s.createdAt?.getTime?.() ?? 0)
-      .filter(t => t > 0)
-    const activeSince = allCreatedAts.length > 0
-      ? new Date(Math.min(...allCreatedAts)).toISOString()
-      : null
-
-    res.json({ disciplines, totalLevelsCompleted, activeSince })
+    res.json({ disciplines, totalLevelsCompleted, activeSince: null })
   } catch {
     res.status(500).json({ message: 'Server error' })
   }
