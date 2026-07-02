@@ -4,6 +4,7 @@ import { usePreviewMode } from '../../hooks/usePreviewMode'
 import PianoKeyboard from '../../components/piano/PianoKeyboard'
 import { ALL_TWELVE_CHORDS, buildChord } from '../../utils/pianoTheory'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 export default function SharpeningMyselfPage() {
   const navigate = useNavigate()
@@ -133,6 +134,7 @@ export default function SharpeningMyselfPage() {
           </p>
         </div>
       </div>
+      <AskAIHint discipline="Piano" context="Piano — Sharpening Myself (free practice with all learned chords; prepare for the production stage)" />
     </div>
   )
 }

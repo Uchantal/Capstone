@@ -5,6 +5,7 @@ import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import api, { completeGuitarDemonstration } from '../../services/api'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
 import DcipLogoLink from '../../components/DcipLogoLink'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const PROMPTS = [
   { label: 'Play a C note on the A string', stringIdx: 4, fret: 3, stringName: 'A string' },
@@ -224,6 +225,7 @@ export default function GuitarLevel2DemonstratePage() {
           <GuitarFretboard onNotePlay={handleNotePlay} showChords={false} />
         </div>
       </div>
+      <AskAIHint discipline="Guitar" context="Guitar Level 2 — Demonstrate (identify and play the note C when prompted at different fret positions)" />
     </div>
   )
 }

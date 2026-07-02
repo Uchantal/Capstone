@@ -7,6 +7,7 @@ import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, drawWaveform } from '../../utils/voicePitch'
 import { runVoiceVerification, type PitchEvent } from '../../utils/voiceVerification'
 import { completeVoiceProduction } from '../../services/api'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 type Phase = 'intro' | 'recording' | 'results'
 
@@ -280,6 +281,7 @@ export default function VoiceProductionPage() {
           </div>
         )}
       </div>
+      <AskAIHint discipline="Voice" context="Voice — Production (record a complete vocal performance meeting all four quality criteria)" />
     </MainLayout>
   )
 }

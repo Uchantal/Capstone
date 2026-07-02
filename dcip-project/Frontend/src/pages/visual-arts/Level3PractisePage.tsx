@@ -6,6 +6,7 @@ import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDem
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 import { saveDraft, fetchDraft } from '../../services/api'
 import DcipLogoLink from '../../components/DcipLogoLink'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 export default function VALevel3PractisePage() {
   const navigate = useNavigate()
@@ -97,6 +98,7 @@ export default function VALevel3PractisePage() {
         sidebarFooter={sidebarFooter}
         initialSnapshot={draftLoaded ?? undefined}
       />
+      <AskAIHint discipline="Visual Arts" context="Visual Arts Level 3 — Practise (compose a small scene with multiple elements; practise colour and shading)" side="left" />
     </div>
   )
 }

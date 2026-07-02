@@ -9,6 +9,7 @@ import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 import DcipLogoLink from '../../components/DcipLogoLink'
 import { useCritiqueAI } from '../../hooks/useCritiqueAI'
 import AICritiqueModal from '../../components/ai/AICritiqueModal'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const TASK =
   'Draw one circle and shade it. Your circle must have at least two visible tones: a lighter area ' +
@@ -240,6 +241,8 @@ export default function VALevel2DemonstratePage() {
         />
       )}
 
+      <AskAIHint discipline="Visual Arts" context="Visual Arts Level 2 — Demonstrate (draw one circle shaded with at least two tones and a cast shadow below)" side="left" />
+
       {passed && (() => {
         const displayScore = combinedScore ?? engagementScore
         const levelPassed = isPreviewMode || displayScore === null || displayScore >= 60
@@ -311,8 +314,23 @@ export default function VALevel2DemonstratePage() {
                     <p className="text-2xl font-bold text-text-primary">{displayScore}<span className="text-sm font-normal text-text-muted">/100</span></p>
                     <p className="text-xs font-semibold mt-1 text-amber-600">{gradeLabel}</p>
                   </div>
+                  {critiqueState.status === 'done' && critiqueState.feedback && (
+                    <div className="mb-4 p-3 bg-[#F9F7F4] rounded-xl border border-surface-border text-left">
+                      <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">AI Feedback</p>
+                      <p className="text-xs text-text-secondary leading-relaxed">{critiqueState.feedback}</p>
+                      {critiqueState.suggestions.length > 0 && (
+                        <ul className="mt-2 space-y-1">
+                          {critiqueState.suggestions.map((s, i) => (
+                            <li key={i} className="text-xs text-text-secondary flex items-start gap-1.5">
+                              <span className="text-primary flex-shrink-0">•</span><span>{s}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
                   <p className="text-sm text-amber-700 leading-relaxed mb-6">
-                    You need at least 60/100 to earn this badge. Spend more time exploring the tools, then try again.
+                    You need at least 60/100 to earn this badge. Review the feedback above and try again.
                   </p>
                   <button
                     onClick={handleReset}

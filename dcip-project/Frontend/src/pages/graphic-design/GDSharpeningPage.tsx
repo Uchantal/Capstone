@@ -6,6 +6,7 @@ import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgre
 import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
 import DcipLogoLink from '../../components/DcipLogoLink'
 import { useGDEngagement } from '../../hooks/useCanvasEngagement'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const QUICK_REF = [
   {
@@ -133,6 +134,7 @@ export default function GDSharpeningPage() {
           onInteraction={recordInteraction}
         />
       </div>
+      <AskAIHint discipline="Graphic Design" context="Graphic Design — Sharpening Myself (free creative exploration applying hierarchy, contrast, and balance; no specific task)" side="left" />
     </div>
   )
 }

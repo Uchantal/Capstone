@@ -8,6 +8,7 @@ import { saveVAProductionResult, savePortfolioItem, completeVisualArtsProduction
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 import { useCritiqueAI } from '../../hooks/useCritiqueAI'
 import AICritiqueModal from '../../components/ai/AICritiqueModal'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const PRODUCTION_CHECKLIST = [
   { id: 'three-shapes', text: 'My composition contains at least three recognisable shapes or elements' },
@@ -387,6 +388,7 @@ export default function VAProductionPage() {
         initialSnapshot={editSnapshot ?? undefined}
         draftKey={editSnapshot ? undefined : `${user?.id ?? 'anon'}:va:production`}
       />
+      <AskAIHint discipline="Visual Arts" context="Visual Arts — Production (create a complete original composition with at least three elements, intentional colour choice, and visible shading on at least one element)" side="left" />
     </div>
   )
 }

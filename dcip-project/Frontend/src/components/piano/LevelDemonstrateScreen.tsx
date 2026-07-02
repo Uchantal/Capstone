@@ -10,6 +10,7 @@ import {
 import api, { completePianoDemonstration } from '../../services/api'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
 import DcipLogoLink from '../DcipLogoLink'
+import AskAIHint from '../ai/AskAIHint'
 
 interface ChordDef {
   symbol: string
@@ -344,6 +345,7 @@ export default function LevelDemonstrateScreen({
           </p>
         </div>
       </div>
+      <AskAIHint discipline="Piano" context={`Piano Level ${levelNumber} — Demonstrate (playing the correct chord when prompted)`} />
     </div>
   )
 }

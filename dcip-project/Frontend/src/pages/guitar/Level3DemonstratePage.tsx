@@ -5,6 +5,7 @@ import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import api, { completeGuitarDemonstration } from '../../services/api'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
 import DcipLogoLink from '../../components/DcipLogoLink'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const KNOWN_CHORDS = ['Em', 'Am', 'G', 'C'] as const
 
@@ -265,6 +266,7 @@ export default function GuitarLevel3DemonstratePage() {
           />
         </div>
       </div>
+      <AskAIHint discipline="Guitar" context="Guitar Level 3 — Demonstrate (play the correct open chord shape when prompted: A, C, D, E, or G)" />
     </div>
   )
 }

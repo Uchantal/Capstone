@@ -85,7 +85,7 @@ export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle,
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <AskAIHint discipline="Piano" context="Piano — Learn" side="left" />
+      <AskAIHint discipline="Piano" context={`Piano Level ${levelNumber} — Learn`} side="left" />
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
         <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted">

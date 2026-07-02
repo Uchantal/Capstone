@@ -6,6 +6,7 @@ import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgre
 import { saveGDProductionResult, savePortfolioItem, completeGDProduction, fetchDraft, deleteDraft } from '../../services/api'
 import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
 import { useGDEngagement } from '../../hooks/useCanvasEngagement'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const CHECKLIST = [
   { id: 'hierarchy',   text: 'My poster has a title and subtitle with clear visual hierarchy' },
@@ -342,6 +343,7 @@ export default function GDProductionPage() {
           onDimensionsChange={(w, h) => { setExportW(w); setExportH(h) }}
         />
       </div>
+      <AskAIHint discipline="Graphic Design" context="Graphic Design — Production (create a complete original poster demonstrating all three design principles: hierarchy, contrast, and balance)" side="left" />
     </div>
   )
 }

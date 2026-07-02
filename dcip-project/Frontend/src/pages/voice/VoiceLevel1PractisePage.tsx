@@ -6,6 +6,7 @@ import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, playTone, drawWaveform, type PitchStatus } from '../../utils/voicePitch'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const NOTES = [
   { label: 'C4', note: 'C', freq: 261.63 },
@@ -133,6 +134,7 @@ export default function VoiceLevel1PractisePage() {
           </button>
         </div>
       </div>
+      <AskAIHint discipline="Voice" context="Voice Level 1 — Practise (matching your singing pitch to the notes C4, E4, and G4 shown on screen)" />
     </MainLayout>
   )
 }

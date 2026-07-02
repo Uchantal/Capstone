@@ -6,6 +6,7 @@ import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgre
 import { useGDEngagement } from '../../hooks/useCanvasEngagement'
 import { saveDraft, fetchDraft } from '../../services/api'
 import DcipLogoLink from '../../components/DcipLogoLink'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 export default function GDLevel2PractisePage() {
   const navigate = useNavigate()
@@ -129,6 +130,7 @@ export default function GDLevel2PractisePage() {
           onInteraction={recordInteraction}
         />
       </div>
+      <AskAIHint discipline="Graphic Design" context="Graphic Design Level 2 — Practise (experiment with text-to-background contrast; try different colour combinations for readability)" side="left" />
     </div>
   )
 }

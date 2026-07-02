@@ -7,6 +7,7 @@ import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstration
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, drawWaveform, DEMO_TOLERANCE, type PitchStatus } from '../../utils/voicePitch'
 import api, { completeVoiceDemonstration } from '../../services/api'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 // 4 prompts: A4 sustained 3s, C4 1.5s, G4 1.5s, C4 1.5s. 3/4 required to pass.
 const PROMPTS = [
@@ -288,6 +289,7 @@ export default function VoiceLevel3DemonstratePage() {
           </div>
         )}
       </div>
+      <AskAIHint discipline="Voice" context="Voice Level 3 — Demonstrate (sing a longer pitch sequence accurately and hold each note in tune)" />
     </MainLayout>
   )
 }

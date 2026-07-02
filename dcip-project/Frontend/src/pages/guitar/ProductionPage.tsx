@@ -7,6 +7,7 @@ import { verifyGuitarPerformance } from '../../utils/guitarVerification'
 import type { NoteEvent, GuitarVerificationResult } from '../../utils/guitarVerification'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
 import { saveProductionResult, savePortfolioItem, completeGuitarProduction } from '../../services/api'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 type Phase = 'intro' | 'recording' | 'results'
 
@@ -340,6 +341,7 @@ export default function GuitarProductionPage() {
           />
         </div>
       </div>
+      <AskAIHint discipline="Guitar" context="Guitar — Production (compose and perform a complete melody or musical piece on the guitar)" />
     </div>
   )
 }

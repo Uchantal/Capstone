@@ -6,6 +6,7 @@ import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, playTone, drawWaveform, type PitchStatus } from '../../utils/voicePitch'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const REFERENCE_NOTES = [
   { label: 'A4 (sustain)', note: 'A', freq: 440.00 },
@@ -144,6 +145,7 @@ export default function VoiceLevel3PractisePage() {
           </button>
         </div>
       </div>
+      <AskAIHint discipline="Voice" context="Voice Level 3 — Practise (singing longer note sequences and maintaining pitch accuracy)" />
     </MainLayout>
   )
 }

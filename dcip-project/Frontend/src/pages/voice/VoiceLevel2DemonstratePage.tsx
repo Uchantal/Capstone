@@ -7,6 +7,7 @@ import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstration
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, drawWaveform, DEMO_TOLERANCE, type PitchStatus } from '../../utils/voicePitch'
 import api, { completeVoiceDemonstration } from '../../services/api'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const DEMO_SCALE = [
   { label: 'C4', note: 'C', freq: 261.63 },
@@ -292,6 +293,7 @@ export default function VoiceLevel2DemonstratePage() {
           </div>
         )}
       </div>
+      <AskAIHint discipline="Voice" context="Voice Level 2 — Demonstrate (match and hold a sequence of pitches in tune)" />
     </MainLayout>
   )
 }

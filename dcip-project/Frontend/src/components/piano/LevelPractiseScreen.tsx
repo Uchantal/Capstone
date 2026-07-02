@@ -5,6 +5,7 @@ import PianoKeyboard from './PianoKeyboard'
 import { buildChord, type ChordType } from '../../utils/pianoTheory'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
 import DcipLogoLink from '../DcipLogoLink'
+import AskAIHint from '../ai/AskAIHint'
 
 interface ChordDef {
   symbol: string
@@ -185,6 +186,7 @@ export default function LevelPractiseScreen({
           </p>
         </div>
       </div>
+      <AskAIHint discipline="Piano" context={`Piano Level ${levelNumber} — Practise (playing major chords on the keyboard)`} />
     </div>
   )
 }

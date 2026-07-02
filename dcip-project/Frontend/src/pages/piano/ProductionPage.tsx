@@ -7,6 +7,7 @@ import { verifyPianoPerformance } from '../../utils/pianoVerification'
 import type { NoteEvent, PianoVerificationResult } from '../../utils/pianoVerification'
 import { saveProductionResult, savePortfolioItem, completePianoProduction } from '../../services/api'
 import { usePianoProgress } from '../../hooks/usePianoProgress'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 type Phase = 'intro' | 'recording' | 'results'
 
@@ -392,6 +393,7 @@ export default function PianoProductionPage() {
           </p>
         </div>
       </div>
+      <AskAIHint discipline="Piano" context="Piano — Production (compose and perform a complete piano piece using all learned chord types)" />
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
 import DcipLogoLink from '../../components/DcipLogoLink'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const D_POSITIONS = [
   { stringIdx: 3, fret: 0, label: 'D', stringName: 'D string', fretLabel: 'open' },
@@ -100,6 +101,7 @@ export default function GuitarLevel3PractisePage() {
           <GuitarFretboard showChords={true} highlightPositions={highlight} />
         </div>
       </div>
+      <AskAIHint discipline="Guitar" context="Guitar Level 3 — Practise (forming and playing open chord shapes: A, C, D, E, G)" />
     </div>
   )
 }

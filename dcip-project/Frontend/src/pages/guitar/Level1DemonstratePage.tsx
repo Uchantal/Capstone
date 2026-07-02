@@ -6,6 +6,7 @@ import { noteAt } from '../../components/guitar/GuitarLevelScreen'
 import api, { completeGuitarDemonstration } from '../../services/api'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
 import DcipLogoLink from '../../components/DcipLogoLink'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const TOTAL_PROMPTS = 3
 const REQUIRED_CORRECT = 2
@@ -219,6 +220,7 @@ export default function GuitarLevel1DemonstratePage() {
           <GuitarFretboard onNotePlay={handleNotePlay} showChords={false} />
         </div>
       </div>
+      <AskAIHint discipline="Guitar" context="Guitar Level 1 — Demonstrate (identify and play the note E when prompted across different strings)" />
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
 import DcipLogoLink from '../../components/DcipLogoLink'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const E_POSITIONS = [
   { stringIdx: 5, fret: 0,  label: 'E', stringName: 'Low E string',  fretLabel: 'open' },
@@ -83,6 +84,7 @@ export default function GuitarLevel1PractisePage() {
           <GuitarFretboard showChords={false} highlightPositions={highlight} />
         </div>
       </div>
+      <AskAIHint discipline="Guitar" context="Guitar Level 1 — Practise (finding and playing the note E on each of the 6 guitar strings)" />
     </div>
   )
 }

@@ -836,7 +836,18 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
             shapeMode={shapeMode}
             onShapeModeChange={setShapeMode}
             colour={colour}
-            onColourChange={setColour}
+            onColourChange={(newColour) => {
+              setColour(newColour)
+              if (selectedIdRef.current) {
+                shapesRef.current = shapesRef.current.map(s =>
+                  s.id === selectedIdRef.current ? { ...s, color: newColour } : s
+                )
+                renderShapes(shapesRef.current, selectedIdRef.current)
+                renderComposite()
+                saveToHistory()
+                onInteraction?.()
+              }
+            }}
             bgColour={bgColour}
             onBgColourChange={changeBgColour}
             brushSize={size}
@@ -946,7 +957,7 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
             {/* Selection hint */}
             {tool === 'select' && selectedId && (
               <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/90 border border-surface-border text-text-secondary text-xs px-3 py-1.5 rounded-full shadow pointer-events-none z-20">
-                Drag to move · Delete to remove
+                Drag to move · Change colour · Delete to remove
               </div>
             )}
 

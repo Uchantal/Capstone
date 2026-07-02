@@ -6,6 +6,7 @@ import PitchIndicator from '../../components/voice/PitchIndicator'
 import { useVoiceDemonstrationProgress } from '../../hooks/useVoiceDemonstrationProgress'
 import { useVoiceMic } from '../../hooks/useVoiceMic'
 import { detectPitch, getPitchStatus, playTone, drawWaveform, type PitchStatus } from '../../utils/voicePitch'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const SCALE = [
   { label: 'C4', note: 'C', freq: 261.63 },
@@ -153,6 +154,7 @@ export default function VoiceLevel2PractisePage() {
           </button>
         </div>
       </div>
+      <AskAIHint discipline="Voice" context="Voice Level 2 — Practise (singing pitches across a wider range; matching different notes)" />
     </MainLayout>
   )
 }

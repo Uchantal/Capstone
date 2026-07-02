@@ -4,6 +4,7 @@ import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
 import DcipLogoLink from '../../components/DcipLogoLink'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const C_POSITIONS = [
   { stringIdx: 4, fret: 3, label: 'C', stringName: 'A string', fretLabel: 'fret 3' },
@@ -81,6 +82,7 @@ export default function GuitarLevel2PractisePage() {
           <GuitarFretboard showChords={false} highlightPositions={highlight} />
         </div>
       </div>
+      <AskAIHint discipline="Guitar" context="Guitar Level 2 — Practise (finding and playing the note C at different positions on the fretboard)" />
     </div>
   )
 }

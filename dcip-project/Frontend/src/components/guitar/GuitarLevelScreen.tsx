@@ -71,7 +71,7 @@ export function Level1Screen({ onComplete, nextPath }: Level1Props) {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <AskAIHint discipline="Guitar" context="Guitar — Learn" side="left" />
+      <AskAIHint discipline="Guitar" context="Guitar Level 1 — Learn (finding and playing the note E on all 6 strings)" side="left" />
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
         <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted">
@@ -198,7 +198,7 @@ export function Level2Screen({ onComplete, nextPath }: Level2Props) {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <AskAIHint discipline="Guitar" context="Guitar — Learn" side="left" />
+      <AskAIHint discipline="Guitar" context="Guitar Level 2 — Learn (finding the note C across the fretboard)" side="left" />
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
         <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted">
@@ -357,7 +357,7 @@ export function Level3Screen({ onComplete, nextPath }: Level3Props) {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <AskAIHint discipline="Guitar" context="Guitar — Learn" side="left" />
+      <AskAIHint discipline="Guitar" context="Guitar Level 3 — Learn (playing open chord shapes: A, C, D, E, G)" side="left" />
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
         <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted">

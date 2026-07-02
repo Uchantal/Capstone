@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth'
 import VisualArtsModule from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const TOOL_QUICK_REF = [
   { name: 'Brush',       desc: 'Freehand strokes, variable size.' },
@@ -120,6 +121,7 @@ export default function SharpeningPage() {
         sidebarFooter={sidebarFooter}
         draftKey={`${user?.id ?? 'anon'}:va:sharpening`}
       />
+      <AskAIHint discipline="Visual Arts" context="Visual Arts — Sharpening Myself (free creative practice; prepare for the production stage by experimenting with composition, colour, and shading)" side="left" />
     </div>
   )
 }

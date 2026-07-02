@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import GuitarFretboard from '../../components/guitar/GuitarFretboard'
 import { useGuitarDemonstrationProgress } from '../../hooks/useGuitarDemonstrationProgress'
+import AskAIHint from '../../components/ai/AskAIHint'
 
 const NOTE_REFERENCE = [
   {
@@ -134,6 +135,7 @@ export default function GuitarSharpeningPage() {
           <GuitarFretboard showChords={true} />
         </div>
       </div>
+      <AskAIHint discipline="Guitar" context="Guitar — Sharpening Myself (free practice with all learned notes and chord shapes)" />
     </div>
   )
 }
