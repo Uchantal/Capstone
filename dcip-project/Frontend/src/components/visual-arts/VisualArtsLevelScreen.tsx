@@ -165,18 +165,18 @@ export default function VisualArtsLevelScreen({
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <AskAIHint discipline="Visual Arts" context={`${levelTitle} — Learn`} />
+      <AskAIHint discipline="Visual Arts" context={`${levelTitle} — Learn`} side="left" />
       <div className="h-auto min-h-12 flex-shrink-0 bg-white border-b border-surface-border flex flex-wrap items-center px-4 py-2 gap-2">
         <DcipLogoLink />
-        <div className="hidden sm:flex items-center gap-2 text-xs text-text-muted flex-1 min-w-0">
+        <div className="flex items-center gap-2 text-xs text-text-muted flex-1 min-w-0">
           <button
-            onClick={() => navigate('/visual-arts/virtual-canvas')}
-            className="hover:text-text-primary transition-colors whitespace-nowrap"
+            onClick={() => navigate(-1)}
+            className="hover:text-text-primary transition-colors flex-shrink-0"
           >
-            Visual Arts
+            ← Back
           </button>
-          <span>/</span>
-          <span className="truncate">{levelTitle}</span>
+          <span className="hidden sm:inline">/</span>
+          <span className="hidden sm:block truncate">{levelTitle}</span>
         </div>
         <div className="flex items-center gap-2 ml-auto">
           <button

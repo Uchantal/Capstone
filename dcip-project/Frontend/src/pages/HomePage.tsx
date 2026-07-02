@@ -38,7 +38,14 @@ function StepImg({ index }: { index: number }) {
     '/images/graduate.jpg',
     '/images/unclock%20icon.png',
   ]
-  return <img src={src[index]} alt="" className="w-full h-full object-contain mix-blend-multiply" />
+  const alt = [
+    'Register at your school',
+    'Choose your discipline',
+    'Learn with AI support',
+    'Graduate your discipline',
+    'Unlock DCIP Studio',
+  ]
+  return <img src={src[index]} alt={alt[index]} loading="lazy" className="w-full h-full object-contain mix-blend-multiply" />
 }
 
 function FeatureIcon({ id }: { id: string }) {
@@ -48,7 +55,13 @@ function FeatureIcon({ id }: { id: string }) {
     portfolio: '/portifolio%20icon.png',
     offline:   '/Offline%20icon.png',
   }
-  return <img src={src[id] ?? src.studio} alt="" className="w-full h-full object-contain" />
+  const alt: Record<string, string> = {
+    studio:    'DCIP Studio icon',
+    ai:        'AI-Powered Learning icon',
+    portfolio: 'Portfolio icon',
+    offline:   'Works Offline icon',
+  }
+  return <img src={src[id] ?? src.studio} alt={alt[id] ?? ''} loading="lazy" className="w-full h-full object-contain" />
 }
 
 const disciplines = [
@@ -302,6 +315,7 @@ export default function HomePage() {
                   <img
                     src={d.img}
                     alt={d.imgAlt}
+                    loading="lazy"
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement

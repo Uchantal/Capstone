@@ -92,7 +92,12 @@ export default function VALevel3DemonstratePage() {
     } catch {}
     pendingRef.current = { imageData: snapshot, combined }
     setSubmitting(false)
-    runCritique(snapshot, 'visual-arts', 3)
+    runCritique(snapshot, 'visual-arts', 3, TASK, [
+      'At least three recognisable shapes or elements forming a small scene',
+      'More than one colour used intentionally',
+      'Visible shading on at least one element',
+      'At least 12 visible marks on the canvas',
+    ])
   }
 
   useEffect(() => {
@@ -171,10 +176,10 @@ export default function VALevel3DemonstratePage() {
         <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
-            onClick={() => navigate('/visual-arts/virtual-canvas')}
+            onClick={() => navigate(-1)}
             className="hover:text-text-primary transition-colors"
           >
-            Visual Arts
+            ← Back
           </button>
           <span>/</span>
           <button
@@ -232,7 +237,7 @@ export default function VALevel3DemonstratePage() {
       {critiqueState.status === 'needsExplanation' && (
         <AICritiqueModal
           question={critiqueState.question}
-          onSubmit={text => submitExplanation(pendingRef.current?.imageData ?? '', 'visual-arts', 3, text)}
+          onSubmit={text => submitExplanation(pendingRef.current?.imageData ?? '', 'visual-arts', 3, text, TASK, ['Three or more shapes forming a scene', 'Multiple colours', 'Shading on at least one element'])}
           onSkip={skipCritique}
         />
       )}

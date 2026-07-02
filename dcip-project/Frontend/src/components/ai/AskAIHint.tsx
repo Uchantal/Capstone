@@ -4,6 +4,8 @@ import api from '../../services/api'
 interface Props {
   discipline: string
   context?: string
+  /** On canvas pages pass side="left" so the widget anchors over the instruction panel, not the canvas */
+  side?: 'right' | 'left'
 }
 
 interface Bubble {
@@ -18,7 +20,7 @@ interface ChatMessage {
   answer: string | null
 }
 
-export default function AskAIHint({ discipline, context }: Props) {
+export default function AskAIHint({ discipline, context, side = 'right' }: Props) {
   const [open,         setOpen]         = useState(false)
   const [selectedText, setSelectedText] = useState('')
   const [bubble,       setBubble]       = useState<Bubble | null>(null)
@@ -147,8 +149,8 @@ export default function AskAIHint({ discipline, context }: Props) {
         </div>
       )}
 
-      {/* Bottom-right panel */}
-      <div className="fixed bottom-5 right-5 z-[9999] flex flex-col items-end gap-3">
+      {/* Floating panel — anchors to left on canvas pages so it doesn't cover the canvas */}
+      <div className={`fixed bottom-5 z-[9999] flex flex-col gap-3 ${side === 'left' ? 'left-5 items-start' : 'right-5 items-end'}`}>
 
         {open && (
           <div
@@ -172,7 +174,7 @@ export default function AskAIHint({ discipline, context }: Props) {
                     Clear
                   </button>
                 )}
-                <button onClick={handleToggle} className="text-white/70 hover:text-white text-lg leading-none">&times;</button>
+                <button aria-label="Close" onClick={handleToggle} className="text-white/70 hover:text-white text-lg leading-none">&times;</button>
               </div>
             </div>
 
@@ -190,7 +192,7 @@ export default function AskAIHint({ discipline, context }: Props) {
                   <div className="flex justify-end">
                     <div className="max-w-[85%] space-y-1">
                       {msg.image && (
-                        <img src={msg.image} alt="attached" className="h-20 w-full object-cover rounded-xl border border-surface-border" />
+                        <img src={msg.image} alt="attached" loading="lazy" className="h-20 w-full object-cover rounded-xl border border-surface-border" />
                       )}
                       <div className="bg-[#1B3A6E] text-white text-xs rounded-2xl rounded-tr-sm px-3 py-2 leading-relaxed">
                         {msg.question}
@@ -257,8 +259,8 @@ export default function AskAIHint({ discipline, context }: Props) {
 
               <div className="flex gap-2">
                 <button
+                  aria-label="Attach an image"
                   onClick={() => fileInputRef.current?.click()}
-                  title="Attach an image"
                   className="flex items-center justify-center border border-surface-border rounded-xl px-3 py-2 hover:border-[#1B3A6E] transition-colors"
                 >
                   <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

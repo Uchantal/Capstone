@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, type DesignElement } from '../../components/graphic-design/PosterSurface'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
 import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
+import DcipLogoLink from '../../components/DcipLogoLink'
 import { useGDEngagement } from '../../hooks/useCanvasEngagement'
 
 const QUICK_REF = [
@@ -81,19 +82,19 @@ export default function GDSharpeningPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-white">
-      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
-        <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
-          <button onClick={() => navigate('/graphic-design/virtual-studio')} className="hover:text-text-primary transition-colors">
-            Graphic Design
-          </button>
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+        <DcipLogoLink />
+        <div className="hidden sm:flex items-center gap-2 text-xs text-text-muted flex-1">
+          <button onClick={() => navigate(-1)} className="hover:text-text-primary transition-colors">← Back</button>
           <span>/</span>
           <span className="text-text-primary">Sharpening</span>
         </div>
         <button
           onClick={handleContinue}
-          className="bg-primary text-white font-semibold px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors text-sm"
+          className="ml-auto bg-primary text-white font-semibold px-3 py-1.5 rounded-lg hover:bg-primary-dark transition-colors text-xs flex-shrink-0"
         >
-          I am ready. Continue to Production
+          <span className="hidden sm:inline">Continue to Production</span>
+          <span className="sm:hidden">Continue</span>
         </button>
       </div>
 

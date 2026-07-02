@@ -109,7 +109,7 @@ export default function GuitarLevel2DemonstratePage() {
         <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
           <DcipLogoLink />
           <div className="flex items-center gap-2 text-xs text-text-muted">
-            <button onClick={() => navigate('/guitar/virtual-instrument')} className="hover:text-text-primary transition-colors">Guitar</button>
+            <button onClick={() => navigate(-1)} className="hover:text-text-primary transition-colors">← Back</button>
             <span>/</span>
             <span>Level 2</span>
             <span>/</span>
@@ -191,7 +191,7 @@ export default function GuitarLevel2DemonstratePage() {
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
         <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
-          <button onClick={() => navigate('/guitar/virtual-instrument')} className="hover:text-text-primary transition-colors">Guitar</button>
+          <button onClick={() => navigate(-1)} className="hover:text-text-primary transition-colors">← Back</button>
           <span>/</span>
           <span>Level 2</span>
           <span>/</span>

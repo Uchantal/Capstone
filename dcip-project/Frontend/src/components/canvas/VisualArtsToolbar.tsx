@@ -146,7 +146,7 @@ export default function VisualArtsToolbar({
       >
         {/* ── Select ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={() => onToolChange('select')} className={toolBtn(activeTool === 'select')}>
+          <button aria-label="Select and move" onClick={() => onToolChange('select')} className={toolBtn(activeTool === 'select')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
               <path d="M4 2l16 10-7 1.5L9.5 20 4 2z"/>
             </svg>
@@ -158,7 +158,7 @@ export default function VisualArtsToolbar({
 
         {/* ── Brush ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={() => onToolChange('brush')} className={toolBtn(activeTool === 'brush')}>
+          <button aria-label="Brush" onClick={() => onToolChange('brush')} className={toolBtn(activeTool === 'brush')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
               <path d="m15 5 4 4"/>
@@ -169,7 +169,7 @@ export default function VisualArtsToolbar({
 
         {/* ── Eraser ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={() => onToolChange('eraser')} className={toolBtn(activeTool === 'eraser')}>
+          <button aria-label="Eraser" onClick={() => onToolChange('eraser')} className={toolBtn(activeTool === 'eraser')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/>
               <path d="M22 21H7"/>
@@ -183,7 +183,7 @@ export default function VisualArtsToolbar({
 
         {/* ── Line ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={() => onToolChange('line')} className={toolBtn(activeTool === 'line')}>
+          <button aria-label="Line" onClick={() => onToolChange('line')} className={toolBtn(activeTool === 'line')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="5" y1="19" x2="19" y2="5"/>
             </svg>
@@ -193,7 +193,7 @@ export default function VisualArtsToolbar({
 
         {/* ── Rectangle ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={() => onToolChange('rect')} className={toolBtn(activeTool === 'rect')}>
+          <button aria-label="Rectangle" onClick={() => onToolChange('rect')} className={toolBtn(activeTool === 'rect')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="5" width="18" height="14" rx="2"/>
             </svg>
@@ -203,7 +203,7 @@ export default function VisualArtsToolbar({
 
         {/* ── Ellipse ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={() => onToolChange('circle')} className={toolBtn(activeTool === 'circle')}>
+          <button aria-label="Ellipse" onClick={() => onToolChange('circle')} className={toolBtn(activeTool === 'circle')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <ellipse cx="12" cy="12" rx="9" ry="6"/>
             </svg>
@@ -213,7 +213,7 @@ export default function VisualArtsToolbar({
 
         {/* ── Ruler ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={() => onToolChange('ruler')} className={toolBtn(activeTool === 'ruler')}>
+          <button aria-label="Ruler" onClick={() => onToolChange('ruler')} className={toolBtn(activeTool === 'ruler')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 9l4-4 14 14-4 4z"/>
               <path d="M8 12l2 2"/>
@@ -229,7 +229,7 @@ export default function VisualArtsToolbar({
           <>
             <Divider />
             <div className="relative group flex-shrink-0">
-              <button onClick={() => onShapeModeChange('fill')} className={toolBtn(shapeMode === 'fill')}>
+              <button aria-label="Fill shape" onClick={() => onShapeModeChange('fill')} className={toolBtn(shapeMode === 'fill')}>
                 <svg width="18" height="18" viewBox="0 0 24 24">
                   <rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor"/>
                 </svg>
@@ -237,7 +237,7 @@ export default function VisualArtsToolbar({
               <Tooltip label="Fill shape" />
             </div>
             <div className="relative group flex-shrink-0">
-              <button onClick={() => onShapeModeChange('outline')} className={toolBtn(shapeMode === 'outline')}>
+              <button aria-label="Outline shape" onClick={() => onShapeModeChange('outline')} className={toolBtn(shapeMode === 'outline')}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="4" y="4" width="16" height="16" rx="2"/>
                 </svg>
@@ -251,7 +251,7 @@ export default function VisualArtsToolbar({
 
         {/* ── Drawing colour ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={e => togglePopup('colour', e)} className={iconBtn}>
+          <button aria-label="Drawing colour" onClick={e => togglePopup('colour', e)} className={iconBtn}>
             <span
               className="w-5 h-5 rounded-full border border-text-primary/20 flex-shrink-0"
               style={{ backgroundColor: colour, boxShadow: colour === '#FFFFFF' ? 'inset 0 0 0 1px #e5e7eb' : undefined }}
@@ -262,7 +262,7 @@ export default function VisualArtsToolbar({
 
         {/* ── Canvas background ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={e => togglePopup('background', e)} className={iconBtn}>
+          <button aria-label="Canvas background" onClick={e => togglePopup('background', e)} className={iconBtn}>
             <span
               className="w-5 h-5 rounded-sm border border-surface-border flex-shrink-0"
               style={{ backgroundColor: bgColour }}
@@ -275,7 +275,7 @@ export default function VisualArtsToolbar({
 
         {/* ── Brush size ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={e => togglePopup('size', e)} className={iconBtn}>
+          <button aria-label="Brush size" onClick={e => togglePopup('size', e)} className={iconBtn}>
             <span className="text-[11px] font-bold text-text-secondary leading-none select-none">{brushSize}</span>
           </button>
           <Tooltip label={`Brush size (${brushSize}px)`} />
@@ -285,7 +285,7 @@ export default function VisualArtsToolbar({
 
         {/* ── Undo ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={onUndo} disabled={!canUndo} className={`${iconBtn} disabled:opacity-40 disabled:cursor-not-allowed`}>
+          <button aria-label="Undo" onClick={onUndo} disabled={!canUndo} className={`${iconBtn} disabled:opacity-40 disabled:cursor-not-allowed`}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 14L4 9l5-5"/>
               <path d="M4 9h10.5a5.5 5.5 0 010 11H11"/>
@@ -296,7 +296,7 @@ export default function VisualArtsToolbar({
 
         {/* ── Redo ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={onRedo} disabled={!canRedo} className={`${iconBtn} disabled:opacity-40 disabled:cursor-not-allowed`}>
+          <button aria-label="Redo" onClick={onRedo} disabled={!canRedo} className={`${iconBtn} disabled:opacity-40 disabled:cursor-not-allowed`}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 14l5-5-5-5"/>
               <path d="M20 9H9.5a5.5 5.5 0 000 11H13"/>
@@ -310,7 +310,7 @@ export default function VisualArtsToolbar({
         {/* ── Delete selected shape ── */}
         {hasSelection && onDeleteSelected && (
           <div className="relative group flex-shrink-0">
-            <button onClick={onDeleteSelected} className={redBtn}>
+            <button aria-label="Delete selected" onClick={onDeleteSelected} className={redBtn}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
               </svg>
@@ -321,7 +321,7 @@ export default function VisualArtsToolbar({
 
         {/* ── Clear canvas ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={onClear} className={redBtn}>
+          <button aria-label="Clear canvas" onClick={onClear} className={redBtn}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="3 6 5 6 21 6"/>
               <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>

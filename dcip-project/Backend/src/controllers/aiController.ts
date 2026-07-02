@@ -44,11 +44,15 @@ Score generously for genuine effort. No text outside the JSON.`
 
 export async function critiqueArtwork(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const { imageData, discipline, level, explanation } = req.body as {
+    const { imageData, discipline, level, explanation, task, requirements } = req.body as {
       imageData: string
       discipline: string
       level: number
       explanation?: string
+      /** The specific instruction shown to the student for this demonstration */
+      task?: string
+      /** The specific rubric requirements for this level */
+      requirements?: string[]
     }
 
     if (!imageData || !discipline) {
@@ -59,14 +63,15 @@ export async function critiqueArtwork(req: AuthRequest, res: Response): Promise<
     const systemPrompt = discipline === 'graphic-design' ? GD_SYSTEM : VA_SYSTEM
     const subject = discipline === 'graphic-design' ? 'Graphic Design poster' : 'Visual Arts drawing'
 
+    const contextLines: string[] = [`This is a Level ${level} ${subject}.`]
+    if (task) contextLines.push(`The student was asked to: ${task}`)
+    if (requirements?.length) contextLines.push(`Requirements for this level: ${requirements.join('; ')}.`)
+    if (explanation) contextLines.push(`The student explained: "${explanation}". Please give your full assessment now.`)
+    else contextLines.push('Please assess the work against the task and requirements above.')
+
     const userContent: AIMessageContent[] = [
       { type: 'image_url', image_url: { url: imageData } },
-      {
-        type: 'text',
-        text: explanation
-          ? `This is a Level ${level} ${subject}. The student explained: "${explanation}". Please give your full assessment now.`
-          : `This is a Level ${level} ${subject}. Please assess it.`,
-      },
+      { type: 'text', text: contextLines.join('\n') },
     ]
 
     const raw = await callAI([

@@ -13,11 +13,11 @@ export function useCritiqueAI() {
   const [state, setState] = useState<CritiqueState>({ status: 'idle' })
   const abortRef = useRef(false)
 
-  async function runCritique(imageData: string, discipline: string, level: number) {
+  async function runCritique(imageData: string, discipline: string, level: number, task?: string, requirements?: string[]) {
     abortRef.current = false
     setState({ status: 'loading' })
     try {
-      const res = await api.post('/ai/critique', { imageData, discipline, level })
+      const res = await api.post('/ai/critique', { imageData, discipline, level, task, requirements })
       if (abortRef.current) return
       const data = res.data
       if (data.needsExplanation) {
@@ -37,10 +37,10 @@ export function useCritiqueAI() {
     }
   }
 
-  async function submitExplanation(imageData: string, discipline: string, level: number, explanation: string) {
+  async function submitExplanation(imageData: string, discipline: string, level: number, explanation: string, task?: string, requirements?: string[]) {
     setState({ status: 'loading' })
     try {
-      const res = await api.post('/ai/critique', { imageData, discipline, level, explanation })
+      const res = await api.post('/ai/critique', { imageData, discipline, level, explanation, task, requirements })
       const data = res.data
       setState({
         status:      'done',

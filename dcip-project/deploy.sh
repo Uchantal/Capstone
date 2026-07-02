@@ -26,4 +26,8 @@ npm run build
 echo "Copying frontend to web root..."
 sudo cp -r dist/* /var/www/dcip/
 
+echo "Applying Nginx config..."
+sudo cp "$PROJECT_DIR/nginx.conf" /etc/nginx/sites-available/dcip-rw.online
+sudo nginx -t && sudo systemctl reload nginx
+
 echo "Done. DCIP is updated and running."

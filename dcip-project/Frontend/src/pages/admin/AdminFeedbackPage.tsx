@@ -82,12 +82,13 @@ export default function AdminFeedbackPage() {
                         {item.screenshotData ? (
                           <button
                             onClick={() => setLightbox(item.screenshotData!)}
+                            aria-label="View full screenshot"
                             className="block"
-                            title="Click to view full screenshot"
                           >
                             <img
                               src={item.screenshotData}
                               alt="Screenshot"
+                              loading="lazy"
                               className="w-16 h-11 object-cover rounded border border-surface-border hover:border-primary hover:opacity-90 transition-all"
                             />
                           </button>

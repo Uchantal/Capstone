@@ -178,7 +178,7 @@ export default function LevelDemonstrateScreen({
       <div className="h-screen flex flex-col overflow-hidden">
         <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
           <DcipLogoLink />
-          <div className="flex items-center gap-2 text-xs text-text-muted">
+          <div className="hidden sm:flex items-center gap-2 text-xs text-text-muted">
             <button
               onClick={() => navigate('/session/music-piano')}
               className="hover:text-text-primary transition-colors"
@@ -272,7 +272,7 @@ export default function LevelDemonstrateScreen({
     <div className="h-screen flex flex-col overflow-hidden">
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
         <DcipLogoLink />
-        <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
+        <div className="hidden sm:flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
             onClick={() => navigate('/session/music-piano')}
             className="hover:text-text-primary transition-colors"
@@ -287,7 +287,7 @@ export default function LevelDemonstrateScreen({
         <button
           onClick={handleSkip}
           disabled={validState === 'correct'}
-          className="border border-surface-border text-text-secondary text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="ml-auto border border-surface-border text-text-secondary text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           Skip this chord
         </button>

@@ -123,7 +123,16 @@ export default function GDLevel3DemonstratePage() {
     } catch {}
     pendingRef.current = { imageData, combined }
     setSubmitting(false)
-    runCritique(imageData, 'graphic-design', 3)
+    runCritique(
+      imageData, 'graphic-design', 3,
+      'Design a poster that shows hierarchy, contrast, and balance all working together. This is your chance to show everything you have learned.',
+      [
+        'At least four elements in total',
+        'A contact block with an email address, website, or phone number',
+        'At least one non-text element (shape or image)',
+        'Strong visual hierarchy: dominant title, supporting subtitle, readable body text',
+      ],
+    )
   }
 
   useEffect(() => {
@@ -172,9 +181,7 @@ export default function GDLevel3DemonstratePage() {
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
         <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted">
-          <button onClick={() => navigate('/graphic-design/virtual-studio')} className="hover:text-text-primary transition-colors">
-            Graphic Design
-          </button>
+          <button onClick={() => navigate(-1)} className="hover:text-text-primary transition-colors">← Back</button>
           <span>/</span>
           <span>Level 3</span>
           <span>/</span>
@@ -260,7 +267,10 @@ export default function GDLevel3DemonstratePage() {
       {critiqueState.status === 'needsExplanation' && (
         <AICritiqueModal
           question={critiqueState.question}
-          onSubmit={text => submitExplanation(pendingRef.current?.imageData ?? '', 'graphic-design', 3, text)}
+          onSubmit={text => submitExplanation(pendingRef.current?.imageData ?? '', 'graphic-design', 3, text,
+            'Design a poster that shows hierarchy, contrast, and balance all working together.',
+            ['At least four elements', 'Contact block (email/website/phone)', 'At least one non-text element', 'Strong visual hierarchy'],
+          )}
           onSkip={skipCritique}
         />
       )}

@@ -30,7 +30,7 @@ export default function CanvasInstructionPanel({ children }: Props) {
       <div className="h-8 flex-shrink-0 flex items-center justify-end px-1 border-b border-surface-border">
         <button
           onClick={() => setCollapsed(p => !p)}
-          title={collapsed ? 'Show instructions' : 'Hide instructions'}
+          aria-label={collapsed ? 'Show instructions' : 'Hide instructions'}
           className="w-6 h-6 flex items-center justify-center border border-primary bg-white text-text-primary rounded hover:bg-primary/10 transition-colors flex-shrink-0"
         >
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

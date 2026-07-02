@@ -7,6 +7,7 @@ import { fetchGDLevelPoster, saveGDLevelPoster } from '../../services/api'
 import CanvasInstructionPanel from '../canvas/CanvasInstructionPanel'
 import { useGDEngagement } from '../../hooks/useCanvasEngagement'
 import AskAIHint from '../ai/AskAIHint'
+import DcipLogoLink from '../DcipLogoLink'
 
 function stageIdToEngagementKey(stageId: string): string {
   if (stageId === 'gd-level-1') return 'level1Learn'
@@ -223,31 +224,31 @@ export default function GDLevelScreen({
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-white">
-      <AskAIHint discipline="Graphic Design" context={`${levelTitle} — Learn`} />
+      <AskAIHint discipline="Graphic Design" context={`${levelTitle} — Learn`} side="left" />
       {/* ── Top bar ── */}
-      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-6">
-        <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
+      <div className="h-auto min-h-12 flex-shrink-0 bg-white border-b border-surface-border flex flex-wrap items-center px-4 py-2 gap-2">
+        <DcipLogoLink />
+        <div className="flex items-center gap-2 text-xs text-text-muted flex-1 min-w-0">
           <button
-            onClick={() => navigate('/graphic-design/virtual-studio')}
-            className="hover:text-text-primary transition-colors"
+            onClick={() => navigate(-1)}
+            className="hover:text-text-primary transition-colors flex-shrink-0"
           >
-            Graphic Design
+            ← Back
           </button>
           <span>/</span>
-          <span>Door To Know Graphic Design</span>
-          <span>/</span>
-          <span className="text-text-primary">{levelTitle}</span>
+          <span className="truncate">{levelTitle}</span>
         </div>
-        <div className="flex flex-col items-end gap-0.5">
+        <div className="flex flex-col items-end gap-0.5 ml-auto">
           <button
             onClick={handleComplete}
             disabled={!canComplete || saving}
-            className="bg-secondary text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+            className="bg-secondary text-white font-semibold px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed text-xs"
           >
-            {saving ? 'Saving...' : 'Mark Level Complete'}
+            <span className="hidden sm:inline">{saving ? 'Saving...' : 'Mark Level Complete'}</span>
+            <span className="sm:hidden">{saving ? 'Saving...' : 'Complete'}</span>
           </button>
           {!canComplete && (
-            <p className="text-xs text-text-secondary text-right">{buttonHint}</p>
+            <p className="text-xs text-text-secondary text-right hidden sm:block">{buttonHint}</p>
           )}
         </div>
       </div>

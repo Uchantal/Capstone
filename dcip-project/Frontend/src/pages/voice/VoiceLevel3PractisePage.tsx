@@ -70,7 +70,7 @@ export default function VoiceLevel3PractisePage() {
       <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-8">
 
         <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
-          <button onClick={() => navigate('/voice/studio')} className="hover:text-text-primary transition-colors">Voice and Singing</button>
+          <button onClick={() => navigate(-1)} className="hover:text-text-primary transition-colors">← Back</button>
           <span>/</span><span>Level 3</span><span>/</span>
           <span className="text-text-primary">Practise</span>
         </div>

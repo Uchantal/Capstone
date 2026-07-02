@@ -14,15 +14,15 @@ export interface AuthUser {
   graduatedDisciplines?: string[]
 }
 
-const loadToken = (): string | null => localStorage.getItem('token')
+const loadToken = (): string | null => sessionStorage.getItem('token')
 
 const loadUser = (): AuthUser | null => {
-  const stored = localStorage.getItem('user')
+  const stored = sessionStorage.getItem('user')
   if (!stored) return null
   try {
     return JSON.parse(stored)
   } catch {
-    localStorage.removeItem('user')
+    sessionStorage.removeItem('user')
     return null
   }
 }
@@ -45,15 +45,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(loadUser)
 
   const saveAuth = (newToken: string, userData: AuthUser) => {
-    localStorage.setItem('token', newToken)
-    localStorage.setItem('user', JSON.stringify(userData))
+    sessionStorage.setItem('token', newToken)
+    sessionStorage.setItem('user', JSON.stringify(userData))
     setToken(newToken)
     setUser(userData)
   }
 
   const logout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('user')
     setToken(null)
     setUser(null)
   }
@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(prev => {
       if (!prev) return prev
       const merged = { ...prev, ...updated }
-      localStorage.setItem('user', JSON.stringify(merged))
+      sessionStorage.setItem('user', JSON.stringify(merged))
       return merged
     })
   }

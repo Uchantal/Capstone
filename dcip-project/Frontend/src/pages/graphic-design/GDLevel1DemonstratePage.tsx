@@ -132,7 +132,16 @@ export default function GDLevel1DemonstratePage() {
     } catch {}
     pendingRef.current = { imageData, combined }
     setSubmitting(false)
-    runCritique(imageData, 'graphic-design', 1)
+    runCritique(
+      imageData, 'graphic-design', 1,
+      'Design a poster with a large title, a smaller subtitle, and centre alignment. The title must be the dominant element a viewer notices first.',
+      [
+        'At least two text elements (a title and a subtitle)',
+        'At least one text element with font size 32 or larger',
+        'Different font sizes used to create visual hierarchy',
+        'Real content written in — not placeholder text',
+      ],
+    )
   }
 
   useEffect(() => {
@@ -181,9 +190,7 @@ export default function GDLevel1DemonstratePage() {
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
         <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted">
-          <button onClick={() => navigate('/graphic-design/virtual-studio')} className="hover:text-text-primary transition-colors">
-            Graphic Design
-          </button>
+          <button onClick={() => navigate(-1)} className="hover:text-text-primary transition-colors">← Back</button>
           <span>/</span>
           <span>Level 1</span>
           <span>/</span>
@@ -269,7 +276,10 @@ export default function GDLevel1DemonstratePage() {
       {critiqueState.status === 'needsExplanation' && (
         <AICritiqueModal
           question={critiqueState.question}
-          onSubmit={text => submitExplanation(pendingRef.current?.imageData ?? '', 'graphic-design', 1, text)}
+          onSubmit={text => submitExplanation(pendingRef.current?.imageData ?? '', 'graphic-design', 1, text,
+            'Design a poster with a large title, a smaller subtitle, and centre alignment.',
+            ['At least two text elements', 'At least one font size 32 or larger', 'Different font sizes for hierarchy', 'Real content, not placeholder text'],
+          )}
           onSkip={skipCritique}
         />
       )}

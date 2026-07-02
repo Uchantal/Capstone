@@ -170,7 +170,7 @@ export default function GraphicDesignToolbar({
       >
         {/* ── Canvas format ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={e => togglePopup('templates', e)} className={iconBtn(openPopup === 'templates')}>
+          <button aria-label="Canvas format" onClick={e => togglePopup('templates', e)} className={iconBtn(openPopup === 'templates')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="7" height="7" rx="1"/>
               <rect x="14" y="3" width="7" height="7" rx="1"/>
@@ -185,7 +185,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Add text ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={onAddText} className={iconBtn()}>
+          <button aria-label="Add text" onClick={onAddText} className={iconBtn()}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 7V4h16v3"/>
               <path d="M9 20h6"/>
@@ -197,7 +197,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Add heading ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={onAddHeading} className={iconBtn()}>
+          <button aria-label="Add heading" onClick={onAddHeading} className={iconBtn()}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 7V4h16v3"/>
               <path d="M9 20h6"/>
@@ -210,7 +210,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Shapes ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={e => togglePopup('shapes', e)} className={iconBtn(openPopup === 'shapes')}>
+          <button aria-label="Add shape" onClick={e => togglePopup('shapes', e)} className={iconBtn(openPopup === 'shapes')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="8" height="8" rx="1"/>
               <circle cx="17" cy="7" r="4"/>
@@ -221,7 +221,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Add image ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={() => imageInputRef.current?.click()} className={iconBtn()}>
+          <button aria-label="Add image" onClick={() => imageInputRef.current?.click()} className={iconBtn()}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2"/>
               <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -234,7 +234,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Add details ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={onAddDetails} className={iconBtn()}>
+          <button aria-label="Add contact details" onClick={onAddDetails} className={iconBtn()}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="3" y1="6"  x2="21" y2="6"/>
               <line x1="3" y1="12" x2="15" y2="12"/>
@@ -248,7 +248,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Background colour ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={e => togglePopup('background', e)} className={iconBtn()}>
+          <button aria-label="Poster background" onClick={e => togglePopup('background', e)} className={iconBtn()}>
             <span className="w-5 h-5 rounded-sm border border-surface-border flex-shrink-0" style={{ backgroundColor: bgColour }} />
           </button>
           <Tooltip label="Poster background" />
@@ -256,7 +256,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Element colour ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={e => togglePopup('colour', e)} className={iconBtn()} disabled={!hasSelected}>
+          <button aria-label="Element colour" onClick={e => togglePopup('colour', e)} className={iconBtn()} disabled={!hasSelected}>
             <span
               className="w-5 h-5 rounded-full border border-text-primary/20 flex-shrink-0"
               style={{
@@ -273,6 +273,7 @@ export default function GraphicDesignToolbar({
         {/* ── Font size ── */}
         <div className="relative group flex-shrink-0">
           <button
+            aria-label="Font size"
             onClick={e => isText ? togglePopup('fontsize', e) : undefined}
             disabled={!isText}
             className={iconBtn(openPopup === 'fontsize', !isText)}
@@ -293,7 +294,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Bold ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={isText ? onBoldToggle : undefined} disabled={!isText} className={iconBtn(isBold, !isText)}>
+          <button aria-label="Bold" onClick={isText ? onBoldToggle : undefined} disabled={!isText} className={iconBtn(isBold, !isText)}>
             <span className="text-sm font-bold leading-none">B</span>
           </button>
           <Tooltip label="Bold" />
@@ -301,7 +302,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Italic ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={isText ? onItalicToggle : undefined} disabled={!isText} className={iconBtn(isItalic, !isText)}>
+          <button aria-label="Italic" onClick={isText ? onItalicToggle : undefined} disabled={!isText} className={iconBtn(isItalic, !isText)}>
             <span className="text-sm italic leading-none">I</span>
           </button>
           <Tooltip label="Italic" />
@@ -309,7 +310,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Underline ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={isText ? onUnderlineToggle : undefined} disabled={!isText} className={iconBtn(isUnderline, !isText)}>
+          <button aria-label="Underline" onClick={isText ? onUnderlineToggle : undefined} disabled={!isText} className={iconBtn(isUnderline, !isText)}>
             <span className="text-sm underline leading-none">U</span>
           </button>
           <Tooltip label="Underline" />
@@ -319,7 +320,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Align left ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={isText ? () => onAlignChange('left') : undefined} disabled={!isText} className={iconBtn(isText && textAlign === 'left', !isText)}>
+          <button aria-label="Align left" onClick={isText ? () => onAlignChange('left') : undefined} disabled={!isText} className={iconBtn(isText && textAlign === 'left', !isText)}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="3" y1="6"  x2="21" y2="6"/>
               <line x1="3" y1="12" x2="15" y2="12"/>
@@ -331,7 +332,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Align centre ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={isText ? () => onAlignChange('center') : undefined} disabled={!isText} className={iconBtn(isText && textAlign === 'center', !isText)}>
+          <button aria-label="Align centre" onClick={isText ? () => onAlignChange('center') : undefined} disabled={!isText} className={iconBtn(isText && textAlign === 'center', !isText)}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="3"  y1="6"  x2="21" y2="6"/>
               <line x1="6"  y1="12" x2="18" y2="12"/>
@@ -343,7 +344,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Align right ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={isText ? () => onAlignChange('right') : undefined} disabled={!isText} className={iconBtn(isText && textAlign === 'right', !isText)}>
+          <button aria-label="Align right" onClick={isText ? () => onAlignChange('right') : undefined} disabled={!isText} className={iconBtn(isText && textAlign === 'right', !isText)}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="3"  y1="6"  x2="21" y2="6"/>
               <line x1="9"  y1="12" x2="21" y2="12"/>
@@ -357,7 +358,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Duplicate ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={hasSelected ? onDuplicate : undefined} disabled={!hasSelected} className={iconBtn(false, !hasSelected)}>
+          <button aria-label="Duplicate" onClick={hasSelected ? onDuplicate : undefined} disabled={!hasSelected} className={iconBtn(false, !hasSelected)}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="8"  y="8"  width="13" height="13" rx="2"/>
               <rect x="3"  y="3"  width="13" height="13" rx="2"/>
@@ -368,7 +369,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Delete ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={hasSelected ? onDelete : undefined} disabled={!hasSelected} className={redBtn(!hasSelected)}>
+          <button aria-label="Delete" onClick={hasSelected ? onDelete : undefined} disabled={!hasSelected} className={redBtn(!hasSelected)}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="3 6 5 6 21 6"/>
               <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
@@ -383,7 +384,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Undo ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={onUndo} disabled={!canUndo} className={`${iconBtn()} disabled:opacity-40 disabled:cursor-not-allowed`}>
+          <button aria-label="Undo" onClick={onUndo} disabled={!canUndo} className={`${iconBtn()} disabled:opacity-40 disabled:cursor-not-allowed`}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 14L4 9l5-5"/>
               <path d="M4 9h10.5a5.5 5.5 0 010 11H11"/>
@@ -394,7 +395,7 @@ export default function GraphicDesignToolbar({
 
         {/* ── Redo ── */}
         <div className="relative group flex-shrink-0">
-          <button onClick={onRedo} disabled={!canRedo} className={`${iconBtn()} disabled:opacity-40 disabled:cursor-not-allowed`}>
+          <button aria-label="Redo" onClick={onRedo} disabled={!canRedo} className={`${iconBtn()} disabled:opacity-40 disabled:cursor-not-allowed`}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 14l5-5-5-5"/>
               <path d="M20 9H9.5a5.5 5.5 0 000 11H13"/>

@@ -89,6 +89,17 @@ function buildCalendar(year: number, month: number) {
   return cells
 }
 
+function shiftMonth(key: string, delta: number): string {
+  const [y, m] = key.split('-').map(Number)
+  const date = new Date(y, m - 1 + delta, 1)
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
+function currentMonthKey(): string {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+}
+
 
 export default function PortfolioPage() {
   const { user } = useAuth()
@@ -314,12 +325,29 @@ export default function PortfolioPage() {
                   {/* Mini calendar */}
                   <div className="bg-white border border-surface-border rounded-xl p-5 mb-5">
                     <div className="flex items-center justify-between mb-3">
-                      <p className="text-text-primary font-bold text-sm">{formatMonthLabel(activeMonth)}</p>
-                      {selectedDay && (
-                        <button onClick={() => { setSelectedDay(null); setSelected(null) }} className="text-xs text-primary hover:underline">
-                          Show all
-                        </button>
-                      )}
+                      <button
+                        onClick={() => { setActiveMonth(shiftMonth(activeMonth, -1)); setSelectedDay(null); setSelected(null) }}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-surface-warm transition-colors text-text-secondary hover:text-text-primary"
+                        title="Previous month"
+                      >
+                        ‹
+                      </button>
+                      <div className="flex items-center gap-3">
+                        <p className="text-text-primary font-bold text-sm">{formatMonthLabel(activeMonth)}</p>
+                        {selectedDay && (
+                          <button onClick={() => { setSelectedDay(null); setSelected(null) }} className="text-xs text-primary hover:underline">
+                            Show all
+                          </button>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => { setActiveMonth(shiftMonth(activeMonth, 1)); setSelectedDay(null); setSelected(null) }}
+                        disabled={activeMonth >= currentMonthKey()}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-surface-warm transition-colors text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Next month"
+                      >
+                        ›
+                      </button>
                     </div>
                     <div className="grid grid-cols-7 gap-1 text-center mb-1">
                       {DAY_LABELS.map(d => (

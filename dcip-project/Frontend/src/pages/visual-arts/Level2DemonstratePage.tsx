@@ -90,7 +90,12 @@ export default function VALevel2DemonstratePage() {
     } catch {}
     pendingRef.current = { imageData: snapshot, combined }
     setSubmitting(false)
-    runCritique(snapshot, 'visual-arts', 2)
+    runCritique(snapshot, 'visual-arts', 2, TASK, [
+      'One circle drawn and shaded',
+      'At least two visible tones: a lighter area and a darker shadow area',
+      'A cast shadow visible below the circle',
+      'At least 8 visible marks on the canvas',
+    ])
   }
 
   useEffect(() => {
@@ -169,10 +174,10 @@ export default function VALevel2DemonstratePage() {
         <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted flex-1">
           <button
-            onClick={() => navigate('/visual-arts/virtual-canvas')}
+            onClick={() => navigate(-1)}
             className="hover:text-text-primary transition-colors"
           >
-            Visual Arts
+            ← Back
           </button>
           <span>/</span>
           <button
@@ -230,7 +235,7 @@ export default function VALevel2DemonstratePage() {
       {critiqueState.status === 'needsExplanation' && (
         <AICritiqueModal
           question={critiqueState.question}
-          onSubmit={text => submitExplanation(pendingRef.current?.imageData ?? '', 'visual-arts', 2, text)}
+          onSubmit={text => submitExplanation(pendingRef.current?.imageData ?? '', 'visual-arts', 2, text, TASK, ['Circle with shading (light and shadow tones)', 'Cast shadow below the circle'])}
           onSkip={skipCritique}
         />
       )}

@@ -83,6 +83,7 @@ export default function DisciplineSelectPage() {
                 <img
                   src={d.img}
                   alt={d.imgAlt}
+                  loading="lazy"
                   className={`w-full h-full object-contain ${d.imgPosition} transition-transform duration-500 group-hover:scale-105`}
                 />
                 {user?.discipline === d.id && (

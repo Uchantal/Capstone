@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import GuitarFretboard from './GuitarFretboard'
 import AskAIHint from '../ai/AskAIHint'
+import DcipLogoLink from '../DcipLogoLink'
 
 const CHROMATIC = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const OPEN_NOTES = ['E', 'B', 'G', 'D', 'A', 'E']
@@ -70,10 +71,11 @@ export function Level1Screen({ onComplete, nextPath }: Level1Props) {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <AskAIHint discipline="Guitar" context="Guitar — Learn" />
-      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <AskAIHint discipline="Guitar" context="Guitar — Learn" side="left" />
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+        <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted">
-          <button onClick={() => navigate('/guitar/virtual-instrument')} className="hover:text-text-primary transition-colors">Guitar</button>
+          <button onClick={() => navigate(-1)} className="hover:text-text-primary transition-colors flex-shrink-0">← Back</button>
           <span>/</span>
           <span>Door To Know Guitar</span>
           <span>/</span>
@@ -196,10 +198,11 @@ export function Level2Screen({ onComplete, nextPath }: Level2Props) {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <AskAIHint discipline="Guitar" context="Guitar — Learn" />
-      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <AskAIHint discipline="Guitar" context="Guitar — Learn" side="left" />
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+        <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted">
-          <button onClick={() => navigate('/guitar/virtual-instrument')} className="hover:text-text-primary transition-colors">Guitar</button>
+          <button onClick={() => navigate(-1)} className="hover:text-text-primary transition-colors flex-shrink-0">← Back</button>
           <span>/</span>
           <span>Door To Know Guitar</span>
           <span>/</span>
@@ -354,10 +357,11 @@ export function Level3Screen({ onComplete, nextPath }: Level3Props) {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <AskAIHint discipline="Guitar" context="Guitar — Learn" />
-      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <AskAIHint discipline="Guitar" context="Guitar — Learn" side="left" />
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+        <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted">
-          <button onClick={() => navigate('/guitar/virtual-instrument')} className="hover:text-text-primary transition-colors">Guitar</button>
+          <button onClick={() => navigate(-1)} className="hover:text-text-primary transition-colors flex-shrink-0">← Back</button>
           <span>/</span>
           <span>Door To Know Guitar</span>
           <span>/</span>

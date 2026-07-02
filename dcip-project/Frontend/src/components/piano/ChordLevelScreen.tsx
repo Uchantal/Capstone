@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import PianoKeyboard from './PianoKeyboard'
 import AskAIHint from '../ai/AskAIHint'
+import DcipLogoLink from '../DcipLogoLink'
 import { useChordValidation } from '../../hooks/useChordValidation'
 import {
   buildChord,
@@ -84,19 +85,18 @@ export default function ChordLevelScreen({ levelNumber, totalLevels, levelTitle,
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <AskAIHint discipline="Piano" context="Piano — Learn" />
-      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4">
+      <AskAIHint discipline="Piano" context="Piano — Learn" side="left" />
+      <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
+        <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted">
           <button
-            onClick={() => navigate('/piano/understanding-the-piano')}
-            className="hover:text-text-primary transition-colors"
+            onClick={() => navigate(-1)}
+            className="hover:text-text-primary transition-colors flex-shrink-0"
           >
-            Piano
+            ← Back
           </button>
-          <span>/</span>
-          <span>Door To Know Piano</span>
-          <span>/</span>
-          <span className="text-text-primary">{levelTitle}</span>
+          <span className="hidden sm:inline">/</span>
+          <span className="hidden sm:block text-text-primary">{levelTitle}</span>
         </div>
       </div>
 

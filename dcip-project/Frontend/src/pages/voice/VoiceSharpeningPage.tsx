@@ -87,7 +87,7 @@ export default function VoiceSharpeningPage() {
         )}
 
         <div className="flex items-center gap-2 text-xs text-text-muted mb-5">
-          <button onClick={() => navigate('/voice/studio')} className="hover:text-text-primary transition-colors">Voice and Singing</button>
+          <button onClick={() => navigate(-1)} className="hover:text-text-primary transition-colors">← Back</button>
           <span>/</span>
           <span className="text-text-primary">Sharpening Myself</span>
         </div>

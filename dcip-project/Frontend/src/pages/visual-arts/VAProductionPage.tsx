@@ -68,7 +68,15 @@ export default function VAProductionPage() {
     setEngagementScore(score)
     pendingRef.current = { imageData, snapshot, engScore: score }
     setSubmitting(false)
-    runCritique(imageData, 'visual-arts', 3)
+    runCritique(imageData, 'visual-arts', 3,
+      'Create a complete original composition that demonstrates your full range of visual arts skills.',
+      [
+        'At least three recognisable shapes or elements',
+        'Colour used intentionally — not randomly placed',
+        'Visible shading on at least one element',
+        'This is an original work, not copied from a reference shown in the platform',
+      ],
+    )
   }
 
   useEffect(() => {
@@ -137,7 +145,10 @@ export default function VAProductionPage() {
       <div className="h-screen flex items-center justify-center bg-white">
         <AICritiqueModal
           question={critiqueState.question}
-          onSubmit={text => submitExplanation(pendingRef.current?.imageData ?? '', 'visual-arts', 3, text)}
+          onSubmit={text => submitExplanation(pendingRef.current?.imageData ?? '', 'visual-arts', 3, text,
+            'Create a complete original composition demonstrating your full visual arts skills.',
+            ['At least three elements', 'Intentional colour use', 'Visible shading on at least one element'],
+          )}
           onSkip={skipCritique}
         />
       </div>

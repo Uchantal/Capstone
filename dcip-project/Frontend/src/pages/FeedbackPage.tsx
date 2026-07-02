@@ -231,6 +231,7 @@ export default function FeedbackPage() {
                   <img
                     src={screenshotData}
                     alt="Screenshot preview"
+                    loading="lazy"
                     className="w-24 h-16 object-cover rounded border border-[#E8E4DC] flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">

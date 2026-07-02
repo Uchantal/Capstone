@@ -116,7 +116,15 @@ export default function GDLevel2DemonstratePage() {
     } catch {}
     pendingRef.current = { imageData, combined }
     setSubmitting(false)
-    runCritique(imageData, 'graphic-design', 2)
+    runCritique(
+      imageData, 'graphic-design', 2,
+      'Create a poster with strong, readable contrast between text and background. The colour mood should match the tone of your announcement.',
+      [
+        'At least one shape element added to the design',
+        'At least two different colours used',
+        'Text colour must be clearly readable against the background colour',
+      ],
+    )
   }
 
   useEffect(() => {
@@ -165,9 +173,7 @@ export default function GDLevel2DemonstratePage() {
       <div className="h-12 flex-shrink-0 bg-white border-b border-surface-border flex items-center px-4 gap-3">
         <DcipLogoLink />
         <div className="flex items-center gap-2 text-xs text-text-muted">
-          <button onClick={() => navigate('/graphic-design/virtual-studio')} className="hover:text-text-primary transition-colors">
-            Graphic Design
-          </button>
+          <button onClick={() => navigate(-1)} className="hover:text-text-primary transition-colors">← Back</button>
           <span>/</span>
           <span>Level 2</span>
           <span>/</span>
@@ -253,7 +259,10 @@ export default function GDLevel2DemonstratePage() {
       {critiqueState.status === 'needsExplanation' && (
         <AICritiqueModal
           question={critiqueState.question}
-          onSubmit={text => submitExplanation(pendingRef.current?.imageData ?? '', 'graphic-design', 2, text)}
+          onSubmit={text => submitExplanation(pendingRef.current?.imageData ?? '', 'graphic-design', 2, text,
+            'Create a poster with strong, readable contrast between text and background.',
+            ['At least one shape', 'At least two different colours', 'Text readable against background'],
+          )}
           onSkip={skipCritique}
         />
       )}
