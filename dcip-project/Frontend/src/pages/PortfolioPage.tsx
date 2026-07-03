@@ -308,9 +308,17 @@ export default function PortfolioPage() {
               const [yr, mo] = activeMonth.split('-').map(Number)
               const calCells = buildCalendar(yr, mo - 1)
               const monthItems = itemsForMonth(activeDiscipline, activeMonth)
-              const daysWithItems = new Set(monthItems.map(i => new Date(i.createdAt).getDate()))
+              const daysWithItems = new Set(
+                monthItems.map(i => {
+                  const d = new Date(i.createdAt)
+                  return d.getFullYear() === yr && d.getMonth() + 1 === mo ? d.getDate() : -1
+                }).filter(d => d > 0)
+              )
               const displayedItems = selectedDay
-                ? monthItems.filter(i => new Date(i.createdAt).getDate() === selectedDay)
+                ? monthItems.filter(i => {
+                    const d = new Date(i.createdAt)
+                    return d.getFullYear() === yr && d.getMonth() + 1 === mo && d.getDate() === selectedDay
+                  })
                 : monthItems
               const DAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
@@ -321,6 +329,13 @@ export default function PortfolioPage() {
                     { label: DISCIPLINE_META[activeDiscipline].label, onClick: () => goToMonths(activeDiscipline) },
                     { label: formatMonthLabel(activeMonth) },
                   ]} />
+
+                  <p className="text-text-secondary text-sm mb-4">
+                    {selectedDay
+                      ? `Showing ${displayedItems.length} item${displayedItems.length !== 1 ? 's' : ''} saved on ${new Date(yr, mo - 1, selectedDay).toLocaleDateString('en', { month: 'long', day: 'numeric', year: 'numeric' })}`
+                      : `Showing all ${monthItems.length} item${monthItems.length !== 1 ? 's' : ''} in ${formatMonthLabel(activeMonth)}`
+                    }
+                  </p>
 
                   {/* Mini calendar */}
                   <div className="bg-white border border-surface-border rounded-xl p-5 mb-5">
