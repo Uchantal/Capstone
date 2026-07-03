@@ -217,7 +217,7 @@ function DisciplineCard({ disc, onContinue, onViewDetail }: { disc: DisciplineSu
       </div>
       <div className="flex justify-between text-[10px] text-text-muted mb-1">
         <span>Progress</span>
-        <span>{disc.completedStages.length} / {totalStages} stages</span>
+        <span>{Math.min(disc.completedStages.length, totalStages)} / {totalStages} stages</span>
       </div>
       <div className="h-1.5 bg-surface-warm rounded-full overflow-hidden mb-4">
         <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
@@ -426,8 +426,24 @@ export default function DashboardPage() {
         </div>
 
         {loading ? (
-          <div className="bg-white border border-surface-border rounded-2xl p-8 text-center">
-            <p className="text-text-muted text-sm">Loading your progress...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[1, 2, 3, 4].map(n => (
+              <div key={n} className="bg-white border border-surface-border rounded-2xl p-5 animate-pulse">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="h-4 w-24 bg-surface-warm rounded" />
+                  <div className="h-3 w-16 bg-surface-warm rounded" />
+                </div>
+                <div className="flex justify-between mb-1">
+                  <div className="h-3 w-12 bg-surface-warm rounded" />
+                  <div className="h-3 w-16 bg-surface-warm rounded" />
+                </div>
+                <div className="h-1.5 bg-surface-warm rounded-full mb-4" />
+                <div className="flex gap-2 mb-4">
+                  {[1,2,3,4,5].map(d => <div key={d} className="w-3 h-3 rounded-full bg-surface-warm" />)}
+                </div>
+                <div className="h-9 bg-surface-warm rounded-xl" />
+              </div>
+            ))}
           </div>
         ) : disciplines.length === 0 ? (
           <div className="bg-white border border-surface-border rounded-2xl p-10 text-center">
