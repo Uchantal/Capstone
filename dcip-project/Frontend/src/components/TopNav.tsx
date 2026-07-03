@@ -145,8 +145,6 @@ export default function TopNav() {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const continueUrlRef = useRef<string | null>(null)
 
-  const isStudent = user?.role === 'student'
-
   const handleLogout = () => {
     setProfileOpen(false)
     logout()
@@ -161,7 +159,6 @@ export default function TopNav() {
 
   const statusLabel = syncing ? 'Syncing' : isOnline ? 'Online' : 'Offline'
 
-  // Close dropdown on outside click
   useEffect(() => {
     if (!profileOpen) return
     const handler = (e: MouseEvent) => {
@@ -195,26 +192,23 @@ export default function TopNav() {
     navigate(url)
   }
 
-  // Non-student nav (supervisor / admin)
-  if (!isStudent) {
-    const roleLabel = user?.role === 'admin' ? 'Administrator' : 'Supervisor'
+  // Non-student nav (admin)
+  if (user?.role === 'admin') {
     return (
       <nav className="bg-white border-b border-surface-border h-12 flex items-center px-6 justify-between">
         <div className="flex items-center gap-3">
           <LogoLink />
-
           <div>
             <p className="text-text-primary font-semibold text-sm leading-tight hidden lg:block">
               Digital Creative Infrastructure Platform
             </p>
             {user && (
               <p className="text-text-secondary text-xs leading-tight">
-                {user.fullName} · {roleLabel}
+                {user.fullName} · Administrator
               </p>
             )}
           </div>
         </div>
-
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <div className={`w-2 h-2 rounded-full ${statusColor}`} />
@@ -233,7 +227,7 @@ export default function TopNav() {
     )
   }
 
-  // Student nav with profile dropdown
+  // Student nav
   const initials = user ? getInitials(user.fullName) : ''
   const firstName = user ? getFirstName(user.fullName) : ''
   const schoolName = user?.school?.name ?? ''

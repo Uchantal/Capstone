@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { registerUser, fetchSchools } from '../services/api'
+import { useAuth } from '../hooks/useAuth'
 import Footer from '../components/Footer'
 
 interface School {
@@ -11,6 +12,8 @@ interface School {
 }
 
 export default function RegisterPage() {
+  const navigate = useNavigate()
+  const { saveAuth } = useAuth()
   const [schools, setSchools] = useState<School[]>([])
   const [form, setForm] = useState({
     fullName: '',
@@ -25,7 +28,6 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [registered, setRegistered] = useState(false)
 
   // School searchable dropdown
   const [schoolOpen, setSchoolOpen]     = useState(false)
@@ -109,8 +111,9 @@ export default function RegisterPage() {
 
     setLoading(true)
     try {
-      await registerUser({ fullName: form.fullName, username: form.username, email: form.email, password: form.password, schoolId: form.schoolId })
-      setRegistered(true)
+      const res = await registerUser({ fullName: form.fullName, username: form.username, email: form.email, password: form.password, schoolId: form.schoolId })
+      saveAuth(res.data.token, res.data.user)
+      navigate('/disciplines')
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err
@@ -129,35 +132,7 @@ export default function RegisterPage() {
       <div className="flex-1 flex items-center justify-center px-8 py-12">
         <div className="w-full max-w-md">
 
-          {registered ? (
-            /* ── Check-email success state ── */
-            <div>
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-secondary/10 mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h1 className="text-text-primary font-bold text-2xl mb-1">Check your email</h1>
-              <p className="text-text-secondary text-sm mb-6">
-                We sent a verification link to{' '}
-                <span className="text-text-primary font-medium">{form.email}</span>.
-                Click the link in that email to activate your account. The link expires in 24 hours.
-              </p>
-              <div className="bg-surface-warm border border-surface-border rounded-lg px-4 py-3 mb-6">
-                <p className="text-text-secondary text-sm">
-                  Didn't receive anything? Check your spam folder, contact us for support, or send us feedback.
-                </p>
-              </div>
-              <Link
-                to="/login"
-                className="w-full bg-primary text-white font-semibold text-sm py-3.5 rounded-xl hover:bg-primary-dark transition-colors flex items-center justify-center"
-              >
-                Back to Login
-              </Link>
-            </div>
-          ) : (
-            /* ── Registration form ── */
-            <>
+          <>
           <h1 className="text-text-primary font-bold text-2xl mb-1">Create your account</h1>
           <p className="text-text-secondary text-sm mb-8">
             Already have an account?{' '}
@@ -432,7 +407,6 @@ export default function RegisterPage() {
             </button>
           </form>
           </>
-          )}
         </div>
       </div>
       </div>

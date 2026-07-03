@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose'
 
-export type UserRole = 'student' | 'supervisor' | 'admin'
+export type UserRole = 'student' | 'admin'
 
 export interface IUser extends Document {
   fullName: string
@@ -17,9 +17,6 @@ export interface IUser extends Document {
   graduatedDisciplines: string[]
   passwordResetToken: string | undefined
   passwordResetExpires: Date | undefined
-  isEmailVerified: boolean
-  emailVerificationToken: string | undefined
-  emailVerificationExpires: Date | undefined
   createdAt: Date
 }
 
@@ -28,7 +25,7 @@ const userSchema = new Schema<IUser>({
   username: { type: String, required: true, unique: true, trim: true, lowercase: true },
   email: { type: String, required: true, unique: true, trim: true, lowercase: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['student', 'supervisor', 'admin'], default: 'student' },
+  role: { type: String, enum: ['student', 'admin'], default: 'student' },
   isActive: { type: Boolean, default: true },
   school: { type: Schema.Types.ObjectId, ref: 'School', default: null },
   discipline: {
@@ -46,9 +43,6 @@ const userSchema = new Schema<IUser>({
   graduatedDisciplines:  [{ type: String }],
   passwordResetToken:    { type: String },
   passwordResetExpires:  { type: Date },
-  isEmailVerified:       { type: Boolean, default: false },
-  emailVerificationToken:    { type: String },
-  emailVerificationExpires:  { type: Date },
   createdAt:             { type: Date, default: Date.now },
 })
 

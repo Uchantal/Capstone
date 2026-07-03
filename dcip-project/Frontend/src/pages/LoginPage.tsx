@@ -31,9 +31,7 @@ export default function LoginPage() {
     try {
       const res = await loginUser(form)
       saveAuth(res.data.token, res.data.user)
-      const role = res.data.user.role
-      if (role === 'admin') navigate('/admin')
-      else if (role === 'supervisor') navigate('/supervisor')
+      if (res.data.user.role === 'admin') navigate('/admin')
       else navigate('/disciplines')
     } catch (err: unknown) {
       const message =

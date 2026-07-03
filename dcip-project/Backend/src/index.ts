@@ -4,12 +4,10 @@ dotenv.config()
 import express from 'express'
 import cors from 'cors'
 import { connectDB } from './config/db'
-import User from './models/User'
 import authRoutes from './routes/auth'
 import sessionRoutes from './routes/sessions'
 import portfolioRoutes from './routes/portfolio'
 import adminRoutes from './routes/admin'
-import supervisorRoutes from './routes/supervisor'
 import productionRoutes from './routes/production'
 import journeyRoutes from './routes/journey'
 import pianoRoutes from './routes/piano'
@@ -54,7 +52,6 @@ app.use('/api/auth', authRoutes)
 app.use('/api/sessions', sessionRoutes)
 app.use('/api/portfolio', portfolioRoutes)
 app.use('/api/admin', adminRoutes)
-app.use('/api/supervisor', supervisorRoutes)
 app.use('/api/production', productionRoutes)
 app.use('/api/journey', journeyRoutes)
 app.use('/api/piano', pianoRoutes)
@@ -71,13 +68,6 @@ app.use('/api/ai', aiRoutes)
 
 const PORT = process.env.PORT || 5000
 
-connectDB().then(async () => {
-  const deleted = await User.deleteMany({
-    isEmailVerified: false,
-    emailVerificationExpires: { $lt: new Date() },
-  })
-  if (deleted.deletedCount > 0) {
-    console.log(`Cleaned up ${deleted.deletedCount} expired unverified account(s)`)
-  }
+connectDB().then(() => {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
 })

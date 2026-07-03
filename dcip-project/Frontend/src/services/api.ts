@@ -38,9 +38,6 @@ export const forgotPassword = (email: string) =>
 export const resetPassword = (token: string, newPassword: string) =>
   api.post('/auth/reset-password', { token, newPassword })
 
-export const verifyEmail = (token: string) =>
-  api.post('/auth/verify-email', { token })
-
 export const updateUserSchool = (schoolId: string) =>
   api.patch('/auth/school', { schoolId })
 
@@ -70,13 +67,9 @@ export const deletePortfolioItem = (id: string) => api.delete(`/portfolio/${id}`
 
 // Admin
 export const getAdminStudents = () => api.get('/admin/students')
-
 export const toggleStudentStatus = (id: string) => api.patch(`/admin/students/${id}/toggle`)
-
 export const getAdminModules = () => api.get('/admin/modules')
-
 export const toggleModule = (id: string) => api.patch(`/admin/modules/${id}/toggle`)
-
 export const getAdminReports = (params?: { startDate?: string; endDate?: string }) => {
   const q = new URLSearchParams()
   if (params?.startDate) q.set('startDate', params.startDate)
@@ -84,9 +77,7 @@ export const getAdminReports = (params?: { startDate?: string; endDate?: string 
   const qs = q.toString()
   return api.get(`/admin/reports${qs ? `?${qs}` : ''}`)
 }
-
 export const getAdminSupervisors = () => api.get('/admin/supervisors')
-
 export const createSupervisor = (data: {
   fullName: string
   username: string
@@ -94,6 +85,8 @@ export const createSupervisor = (data: {
   password: string
   schoolId: string
 }) => api.post('/admin/supervisors', data)
+export const getAdminFeedback = () => api.get('/feedback')
+export const getAdminFeedbackCount = () => api.get('/feedback/count')
 
 // Progress
 export const fetchProgress = () => api.get('/sessions/progress')
@@ -105,17 +98,6 @@ export const fetchAnalytics = () => api.get('/sessions/analytics')
 
 export const fetchCurriculum = (discipline: string) =>
   api.get(`/sessions/curriculum/${discipline}`)
-
-// Supervisor
-export const getSupervisorActiveSessions = () => api.get('/supervisor/sessions/active')
-
-export const getSupervisorStudents = () => api.get('/supervisor/students')
-
-export const getSupervisorProgress = () => api.get('/supervisor/progress')
-
-export const getSupervisorLiveActivity = () => api.get('/supervisor/live-activity')
-
-export const getSupervisorSchoolAnalytics = (period?: string) => api.get(`/supervisor/school-analytics${period ? `?period=${period}` : ''}`)
 
 // Production
 export const saveProductionResult = (data: {
@@ -232,9 +214,6 @@ export const submitFeedback = (data: {
   message: string
   screenshotData?: string
 }) => api.post('/feedback', data)
-
-export const getAdminFeedback = () => api.get('/feedback')
-export const getAdminFeedbackCount = () => api.get('/feedback/count')
 
 // Engagement
 export const saveEngagementScore = (discipline: string, stage: string, score: number) =>

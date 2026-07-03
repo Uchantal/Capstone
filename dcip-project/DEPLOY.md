@@ -1,7 +1,5 @@
 # DCIP Deployment Guide — DigitalOcean VPS
 
----
-
 ## PART 1 — CREATE THE DROPLET
 
 1. Go to [digitalocean.com](https://digitalocean.com) and create an account.
@@ -83,12 +81,24 @@ Add these variables (replace with your real values):
 ```
 PORT=5000
 NODE_ENV=production
+
 MONGODB_URI=your_mongodb_atlas_connection_string
 JWT_SECRET=your_jwt_secret_string_minimum_32_characters
+
 CLIENT_URL=https://dcip-rw.online
 FRONTEND_URL=https://dcip-rw.online
+
 EMAIL_USER=your_gmail_address@gmail.com
 EMAIL_PASS=your_gmail_app_password
+
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+GEMINI_API_KEY=your_gemini_api_key
+
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_MODEL=google/gemma-4-31b-it:free
 ```
 
 Save and exit: **Ctrl+X → Y → Enter**
@@ -190,8 +200,6 @@ You should see the DCIP homepage and the health endpoint returning:
    > `CLIENT_URL` controls which origins the CORS policy allows.
    > `FRONTEND_URL` is used to build the link inside password-reset emails —
    > if it still points to `http://`, reset links will break once HTTPS is active.
-
----
 
 ---
 

@@ -1,12 +1,7 @@
 # DCIP — Digital Creative Infrastructure Platform
 
-> An AI-powered online learning platform for Rwandan secondary school students (ages 14–18) to develop creative skills in Visual Arts, Graphic Design, Guitar, Piano, and Voice.
-
-**Live Application:** [https://dcip-rw.online](https://dcip-rw.online)
-
-**Demo Video:** [Watch on YouTube] 
-
----
+**Live Application:** [https://dcip-rw.online](https://dcip-rw.online)  
+**Demo Video:** [Watch on YouTube](https://www.youtube.com/watch?v=lvIOg2AYKYU)
 
 ## Table of Contents
 
@@ -19,58 +14,58 @@
 - [Environment Variables](#environment-variables)
 - [Running Locally](#running-locally)
 - [Deployment](#deployment)
-- [Testing Strategies](#testing-strategies)
-
----
 
 ## Overview
 
-DCIP is a self-directed digital learning platform that gives identified talented youth in Rwandan secondary schools structured access to creative skill development in Music, Visual Arts, and Graphic Design — using the computer laboratories their schools already have. Students follow a guided journey through mandatory foundation courses and three progressive skill levels, each built around Learn, Practise, and Demonstrate stages that build real competency before unlocking the next level. An embedded AI assistant provides real-time hints, answers questions, and analyses submitted artwork to give students honest feedback on their composition and technique. Students who complete all three levels do not stop there,  they unlock open Production space "studio" where they can create freely, build a personal portfolio of their work, and develop at their own pace without structured constraints
----
+DCIP is a self-directed digital learning platform built for identified talented youth in Rwandan secondary schools. It gives students structured access to creative skill development in Music, Visual Arts, and Graphic Design using the computer laboratories their schools already have. Students follow a guided journey through three progressive skill levels, each built around Learn, Practise, and Demonstrate stages that build real competency before unlocking the next level. An embedded AI assistant provides real-time hints, answers student questions, and analyses submitted artwork to give honest feedback on composition and technique. Students who complete all three levels unlock an open Production studio where they can create freely and build a personal portfolio at their own pace.
 
 ## Core Features
 
 ### Learning System
-- **5 disciplines:** Visual Arts, Graphic Design, Guitar, Piano, Voice
-- **3 levels per discipline**, each with three stages:
+
+- 5 disciplines: Visual Arts, Graphic Design, Guitar, Piano, Voice
+- 3 levels per discipline, each with three stages:
   - **Learn** — theory content with an interactive canvas or instrument
   - **Practise** — guided exercises with real-time feedback
-  - **Demonstrate** — submit final work to earn a badge
-- **Badge system** — Beginner, Intermediate, and Advanced badges awarded on level completion
+  - **Demonstrate** — submit final work to earn a level badge
+- Badge system: Beginner, Intermediate, and Advanced badges awarded on level completion
 
 ### AI Integration
+
 - **Ask AI Assistant** — persistent chat panel on every course page; students can type questions, highlight confusing text to ask about it directly, or upload an image for analysis
-- **AI Artwork Critique** — on Demonstrate submission, AI grades Visual Arts and Graphic Design work using computer vision and blends an AI quality score (70%) with an engagement score (30%) into a final grade
+- **AI Artwork Critique** — on Demonstrate submission, AI grades Visual Arts and Graphic Design work using computer vision and combines an AI quality score with an engagement score into a final grade
 - **Two-step critique** — if the AI cannot assess intent from the image alone, it asks the student to explain their work before completing the assessment
-- **AI Coach's Note** — after Guitar, Piano, and Voice Demonstrate results (which are assessed programmatically), AI generates a personalised coaching message based on the student's score, offering encouragement if they passed or specific practice advice if they did not
-- **Model chain:** Gemini 3.1 Flash Lite (primary, 500 RPD, vision-capable) → OpenRouter fallback chain (google/gemma-4-31b-it, nvidia/nemotron, meta-llama, qwen)
+- **AI Coach's Note** — after Guitar, Piano, and Voice results, AI generates a personalised coaching message with encouragement if the student passed or specific practice advice if they did not
+- **Model chain:** Gemini 3.1 Flash Lite (primary, vision-capable) → OpenRouter fallback chain (Gemma 4 31B, NVIDIA Nemotron, Meta Llama, Qwen)
 
 ### Creative Studios
-- **Visual Arts Studio** — freehand drawing canvas with brush, pencil, eraser, shapes, colour picker, layer support
-- **Graphic Design Studio** — poster design canvas with text tool, typography hierarchy tools
+
+- **Visual Arts Studio** — freehand drawing canvas with brush, pencil, eraser, shapes, colour picker, and layer support
+- **Graphic Design Studio** — poster design canvas with text tool and typography hierarchy tools
 - **Guitar Studio** — interactive fretboard with note playback and recording
 - **Piano Studio** — keyboard with chord validation and recording
 - **Voice Studio** — microphone recording with playback
 - **My Studio Works** — personal library with folder organisation; files stored on Cloudinary, URLs saved in MongoDB
 
 ### Engagement Scoring
-- Tracks time on canvas, tool clicks, and interactions (Perusall-inspired model)
-- Engagement score (0–100) blended with AI quality score to produce the final grade
-- Score formula: `finalScore = aiScore × 0.7 + engagement × 0.3` — AI quality is the dominant factor; engagement prevents passing on zero interaction alone
+
+- Tracks time on canvas, tool clicks, and interactions
+- Engagement score (0–100) is blended with the AI quality score to produce the final grade
+- AI quality is the dominant factor; engagement prevents passing on zero interaction alone
 
 ### Offline Support (PWA)
-- Service Worker with Cache-First strategy for the app shell and assets
+
+- Service Worker with Cache-First strategy for the app shell and static assets
 - Network-First strategy for API GET requests with automatic cache fallback
-- IndexedDB queue (`pendingRequests` store) for failed POST/PATCH — replayed automatically on reconnect
-- Offline banner shown to students when connection is lost; sync toast on reconnect
+- IndexedDB queue for failed POST/PATCH requests — replayed automatically on reconnect
+- Offline banner shown when connection is lost; sync toast shown on reconnect
 
 ### User Management
-- Student, Supervisor, and Admin roles with separate dashboards
-- School-based registration with email verification
-- Password reset via email (Nodemailer + Gmail App Password)
-- JWT authentication with HTTP-only tokens
 
----
+- Student and Admin roles with separate dashboards
+- School-based registration
+- Password reset via email (Nodemailer + Gmail App Password)
+- JWT authentication
 
 ## Tech Stack
 
@@ -85,8 +80,6 @@ DCIP is a self-directed digital learning platform that gives identified talented
 | AI — Fallback | OpenRouter (Gemma 4 31B, NVIDIA Nemotron, Meta Llama, Qwen) |
 | Deployment | DigitalOcean VPS, PM2, Nginx, Certbot (HTTPS) |
 | Email | Nodemailer with Gmail App Password |
-
----
 
 ## Architecture
 
@@ -107,11 +100,7 @@ Nginx (dcip-rw.online)
 
 Both frontend and backend run on a single DigitalOcean Droplet (Ubuntu 22.04, 1 GB RAM). The backend is managed by PM2 and survives reboots. Nginx handles all incoming requests and proxies `/api/*` to Express on port 5000.
 
----
-
 ## Prerequisites
-
-Make sure the following are installed on your machine before running locally:
 
 - **Node.js 20+** — [nodejs.org](https://nodejs.org)
 - **npm 9+** — included with Node.js
@@ -121,95 +110,75 @@ Make sure the following are installed on your machine before running locally:
 - A **Google AI Studio** account for the Gemini API key — [aistudio.google.com](https://aistudio.google.com)
 - An **OpenRouter** account for the fallback AI key — [openrouter.ai](https://openrouter.ai)
 
----
-
 ## Local Installation
 
-### 1. Clone the repository
+**1. Clone the repository**
 
 ```bash
 git clone https://github.com/Uchantal/Capstone.git
 cd Capstone/dcip-project
 ```
 
-### 2. Install backend dependencies
+**2. Install backend dependencies**
 
 ```bash
 cd Backend
 npm install
 ```
 
-### 3. Install frontend dependencies
+**3. Install frontend dependencies**
 
 ```bash
 cd ../Frontend
 npm install
 ```
 
----
-
 ## Environment Variables
 
-### Backend — `dcip-project/Backend/.env`
-
-Create this file and fill in your own values:
+Create `dcip-project/Backend/.env` and fill in your own values:
 
 ```env
 PORT=5000
 NODE_ENV=development
 
-# MongoDB Atlas connection string
 MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/dcip
-
-# JWT secret — any long random string (minimum 32 characters)
 JWT_SECRET=your_jwt_secret_here
 
-# Frontend URL (used in CORS and password-reset emails)
 CLIENT_URL=http://localhost:5173
 FRONTEND_URL=http://localhost:5173
 
-# Gmail credentials for email verification and password reset
 EMAIL_USER=your_gmail_address@gmail.com
 EMAIL_PASS=your_gmail_app_password
 
-# Cloudinary — from your Cloudinary dashboard
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 
-# AI — primary model (Google AI Studio)
 GEMINI_API_KEY=your_gemini_api_key
 
-# AI — fallback chain (OpenRouter)
 OPENROUTER_API_KEY=your_openrouter_api_key
 OPENROUTER_MODEL=google/gemma-4-31b-it:free
 ```
 
-> **Note:** The `.env` file is listed in `.gitignore` and is never committed to the repository.
-
-### Frontend — no `.env` file required for local development
-
-The frontend points to `http://localhost:5000` for API calls in development. This is configured in `Frontend/src/services/api.ts`.
-
----
+The `.env` file is listed in `.gitignore` and is never committed to the repository. The frontend requires no `.env` file for local development — API calls point to `http://localhost:5000` by default, configured in `Frontend/src/services/api.ts`.
 
 ## Running Locally
 
-Open **two terminal windows** from `dcip-project/`:
+Open two terminal windows from `dcip-project/`:
 
 **Terminal 1 — Backend:**
 ```bash
 cd Backend
 npm run dev
 ```
-The backend starts on `http://localhost:5000`.
 
 **Terminal 2 — Frontend:**
 ```bash
 cd Frontend
 npm run dev
 ```
-The frontend starts on `http://localhost:5173`. Open this URL in your browser.
+
+Open `http://localhost:5173` in your browser.
 
 **Seed initial data (first run only):**
 ```bash
@@ -218,13 +187,11 @@ npm run seed
 npm run seed:curriculum
 ```
 
----
-
 ## Deployment
 
 The platform is deployed on a DigitalOcean Droplet running Ubuntu 22.04. The full setup guide is in [DEPLOY.md](dcip-project/DEPLOY.md).
 
-### Quick update after pushing changes to GitHub
+**Quick update after pushing changes to GitHub:**
 
 SSH into the server and run:
 
@@ -233,114 +200,13 @@ cd /var/www/Capstone/dcip-project
 bash deploy.sh
 ```
 
-This script:
-1. Pulls the latest code from GitHub (`main` branch)
-2. Installs backend dependencies and compiles TypeScript (`npm run build`)
-3. Restarts the backend process with PM2
-4. Installs frontend dependencies and builds the React app (`npm run build`)
-5. Copies the production build to `/var/www/dcip/` (Nginx web root)
+This script pulls the latest code from GitHub, builds the backend and frontend, restarts the PM2 process, and copies the frontend build to the Nginx web root.
 
-### Verify the deployment
+**Verify the deployment:**
 
 ```bash
-pm2 status                              # Backend should show "online"
-curl http://localhost:5000/api/health   # Should return { "status": "ok" }
+pm2 status
+curl http://localhost:5000/api/health
 ```
 
 Live site: [https://dcip-rw.online](https://dcip-rw.online)
-
----
-
-## Testing Strategies
-
-### 1. Functional Testing — Happy Path
-
-| Scenario | Steps |
-|---|---|
-| Student completes a level | Register → select discipline → complete Learn → Practise → Demonstrate → verify badge awarded |
-| AI hint on course page | Open any lesson → highlight a sentence → click Ask AI → verify contextual answer |
-| AI artwork critique | Submit a VA or GD Demonstrate → verify AI score and feedback appear in result modal |
-| Studio save with folder | Open a studio → create work → save to a new folder → verify it appears in My Studio Works under that folder |
-| Offline mode | Open the app → disconnect internet → navigate between pages → verify offline banner appears and pages still load |
-
-### 2. Edge Case Testing — Invalid Inputs
-
-| Scenario | Expected behaviour |
-|---|---|
-| Submit blank canvas on Demonstrate | Check My Work button blocks submission with a validation message |
-| Ask AI with no text and no image | Ask AI button is disabled — cannot submit |
-| Register with a duplicate email | Backend returns 400 with "email already in use" |
-| Wrong password on login | Returns 401 with "invalid credentials" — no token issued |
-| Upload oversized image to AI | FileReader converts to base64; Gemini API handles up to 20 MB inline data |
-
-### 3. Performance Testing — Different Hardware
-
-| Environment | Result |
-|---|---|
-| Desktop Chrome (Windows 11, 16 GB RAM) | All features load under 1.5 s; canvas interaction at 60 fps |
-| Mobile Chrome (Android, mid-range device) | App loads; touch drawing works; AI panel responds correctly |
-| Slow 3G (Chrome DevTools throttling) | App shell loads from Service Worker cache; offline banner shown; API calls queue in IndexedDB |
-| Incognito / no cache | First load fetches from server; subsequent navigations served from cache |
-
-### 4. AI Model Fallback Testing
-
-| Scenario | Expected behaviour |
-|---|---|
-| Gemini API key valid | Gemini 3.1 Flash Lite responds within 3 s |
-| Gemini unavailable | Automatically falls back to google/gemma-4-31b-it via OpenRouter |
-| All models rate-limited | Returns "AI is currently unavailable. Please try again shortly." — no crash |
-
----
-
-### 5. Offline Functionality Testing (Step by Step)
-
-DCIP is a Progressive Web App (PWA). It caches its pages and assets so students can keep studying even when their internet cuts out, and queues any saved work to sync automatically when the connection returns.
-
-#### Step 1 — Open DevTools
-
-Open the app in **Google Chrome**, then press **F12** (or right-click anywhere → **Inspect**) to open DevTools.
-
-#### Step 2 — Verify the Service Worker is registered
-
-1. Click the **Application** tab in DevTools.
-2. In the left sidebar click **Service Workers**.
-3. You should see `sw.js` listed with status **activated and running**.
-   - If it shows "waiting to activate", click **skipWaiting**.
-4. Still in the Application tab, click **Cache Storage** in the left sidebar — you will see cached entries for the app shell, pages, and assets.
-
-#### Step 3 — Simulate slow bandwidth
-
-1. Click the **Network** tab in DevTools.
-2. In the throttling dropdown (default shows **No throttling**), select **Slow 3G**.
-   - Slow 3G simulates a bandwidth of approximately **400 Kbps download / 400 Kbps upload**, which is realistic for rural Rwanda.
-3. Reload the page — it should still load fully because the Service Worker serves the app shell from cache.
-4. Navigate between pages — all previously visited pages load instantly from cache despite the slow connection.
-
-#### Step 4 — Go fully offline
-
-1. Still in the **Network** tab, change the throttling dropdown to **Offline**.
-   - Alternatively tick the **Offline** checkbox just above the network log.
-2. Reload the page — the app still loads (served from cache, no server needed).
-3. Navigate to any lesson page — content loads normally.
-4. A **gold banner** appears at the top of the screen reading something like "You are offline. Your work will sync when you reconnect."
-
-#### Step 5 — Test the sync queue
-
-1. While still offline, save a studio work or complete an action that writes to the backend (e.g. save a drawing).
-2. Open the **Application** tab → **IndexedDB** → **dcip-offline** → **pendingRequests**.
-3. You will see the queued POST request stored there, waiting to be replayed.
-
-#### Step 6 — Reconnect and verify sync
-
-1. Change the throttling dropdown back to **No throttling** (online).
-2. Within a few seconds the app detects the reconnection, replays the queued request automatically, and shows a **"Your work has been synced."** toast notification at the bottom of the screen.
-3. Check the **pendingRequests** store in IndexedDB — it is now empty.
-
-#### Bandwidth reference
-
-| Chrome DevTools preset | Download speed | Equivalent scenario |
-|---|---|---|
-| No throttling | Full speed | Good Wi-Fi or fibre |
-| Fast 3G | ~1.5 Mbps | Standard mobile data |
-| **Slow 3G** | **~400 Kbps** | **Rural Rwanda (recommended for testing DCIP)** |
-| Offline | 0 Kbps | No connection at all |

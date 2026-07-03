@@ -12,7 +12,6 @@ const RegisterPage         = lazy(() => import('./pages/RegisterPage'))
 const LoginPage            = lazy(() => import('./pages/LoginPage'))
 const ForgotPasswordPage   = lazy(() => import('./pages/ForgotPasswordPage'))
 const ResetPasswordPage    = lazy(() => import('./pages/ResetPasswordPage'))
-const VerifyEmailPage      = lazy(() => import('./pages/VerifyEmailPage'))
 const FeedbackPage         = lazy(() => import('./pages/FeedbackPage'))
 
 // Core student pages
@@ -107,14 +106,6 @@ const VoiceLevel3DemonstratePage = lazy(() => import('./pages/voice/VoiceLevel3D
 const VoiceSharpeningPage      = lazy(() => import('./pages/voice/VoiceSharpeningPage'))
 const VoiceProductionPage      = lazy(() => import('./pages/voice/VoiceProductionPage'))
 
-// Glossaries
-const GlossaryPage              = lazy(() => import('./pages/guitar/GlossaryPage'))
-const PianoGlossaryPage         = lazy(() => import('./pages/piano/GlossaryPage'))
-const VoiceGlossaryPage         = lazy(() => import('./pages/voice/VoiceGlossaryPage'))
-
-// Supervisor
-const SupervisorDashboardPage  = lazy(() => import('./pages/supervisor/SupervisorDashboardPage'))
-
 // Admin
 const AdminOverviewPage     = lazy(() => import('./pages/admin/AdminOverviewPage'))
 const AdminStudentsPage     = lazy(() => import('./pages/admin/AdminStudentsPage'))
@@ -126,6 +117,11 @@ const AdminSchoolDetailPage = lazy(() => import('./pages/admin/AdminSchoolDetail
 const AdminFeedbackPage     = lazy(() => import('./pages/admin/AdminFeedbackPage'))
 const AdminPreviewPage      = lazy(() => import('./pages/admin/AdminPreviewPage'))
 const AdminStudioPage       = lazy(() => import('./pages/admin/AdminStudioPage'))
+
+// Glossaries
+const GlossaryPage              = lazy(() => import('./pages/guitar/GlossaryPage'))
+const PianoGlossaryPage         = lazy(() => import('./pages/piano/GlossaryPage'))
+const VoiceGlossaryPage         = lazy(() => import('./pages/voice/VoiceGlossaryPage'))
 
 // Loading fallback
 function PageLoader() {
@@ -155,7 +151,6 @@ function PreviewProvider({ children }: { children: React.ReactNode }) {
 
 const roleHome = (role?: string) => {
   if (role === 'admin') return '/admin/overview'
-  if (role === 'supervisor') return '/supervisor'
   return '/disciplines'
 }
 
@@ -194,13 +189,6 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-function SupervisorRoute({ children }: { children: React.ReactNode }) {
-  const { token, user } = useAuth()
-  if (!token) return <Navigate to="/login" replace />
-  if (user?.role !== 'supervisor') return <Navigate to={roleHome(user?.role)} replace />
-  return <>{children}</>
-}
-
 // Routes
 function AppContent() {
   const { user } = useAuth()
@@ -219,7 +207,6 @@ function AppContent() {
         <Route path="/login"          element={<PublicRoute><LoginPage /></PublicRoute>} />
         <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
         <Route path="/reset-password" element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
-        <Route path="/verify-email"   element={<VerifyEmailPage />} />
         <Route path="/feedback"       element={<FeedbackPage />} />
 
         {/* Core student */}
@@ -316,9 +303,6 @@ function AppContent() {
         <Route path="/voice/sharpening-myself"       element={S(VoiceSharpeningPage)} />
         <Route path="/voice/production"              element={S(VoiceProductionPage)} />
         <Route path="/voice/glossary"                element={S(VoiceGlossaryPage)} />
-
-        {/* Supervisor */}
-        <Route path="/supervisor" element={<SupervisorRoute><SupervisorDashboardPage /></SupervisorRoute>} />
 
         {/* Admin */}
         <Route path="/admin"                element={A(() => <Navigate to="/admin/overview" replace />)} />
