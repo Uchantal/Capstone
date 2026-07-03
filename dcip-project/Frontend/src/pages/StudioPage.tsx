@@ -5,20 +5,16 @@ import StudioCanvas, { CANVAS_FORMATS, StudioCanvasHandle } from '../components/
 import GuitarStudio, { GuitarStudioHandle } from '../components/studio/GuitarStudio'
 import VoiceStudio, { VoiceStudioHandle } from '../components/studio/VoiceStudio'
 import PianoStudio, { PianoStudioHandle } from '../components/studio/PianoStudio'
-import api from '../services/api'
+import api, { fetchProgressSummary } from '../services/api'
+import { usePreviewMode } from '../hooks/usePreviewMode'
 import DcipLogoLink from '../components/DcipLogoLink'
 import Footer from '../components/Footer'
 
-// Shared handle interface — all studio components expose these methods
 interface StudioHandle {
   captureImage(): string
   getFormat(): { label: string; width: number; height: number }
   captureAudio?: () => Promise<{ dataUrl: string; mimeType: string } | null>
 }
-
-// ---------------------------------------------------------------------------
-// API helpers (inline to avoid extra file)
-// ---------------------------------------------------------------------------
 
 interface StudioWorkMeta {
   _id: string
@@ -86,10 +82,6 @@ function deleteFolderApi(id: string): Promise<void> {
   return api.delete(`/studio/folders/${id}`).then(() => undefined)
 }
 
-// ---------------------------------------------------------------------------
-// Download helper
-// ---------------------------------------------------------------------------
-
 async function downloadFile(src: string, filename: string) {
   let href = src
   if (src.startsWith('http')) {
@@ -104,10 +96,6 @@ async function downloadFile(src: string, filename: string) {
   document.body.removeChild(a)
   if (href !== src) URL.revokeObjectURL(href)
 }
-
-// ---------------------------------------------------------------------------
-// Save dialog
-// ---------------------------------------------------------------------------
 
 interface SaveDialogProps {
   discipline: string
@@ -197,10 +185,6 @@ function SaveDialog({ discipline, format, folders, onSave, onCancel, saving }: S
     </div>
   )
 }
-
-// ---------------------------------------------------------------------------
-// Library view
-// ---------------------------------------------------------------------------
 
 interface LibraryViewProps {
   works: StudioWorkMeta[]
@@ -470,10 +454,6 @@ function LibraryView({
   )
 }
 
-// ---------------------------------------------------------------------------
-// Discipline definitions (module-level constant)
-// ---------------------------------------------------------------------------
-
 const DISCIPLINES = [
   { value: 'visual-arts',    label: 'Visual Arts',    description: 'Painting, drawing, mixed media, and visual composition', image: '/images/visual-arts.jpg' },
   { value: 'graphic-design', label: 'Graphic Design', description: 'Layouts, branding, typography, and digital design',      image: '/images/graphic-design.jpg' },
@@ -482,22 +462,36 @@ const DISCIPLINES = [
   { value: 'piano',          label: 'Piano',          description: 'Piano compositions, sheet music, and arrangements',      image: '/images/piano.jpg' },
 ]
 
-// ---------------------------------------------------------------------------
-// Main StudioPage
-// ---------------------------------------------------------------------------
-
 type StudioView = 'choose' | 'workspace' | 'library'
 
+const PRODUCTION_STAGE_IDS = new Set([
+  'piano-production-demo', 'guitar-production-demo', 'voice-production-demo',
+  'va-production-demo', 'gd-production-demo',
+])
+
 export default function StudioPage() {
-  const navigate     = useNavigate()
-  const { user }     = useAuth()
-  // Separate typed refs per studio type — React forwardRef requires concrete types
+  const navigate        = useNavigate()
+  const { user }        = useAuth()
+  const isPreviewMode   = usePreviewMode()
+  const [isGraduate, setIsGraduate] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    if (isPreviewMode) { setIsGraduate(true); return }
+    fetchProgressSummary()
+      .then(res => {
+        const graduated = (res.data.disciplines as { completedStages: string[] }[])
+          ?.some(d => d.completedStages.some(s => PRODUCTION_STAGE_IDS.has(s))) ?? false
+        setIsGraduate(graduated)
+      })
+      .catch(() => setIsGraduate(false))
+  }, [isPreviewMode])
+
+  // Separate typed refs per studio type — forwardRef requires concrete types, not a union
   const canvasRef    = useRef<StudioCanvasHandle>(null)
   const guitarRef    = useRef<GuitarStudioHandle>(null)
   const voiceRef     = useRef<VoiceStudioHandle>(null)
   const pianoRef     = useRef<PianoStudioHandle>(null)
 
-  // Returns the active studio handle regardless of which component is mounted
   function activeStudio(): StudioHandle | null {
     if (discipline === 'guitar')  return guitarRef.current
     if (discipline === 'voice')   return voiceRef.current
@@ -513,7 +507,7 @@ export default function StudioPage() {
   const [works,        setWorks]         = useState<StudioWorkMeta[]>([])
   const [worksLoading, setWorksLoading]  = useState(false)
   const [folders,      setFolders]       = useState<StudioFolder[]>([])
-  // undefined = All works, null = Uncategorized, string = a specific folder id
+  // undefined = All works | null = Uncategorized | string = folder id
   const [activeFolder, setActiveFolder]  = useState<string | null | undefined>(undefined)
   const [discipline,   setDiscipline]    = useState('')
   const [editWork,     setEditWork]      = useState<{ src: string; format: typeof CANVAS_FORMATS[number] } | null>(null)
@@ -528,7 +522,6 @@ export default function StudioPage() {
 
   const disciplineLabel = DISCIPLINES.find(d => d.value === discipline)?.label ?? discipline
 
-  // Fetch works (optionally scoped to a folder) and the folder list when switching to library
   const loadWorks = useCallback(async () => {
     setWorksLoading(true)
     try { setWorks(await fetchWorks(activeFolder)) } finally { setWorksLoading(false) }
@@ -561,12 +554,12 @@ export default function StudioPage() {
 
   async function handleMoveWork(id: string, folder: string | null) {
     await moveWork(id, folder)
-    // The work no longer belongs in the currently active folder view (unless moved within "All")
+    // Remove from current view unless we're showing all works
     if (activeFolder !== undefined) setWorks(prev => prev.filter(w => w._id !== id))
     else loadWorks()
   }
 
-  // Save work — audio studios save audio when a recording exists, otherwise fall back to PNG
+  // Audio studios prefer saving the recording; fall back to PNG if no audio was captured
   async function handleSave(title: string, folderOpts: { folder?: string; newFolderName?: string }) {
     const studio = activeStudio()
     if (!studio) return
@@ -611,7 +604,6 @@ export default function StudioPage() {
     }
   }
 
-  // Download a saved work from the library
   async function handleDownload(id: string, title: string) {
     const work = await fetchWork(id)
     const ext = work.fileType?.startsWith('audio/')
@@ -621,19 +613,50 @@ export default function StudioPage() {
     downloadFile(src, `${title.replace(/\s+/g, '-')}.${ext}`)
   }
 
-  // Delete a saved work
   async function handleDelete(id: string) {
     await deleteWork(id)
     setWorks(prev => prev.filter(w => w._id !== id))
   }
 
-  // Download current workspace content directly
   function handleDownloadCurrent() {
     const studio = activeStudio()
     if (!studio) return
     const data = studio.captureImage()
     const fmt  = studio.getFormat()
     downloadFile(data, `${disciplineLabel}-${Date.now()}-${fmt.label.replace(/\s+/g, '-')}.png`)
+  }
+
+  if (isGraduate === null) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-surface-warm">
+        <p className="text-text-muted text-sm">Loading...</p>
+      </div>
+    )
+  }
+
+  if (!isGraduate) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-surface-warm">
+        <div className="bg-white border border-surface-border rounded-2xl p-10 text-center max-w-sm mx-4 shadow-sm">
+          <div className="w-14 h-14 rounded-full bg-surface-warm border border-surface-border flex items-center justify-center mx-auto mb-5">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text-muted">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <h2 className="text-text-primary font-bold text-lg mb-2">Studio is Locked</h2>
+          <p className="text-text-secondary text-sm leading-relaxed mb-6">
+            Complete your first production stage to unlock the Studio and access your creative workspace.
+          </p>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="w-full bg-primary text-white font-semibold py-2.5 rounded-xl hover:bg-primary-dark transition-colors text-sm"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (

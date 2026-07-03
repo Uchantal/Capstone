@@ -18,12 +18,9 @@ const NO_BACK_PATHS = new Set([
   '/profile',
 ])
 
-// Explicit parent for every content page.
-// Used when there is no browser history (direct URL, bookmark, post-SW-reload)
-// so the back button always navigates to the right place rather than
-// falling back blindly to /disciplines.
+// Static parent map for back button fallback when there's no SPA history
 const ROUTE_PARENT: Record<string, string> = {
-  // ── Piano ────────────────────────────────────────────────────────────
+  // Piano
   '/piano/understanding-the-piano':     '/piano/virtual-instrument',
   '/piano/notes-build-chords':          '/piano/understanding-the-piano',
   '/piano/level-1':                     '/piano/virtual-instrument',
@@ -38,7 +35,7 @@ const ROUTE_PARENT: Record<string, string> = {
   '/piano/sharpening-myself':           '/piano/virtual-instrument',
   '/piano/production':                  '/piano/virtual-instrument',
 
-  // ── Guitar ───────────────────────────────────────────────────────────
+  // Guitar
   '/guitar/reading-the-fretboard':      '/guitar/virtual-instrument',
   '/guitar/notes-across-the-neck':      '/guitar/reading-the-fretboard',
   '/guitar/level-1':                    '/guitar/virtual-instrument',
@@ -53,7 +50,7 @@ const ROUTE_PARENT: Record<string, string> = {
   '/guitar/sharpening-myself':          '/guitar/virtual-instrument',
   '/guitar/production':                 '/guitar/virtual-instrument',
 
-  // ── Voice ────────────────────────────────────────────────────────────
+  // Voice
   '/voice/posture-breath-voice':        '/voice/studio',
   '/voice/pitch-and-scale':             '/voice/posture-breath-voice',
   '/voice/level-1':                     '/voice/studio',
@@ -68,7 +65,7 @@ const ROUTE_PARENT: Record<string, string> = {
   '/voice/sharpening-myself':           '/voice/studio',
   '/voice/production':                  '/voice/studio',
 
-  // ── Visual Arts ──────────────────────────────────────────────────────
+  // Visual Arts
   '/visual-arts/course-1':              '/visual-arts/virtual-canvas',
   '/visual-arts/course-2':              '/visual-arts/course-1',
   '/visual-arts/level-1':               '/visual-arts/virtual-canvas',
@@ -83,7 +80,7 @@ const ROUTE_PARENT: Record<string, string> = {
   '/visual-arts/sharpening':            '/visual-arts/virtual-canvas',
   '/visual-arts/production':            '/visual-arts/virtual-canvas',
 
-  // ── Graphic Design ───────────────────────────────────────────────────
+  // Graphic Design
   '/graphic-design/course-1':           '/graphic-design/virtual-studio',
   '/graphic-design/course-2':           '/graphic-design/course-1',
   '/graphic-design/level-1':            '/graphic-design/virtual-studio',
@@ -98,7 +95,7 @@ const ROUTE_PARENT: Record<string, string> = {
   '/graphic-design/sharpening':         '/graphic-design/virtual-studio',
   '/graphic-design/production':         '/graphic-design/virtual-studio',
 
-  // ── Hub / instrument pages ───────────────────────────────────────────
+  // Hub / instrument pages
   '/piano/virtual-instrument':          '/disciplines',
   '/guitar/virtual-instrument':         '/disciplines',
   '/voice/studio':                      '/disciplines',
@@ -122,11 +119,7 @@ export default function MainLayout({ children, background = 'bg-white' }: Props)
   const showBack = isStudent && !NO_BACK_PATHS.has(pathname)
 
   const handleBack = () => {
-    // If there is real browser history from within this SPA session use it —
-    // this gives the most natural "undo last navigation" feeling.
-    // Otherwise fall back to the statically-defined parent for this route so
-    // that the button still works after a page reload, a direct URL open, or
-    // after the service-worker reload that fires on each new deploy.
+    // Use SPA history when available; fall back to static parent after reload or direct URL open.
     if ((window.history.state?.idx ?? 0) > 0) {
       navigate(-1)
     } else {

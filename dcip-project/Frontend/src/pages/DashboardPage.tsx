@@ -340,6 +340,14 @@ export default function DashboardPage() {
   ) / 10
   const levelsCompleted = summary?.totalLevelsCompleted ?? 0
 
+  const PRODUCTION_STAGE_IDS = new Set([
+    'piano-production-demo', 'guitar-production-demo', 'voice-production-demo',
+    'va-production-demo', 'gd-production-demo',
+  ])
+  const isGraduate = disciplines.some(d =>
+    d.completedStages.some(s => PRODUCTION_STAGE_IDS.has(s))
+  )
+
   return (
     <MainLayout>
       <div className="max-w-6xl mx-auto px-6 py-8">
@@ -369,19 +377,41 @@ export default function DashboardPage() {
         </div>
 
         {/* Studio banner */}
-        <div className="bg-white rounded-2xl px-6 py-5 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <p className="text-text-primary font-bold text-sm">DCIP Studio</p>
-            <p className="text-text-muted text-xs mt-0.5">
-              Unlock the studio, access virtual space and create serious work.
-            </p>
+        <div className={`rounded-2xl px-6 py-5 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${isGraduate ? 'bg-white border border-surface-border' : 'bg-surface-warm border border-surface-border'}`}>
+          <div className="flex items-start gap-3">
+            {!isGraduate && (
+              <div className="w-8 h-8 rounded-full bg-surface-border flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-text-muted">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </div>
+            )}
+            <div>
+              <p className="text-text-primary font-bold text-sm">DCIP Studio</p>
+              <p className="text-text-muted text-xs mt-0.5">
+                {isGraduate
+                  ? 'Your creative studio is open. Build, experiment, and create serious work.'
+                  : 'Complete your first production to unlock the Studio.'}
+              </p>
+            </div>
           </div>
-          <button
-            onClick={() => navigate('/studio')}
-            className="flex-shrink-0 bg-primary text-white font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-primary-dark transition-colors"
-          >
-            Enter Studio
-          </button>
+          {isGraduate ? (
+            <button
+              onClick={() => navigate('/studio')}
+              className="flex-shrink-0 bg-primary text-white font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-primary-dark transition-colors"
+            >
+              Enter Studio
+            </button>
+          ) : (
+            <span className="flex-shrink-0 inline-flex items-center gap-2 text-text-muted text-xs font-medium px-5 py-2.5 rounded-xl bg-surface-border/60 border border-surface-border cursor-not-allowed select-none">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              Locked
+            </span>
+          )}
         </div>
 
         {/* Disciplines */}

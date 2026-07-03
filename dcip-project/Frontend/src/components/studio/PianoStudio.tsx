@@ -6,8 +6,6 @@ export interface PianoStudioHandle {
   captureAudio(): Promise<{ dataUrl: string; mimeType: string } | null>
 }
 
-// ---- Note definitions ----
-
 interface PianoNote {
   name: string
   baseName: string
@@ -72,10 +70,7 @@ const NOTE_COLORS: Record<string, string> = {
   'B': '#555555',
 }
 
-// ---- Laptop keyboard to note mapping (standard QWERTY piano layout) ----
-// Middle row (A-J, K-L) = white notes C4-D5
-// Top row (W E _ T Y U _ O P) = black notes C#4-D#5
-
+// QWERTY: middle row (A-L) = white notes C4-D5; top row (W E T Y U O P) = black notes
 const KEY_MAP: Record<string, string> = {
   'a': 'C4',  'w': 'C#4',
   's': 'D4',  'e': 'D#4',
@@ -91,8 +86,6 @@ const KEY_MAP: Record<string, string> = {
 const NOTE_TO_KEY = Object.fromEntries(
   Object.entries(KEY_MAP).map(([k, n]) => [n, k.toUpperCase()])
 )
-
-// ---- Web Audio ----
 
 let _audioCtx: AudioContext | null = null
 function getAudioCtx(): AudioContext {
@@ -116,8 +109,6 @@ function playNoteSound(freq: number) {
   osc.start(ctx.currentTime)
   osc.stop(ctx.currentTime + 1.4)
 }
-
-// ---- WAV export (OfflineAudioContext → PCM → WAV blob → download) ----
 
 function encodeWav(buffer: AudioBuffer): Blob {
   const numCh = buffer.numberOfChannels
@@ -193,8 +184,6 @@ function blobToDataUrl(blob: Blob): Promise<string> {
   })
 }
 
-// ---- Canvas export ----
-
 function renderToCanvas(
   title: string, composer: string, key: string, bpm: string,
   style: string, sequence: PianoNote[], notes: string,
@@ -254,7 +243,6 @@ function renderToCanvas(
   return canvas.toDataURL('image/png')
 }
 
-// ---- Piano key dimensions (larger than before) ----
 const W_KEY    = 62   // white key width px
 const W_HEIGHT = 200  // white key height px
 const B_KEY    = 38   // black key width px
@@ -265,8 +253,6 @@ function getBlackKeyLeft(note: PianoNote): number {
   const offset = BLACK_OFFSETS[note.baseName] ?? 0
   return octave * 7 * W_KEY + offset * W_KEY - B_KEY / 2
 }
-
-// ---- Keyboard component ----
 
 interface KeyboardProps {
   activeNote: string | null
@@ -329,8 +315,6 @@ function Keyboard({ activeNote, onPlay }: KeyboardProps) {
   )
 }
 
-// ---- Keyboard shortcut legend entries ----
-
 const SHORTCUT_LEGEND = [
   { key: 'A', note: 'C4',  isBlack: false },
   { key: 'W', note: 'C#4', isBlack: true  },
@@ -350,20 +334,14 @@ const SHORTCUT_LEGEND = [
   { key: 'P', note: 'D#5', isBlack: true  },
 ]
 
-// ---- Constants ----
-
 const KEYS_LIST   = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const STYLES_LIST = ['Classical', 'Jazz', 'Gospel', 'Pop', 'Blues', 'Contemporary', 'Neo-soul', 'Ambient', 'Ragtime', 'Other']
 const TIME_SIGS   = ['4/4', '3/4', '6/8', '2/4', '12/8', '5/4', '7/8']
-
-// ---- Sequence entry (note + when it was played relative to recording start) ----
 
 interface SequenceEntry {
   note: PianoNote
   timestamp: number  // ms from the moment recording started
 }
-
-// ---- Main component ----
 
 const PianoStudio = forwardRef<PianoStudioHandle, { onDirty: () => void }>(({ onDirty }, ref) => {
   const [title,      setTitle]      = useState('')
@@ -379,8 +357,7 @@ const PianoStudio = forwardRef<PianoStudioHandle, { onDirty: () => void }>(({ on
   const [playing,    setPlaying]    = useState(false)
   const [exporting,  setExporting]  = useState(false)
 
-  // Ref so the keyboard handler always reads the latest recording state
-  // without needing to re-register the listener each time recording toggles
+  // Ref so keyboard handler reads current recording state without re-registering on each toggle.
   const recordingRef      = useRef(recording)
   recordingRef.current    = recording
   const recordingStart    = useRef<number>(0)  // wall-clock time when recording began

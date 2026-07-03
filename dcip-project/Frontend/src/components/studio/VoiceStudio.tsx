@@ -6,8 +6,6 @@ export interface VoiceStudioHandle {
   captureAudio(): Promise<{ dataUrl: string; mimeType: string } | null>
 }
 
-// ---- Types ----
-
 interface Take {
   id: string
   name: string
@@ -24,8 +22,6 @@ interface SongSection {
   lyrics: string
 }
 
-// ---- Music theory ----
-
 const ALL_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const NOTE_FREQS: Record<string, number> = {
   'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13,
@@ -41,8 +37,7 @@ function getScale(root: string, type: 'major' | 'minor'): string[] {
   return (type === 'major' ? MAJOR_STEPS : MINOR_STEPS).map(s => ALL_NOTES[(idx + s) % 12])
 }
 
-// ---- Web Audio (pitch pipe tones only) ----
-
+// Web Audio — pitch pipe tones only
 let _ptx: AudioContext | null = null
 function getPtx(): AudioContext {
   if (!_ptx) _ptx = new AudioContext()
@@ -63,8 +58,6 @@ function playPitchTone(freq: number) {
   osc.start(t); osc.stop(t + 1.2)
 }
 
-// ---- Helpers ----
-
 function fmtTime(sec: number): string {
   const m = Math.floor(sec / 60)
   const s = Math.floor(sec % 60).toString().padStart(2, '0')
@@ -83,9 +76,7 @@ function fileExt(mimeType: string): string {
   return 'webm'
 }
 
-// ---- Waveform canvas component ----
-// Draws idle animation when inactive, live waveform / spectrum when a mic analyser is connected.
-
+// Draws idle animation when inactive, live waveform/spectrum when a mic analyser is connected
 type VisualizerMode = 'waveform' | 'spectrum'
 
 interface WaveformCanvasProps {
@@ -109,7 +100,6 @@ function WaveformCanvas({ analyserRef, isLive, mode }: WaveformCanvasProps) {
     cancelAnimationFrame(frameRef.current)
 
     if (!isLive) {
-      // Idle: gentle breathing sine
       let phase = 0
       const idle = () => {
         frameRef.current = requestAnimationFrame(idle)
@@ -130,7 +120,6 @@ function WaveformCanvas({ analyserRef, isLive, mode }: WaveformCanvasProps) {
       }
       idle()
     } else {
-      // Live: draw from analyser
       const draw = () => {
         const analyser = analyserRef.current
         if (!analyser) return
@@ -185,8 +174,6 @@ function WaveformCanvas({ analyserRef, isLive, mode }: WaveformCanvasProps) {
   )
 }
 
-// ---- Pitch Pipe ----
-
 interface PitchPipeProps { selectedKey: string; scaleType: 'major' | 'minor' }
 
 function PitchPipe({ selectedKey, scaleType }: PitchPipeProps) {
@@ -214,8 +201,6 @@ function PitchPipe({ selectedKey, scaleType }: PitchPipeProps) {
     </div>
   )
 }
-
-// ---- Canvas export (PNG composition sheet) ----
 
 function renderToCanvas(
   title: string, artist: string, selectedKey: string, scaleType: string,
@@ -256,8 +241,6 @@ function renderToCanvas(
   return canvas.toDataURL('image/png')
 }
 
-// ---- Constants ----
-
 const SECTION_TYPES = ['Intro', 'Verse', 'Pre-Chorus', 'Chorus', 'Post-Chorus', 'Bridge', 'Outro']
 const KEYS = ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B']
 const GENRES = ['Pop', 'R&B', 'Gospel', 'Jazz', 'Classical', 'Folk', 'Afrobeat', 'Ballad', 'Soul', 'Hip-Hop']
@@ -266,10 +249,7 @@ function newSection(type = 'Verse'): SongSection {
   return { id: `${Date.now()}-${Math.random()}`, type, vocalDirection: '', lyrics: '' }
 }
 
-// ---- Main component ----
-
 const VoiceStudio = forwardRef<VoiceStudioHandle, { onDirty: () => void }>(({ onDirty }, ref) => {
-  // Metadata
   const [title,       setTitle]       = useState('')
   const [artist,      setArtist]      = useState('')
   const [selectedKey, setSelectedKey] = useState('C')
@@ -282,13 +262,11 @@ const VoiceStudio = forwardRef<VoiceStudioHandle, { onDirty: () => void }>(({ on
   ])
   const [vizMode,     setVizMode]     = useState<VisualizerMode>('waveform')
 
-  // Recording state
   const [micState,    setMicState]    = useState<'idle' | 'requesting' | 'active' | 'denied'>('idle')
   const [takes,       setTakes]       = useState<Take[]>([])
   const [playingId,   setPlayingId]   = useState<string | null>(null)
   const [elapsedSec,  setElapsedSec]  = useState(0)
 
-  // Refs
   const streamRef       = useRef<MediaStream | null>(null)
   const audioCtxRef     = useRef<AudioContext | null>(null)
   const analyserRef     = useRef<AnalyserNode | null>(null)
@@ -299,15 +277,12 @@ const VoiceStudio = forwardRef<VoiceStudioHandle, { onDirty: () => void }>(({ on
   const playingAudioRef = useRef<HTMLAudioElement | null>(null)
   const takeCountRef    = useRef(0)
 
-  // ---- Recording controls ----
-
   async function startRecording() {
     setMicState('requesting')
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
       streamRef.current = stream
 
-      // Set up AudioContext + AnalyserNode so the waveform canvas can draw
       const audioCtx = new AudioContext()
       audioCtxRef.current = audioCtx
       const source = audioCtx.createMediaStreamSource(stream)
@@ -317,7 +292,6 @@ const VoiceStudio = forwardRef<VoiceStudioHandle, { onDirty: () => void }>(({ on
       source.connect(analyser)
       analyserRef.current = analyser
 
-      // Set up MediaRecorder for actual audio capture
       const mime = bestMimeType()
       const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined)
       chunksRef.current = []
@@ -370,8 +344,6 @@ const VoiceStudio = forwardRef<VoiceStudioHandle, { onDirty: () => void }>(({ on
     setElapsedSec(0)
   }
 
-  // ---- Take playback ----
-
   function playTake(take: Take) {
     if (playingId === take.id) {
       playingAudioRef.current?.pause()
@@ -412,7 +384,6 @@ const VoiceStudio = forwardRef<VoiceStudioHandle, { onDirty: () => void }>(({ on
     onDirty()
   }
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (elapsedTimerRef.current) clearInterval(elapsedTimerRef.current)

@@ -2,8 +2,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import GraphicDesignToolbar from '../canvas/GraphicDesignToolbar'
 import SessionNotepad from '../canvas/SessionNotepad'
 
-// ── Canvas templates ──────────────────────────────────────────────────────────
-
 export interface CanvasTemplate {
   id: string
   label: string
@@ -20,8 +18,6 @@ export const CANVAS_TEMPLATES: CanvasTemplate[] = [
   { id: 'free',            label: 'Free Canvas',     realW: 1200, realH: 800  },
 ]
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
 export type ShapeType =
   'triangle' | 'diamond' | 'pentagon' | 'hexagon' | 'star' | 'cross' |
   'heart' | 'speech-bubble' | 'arrow-right' | 'arrow-left' | 'double-arrow' | 'line'
@@ -34,7 +30,6 @@ export interface DesignElement {
   width: number
   height: number
   zIndex: number
-  // text
   text?: string
   fontSize?: number
   fontWeight?: 'normal' | 'bold'
@@ -42,13 +37,11 @@ export interface DesignElement {
   textDecoration?: 'none' | 'underline'
   textAlign?: 'left' | 'center' | 'right'
   color?: string
-  // shape / rect / circle
   fill?: string
   strokeColor?: string
   strokeWidth?: number
   borderRadius?: number
   shapeType?: ShapeType
-  // image
   src?: string
 }
 
@@ -56,8 +49,6 @@ export const DEFAULT_BG_COLOR = '#FFFFFF'
 export const DEFAULT_ELEMENTS: DesignElement[] = []
 
 type HandleId = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
-
-// ── Shape SVG renderers ───────────────────────────────────────────────────────
 
 export const SHAPE_SVG: Record<ShapeType, (fill: string) => React.ReactNode> = {
   triangle:        fill => <polygon points="50,5 95,95 5,95" fill={fill} />,
@@ -73,8 +64,6 @@ export const SHAPE_SVG: Record<ShapeType, (fill: string) => React.ReactNode> = {
   line:            fill => <rect x={0} y={42} width={100} height={16} fill={fill} />,
   'double-arrow':  fill => <polygon points="20,50 40,25 40,38 60,38 60,25 80,50 60,75 60,62 40,62 40,75" fill={fill} />,
 }
-
-// ── Shape picker items ────────────────────────────────────────────────────────
 
 export type PickerItem =
   | { kind: 'rect';   label: string }
@@ -109,8 +98,6 @@ function renderShapeContent(el: DesignElement): React.ReactNode {
     </svg>
   )
 }
-
-// ── Canvas export ─────────────────────────────────────────────────────────────
 
 function drawRoundedRect(
   ctx: CanvasRenderingContext2D,
@@ -252,8 +239,6 @@ export async function exportDesignToDataUrl(
   return canvas.toDataURL('image/png')
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
 function makeId(): string {
   return Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4)
 }
@@ -301,8 +286,6 @@ const RESIZE_HANDLES: Array<{ id: HandleId; pos: React.CSSProperties; cursor: st
   { id: 'w',  pos: { left: -5, top: 'calc(50% - 5px)' },        cursor: 'ew-resize'   },
 ]
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
 interface Props {
   defaultElements: DesignElement[]
   defaultBgColor: string
@@ -337,7 +320,7 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
 
   const selectedEl = elements.find(el => el.id === selectedId) ?? null
 
-  // ── Responsive canvas scale ───────────────────────────────────────────────────
+  // Scale canvas to fit the available area, accounting for label height
   useEffect(() => {
     const area = canvasAreaRef.current
     if (!area) return
@@ -368,7 +351,6 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [template.id])
 
-  // ── History ───────────────────────────────────────────────────────────────────
   function pushHistory(els: DesignElement[], bg: string) {
     const next = historyRef.current.slice(0, historyIdxRef.current + 1)
     next.push({ elements: els, bgColor: bg })
@@ -403,7 +385,6 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
     setSelectedId(null)
   }
 
-  // ── Commit helpers ────────────────────────────────────────────────────────────
   function commit(newEls: DesignElement[], newBg: string) {
     setElements(newEls)
     setBgColor(newBg)
@@ -433,7 +414,6 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
     }
   }
 
-  // ── Element actions ───────────────────────────────────────────────────────────
   function deleteSelected() {
     if (!selectedId) return
     const newEls = elements.filter(e => e.id !== selectedId)
@@ -452,7 +432,6 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
     commit(newEls, bgColor)
   }
 
-  // ── Add elements ──────────────────────────────────────────────────────────────
   function addTextElement() {
     const id = makeId()
     const offset = (elements.length % 5) * 18
@@ -560,7 +539,7 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
     e.target.value = ''
   }
 
-  // ── Drag and resize (scale-corrected) ─────────────────────────────────────────
+  // Drag and resize — mouse deltas are divided by canvasScale to get logical coordinates
   function handleElementMouseDown(e: React.MouseEvent, elId: string) {
     if (e.button !== 0) return
     e.stopPropagation()
@@ -647,7 +626,6 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
     document.addEventListener('mouseup', onUp)
   }
 
-  // ── Toolbar callbacks ─────────────────────────────────────────────────────────
   function handleFontSizeChange(sz: number) {
     if (!selectedEl || selectedEl.type !== 'text') return
     updateElement(selectedEl.id, { fontSize: sz })
@@ -673,7 +651,6 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
     updateElement(selectedEl.id, { textAlign: align })
   }
 
-  // ── Template management ───────────────────────────────────────────────────────
   function applyTemplate(t: CanvasTemplate) {
     canvasWRef.current  = t.realW
     canvasHRef.current  = t.realH
@@ -704,7 +681,6 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
     }
   }
 
-  // ── Derived ───────────────────────────────────────────────────────────────────
   const sorted = [...elements].sort((a, b) => a.zIndex - b.zIndex)
 
   const activeElementColor: string | null = selectedEl
@@ -715,11 +691,10 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
           : null)
     : null
 
-  // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="flex-1 flex flex-col-reverse sm:flex-row overflow-hidden">
 
-      {/* ── Icon toolbar ── */}
+      {/* Toolbar */}
       <GraphicDesignToolbar
         selectedElement={selectedEl}
         colour={activeElementColor}
@@ -749,12 +724,11 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
         onTemplateChange={selectTemplate}
       />
 
-      {/* ── Canvas area ── */}
+      {/* Canvas area */}
       <div ref={canvasAreaRef} className="flex-1 relative overflow-hidden bg-[#F3F3F3]">
         <SessionNotepad />
 
         {template.id === 'free' ? (
-          // Free Canvas: fills the entire workspace at 1:1 scale
           <div
             style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}
           >
@@ -793,7 +767,6 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
           </div>
           </div>
         ) : (
-          // Fixed aspect-ratio canvas centred in the workspace
           <>
           <div style={{ position: 'absolute', inset: '0 0 28px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div
@@ -966,7 +939,6 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
         </div>
         </div>
         </div>
-        {/* Format label */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <span style={{ fontSize: 11, color: '#6B7280', fontFamily: 'sans-serif' }}>
             {template.label} - {template.realW} x {template.realH}px
@@ -977,7 +949,7 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
 
       </div>
 
-      {/* ── Confirmation dialog: switching format will clear canvas ── */}
+      {/* Format change dialog */}
       {pendingTemplate !== null && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: '#fff', border: '1px solid #C9A84C', borderRadius: 12, padding: 28, maxWidth: 360, width: '90%' }}>

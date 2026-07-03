@@ -95,7 +95,7 @@ export const createSupervisor = (data: {
   schoolId: string
 }) => api.post('/admin/supervisors', data)
 
-// Sessions: progress and analytics
+// Progress
 export const fetchProgress = () => api.get('/sessions/progress')
 
 export const fetchProgressByDiscipline = (discipline: string) =>
@@ -131,7 +131,7 @@ export const saveProductionResult = (data: {
 export const fetchMyProductionResults = (discipline?: string) =>
   api.get('/production/result/me', { params: discipline ? { discipline } : {} })
 
-// Journey (Visual Arts structured progression)
+// Visual Arts journey
 export const fetchJourneyProgress = (discipline: string) =>
   api.get('/journey/progress', { params: { discipline } })
 
@@ -148,7 +148,7 @@ export const saveVAProductionResult = (data: {
   }
 }) => api.post('/journey/va-production', data)
 
-// Journey (Graphic Design structured progression)
+// Graphic Design journey
 export const fetchGDLevelPoster = (level: number) =>
   api.get('/journey/gd-level-poster', { params: { level } })
 
@@ -182,7 +182,7 @@ export const saveGDProductionResult = (data: {
   }
 }) => api.post('/journey/gd-production', data)
 
-// Piano demonstration-based progression
+// Piano
 export const fetchPianoProgress = () =>
   api.get('/piano/progress')
 
@@ -192,35 +192,35 @@ export const completePianoDemonstration = (level: 1 | 2 | 3, passed: boolean) =>
 export const completePianoProduction = (passed: boolean) =>
   api.post('/piano/production/complete', { passed })
 
-// Guitar demonstration-based progression
+// Guitar
 export const fetchGuitarProgress = () => api.get('/guitar/progress')
 export const completeGuitarDemonstration = (level: 1 | 2 | 3, passed: boolean) =>
   api.post(`/guitar/demonstration/${level}/complete`, { passed })
 export const completeGuitarProduction = (passed: boolean) =>
   api.post('/guitar/production/complete', { passed })
 
-// Visual Arts demonstration-based progression
+// Visual Arts
 export const fetchVisualArtsProgress = () => api.get('/visual-arts/progress')
 export const completeVisualArtsDemonstration = (level: 1 | 2 | 3, passed: boolean, canvasSnapshot: string) =>
   api.post(`/visual-arts/demonstration/${level}/complete`, { passed, canvasSnapshot })
 export const completeVisualArtsProduction = (passed: boolean) =>
   api.post('/visual-arts/production/complete', { passed })
 
-// Graphic Design demonstration-based progression
+// Graphic Design
 export const fetchGDProgress = () => api.get('/graphic-design/progress')
 export const completeGDDemonstration = (level: 1 | 2 | 3, passed: boolean, posterSnapshot: string, imageData: string) =>
   api.post(`/graphic-design/demonstration/${level}/complete`, { passed, posterSnapshot, imageData })
 export const completeGDProduction = (passed: boolean) =>
   api.post('/graphic-design/production/complete', { passed })
 
-// Voice demonstration-based progression
+// Voice
 export const fetchVoiceProgress = () => api.get('/voice/progress')
 export const completeVoiceDemonstration = (level: 1 | 2 | 3, passed: boolean) =>
   api.post(`/voice/demonstration/${level}/complete`, { passed })
 export const completeVoiceProduction = (passed: boolean) =>
   api.post('/voice/production/complete', { passed })
 
-// Unified skill summary — all disciplines, stage-based skill levels
+// Summary
 export const fetchProgressSummary = () => api.get('/progress/summary')
 
 // Feedback
@@ -236,7 +236,7 @@ export const submitFeedback = (data: {
 export const getAdminFeedback = () => api.get('/feedback')
 export const getAdminFeedbackCount = () => api.get('/feedback/count')
 
-// Engagement tracking
+// Engagement
 export const saveEngagementScore = (discipline: string, stage: string, score: number) =>
   api.post(`/engagement/${discipline}/${stage}`, { score })
 
@@ -246,7 +246,7 @@ export const fetchEngagementScores = (discipline: string) =>
 export const fetchAdminStudentProfile = (id: string) =>
   api.get(`/admin/students/${id}/profile`)
 
-// Drafts — one slot per student per discipline (VA and GD practise / production)
+// Drafts
 export const saveDraft = (data: { discipline: string; snapshot: string; thumbnailData?: string }) =>
   api.post('/drafts', data)
 

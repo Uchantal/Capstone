@@ -198,7 +198,7 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
   useEffect(() => { if (tool !== 'ruler') setRulerLine(null) }, [tool])
   useEffect(() => { if (tool !== 'rect' && tool !== 'circle') setShapeDim(null) }, [tool])
 
-  // ── Render shapes from object model onto shapeCanvasRef ───────────────────
+  // Render shapes onto shapeCanvasRef
   const renderShapes = useCallback((shapes: Shape[], selId: string | null) => {
     const shapeCanvas = shapeCanvasRef.current
     const eraseCanvas = eraseCanvasRef.current
@@ -240,7 +240,7 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
     }
   }, [])
 
-  // ── Composite ─────────────────────────────────────────────────────────────
+  // Composite all canvas layers into the export canvas
   const renderComposite = useCallback(() => {
     const bg    = bgCanvasRef.current
     const shape = shapeCanvasRef.current
@@ -255,7 +255,6 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
     ctx.drawImage(draw,  0, 0)
   }, [])
 
-  // ── History ───────────────────────────────────────────────────────────────
   const saveToHistory = useCallback(() => {
     const draw  = drawCanvasRef.current
     const erase = eraseCanvasRef.current
@@ -325,10 +324,8 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
     applyHistoryEntry(historyRef.current[historyIdx.current])
   }, [applyHistoryEntry])
 
-  // ── Keyboard shortcuts ────────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // Ignore if focused in an input
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
 
       if (e.ctrlKey) {
@@ -360,7 +357,6 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
     return () => window.removeEventListener('keydown', handler)
   }, [undo, redo, renderShapes, renderComposite, saveToHistory])
 
-  // ── Canvas resize ─────────────────────────────────────────────────────────
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
@@ -415,7 +411,7 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // ── Drawing ───────────────────────────────────────────────────────────────
+  // Drawing handlers
   const startDraw = (e: React.MouseEvent | React.TouchEvent) => {
     const drawCanvas = drawCanvasRef.current
     if (!drawCanvas) return
@@ -426,7 +422,7 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
     const t = toolRef.current
 
     if (t === 'select') {
-      // Hit-test shapes in reverse order (topmost first)
+      // Test shapes in reverse order so topmost shape wins
       const found = [...shapesRef.current].reverse().find(s => hitTestShape(s, pos.x, pos.y))
       if (found) {
         setSelectedId(found.id)
@@ -446,7 +442,7 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
     if (t === 'ruler') return  // ruler only tracks on mousemove
 
     if (t === 'line' || t === 'rect' || t === 'circle') {
-      // Snapshot current shapeCanvas state as the base for live preview
+      // Snapshot shapeCanvas as the baseline so live preview can restore it on each move
       const shapeCanvas = shapeCanvasRef.current
       const shapeCtx = shapeCanvas?.getContext('2d', { willReadFrequently: true })
       if (shapeCtx && shapeCanvas) {
@@ -464,7 +460,6 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
     const pos = getPos(e, drawCanvas)
     const t = toolRef.current
 
-    // ── Select: drag-to-move ─────────────────────────────────────────────
     if (t === 'select') {
       if (!isDraggingShape.current || !selectedIdRef.current) return
       shapesRef.current = shapesRef.current.map(s => {
@@ -480,14 +475,12 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
       return
     }
 
-    // ── Ruler: live distance overlay ─────────────────────────────────────
     if (t === 'ruler') {
       const dist = parseFloat((Math.hypot(pos.x - startPos.current.x, pos.y - startPos.current.y) * 2.54 / 96).toFixed(2))
       setRulerLine({ x1: startPos.current.x, y1: startPos.current.y, x2: pos.x, y2: pos.y, dist })
       return
     }
 
-    // ── Brush ─────────────────────────────────────────────────────────────
     if (t === 'brush') {
       ctx.save()
       ctx.globalCompositeOperation = 'source-over'
@@ -505,12 +498,10 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
       return
     }
 
-    // ── Eraser ────────────────────────────────────────────────────────────
     if (t === 'eraser') {
       const prevPos = lastPos.current
       lastPos.current = pos
 
-      // Erase freehand brush strokes on draw canvas
       ctx.save()
       ctx.globalCompositeOperation = 'destination-out'
       ctx.strokeStyle = 'rgba(0,0,0,1)'
@@ -523,8 +514,7 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
       ctx.stroke()
       ctx.restore()
 
-      // Paint the same stroke onto the erase canvas — renderShapes applies it
-      // as destination-out to punch pixel-accurate holes through shapes
+      // Mirror stroke onto eraseCanvas; renderShapes applies it as destination-out to punch holes through shapes
       const eraseCanvas = eraseCanvasRef.current
       const eraseCtx = eraseCanvas?.getContext('2d', { willReadFrequently: true })
       if (eraseCtx) {
@@ -545,13 +535,12 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
       return
     }
 
-    // ── Shape preview ─────────────────────────────────────────────────────
     if (t === 'line' || t === 'rect' || t === 'circle') {
       const shapeCanvas = shapeCanvasRef.current
       const shapeCtx = shapeCanvas?.getContext('2d', { willReadFrequently: true })
       if (!shapeCtx || !shapeCanvas || !previewBaseRef.current) return
 
-      // Restore the baseline (already-committed shapes), then draw the live preview on top
+      // Restore baseline, then paint live preview on top
       shapeCtx.putImageData(previewBaseRef.current, 0, 0)
 
       previewShapeRef.current = {
@@ -594,7 +583,6 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
     drawing.current = false
     const t = toolRef.current
 
-    // ── Select: commit moved position ────────────────────────────────────
     if (t === 'select') {
       if (isDraggingShape.current) {
         isDraggingShape.current = false
@@ -604,10 +592,8 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
       return
     }
 
-    // ── Ruler: keep the line visible until next click ────────────────────
     if (t === 'ruler') return
 
-    // ── Shapes: commit preview to object model ───────────────────────────
     if (t === 'line' || t === 'rect' || t === 'circle') {
       if (previewShapeRef.current) {
         const committed: Shape = {
@@ -628,7 +614,6 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
     if (t !== 'eraser') onColourUsed?.(colourRef.current)
   }
 
-  // ── Background colour ─────────────────────────────────────────────────────
   const changeBgColour = (newBg: string) => {
     bgRef.current = newBg
     setBgColour(newBg)
@@ -642,7 +627,6 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
     onInteraction?.()
   }
 
-  // ── Clear ─────────────────────────────────────────────────────────────────
   const confirmClear = () => {
     const draw  = drawCanvasRef.current
     const erase = eraseCanvasRef.current
@@ -658,7 +642,6 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
     setShowConfirm(false)
   }
 
-  // Cursor style based on active tool and hover
   const getCursor = () => {
     if (tool === 'select') return 'default'
     if (tool === 'ruler')  return 'crosshair'
@@ -670,7 +653,6 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
     try {
       const s = JSON.parse(data) as { drawData: string; eraseData: string; bgColor: string; shapes: Shape[] }
 
-      // Restore background color
       setBgColour(s.bgColor)
       bgRef.current = s.bgColor
       const bgCanvas = bgCanvasRef.current
@@ -679,7 +661,6 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
         if (bgCtx) { bgCtx.fillStyle = s.bgColor; bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height) }
       }
 
-      // Restore shapes
       shapesRef.current = s.shapes ?? []
       const shapeCanvas = shapeCanvasRef.current
       if (shapeCanvas) {
@@ -690,7 +671,6 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
         }
       }
 
-      // Restore freehand draw layer
       if (s.drawData && drawCanvasRef.current) {
         const img = new Image()
         img.onload = () => {
@@ -703,7 +683,6 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
         img.src = s.drawData
       }
 
-      // Restore erase layer
       if (s.eraseData && eraseCanvasRef.current) {
         const img = new Image()
         img.onload = () => {
@@ -737,7 +716,7 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
       if (!ctx) return ''
       const w = out.width
       const h = out.height
-      // Render committed shapes without any selection UI to a temp canvas
+      // Render shapes without selection UI for a clean export
       const tempCanvas = document.createElement('canvas')
       tempCanvas.width = w
       tempCanvas.height = h
@@ -751,7 +730,6 @@ const VisualArtsModule = forwardRef<VisualArtsModuleHandle, Props>(function Visu
           tempCtx.restore()
         }
       }
-      // Composite: background + clean shapes + freehand strokes
       ctx.clearRect(0, 0, w, h)
       ctx.drawImage(bg, 0, 0)
       if (tempCtx) ctx.drawImage(tempCanvas, 0, 0)

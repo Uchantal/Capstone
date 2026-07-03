@@ -6,8 +6,6 @@ export interface GuitarStudioHandle {
   captureAudio(): Promise<{ dataUrl: string; mimeType: string } | null>
 }
 
-// ---- WAV helpers ----
-
 function encodeWavGuitar(buffer: AudioBuffer): Blob {
   const numCh = buffer.numberOfChannels
   const sr = buffer.sampleRate
@@ -80,8 +78,6 @@ function blobToDataUrlGuitar(blob: Blob): Promise<string> {
   })
 }
 
-// ---- Types ----
-
 interface Chord {
   name: string
   freqs: number[]
@@ -91,9 +87,7 @@ interface Chord {
 }
 interface ChordEntry { chord: Chord; timestamp: number }
 
-// ---- Guitar note data ----
-// Strings displayed top (high e) to bottom (low E), as you see a guitar lying flat
-
+// Strings top (high e) to bottom (low E), as seen looking down at a guitar lying flat
 const ALL_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
 const STRINGS = [
@@ -118,9 +112,7 @@ function freqAt(si: number, fret: number) {
   return STRINGS[si].openFreq * Math.pow(2, fret / 12)
 }
 
-// ---- Chord library ----
-// strings: [low E, A, D, G, B, high e]  — -1=muted(X), 0=open(O), 1-12=fret number
-
+// strings: [low E, A, D, G, B, high e]  — -1=muted, 0=open, 1-12=fret
 const CHORDS: Chord[] = [
   { name: 'Am',  strings: [-1, 0, 2, 2, 1, 0], freqs: [110.00, 164.81, 220.00, 261.63, 329.63] },
   { name: 'A',   strings: [-1, 0, 2, 2, 2, 0], freqs: [110.00, 164.81, 220.00, 277.18, 329.63] },
@@ -136,8 +128,6 @@ const CHORDS: Chord[] = [
   { name: 'G',   strings: [3, 2, 0, 0, 0, 3],  freqs: [98.00, 123.47, 196.00, 246.94, 392.00] },
   { name: 'G7',  strings: [3, 2, 0, 0, 0, 1],  freqs: [98.00, 123.47, 196.00, 246.94, 349.23] },
 ]
-
-// ---- Chord Diagram (SVG, matches guitar wood aesthetic) ----
 
 function ChordDiagram({ chord, onClick }: { chord: Chord; onClick: () => void }) {
   const W = 80, H = 118
@@ -240,8 +230,6 @@ function ChordDiagram({ chord, onClick }: { chord: Chord; onClick: () => void })
   )
 }
 
-// ---- Web Audio ----
-
 let _ctx: AudioContext | null = null
 function getCtx(): AudioContext {
   if (!_ctx) _ctx = new AudioContext()
@@ -268,8 +256,6 @@ function strum(chord: Chord) {
   chord.freqs.forEach((f, i) => playGuitarNote(f, i * 0.022))
 }
 
-// ---- Physical Fretboard Component ----
-
 interface FretboardProps {
   activeCell: string | null
   onPlay: (freq: number, note: string, si: number, fret: number) => void
@@ -279,7 +265,6 @@ function Fretboard({ activeCell, onPlay }: FretboardProps) {
   const wrapperRef  = useRef<HTMLDivElement>(null)
   const [containerW, setContainerW] = useState(0)
 
-  // Measure the card width and re-scale whenever it changes
   useEffect(() => {
     const el = wrapperRef.current
     if (!el) return
@@ -396,8 +381,6 @@ function Fretboard({ activeCell, onPlay }: FretboardProps) {
   )
 }
 
-// ---- Canvas export ----
-
 function renderToCanvas(
   title: string, artist: string, key: string, capo: string, bpm: string,
   tuning: string, progression: ChordEntry[], notes: string,
@@ -459,12 +442,8 @@ function renderToCanvas(
   return canvas.toDataURL('image/png')
 }
 
-// ---- Constants ----
-
 const KEYS = ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B']
 const TUNINGS = ['Standard (EADGBe)', 'Drop D (DADGBe)', 'Open G (DGDGBd)', 'Open D (DADf#Ad)', 'DADGAD', 'Half Step Down']
-
-// ---- Main component ----
 
 const GuitarStudio = forwardRef<GuitarStudioHandle, { onDirty: () => void }>(({ onDirty }, ref) => {
   const [title,       setTitle]       = useState('')

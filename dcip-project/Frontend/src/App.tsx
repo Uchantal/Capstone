@@ -4,8 +4,7 @@ import { fetchMe } from './services/api'
 import { useAuth, AuthProvider } from './hooks/useAuth'
 import PreviewNavBar from './components/PreviewNavBar'
 
-// ── Lazy-loaded pages ────────────────────────────────────────────────────────
-// Each import() becomes its own JS chunk — only downloaded when that route is visited.
+// Lazy-loaded pages
 
 // Public
 const HomePage             = lazy(() => import('./pages/HomePage'))
@@ -128,7 +127,7 @@ const AdminFeedbackPage     = lazy(() => import('./pages/admin/AdminFeedbackPage
 const AdminPreviewPage      = lazy(() => import('./pages/admin/AdminPreviewPage'))
 const AdminStudioPage       = lazy(() => import('./pages/admin/AdminStudioPage'))
 
-// ── Loading fallback ─────────────────────────────────────────────────────────
+// Loading fallback
 function PageLoader() {
   return (
     <div className="h-screen flex items-center justify-center bg-white">
@@ -137,7 +136,7 @@ function PageLoader() {
   )
 }
 
-// ── Route guards ─────────────────────────────────────────────────────────────
+// Route guards
 const PreviewContext = createContext(false)
 
 function PreviewProvider({ children }: { children: React.ReactNode }) {
@@ -202,7 +201,7 @@ function SupervisorRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-// ── Routes ───────────────────────────────────────────────────────────────────
+// Routes
 function AppContent() {
   const { user } = useAuth()
   const { pathname } = useLocation()

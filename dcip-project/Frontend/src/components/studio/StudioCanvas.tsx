@@ -8,10 +8,6 @@ import {
   useState,
 } from 'react'
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 export type StudioTool =
   | 'brush' | 'eraser' | 'line' | 'rect' | 'ellipse'
   | 'text' | 'image' | 'select' | 'ruler'
@@ -77,20 +73,12 @@ export const CANVAS_FORMATS: CanvasFormat[] = [
   { id: 'a3p', label: 'A3 Portrait',    width: 1123, height: 1587 },
 ]
 
-// ---------------------------------------------------------------------------
-// Preset color palette for the color swatches
-// ---------------------------------------------------------------------------
-
 const PRESET_COLORS = [
   '#1A1A1A', '#555555', '#888888', '#FFFFFF',
   '#C8960C', '#2D6A4F', '#D62828', '#1E3A5F',
   '#FF6B35', '#FFD93D', '#06D6A0', '#4CC9F0',
   '#E63946', '#7B2D8B', '#F4A261', '#2A9D8F',
 ]
-
-// ---------------------------------------------------------------------------
-// ColorSwatch — styled color picker replacing raw <input type="color">
-// ---------------------------------------------------------------------------
 
 function ColorSwatch({
   value,
@@ -140,10 +128,6 @@ function ColorSwatch({
     </div>
   )
 }
-
-// ---------------------------------------------------------------------------
-// ToolIcon — SVG icon for each drawing tool
-// ---------------------------------------------------------------------------
 
 function ToolIcon({ tool }: { tool: StudioTool }) {
   return (
@@ -206,10 +190,6 @@ interface Props {
   draftKey?: string
   initialDrawImage?: string
 }
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function uid(): string {
   return Math.random().toString(36).slice(2)
@@ -347,17 +327,12 @@ function removeImageBackground(src: string, tolerance = 40): Promise<string> {
   })
 }
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
 const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas(
   { initialFormat = CANVAS_FORMATS[0], onDirty, draftKey, initialDrawImage },
   ref,
 ) {
   const [format, setFormat] = useState<CanvasFormat>(initialFormat)
 
-  // --- Canvas refs ---
   const bgCanvasRef        = useRef<HTMLCanvasElement>(null)
   const shapeCanvasRef     = useRef<HTMLCanvasElement>(null)
   const drawCanvasRef      = useRef<HTMLCanvasElement>(null)
@@ -366,7 +341,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   const fileInputRef       = useRef<HTMLInputElement>(null)
   const textareaRef        = useRef<HTMLTextAreaElement>(null)
 
-  // --- Tool state ---
   const [activeTool,    setActiveTool]    = useState<StudioTool>('brush')
   const [strokeColor,   setStrokeColor]   = useState('#1A1A1A')
   const [fillColor,     setFillColor]     = useState('#C8960C')
@@ -377,13 +351,12 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   const [fontFamily,    setFontFamily]    = useState('Arial')
   const [selectedId,    setSelectedId]    = useState<string | null>(null)
 
-  // --- Text input overlay ---
   const [textInput, setTextInput] = useState<{ visible: boolean; x: number; y: number; screenX: number; screenY: number }>({
     visible: false, x: 0, y: 0, screenX: 0, screenY: 0,
   })
   const [textValue, setTextValue] = useState('')
 
-  // --- Mutable drawing refs (avoid stale closures) ---
+  // Mutable drawing refs — avoid stale closures in mouse event handlers
   const shapesRef       = useRef<Shape[]>([])
   const previewRef      = useRef<Shape | null>(null)
   const imgCache        = useRef<Map<string, HTMLImageElement>>(new Map())
@@ -406,11 +379,9 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   const bgColorRef      = useRef('#FFFFFF')
   const saveDraftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // --- Ruler tool state ---
   const [rulerLine, setRulerLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null)
   const rulerStartRef = useRef<{ x: number; y: number } | null>(null)
 
-  // Keep refs in sync with state
   useEffect(() => { activeToolRef.current  = activeTool  }, [activeTool])
   useEffect(() => { strokeColorRef.current = strokeColor }, [strokeColor])
   useEffect(() => { fillColorRef.current   = fillColor   }, [fillColor])
@@ -420,7 +391,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   useEffect(() => { fontFamilyRef.current  = fontFamily  }, [fontFamily])
   useEffect(() => { bgColorRef.current     = bgColor     }, [bgColor])
 
-  // --- Responsive display size ---
   const [containerSize, setContainerSize] = useState({ width: 800, height: 600 })
   useEffect(() => {
     const el = containerRef.current
@@ -440,7 +410,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     return { displayW: Math.round(format.width * s), displayH: Math.round(format.height * s), scale: s }
   }, [containerSize, format])
 
-  // --- Canvas coordinate conversion ---
   function getCanvasPos(e: React.MouseEvent): { x: number; y: number } {
     const canvas = interactionRef.current
     if (!canvas) return { x: 0, y: 0 }
@@ -460,7 +429,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     return { screenX: rect.left + logicalX * scaleX, screenY: rect.top + logicalY * scaleY }
   }
 
-  // --- Rendering ---
   const renderShapes = useCallback(() => {
     const canvas = shapeCanvasRef.current
     const ctx = canvas?.getContext('2d')
@@ -481,7 +449,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   useEffect(() => { renderBg(bgColor) }, [bgColor, renderBg, format])
   useEffect(() => { renderShapes() }, [renderShapes, format])
 
-  // Resize all canvases when format changes
   useEffect(() => {
     const canvases = [bgCanvasRef, shapeCanvasRef, drawCanvasRef, interactionRef]
     for (const r of canvases) {
@@ -500,7 +467,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [format])
 
-  // --- History ---
   function captureDrawSnapshot(): string | null {
     return drawCanvasRef.current?.toDataURL('image/png') ?? null
   }
@@ -570,7 +536,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     pushHistory()
   }
 
-  // Keyboard shortcuts
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
@@ -589,7 +554,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId])
 
-  // --- Image loading ---
   function loadImageShape(shape: ImageShape) {
     if (imgCache.current.has(shape.id)) { renderShapes(); return }
     const img = new Image()
@@ -597,7 +561,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     img.src = shape.src
   }
 
-  // --- Preview shape builders ---
   function buildPreview(tool: StudioTool, start: { x: number; y: number }, end: { x: number; y: number }): Shape | null {
     const w = end.x - start.x, h = end.y - start.y
     switch (tool) {
@@ -617,7 +580,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     return { ...preview, id: uid() }
   }
 
-  // --- Mouse handlers ---
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return
     const pos = getCanvasPos(e)
@@ -745,7 +707,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [renderShapes, pushHistory])
 
-  // --- Text commit ---
   function commitText() {
     if (!textValue.trim() || !textInput.visible) { setTextInput(t => ({ ...t, visible: false })); return }
     const shape: TextShape = {
@@ -763,7 +724,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     setTextValue('')
   }
 
-  // --- File input (image import) ---
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -794,7 +754,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     e.target.value = ''
   }
 
-  // --- Background removal on selected image ---
   async function handleRemoveBg() {
     const sel = shapesRef.current.find(s => s.id === selectedId && s.type === 'image') as ImageShape | undefined
     if (!sel) return
@@ -811,7 +770,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     img.src = newSrc
   }
 
-  // --- Update selected shape color on toolbar change ---
   useEffect(() => {
     if (!selectedId) return
     shapesRef.current = shapesRef.current.map(s => {
@@ -833,14 +791,13 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fillColor])
 
-  // --- Load images into cache when shapes change ---
   useEffect(() => {
     for (const s of shapesRef.current) {
       if (s.type === 'image') loadImageShape(s)
     }
   })
 
-  // --- Draft restore on mount (skipped when editing an existing saved work) ---
+  // Restore draft on mount — skipped when editing an existing saved work
   useEffect(() => {
     if (!draftKey || initialDrawImage) return
     try {
@@ -872,7 +829,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // --- Load existing saved work image onto draw canvas ---
   useEffect(() => {
     if (!initialDrawImage) return
     const t = setTimeout(() => {
@@ -887,7 +843,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // --- Expose imperative handle ---
   useImperativeHandle(ref, () => ({
     captureImage(): string {
       const bg    = bgCanvasRef.current
@@ -918,13 +873,11 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     },
   }), [format, draftKey])
 
-  // --- Format change ---
   function handleFormatChange(fmt: CanvasFormat) {
     if (!window.confirm(`Changing format will clear the current canvas. Continue?`)) return
     setFormat(fmt)
   }
 
-  // --- Derived UI ---
   const selectedShape = shapesRef.current.find(s => s.id === selectedId) ?? null
   const showFillOptions = ['rect', 'ellipse'].includes(activeTool) || (selectedShape?.type === 'rect' || selectedShape?.type === 'ellipse')
   const showTextOptions = activeTool === 'text' || selectedShape?.type === 'text'
@@ -957,12 +910,10 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
 
   return (
     <div className="flex h-full overflow-hidden bg-surface-warm">
-      {/* Hidden inputs */}
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
 
       {/* Left toolbar */}
       <div className="w-48 flex-shrink-0 bg-white border-r border-surface-border flex flex-col overflow-y-auto">
-        {/* Format selector */}
         <div className="px-3 pt-3 pb-2 border-b border-surface-border">
           <p className="text-text-muted text-[9px] uppercase tracking-wide font-semibold mb-1.5">Canvas Format</p>
           <select
@@ -980,7 +931,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
           <p className="text-text-muted text-[9px] mt-1">{format.width} x {format.height} px</p>
         </div>
 
-        {/* Tools */}
         <div className="px-3 pt-3 pb-2 border-b border-surface-border">
           <p className="text-text-muted text-[9px] uppercase tracking-wide font-semibold mb-2">Tools</p>
           <div className="grid grid-cols-2 gap-1">
@@ -1002,18 +952,15 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
           </div>
         </div>
 
-        {/* Tool options */}
         <div className="px-3 pt-3 pb-2 border-b border-surface-border space-y-3">
           <p className="text-text-muted text-[9px] uppercase tracking-wide font-semibold">Options</p>
 
-          {/* Stroke / text color */}
           <ColorSwatch
             value={strokeColor}
             onChange={setStrokeColor}
             label={activeTool === 'text' || selectedShape?.type === 'text' ? 'Text Color' : 'Stroke Color'}
           />
 
-          {/* Fill color */}
           {showFillOptions && (
             <>
               <ColorSwatch
@@ -1038,7 +985,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
             </>
           )}
 
-          {/* Brush size */}
           {(activeTool === 'brush' || activeTool === 'eraser' || activeTool === 'line' || activeTool === 'rect' || activeTool === 'ellipse') && (
             <div>
               <p className="text-text-muted text-[9px] mb-1">Size: {brushSize}px</p>
@@ -1052,7 +998,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
             </div>
           )}
 
-          {/* Text options */}
           {showTextOptions && (
             <>
               <div>
@@ -1080,7 +1025,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
             </>
           )}
 
-          {/* Background removal */}
           {showBgRemove && (
             <button
               onClick={handleRemoveBg}
@@ -1090,7 +1034,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
             </button>
           )}
 
-          {/* Delete selected */}
           {selectedShape && (
             <button
               onClick={() => {
@@ -1106,13 +1049,11 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
           )}
         </div>
 
-        {/* Background */}
         <div className="px-3 pt-3 pb-2 border-b border-surface-border">
           <p className="text-text-muted text-[9px] uppercase tracking-wide font-semibold mb-1.5">Background</p>
           <ColorSwatch value={bgColor} onChange={setBgColor} label="Canvas Color" />
         </div>
 
-        {/* Actions */}
         <div className="px-3 pt-3 pb-3 space-y-1.5">
           <p className="text-text-muted text-[9px] uppercase tracking-wide font-semibold mb-2">Actions</p>
           <div className="flex gap-1">
@@ -1134,7 +1075,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
         className="flex-1 flex items-center justify-center overflow-hidden p-2 relative"
         style={{ background: '#2B2B2B' }}
       >
-        {/* Canvas block */}
         <div
           className="relative"
           style={{ width: displayW, height: displayH, flexShrink: 0, boxShadow: '0 4px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.4)' }}

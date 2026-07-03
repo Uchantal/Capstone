@@ -16,11 +16,7 @@ export const PITCH_TOLERANCE = 8
 // Slightly wider for demonstrations where student sings without hearing the reference first
 export const DEMO_TOLERANCE = 12
 
-// ── YIN autocorrelation pitch detector ───────────────────────────────────────
-// Replaces the old peak-bin FFT approach. YIN finds the fundamental period of
-// the waveform directly from the time-domain signal, giving sub-Hz precision and
-// immunity to harmonics fooling the detector. Reference: de Cheveigné & Kawahara 2002.
-
+// YIN pitch detector (de Cheveigné & Kawahara 2002) — sub-Hz precision, harmonic-immune.
 function detectPitchYIN(analyser: AnalyserNode): number | null {
   const buffer = new Float32Array(1024)
   analyser.getFloatTimeDomainData(buffer)
@@ -81,11 +77,7 @@ function detectPitchYIN(analyser: AnalyserNode): number | null {
   return refinedTau > 0 ? sampleRate / refinedTau : null
 }
 
-// ── Harmonic presence check ───────────────────────────────────────────────────
-// Human singing voice produces energy at integer multiples of the fundamental
-// (2F, 3F, 4F …). A hand clap, finger snap, or broadband noise does not.
-// This check rejects sounds that lack harmonic structure.
-
+// Rejects non-voice sounds (claps, noise) by checking for harmonic energy at 2F and 3F.
 function hasVoiceHarmonics(analyser: AnalyserNode, fundamental: number): boolean {
   const data = new Uint8Array(analyser.frequencyBinCount)
   analyser.getByteFrequencyData(data)
@@ -109,8 +101,6 @@ function hasVoiceHarmonics(analyser: AnalyserNode, fundamental: number): boolean
   // At least one harmonic must carry meaningful energy relative to the fundamental
   return f2 > f1 * 0.15 || f3 > f1 * 0.12
 }
-
-// ── Public API ────────────────────────────────────────────────────────────────
 
 export function detectPitch(analyser: AnalyserNode): number | null {
   const freq = detectPitchYIN(analyser)
