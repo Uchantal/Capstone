@@ -104,9 +104,10 @@ interface SaveDialogProps {
   onSave: (title: string, folderOpts: { folder?: string; newFolderName?: string }) => void
   onCancel: () => void
   saving: boolean
+  error?: string | null
 }
 
-function SaveDialog({ discipline, format, folders, onSave, onCancel, saving }: SaveDialogProps) {
+function SaveDialog({ discipline, format, folders, onSave, onCancel, saving, error }: SaveDialogProps) {
   const [title, setTitle] = useState('')
   // '' = Uncategorized, '__new__' = creating a new folder, otherwise an existing folder id
   const [folderChoice, setFolderChoice] = useState('')
@@ -164,6 +165,9 @@ function SaveDialog({ discipline, format, folders, onSave, onCancel, saving }: S
             className="w-full border border-surface-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-primary mt-2"
             autoFocus
           />
+        )}
+        {error && (
+          <p className="text-accent text-xs mt-3 text-center">{error}</p>
         )}
         <div className="flex gap-2 mt-4">
           <button
@@ -504,6 +508,7 @@ export default function StudioPage() {
   const [showSave,     setShowSave]      = useState(false)
   const [saving,       setSaving]        = useState(false)
   const [saveSuccess,  setSaveSuccess]   = useState(false)
+  const [saveError,    setSaveError]     = useState<string | null>(null)
   const [works,        setWorks]         = useState<StudioWorkMeta[]>([])
   const [worksLoading, setWorksLoading]  = useState(false)
   const [folders,      setFolders]       = useState<StudioFolder[]>([])
@@ -564,6 +569,7 @@ export default function StudioPage() {
     const studio = activeStudio()
     if (!studio) return
     setSaving(true)
+    setSaveError(null)
     try {
       const fmt = studio.getFormat()
       let fileData: string
@@ -599,6 +605,8 @@ export default function StudioPage() {
       setTimeout(() => setSaveSuccess(false), 3000)
       canvasRef.current?.clearDraft()
       if (folderOpts.newFolderName) loadFolders()
+    } catch {
+      setSaveError('Could not save — the server is unavailable. Try again in a moment.')
     } finally {
       setSaving(false)
     }
@@ -846,8 +854,9 @@ export default function StudioPage() {
           format={activeStudio()?.getFormat().label ?? ''}
           folders={folders}
           onSave={handleSave}
-          onCancel={() => setShowSave(false)}
+          onCancel={() => { setShowSave(false); setSaveError(null) }}
           saving={saving}
+          error={saveError}
         />
       )}
     </div>

@@ -4,15 +4,6 @@ import { useAuth } from '../hooks/useAuth'
 import { useSync } from '../hooks/useSync'
 import { fetchProgressSummary } from '../services/api'
 
-const SITE_LINKS = [
-  { label: 'Home',         to: '/' },
-  { label: 'About',        to: '/#about' },
-  { label: 'Features',     to: '/#features' },
-  { label: 'Disciplines',  to: '/disciplines' },
-  { label: 'How It Works', to: '/#how-it-works' },
-  { label: 'Feedback',     to: '/feedback' },
-]
-
 // Ordered stage-to-URL maps for "Continue Learning"
 const STAGE_URLS: Record<string, { stageId: string; url: string }[]> = {
   voice: [
@@ -96,45 +87,14 @@ const STAGE_URLS: Record<string, { stageId: string; url: string }[]> = {
   ],
 }
 
-function LogoDropdown() {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [])
-
+function LogoLink() {
   return (
-    <div className="relative flex-shrink-0" ref={ref}>
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="bg-primary rounded-lg w-9 h-8 flex items-center justify-center hover:opacity-80 transition-opacity"
-      >
-        <span className="text-white font-bold text-[10px] tracking-tight">DCIP</span>
-      </button>
-
-      {open && (
-        <div className="absolute top-10 left-0 z-50 bg-white border border-surface-border rounded-xl shadow-lg py-1 min-w-[160px]">
-          <p className="text-text-secondary text-[10px] font-semibold uppercase tracking-widest px-3 py-2">
-            Visit Site
-          </p>
-          {SITE_LINKS.map(link => (
-            <Link
-              key={link.to}
-              to={link.to}
-              onClick={() => setOpen(false)}
-              className="block px-3 py-2 text-sm text-text-primary hover:bg-gray-50 hover:text-primary transition-colors"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
+    <Link
+      to="/"
+      className="bg-primary rounded-lg w-9 h-8 flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0"
+    >
+      <span className="text-white font-bold text-[10px] tracking-tight">DCIP</span>
+    </Link>
   )
 }
 
@@ -241,7 +201,7 @@ export default function TopNav() {
     return (
       <nav className="bg-white border-b border-surface-border h-12 flex items-center px-6 justify-between">
         <div className="flex items-center gap-3">
-          <LogoDropdown />
+          <LogoLink />
 
           <div>
             <p className="text-text-primary font-semibold text-sm leading-tight hidden lg:block">
@@ -281,7 +241,7 @@ export default function TopNav() {
   return (
     <nav className="bg-white border-b border-surface-border h-12 flex items-center px-6 justify-between">
       <div className="flex items-center gap-3">
-        <LogoDropdown />
+        <LogoLink />
         <p className="text-text-primary font-semibold text-sm leading-tight hidden lg:block">
           Digital Creative Infrastructure Platform
         </p>
