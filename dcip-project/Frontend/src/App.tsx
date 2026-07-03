@@ -316,6 +316,9 @@ function AppContent() {
         <Route path="/admin/feedback"       element={A(AdminFeedbackPage)} />
         <Route path="/admin/preview"        element={A(AdminPreviewPage)} />
         <Route path="/admin/studio"         element={A(AdminStudioPage)} />
+
+        {/* Catch-all — redirect unmatched paths to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
   )
