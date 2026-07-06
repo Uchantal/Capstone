@@ -526,8 +526,7 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
     const reader = new FileReader()
     reader.onload = ev => {
       const raw = ev.target?.result as string
-      // Resize to max 1200px on the longest side before storing — prevents
-      // multi-MB data URLs from crashing canvas state
+      // Scale down large images before storing to keep the data URL small
       const img = new Image()
       img.onload = () => {
         const MAX = 1200
