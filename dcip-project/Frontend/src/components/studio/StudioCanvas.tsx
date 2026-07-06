@@ -727,31 +727,49 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    e.target.value = ''
     const reader = new FileReader()
     reader.onload = ev => {
-      const src = ev.target?.result as string
+      const raw = ev.target?.result as string
       const img = new Image()
       img.onload = () => {
+        // Resize to max 1200px to keep data URL manageable
+        const MAX = 1200
+        let rw = img.naturalWidth, rh = img.naturalHeight
+        if (rw > MAX || rh > MAX) {
+          if (rw > rh) { rh = Math.round((rh / rw) * MAX); rw = MAX }
+          else         { rw = Math.round((rw / rh) * MAX); rh = MAX }
+        }
+        const offscreen = document.createElement('canvas')
+        offscreen.width = rw; offscreen.height = rh
+        offscreen.getContext('2d')!.drawImage(img, 0, 0, rw, rh)
+        const isPng = file.type === 'image/png' || file.type === 'image/gif' || file.type === 'image/webp'
+        const src = offscreen.toDataURL(isPng ? 'image/png' : 'image/jpeg', 0.85)
+
         const maxW = format.width  * 0.5
         const maxH = format.height * 0.5
-        const scale = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1)
-        const w = Math.round(img.naturalWidth  * scale)
-        const h = Math.round(img.naturalHeight * scale)
+        const scale = Math.min(maxW / rw, maxH / rh, 1)
+        const w = Math.round(rw * scale)
+        const h = Math.round(rh * scale)
         const cx = clickPosRef.current.x, cy = clickPosRef.current.y
-        const shape: ImageShape = {
-          id: uid(), type: 'image',
-          x: cx - w / 2, y: cy - h / 2, w, h,
-          src, strokeColor: strokeColorRef.current, strokeWidth: 0,
+
+        const resizedImg = new Image()
+        resizedImg.onload = () => {
+          const shape: ImageShape = {
+            id: uid(), type: 'image',
+            x: cx - w / 2, y: cy - h / 2, w, h,
+            src, strokeColor: strokeColorRef.current, strokeWidth: 0,
+          }
+          imgCache.current.set(shape.id, resizedImg)
+          shapesRef.current = [...shapesRef.current, shape]
+          renderShapes()
+          pushHistory()
         }
-        imgCache.current.set(shape.id, img)
-        shapesRef.current = [...shapesRef.current, shape]
-        renderShapes()
-        pushHistory()
+        resizedImg.src = src
       }
-      img.src = src
+      img.src = raw
     }
     reader.readAsDataURL(file)
-    e.target.value = ''
   }
 
   async function handleRemoveBg() {
@@ -910,7 +928,8 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
 
   return (
     <div className="flex h-full overflow-hidden bg-surface-warm">
-      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange}
+        style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }} />
 
       {/* Left toolbar */}
       <div className="w-48 flex-shrink-0 bg-white border-r border-surface-border flex flex-col overflow-y-auto">

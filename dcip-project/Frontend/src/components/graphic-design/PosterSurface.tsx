@@ -538,7 +538,8 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
         const offscreen = document.createElement('canvas')
         offscreen.width = w; offscreen.height = h
         offscreen.getContext('2d')!.drawImage(img, 0, 0, w, h)
-        const src = offscreen.toDataURL('image/jpeg', 0.85)
+        const isPng = file.type === 'image/png' || file.type === 'image/gif' || file.type === 'image/webp'
+        const src = offscreen.toDataURL(isPng ? 'image/png' : 'image/jpeg', 0.85)
         const id = makeId()
         const aspect = w / h
         const dispW = Math.min(300, w)
