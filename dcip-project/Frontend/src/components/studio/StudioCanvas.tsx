@@ -462,10 +462,19 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
     historyRef.current    = [{ shapes: [], drawSnapshot: null }]
     historyIdxRef.current = 0
     setSelectedId(null)
-    renderBg(bgColor)
-    renderShapes()
+    // Resizing a canvas resets it to transparent — repaint background immediately
+    requestAnimationFrame(() => {
+      renderBg(bgColorRef.current)
+      renderShapes()
+    })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [format])
+
+  // Paint white background on first mount
+  useEffect(() => {
+    requestAnimationFrame(() => renderBg(bgColorRef.current))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function captureDrawSnapshot(): string | null {
     return drawCanvasRef.current?.toDataURL('image/png') ?? null
