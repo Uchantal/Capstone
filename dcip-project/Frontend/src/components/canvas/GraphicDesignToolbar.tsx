@@ -229,7 +229,8 @@ export default function GraphicDesignToolbar({
             </svg>
           </button>
           <Tooltip label="Add image" />
-          <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={onAddImage} />
+          <input ref={imageInputRef} type="file" accept="image/*" onChange={onAddImage}
+            style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }} />
         </div>
 
         {/* ── Add details ── */}

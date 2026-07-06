@@ -522,21 +522,40 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
   function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    e.target.value = ''
     const reader = new FileReader()
     reader.onload = ev => {
-      const src = ev.target?.result as string
-      const id = makeId()
-      const newEl: DesignElement = {
-        id, type: 'image',
-        x: 60, y: 100, width: 300, height: 200,
-        zIndex: elements.length + 1, src,
+      const raw = ev.target?.result as string
+      // Resize to max 1200px on the longest side before storing — prevents
+      // multi-MB data URLs from crashing canvas state
+      const img = new Image()
+      img.onload = () => {
+        const MAX = 1200
+        let w = img.naturalWidth, h = img.naturalHeight
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round((h / w) * MAX); w = MAX }
+          else       { w = Math.round((w / h) * MAX); h = MAX }
+        }
+        const offscreen = document.createElement('canvas')
+        offscreen.width = w; offscreen.height = h
+        offscreen.getContext('2d')!.drawImage(img, 0, 0, w, h)
+        const src = offscreen.toDataURL('image/jpeg', 0.85)
+        const id = makeId()
+        const aspect = w / h
+        const dispW = Math.min(300, w)
+        const dispH = Math.round(dispW / aspect)
+        const newEl: DesignElement = {
+          id, type: 'image',
+          x: 60, y: 100, width: dispW, height: dispH,
+          zIndex: elements.length + 1, src,
+        }
+        const newEls = [...elements, newEl]
+        setSelectedId(id)
+        commit(newEls, bgColor)
       }
-      const newEls = [...elements, newEl]
-      setSelectedId(id)
-      commit(newEls, bgColor)
+      img.src = raw
     }
     reader.readAsDataURL(file)
-    e.target.value = ''
   }
 
   // Drag and resize — mouse deltas are divided by canvasScale to get logical coordinates
