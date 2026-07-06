@@ -281,11 +281,21 @@ const VoiceStudio = forwardRef<VoiceStudioHandle, { onDirty: () => void }>(({ on
     setMicState('requesting')
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+
+      // Verify the mic track is actually live and unmuted
+      const audioTrack = stream.getAudioTracks()[0]
+      if (!audioTrack || audioTrack.readyState !== 'live') {
+        stream.getTracks().forEach(t => t.stop())
+        setMicState('denied')
+        return
+      }
+
       streamRef.current = stream
 
+      // AudioContext may start suspended in Chrome — must resume before reading analyser
       const audioCtx = new AudioContext()
       audioCtxRef.current = audioCtx
-      if (audioCtx.state === 'suspended') await audioCtx.resume()
+      await audioCtx.resume()
       const source = audioCtx.createMediaStreamSource(stream)
       const analyser = audioCtx.createAnalyser()
       analyser.fftSize = 2048
@@ -302,8 +312,17 @@ const VoiceStudio = forwardRef<VoiceStudioHandle, { onDirty: () => void }>(({ on
       }
 
       recorder.onstop = () => {
+        // Clean up audio pipeline only after recorder has finished collecting data
+        streamRef.current?.getTracks().forEach(t => t.stop())
+        streamRef.current = null
+        audioCtxRef.current?.close()
+        audioCtxRef.current = null
+        analyserRef.current = null
+
         const usedMime = recorder.mimeType || mime || 'audio/webm'
         const blob = new Blob(chunksRef.current, { type: usedMime })
+        // Don't save a take if nothing was actually captured
+        if (blob.size < 1000) return
         const url = URL.createObjectURL(blob)
         const durationSec = (Date.now() - recStartRef.current) / 1000
         takeCountRef.current += 1
@@ -317,10 +336,9 @@ const VoiceStudio = forwardRef<VoiceStudioHandle, { onDirty: () => void }>(({ on
       }
 
       recStartRef.current = Date.now()
-      recorder.start(200)   // collect chunks every 200ms
+      recorder.start(200)
       recorderRef.current = recorder
 
-      // Elapsed time ticker
       setElapsedSec(0)
       elapsedTimerRef.current = setInterval(() => {
         setElapsedSec(Math.floor((Date.now() - recStartRef.current) / 1000))
@@ -334,13 +352,8 @@ const VoiceStudio = forwardRef<VoiceStudioHandle, { onDirty: () => void }>(({ on
 
   function stopRecording() {
     if (elapsedTimerRef.current) clearInterval(elapsedTimerRef.current)
-    recorderRef.current?.stop()
+    recorderRef.current?.stop()   // triggers onstop, which handles stream/ctx cleanup
     recorderRef.current = null
-    streamRef.current?.getTracks().forEach(t => t.stop())
-    streamRef.current = null
-    audioCtxRef.current?.close()
-    audioCtxRef.current = null
-    analyserRef.current = null
     setMicState('idle')
     setElapsedSec(0)
   }
@@ -388,6 +401,7 @@ const VoiceStudio = forwardRef<VoiceStudioHandle, { onDirty: () => void }>(({ on
   useEffect(() => {
     return () => {
       if (elapsedTimerRef.current) clearInterval(elapsedTimerRef.current)
+      recorderRef.current?.stop()
       streamRef.current?.getTracks().forEach(t => t.stop())
       audioCtxRef.current?.close()
       playingAudioRef.current?.pause()
