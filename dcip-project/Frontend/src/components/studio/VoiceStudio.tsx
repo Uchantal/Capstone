@@ -121,9 +121,9 @@ function WaveformCanvas({ analyserRef, isLive, mode }: WaveformCanvasProps) {
       idle()
     } else {
       const draw = () => {
+        frameRef.current = requestAnimationFrame(draw)
         const analyser = analyserRef.current
         if (!analyser) return
-        frameRef.current = requestAnimationFrame(draw)
         const bufLen = analyser.frequencyBinCount
         const data = new Uint8Array(bufLen)
 
@@ -285,6 +285,7 @@ const VoiceStudio = forwardRef<VoiceStudioHandle, { onDirty: () => void }>(({ on
 
       const audioCtx = new AudioContext()
       audioCtxRef.current = audioCtx
+      if (audioCtx.state === 'suspended') await audioCtx.resume()
       const source = audioCtx.createMediaStreamSource(stream)
       const analyser = audioCtx.createAnalyser()
       analyser.fftSize = 2048
