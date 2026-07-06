@@ -29,8 +29,14 @@ if (!process.env.JWT_SECRET) {
 
 const app = express()
 
+const ALLOWED_ORIGINS = new Set([
+  process.env.CLIENT_URL,
+  'https://dcip-rw.online',
+  'https://www.dcip-rw.online',
+].filter(Boolean))
+
 const allowedOrigin = (origin: string | undefined, cb: (err: Error | null, allow?: boolean) => void) => {
-  if (!origin || origin.startsWith('http://localhost:') || origin === process.env.CLIENT_URL) {
+  if (!origin || origin.startsWith('http://localhost:') || ALLOWED_ORIGINS.has(origin)) {
     cb(null, true)
   } else {
     cb(new Error(`CORS: origin ${origin} not allowed`))
