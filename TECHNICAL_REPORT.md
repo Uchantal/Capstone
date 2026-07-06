@@ -37,6 +37,8 @@ Because only 61.8% of schools have internet access, the platform is built to wor
 
 The AI assistant addresses the teacher gap. Rural schools do not have specialist music or art teachers. The AI is available on every course page — students can ask questions, highlight text they do not understand, or upload an image for feedback. For Visual Arts and Graphic Design assessments, the AI also grades the submitted work using computer vision. For music, it generates a personalised coaching note after each result.
 
+Measuring whether a student is actually learning — and not just clicking through — was also part of the design. The platform tracks how a student works during a session: how long they spend on the canvas, how many tools they use, how many strokes they make. This produces an engagement score that is combined with the AI quality score to decide whether the student passes a level. A student who submits a genuine piece of work they put effort into will pass. A student who submits a blank or rushed image will not, even if the AI cannot tell the difference from the image alone.
+
 The portfolio solves the access problem that existing talent programmes create. ArtRwanda-Ubuhanzi requires students to show up in person with already-developed skill. DCIP gives students a way to build that skill and document it, so they have something concrete to present.
 
 ---
@@ -269,6 +271,7 @@ The original proposal set out to build a digital creative learning platform for 
 | Three progressive skill levels per discipline | Beginner, Intermediate, Advanced — each with Learn, Practise, Demonstrate |
 | Badge and progression system | Badges awarded on level completion; next level locked until current is passed |
 | AI-assisted feedback | Ask AI panel on every page; AI artwork critique on Demonstrate submission; AI coaching notes for music |
+| Student engagement tracking | Engagement score (tool usage, time on canvas, brush strokes) blended with AI quality score to determine pass/fail on visual assessments |
 | Portfolio and studio space | Production studio unlocked after all three levels; My Studio Works with folder organisation |
 | Offline functionality | Service Worker caching + IndexedDB sync queue |
 | School-based registration and admin management | School dropdown on register; Admin dashboard for managing schools, students, modules, and reports |
@@ -283,3 +286,5 @@ All core requirements from the proposal were implemented and are live on the dep
 DCIP started from a straightforward observation: the schools have the computers, the students have the talent, but there is nothing connecting the two in a structured way. Building this platform meant making a lot of small decisions — about how to structure the learning journey, how to make the AI useful without being intrusive, how to handle offline scenarios that most web apps simply ignore, and how to keep the whole thing running on a minimal server budget.
 
 The result is a platform that is genuinely usable in the conditions it was designed for. It runs in a browser with no installation, works on slow connections, keeps students moving through a structured curriculum, and gives them real feedback at every stage — even when there is no teacher in the room.
+
+One thing that shaped how the platform works is that passing a level is not just about submitting something. The engagement score means that a student has to actually put in the work — spend time on the canvas, try different tools, make real decisions. That was intentional. The goal was never to let students click through and collect badges. It was to give them a record of genuine creative development that they can take outside the platform and use.
