@@ -618,7 +618,6 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
 
     if (tool === 'image') {
       clickPosRef.current = pos
-      fileInputRef.current?.click()
       return
     }
 
@@ -956,7 +955,13 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
             {toolButtons.map(({ tool, label }) => (
               <button
                 key={tool}
-                onClick={() => handleToolChange(tool)}
+                onClick={() => {
+                  handleToolChange(tool)
+                  if (tool === 'image') {
+                    clickPosRef.current = { x: format.width / 2, y: format.height / 2 }
+                    fileInputRef.current?.click()
+                  }
+                }}
                 title={label}
                 className={`py-2 rounded transition-colors flex flex-col items-center gap-0.5 ${
                   activeTool === tool
