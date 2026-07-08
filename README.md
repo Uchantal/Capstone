@@ -85,49 +85,23 @@ DCIP is a self-directed digital learning platform built for identified talented 
 
 ## Architecture
 
-```
-+--------------------------------------------------+
-|              Student Browser (React PWA)         |
-|                                                  |
-|  +------------+  +------------+  +------------+ |
-|  | Learning   |  | Studios    |  | Portfolio  | |
-|  | System     |  | (VA, GD,   |  | Dashboard  | |
-|  | (5 skills) |  |  Music)    |  |            | |
-|  +------------+  +------------+  +------------+ |
-|                                                  |
-|  Service Worker  +  IndexedDB (Offline / PWA)    |
-+---------------------------+----------------------+
-                            |
-                         HTTPS
-                            |
-+---------------------------v----------------------+
-|         DigitalOcean VPS  (Ubuntu 22.04)         |
-|                                                  |
-|  +--------------------------------------------+ |
-|  |              Nginx (Reverse Proxy)          | |
-|  |                                            | |
-|  |  /* -----> /var/www/dcip  (React build)    | |
-|  |  /api/* -> localhost:5000 (Express API)    | |
-|  +--------------------------------------------+ |
-|                       |                          |
-|  +--------------------v-----------------------+ |
-|  |         Express + Node.js (PM2)            | |
-|  |                                            | |
-|  |  Auth    Curriculum    Studios    AI        | |
-|  |  Routes  Routes        Routes     Routes   | |
-|  +----+----------+----------+----------+-----+ |
-|       |          |          |          |        |
-+-------|----------|----------|----------|--------+
-        |          |          |          |
-+-------v--+  +----v-----+  +-v--------+ +-------v--------+
-| MongoDB  |  | Cloudinary|  | Google  | | OpenRouter     |
-| Atlas    |  |           |  | Gemini  | | (Fallback AI)  |
-|          |  | Images    |  | Flash   | |                |
-| Users    |  | Audio     |  | Lite    | | Gemma 4 31B    |
-| Progress |  | Files     |  |         | | NVIDIA Nemotron|
-| Works    |  |           |  | Primary | | Meta Llama     |
-+----------+  +-----------+  +---------+ | Qwen           |
-                                         +----------------+
+```mermaid
+graph TB
+    Student[Student Browser\nReact PWA] -->|HTTPS| Nginx
+
+    subgraph VPS["DigitalOcean VPS — Ubuntu 22.04"]
+        Nginx[Nginx\nReverse Proxy + TLS\ndcip-rw.online]
+        Nginx -->|"/* static files"| React[React Build\n/var/www/dcip]
+        Nginx -->|"/api/* proxy"| Express[Express + Node.js\nPM2 — port 5000\nAuth · Curriculum · Studios · AI]
+    end
+
+    Express --> MongoDB[(MongoDB Atlas\nUsers · Progress · Works)]
+    Express --> Cloudinary[Cloudinary\nImages · Audio Files]
+    Express --> Gemini[Google Gemini\nFlash Lite\nPrimary AI]
+    Gemini -->|fallback chain| OpenRouter[OpenRouter\nGemma 4 31B · Meta Llama · Qwen]
+
+    Student -.->|offline cache| SW[Service Worker\nIndexedDB Queue]
+    SW -.->|reconnect replay| Express
 ```
 
 **Request flow:**
@@ -137,7 +111,7 @@ DCIP is a self-directed digital learning platform built for identified talented 
 3. API calls (`/api/*`) are proxied by Nginx to Express on port 5000.
 4. Express connects to MongoDB Atlas for user data and learning progress.
 5. Studio file uploads go to Cloudinary; the returned URL is saved in MongoDB.
-6. AI requests go to Google Gemini first. If that fails, OpenRouter tries the fallback chain.
+6. AI requests go to Google Gemini first. If that fails, OpenRouter tries the fallback chain in order.
 7. The Service Worker caches the app shell and queues offline writes in IndexedDB for replay on reconnect.
 
 Both the React build and the Express server run on the same DigitalOcean Droplet. PM2 keeps the backend alive across reboots.
