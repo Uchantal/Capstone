@@ -8,8 +8,11 @@ import {
   useState,
 } from 'react'
 
+export type PolygonType = 'triangle' | 'diamond' | 'pentagon' | 'hexagon' | 'star' | 'heart' | 'arrow-right' | 'cross'
+
 export type StudioTool =
   | 'brush' | 'eraser' | 'line' | 'rect' | 'ellipse'
+  | 'triangle' | 'diamond' | 'pentagon' | 'hexagon' | 'star' | 'heart' | 'arrow-right' | 'cross'
   | 'text' | 'image' | 'select' | 'ruler'
 
 interface BaseShape {
@@ -51,7 +54,14 @@ interface ImageShape extends BaseShape {
   src: string
 }
 
-export type Shape = RectShape | EllipseShape | LineShape | TextShape | ImageShape
+interface PolygonShape extends BaseShape {
+  type: 'polygon'
+  polygonType: PolygonType
+  x: number; y: number; w: number; h: number
+  fillColor: string; filled: boolean
+}
+
+export type Shape = RectShape | EllipseShape | LineShape | TextShape | ImageShape | PolygonShape
 
 interface HistoryEntry {
   shapes: Shape[]
@@ -174,6 +184,14 @@ function ToolIcon({ tool }: { tool: StudioTool }) {
           <line x1="12" y1="7" x2="15.5" y2="10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
         </>
       )}
+      {tool === 'triangle'    && <polygon points="11,3 20,19 2,19" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>}
+      {tool === 'diamond'     && <polygon points="11,2 20,11 11,20 2,11" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>}
+      {tool === 'pentagon'    && <polygon points="11,2 20,8 17,19 5,19 2,8" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>}
+      {tool === 'hexagon'     && <polygon points="11,2 19,6.5 19,15.5 11,20 3,15.5 3,6.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>}
+      {tool === 'star'        && <polygon points="11,2 13.5,8.5 20,8.5 15,13 17,20 11,16 5,20 7,13 2,8.5 8.5,8.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>}
+      {tool === 'heart'       && <path d="M11,19 C5,14 2,10 2,7 C2,4 4,2 7,2 C9,2 10.5,3 11,4.5 C11.5,3 13,2 15,2 C18,2 20,4 20,7 C20,10 17,14 11,19 Z" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>}
+      {tool === 'arrow-right' && <polygon points="2,8 13,8 13,4 20,11 13,18 13,14 2,14" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>}
+      {tool === 'cross'       && <path d="M8,2 H14 V8 H20 V14 H14 V20 H8 V14 H2 V8 H8 Z" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>}
     </svg>
   )
 }
@@ -207,6 +225,7 @@ function getShapeBounds(s: Shape): { x: number; y: number; w: number; h: number 
     }
     case 'text':    return { x: s.x, y: s.y - s.fontSize, w: s.text.length * s.fontSize * 0.6 + 10, h: s.fontSize * 1.4 }
     case 'image':   return { x: s.x, y: s.y, w: s.w, h: s.h }
+    case 'polygon': return { x: s.x, y: s.y, w: s.w, h: s.h }
   }
 }
 
@@ -225,6 +244,64 @@ function moveShape(s: Shape, dx: number, dy: number): Shape {
     case 'line':    return { ...s, x1: s.x1 + dx, y1: s.y1 + dy, x2: s.x2 + dx, y2: s.y2 + dy }
     case 'text':    return { ...s, x: s.x + dx, y: s.y + dy }
     case 'image':   return { ...s, x: s.x + dx, y: s.y + dy }
+    case 'polygon': return { ...s, x: s.x + dx, y: s.y + dy }
+  }
+}
+
+function tracePolygon(ctx: CanvasRenderingContext2D, polygonType: PolygonType, x: number, y: number, w: number, h: number) {
+  const cx = x + w / 2, cy = y + h / 2
+  ctx.beginPath()
+  switch (polygonType) {
+    case 'triangle':
+      ctx.moveTo(cx, y); ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.closePath(); break
+    case 'diamond':
+      ctx.moveTo(cx, y); ctx.lineTo(x + w, cy); ctx.lineTo(cx, y + h); ctx.lineTo(x, cy); ctx.closePath(); break
+    case 'pentagon': {
+      const pts = [0,1,2,3,4].map(i => {
+        const a = (i * 2 * Math.PI / 5) - Math.PI / 2
+        return [cx + (w / 2) * Math.cos(a), cy + (h / 2) * Math.sin(a)]
+      })
+      ctx.moveTo(pts[0][0], pts[0][1]); pts.slice(1).forEach(([px,py]) => ctx.lineTo(px, py)); ctx.closePath(); break
+    }
+    case 'hexagon': {
+      const pts = [0,1,2,3,4,5].map(i => {
+        const a = (i * Math.PI / 3) - Math.PI / 6
+        return [cx + (w / 2) * Math.cos(a), cy + (h / 2) * Math.sin(a)]
+      })
+      ctx.moveTo(pts[0][0], pts[0][1]); pts.slice(1).forEach(([px,py]) => ctx.lineTo(px, py)); ctx.closePath(); break
+    }
+    case 'star': {
+      const spikes = 5, outerRx = w / 2, outerRy = h / 2, innerRx = outerRx * 0.4, innerRy = outerRy * 0.4
+      for (let i = 0; i < spikes * 2; i++) {
+        const a = (i * Math.PI / spikes) - Math.PI / 2
+        const rx = i % 2 === 0 ? outerRx : innerRx
+        const ry = i % 2 === 0 ? outerRy : innerRy
+        const px = cx + rx * Math.cos(a), py = cy + ry * Math.sin(a)
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py)
+      }
+      ctx.closePath(); break
+    }
+    case 'heart': {
+      const s2 = Math.min(w, h)
+      const hx = cx, hy = cy + s2 * 0.1
+      ctx.moveTo(hx, hy + s2 * 0.35)
+      ctx.bezierCurveTo(hx - s2 * 0.5, hy - s2 * 0.1, hx - s2 * 0.5, hy - s2 * 0.45, hx, hy - s2 * 0.15)
+      ctx.bezierCurveTo(hx + s2 * 0.5, hy - s2 * 0.45, hx + s2 * 0.5, hy - s2 * 0.1, hx, hy + s2 * 0.35)
+      ctx.closePath(); break
+    }
+    case 'arrow-right':
+      ctx.moveTo(x, y + h * 0.35); ctx.lineTo(x + w * 0.6, y + h * 0.35)
+      ctx.lineTo(x + w * 0.6, y); ctx.lineTo(x + w, cy)
+      ctx.lineTo(x + w * 0.6, y + h); ctx.lineTo(x + w * 0.6, y + h * 0.65)
+      ctx.lineTo(x, y + h * 0.65); ctx.closePath(); break
+    case 'cross':
+      ctx.moveTo(x + w * 0.35, y); ctx.lineTo(x + w * 0.65, y)
+      ctx.lineTo(x + w * 0.65, y + h * 0.35); ctx.lineTo(x + w, y + h * 0.35)
+      ctx.lineTo(x + w, y + h * 0.65); ctx.lineTo(x + w * 0.65, y + h * 0.65)
+      ctx.lineTo(x + w * 0.65, y + h); ctx.lineTo(x + w * 0.35, y + h)
+      ctx.lineTo(x + w * 0.35, y + h * 0.65); ctx.lineTo(x, y + h * 0.65)
+      ctx.lineTo(x, y + h * 0.35); ctx.lineTo(x + w * 0.35, y + h * 0.35)
+      ctx.closePath(); break
   }
 }
 
@@ -275,6 +352,12 @@ function paintShape(
       if (img) ctx.drawImage(img, s.x, s.y, s.w, s.h)
       break
     }
+
+    case 'polygon':
+      ctx.fillStyle = s.fillColor
+      tracePolygon(ctx, s.polygonType, s.x, s.y, s.w, s.h)
+      if (s.filled) ctx.fill(); else ctx.stroke()
+      break
   }
 
   if (withSelection && s.selected) {
@@ -579,6 +662,9 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
         return { id: '__preview__', type: 'ellipse', cx: start.x + w / 2, cy: start.y + h / 2, rx: Math.abs(w) / 2, ry: Math.abs(h) / 2, strokeColor: strokeColorRef.current, strokeWidth: brushSizeRef.current, fillColor: fillColorRef.current, filled: filledRef.current }
       case 'line':
         return { id: '__preview__', type: 'line', x1: start.x, y1: start.y, x2: end.x, y2: end.y, strokeColor: strokeColorRef.current, strokeWidth: brushSizeRef.current }
+      case 'triangle': case 'diamond': case 'pentagon': case 'hexagon':
+      case 'star': case 'heart': case 'arrow-right': case 'cross':
+        return { id: '__preview__', type: 'polygon', polygonType: tool as PolygonType, x: Math.min(start.x, end.x), y: Math.min(start.y, end.y), w: Math.abs(w), h: Math.abs(h), strokeColor: strokeColorRef.current, strokeWidth: brushSizeRef.current, fillColor: fillColorRef.current, filled: filledRef.current }
       default: return null
     }
   }
@@ -611,7 +697,9 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
       return
     }
 
-    if (tool === 'line' || tool === 'rect' || tool === 'ellipse') {
+    if (tool === 'line' || tool === 'rect' || tool === 'ellipse' ||
+        tool === 'triangle' || tool === 'diamond' || tool === 'pentagon' || tool === 'hexagon' ||
+        tool === 'star' || tool === 'heart' || tool === 'arrow-right' || tool === 'cross') {
       isDrawingRef.current = true
       startPosRef.current  = pos
       return
@@ -660,7 +748,7 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
       return
     }
 
-    if (['line', 'rect', 'ellipse'].includes(tool) && isDrawingRef.current && startPosRef.current) {
+    if (['line', 'rect', 'ellipse', 'triangle', 'diamond', 'pentagon', 'hexagon', 'star', 'heart', 'arrow-right', 'cross'].includes(tool) && isDrawingRef.current && startPosRef.current) {
       previewRef.current = buildPreview(tool, startPosRef.current, pos)
       renderShapes()
       return
@@ -695,7 +783,7 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
       return
     }
 
-    if (['line', 'rect', 'ellipse'].includes(tool) && isDrawingRef.current && startPosRef.current) {
+    if (['line', 'rect', 'ellipse', 'triangle', 'diamond', 'pentagon', 'hexagon', 'star', 'heart', 'arrow-right', 'cross'].includes(tool) && isDrawingRef.current && startPosRef.current) {
       isDrawingRef.current = false
       previewRef.current   = null
       const shape = buildFinalShape(tool, startPosRef.current, pos)
@@ -905,20 +993,28 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
   }
 
   const selectedShape = shapesRef.current.find(s => s.id === selectedId) ?? null
-  const showFillOptions = ['rect', 'ellipse'].includes(activeTool) || (selectedShape?.type === 'rect' || selectedShape?.type === 'ellipse')
+  const showFillOptions = ['rect', 'ellipse', 'triangle', 'diamond', 'pentagon', 'hexagon', 'star', 'heart', 'arrow-right', 'cross'].includes(activeTool) || (selectedShape?.type === 'rect' || selectedShape?.type === 'ellipse' || selectedShape?.type === 'polygon')
   const showTextOptions = activeTool === 'text' || selectedShape?.type === 'text'
   const showBgRemove    = selectedShape?.type === 'image'
 
   const toolButtons: { tool: StudioTool; label: string }[] = [
-    { tool: 'brush',   label: 'Brush'   },
-    { tool: 'eraser',  label: 'Eraser'  },
-    { tool: 'line',    label: 'Line'    },
-    { tool: 'rect',    label: 'Rect'    },
-    { tool: 'ellipse', label: 'Ellipse' },
-    { tool: 'text',    label: 'Text'    },
-    { tool: 'image',   label: 'Image'   },
-    { tool: 'select',  label: 'Select'  },
-    { tool: 'ruler',   label: 'Ruler'   },
+    { tool: 'brush',       label: 'Brush'    },
+    { tool: 'eraser',      label: 'Eraser'   },
+    { tool: 'line',        label: 'Line'     },
+    { tool: 'rect',        label: 'Rect'     },
+    { tool: 'ellipse',     label: 'Ellipse'  },
+    { tool: 'triangle',    label: 'Triangle' },
+    { tool: 'diamond',     label: 'Diamond'  },
+    { tool: 'pentagon',    label: 'Pentagon' },
+    { tool: 'hexagon',     label: 'Hexagon'  },
+    { tool: 'star',        label: 'Star'     },
+    { tool: 'heart',       label: 'Heart'    },
+    { tool: 'arrow-right', label: 'Arrow'    },
+    { tool: 'cross',       label: 'Cross'    },
+    { tool: 'text',        label: 'Text'     },
+    { tool: 'image',       label: 'Image'    },
+    { tool: 'select',      label: 'Select'   },
+    { tool: 'ruler',       label: 'Ruler'    },
   ]
 
   const cursor = activeTool === 'select' ? 'cursor-default'
@@ -1018,7 +1114,7 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
             </>
           )}
 
-          {(activeTool === 'brush' || activeTool === 'eraser' || activeTool === 'line' || activeTool === 'rect' || activeTool === 'ellipse') && (
+          {(['brush', 'eraser', 'line', 'rect', 'ellipse', 'triangle', 'diamond', 'pentagon', 'hexagon', 'star', 'heart', 'arrow-right', 'cross'] as StudioTool[]).includes(activeTool) && (
             <div>
               <p className="text-text-muted text-[9px] mb-1">Size: {brushSize}px</p>
               <input

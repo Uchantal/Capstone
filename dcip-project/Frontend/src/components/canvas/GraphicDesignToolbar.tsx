@@ -1,7 +1,18 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { CanvasTemplate, DesignElement, PickerItem, PICKER_ITEMS, SHAPE_SVG, ShapeType } from '../graphic-design/PosterSurface'
 
-type OpenPopup = 'colour' | 'background' | 'fontsize' | 'shapes' | 'templates' | null
+type OpenPopup = 'colour' | 'background' | 'fontsize' | 'shapes' | 'templates' | 'fontfamily' | null
+
+const FONT_FAMILIES = [
+  { label: 'Inter',        value: 'Inter, sans-serif' },
+  { label: 'Georgia',      value: 'Georgia, serif' },
+  { label: 'Impact',       value: 'Impact, sans-serif' },
+  { label: 'Trebuchet MS', value: "'Trebuchet MS', sans-serif" },
+  { label: 'Courier New',  value: "'Courier New', monospace" },
+  { label: 'Verdana',      value: 'Verdana, sans-serif' },
+  { label: 'Arial Black',  value: "'Arial Black', sans-serif" },
+  { label: 'Palatino',     value: 'Palatino, serif' },
+]
 
 const BG_COLORS      = ['#FFFFFF', '#1A1A1A', '#C8960C', '#2D6A4F', '#D62828', '#1e3a5f', '#F9F7F4', '#f59e0b']
 const ELEMENT_COLORS = ['#1A1A1A', '#ffffff', '#C8960C', '#D62828', '#2D6A4F', '#10B981', '#60A5FA', '#9ca3af', '#f59e0b', '#1e3a5f']
@@ -34,6 +45,11 @@ export interface GraphicDesignToolbarProps {
   templates: CanvasTemplate[]
   activeTemplate: CanvasTemplate
   onTemplateChange: (t: CanvasTemplate) => void
+  onFontFamilyChange: (ff: string) => void
+  onLetterSpacingChange: (ls: number) => void
+  onOpacityChange: (op: number) => void
+  onBringForward: () => void
+  onSendBackward: () => void
 }
 
 function Divider() {
@@ -67,11 +83,15 @@ export default function GraphicDesignToolbar({
   canUndo, onUndo,
   canRedo, onRedo,
   templates, activeTemplate, onTemplateChange,
+  onFontFamilyChange, onLetterSpacingChange, onOpacityChange,
+  onBringForward, onSendBackward,
 }: GraphicDesignToolbarProps) {
   const [openPopup,     setOpenPopup]     = useState<OpenPopup>(null)
   const [popupStyle,    setPopupStyle]    = useState<React.CSSProperties>({})
   const [canScrollDown, setCanScrollDown] = useState(false)
   const [localFontSz,   setLocalFontSz]   = useState<number>(selectedElement?.fontSize ?? 24)
+  const [localLS,       setLocalLS]       = useState<number>(selectedElement?.letterSpacing ?? 0)
+  const [localOpacity,  setLocalOpacity]  = useState<number>(selectedElement?.opacity ?? 1)
   const toolbarRef    = useRef<HTMLDivElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
 
@@ -84,7 +104,9 @@ export default function GraphicDesignToolbar({
 
   useEffect(() => {
     setLocalFontSz(selectedElement?.fontSize ?? 24)
-  }, [selectedElement?.id, selectedElement?.fontSize])
+    setLocalLS(selectedElement?.letterSpacing ?? 0)
+    setLocalOpacity(selectedElement?.opacity ?? 1)
+  }, [selectedElement?.id, selectedElement?.fontSize, selectedElement?.letterSpacing, selectedElement?.opacity])
 
   // Detect whether the vertical toolbar has more content below
   const checkScroll = useCallback(() => {
@@ -405,6 +427,88 @@ export default function GraphicDesignToolbar({
           <Tooltip label="Redo" />
         </div>
 
+        <Divider />
+
+        {/* ── Font family ── */}
+        <div className="relative group flex-shrink-0">
+          <button aria-label="Font family" onClick={e => isText ? togglePopup('fontfamily', e) : undefined} disabled={!isText} className={iconBtn(openPopup === 'fontfamily', !isText)}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 20L12 4l8 16"/><path d="M7 14h10"/>
+            </svg>
+          </button>
+          <Tooltip label="Font family" />
+        </div>
+
+        {/* ── Letter spacing ── */}
+        <div className="relative group flex-shrink-0">
+          <button aria-label="Letter spacing" disabled={!isText} className={iconBtn(false, !isText)}
+            onClick={isText ? () => {
+              const next = Math.min(20, localLS + 1)
+              setLocalLS(next)
+              onLetterSpacingChange(next)
+            } : undefined}
+            onContextMenu={isText ? e => {
+              e.preventDefault()
+              const next = Math.max(0, localLS - 1)
+              setLocalLS(next)
+              onLetterSpacingChange(next)
+            } : undefined}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M4 10h16M4 14h16"/><path d="M8 6l-4 4 4 4M16 6l4 4-4 4"/>
+            </svg>
+          </button>
+          <Tooltip label={isText ? `Letter spacing (${localLS}px) — click +1, right-click −1` : 'Letter spacing'} />
+        </div>
+
+        {/* ── Opacity ── */}
+        <div className="relative group flex-shrink-0">
+          <button aria-label="Opacity" disabled={!hasSelected} className={iconBtn(false, !hasSelected)}
+            onClick={hasSelected ? () => {
+              const next = Math.max(0, Math.round((localOpacity - 0.1) * 10) / 10)
+              setLocalOpacity(next)
+              onOpacityChange(next)
+            } : undefined}
+            onContextMenu={hasSelected ? e => {
+              e.preventDefault()
+              const next = Math.min(1, Math.round((localOpacity + 0.1) * 10) / 10)
+              setLocalOpacity(next)
+              onOpacityChange(next)
+            } : undefined}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M12 3a9 9 0 010 18" fill="currentColor" stroke="none" opacity="0.4"/>
+            </svg>
+          </button>
+          <Tooltip label={hasSelected ? `Opacity (${Math.round(localOpacity * 100)}%) — click −10%, right-click +10%` : 'Opacity'} />
+        </div>
+
+        <Divider />
+
+        {/* ── Bring forward ── */}
+        <div className="relative group flex-shrink-0">
+          <button aria-label="Bring forward" onClick={hasSelected ? onBringForward : undefined} disabled={!hasSelected} className={iconBtn(false, !hasSelected)}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="8" y="8" width="13" height="13" rx="2"/>
+              <rect x="3" y="3" width="13" height="13" rx="2" fill="white"/>
+              <path d="M10 7l2-2 2 2M12 5v6"/>
+            </svg>
+          </button>
+          <Tooltip label="Bring forward" />
+        </div>
+
+        {/* ── Send backward ── */}
+        <div className="relative group flex-shrink-0">
+          <button aria-label="Send backward" onClick={hasSelected ? onSendBackward : undefined} disabled={!hasSelected} className={iconBtn(false, !hasSelected)}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="13" height="13" rx="2"/>
+              <rect x="8" y="8" width="13" height="13" rx="2" fill="white"/>
+              <path d="M10 13l2 2 2-2M12 11v4"/>
+            </svg>
+          </button>
+          <Tooltip label="Send backward" />
+        </div>
 
         {/* ════ POPUPS ════ */}
 
@@ -484,6 +588,24 @@ export default function GraphicDesignToolbar({
                       <p className={`text-xs font-semibold truncate ${isActive ? 'text-primary' : 'text-text-primary'}`}>{t.label}</p>
                       <p className="text-[10px] text-text-muted leading-tight">{t.id === 'free' ? 'Fills workspace' : `${t.realW} x ${t.realH}px`}</p>
                     </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {openPopup === 'fontfamily' && isText && (
+          <div style={popupStyle} className={`${popupBase} p-3 w-52`}>
+            <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest mb-2">Font family</p>
+            <div className="flex flex-col gap-1">
+              {FONT_FAMILIES.map(ff => {
+                const isActive = (selectedElement?.fontFamily ?? 'Inter, sans-serif') === ff.value
+                return (
+                  <button key={ff.value} onClick={() => { onFontFamilyChange(ff.value); setOpenPopup(null) }}
+                    className={`text-left px-3 py-2 rounded-lg text-sm border transition-colors ${isActive ? 'bg-primary/10 border-primary/30 text-primary font-semibold' : 'hover:bg-surface-warm border-transparent text-text-primary'}`}
+                    style={{ fontFamily: ff.value }}>
+                    {ff.label}
                   </button>
                 )
               })}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useSync } from '../hooks/useSync'
 import { fetchProgressSummary } from '../services/api'
@@ -87,14 +87,58 @@ const STAGE_URLS: Record<string, { stageId: string; url: string }[]> = {
   ],
 }
 
-function LogoLink() {
+function LogoMenu({ onNavigate }: { onNavigate: (url: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  const go = (url: string) => { setOpen(false); onNavigate(url) }
+
+  const items = [
+    { label: 'Home',              sub: 'Landing page',                  url: '/'              },
+    { label: 'My Dashboard',      sub: 'Overview and quick access',      url: '/dashboard'     },
+    { label: 'My Portfolio',      sub: 'All your saved creative work',   url: '/portfolio'     },
+    { label: 'DCIP Studio',       sub: 'Professional creative workspace', url: '/studio'       },
+    { label: 'Skill Summary',     sub: 'Your progress and badges',       url: '/skill-summary' },
+    { label: 'Choose Discipline', sub: 'Switch or explore disciplines',  url: '/disciplines'   },
+  ]
+
   return (
-    <Link
-      to="/"
-      className="bg-primary rounded-lg w-9 h-8 flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0"
-    >
-      <span className="text-white font-bold text-[10px] tracking-tight">DCIP</span>
-    </Link>
+    <div className="relative flex-shrink-0" ref={ref}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="bg-primary rounded-lg w-9 h-8 flex items-center justify-center hover:opacity-80 transition-opacity"
+        aria-label="Open navigation menu"
+      >
+        <span className="text-white font-bold text-[10px] tracking-tight">DCIP</span>
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-2 bg-white border border-surface-border rounded-xl shadow-lg min-w-56 z-50 overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-surface-border bg-[#F9F7F4]">
+            <p className="text-[10px] uppercase tracking-widest font-semibold text-text-muted">Navigation</p>
+          </div>
+          {items.map(item => (
+            <div
+              key={item.url}
+              onClick={() => go(item.url)}
+              className="px-4 py-3 flex flex-col gap-0.5 hover:bg-[#F9F7F4] cursor-pointer transition-colors duration-100 border-b border-surface-border last:border-b-0"
+            >
+              <span className="text-sm font-medium text-text-primary">{item.label}</span>
+              <span className="text-xs text-text-secondary">{item.sub}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -197,7 +241,7 @@ export default function TopNav() {
     return (
       <nav className="bg-white border-b border-surface-border h-12 flex items-center px-6 justify-between">
         <div className="flex items-center gap-3">
-          <LogoLink />
+          <LogoMenu onNavigate={go} />
           <div>
             <p className="text-text-primary font-semibold text-sm leading-tight hidden lg:block">
               Digital Creative Infrastructure Platform
@@ -235,7 +279,7 @@ export default function TopNav() {
   return (
     <nav className="bg-white border-b border-surface-border h-12 flex items-center px-6 justify-between">
       <div className="flex items-center gap-3">
-        <LogoLink />
+        <LogoMenu onNavigate={go} />
         <p className="text-text-primary font-semibold text-sm leading-tight hidden lg:block">
           Digital Creative Infrastructure Platform
         </p>

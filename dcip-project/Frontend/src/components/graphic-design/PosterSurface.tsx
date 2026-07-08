@@ -10,12 +10,17 @@ export interface CanvasTemplate {
 }
 
 export const CANVAS_TEMPLATES: CanvasTemplate[] = [
-  { id: 'a4-poster',       label: 'A4 Poster',       realW: 595,  realH: 842  },
-  { id: 'instagram-post',  label: 'Instagram Post',  realW: 1080, realH: 1080 },
-  { id: 'instagram-story', label: 'Instagram Story', realW: 1080, realH: 1920 },
-  { id: 'facebook-cover',  label: 'Facebook Cover',  realW: 820,  realH: 312  },
-  { id: 'a5-flyer',        label: 'A5 Flyer',        realW: 420,  realH: 595  },
-  { id: 'free',            label: 'Free Canvas',     realW: 1200, realH: 800  },
+  { id: 'a4-poster',       label: 'A4 Poster',         realW: 595,  realH: 842  },
+  { id: 'a5-flyer',        label: 'A5 Flyer',          realW: 420,  realH: 595  },
+  { id: 'instagram-post',  label: 'Instagram Post',    realW: 1080, realH: 1080 },
+  { id: 'instagram-story', label: 'Instagram Story',   realW: 1080, realH: 1920 },
+  { id: 'facebook-post',   label: 'Facebook Post',     realW: 1200, realH: 630  },
+  { id: 'facebook-cover',  label: 'Facebook Cover',    realW: 820,  realH: 312  },
+  { id: 'twitter-post',    label: 'Twitter / X Post',  realW: 1200, realH: 675  },
+  { id: 'linkedin-post',   label: 'LinkedIn Post',     realW: 1200, realH: 627  },
+  { id: 'whatsapp-status', label: 'WhatsApp Status',   realW: 1080, realH: 1920 },
+  { id: 'youtube-thumb',   label: 'YouTube Thumbnail', realW: 1280, realH: 720  },
+  { id: 'free',            label: 'Free Canvas',       realW: 1200, realH: 800  },
 ]
 
 export type ShapeType =
@@ -32,6 +37,8 @@ export interface DesignElement {
   zIndex: number
   text?: string
   fontSize?: number
+  fontFamily?: string
+  letterSpacing?: number
   fontWeight?: 'normal' | 'bold'
   fontStyle?: 'normal' | 'italic'
   textDecoration?: 'none' | 'underline'
@@ -41,6 +48,7 @@ export interface DesignElement {
   strokeColor?: string
   strokeWidth?: number
   borderRadius?: number
+  opacity?: number
   shapeType?: ShapeType
   src?: string
 }
@@ -180,6 +188,7 @@ export async function exportDesignToDataUrl(
 
   for (const el of sorted) {
     ctx.save()
+    ctx.globalAlpha = el.opacity ?? 1
     if (el.type === 'rect') {
       ctx.fillStyle = el.fill ?? '#C8960C'
       if ((el.borderRadius ?? 0) > 0) {
@@ -217,7 +226,8 @@ export async function exportDesignToDataUrl(
       const fw = el.fontWeight === 'bold' ? 'bold ' : 'normal '
       const fi = el.fontStyle === 'italic' ? 'italic ' : ''
       const fs = el.fontSize ?? 24
-      ctx.font = `${fi}${fw}${fs}px Inter, sans-serif`
+      ctx.font = `${fi}${fw}${fs}px ${el.fontFamily ?? 'Inter, sans-serif'}`
+      if ((el.letterSpacing ?? 0) > 0) ctx.letterSpacing = `${el.letterSpacing}px`
       ctx.textBaseline = 'top'
       ctx.textAlign = (el.textAlign as CanvasTextAlign) ?? 'left'
       const xPos =
@@ -429,6 +439,30 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
     const newEl = { ...el, id: makeId(), x: el.x + 20, y: el.y + 20, zIndex: maxZ + 1 }
     const newEls = [...elements, newEl]
     setSelectedId(newEl.id)
+    commit(newEls, bgColor)
+  }
+
+  function bringForward() {
+    if (!selectedId) return
+    const el = elements.find(e => e.id === selectedId)
+    if (!el) return
+    const newEls = elements.map(e => {
+      if (e.id === selectedId) return { ...e, zIndex: e.zIndex + 1 }
+      if (e.zIndex === el.zIndex + 1) return { ...e, zIndex: e.zIndex - 1 }
+      return e
+    })
+    commit(newEls, bgColor)
+  }
+
+  function sendBackward() {
+    if (!selectedId) return
+    const el = elements.find(e => e.id === selectedId)
+    if (!el || el.zIndex <= 1) return
+    const newEls = elements.map(e => {
+      if (e.id === selectedId) return { ...e, zIndex: Math.max(1, e.zIndex - 1) }
+      if (e.zIndex === el.zIndex - 1) return { ...e, zIndex: e.zIndex + 1 }
+      return e
+    })
     commit(newEls, bgColor)
   }
 
@@ -728,6 +762,11 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
         onAddImage={handleImageUpload}
         onAddDetails={addContactBlock}
         onFontSizeChange={handleFontSizeChange}
+        onFontFamilyChange={ff => selectedEl && updateElement(selectedEl.id, { fontFamily: ff })}
+        onLetterSpacingChange={ls => selectedEl && updateElement(selectedEl.id, { letterSpacing: ls })}
+        onOpacityChange={op => selectedEl && updateElement(selectedEl.id, { opacity: op })}
+        onBringForward={bringForward}
+        onSendBackward={sendBackward}
         onBoldToggle={handleBoldToggle}
         onItalicToggle={handleItalicToggle}
         onUnderlineToggle={handleUnderlineToggle}
@@ -762,12 +801,12 @@ export default function DesignCanvas({ defaultElements, defaultBgColor, onChange
               return (
                 <div
                   key={el.id}
-                  style={{ position: 'absolute', left: el.x, top: el.y, width: el.width, height: el.height, zIndex: el.zIndex, cursor: isEditing ? 'text' : 'move', userSelect: 'none' }}
+                  style={{ position: 'absolute', left: el.x, top: el.y, width: el.width, height: el.height, zIndex: el.zIndex, cursor: isEditing ? 'text' : 'move', userSelect: 'none', opacity: el.opacity ?? 1 }}
                   onClick={e => { e.stopPropagation(); setSelectedId(el.id) }}
                   onMouseDown={e => { if (!isEditing) handleElementMouseDown(e, el.id) }}
                   onDoubleClick={e => { e.stopPropagation(); if (el.type === 'text') { setEditingId(el.id); setSelectedId(el.id) } }}
                 >
-                  {el.type === 'text' && (<div style={{ width:'100%',height:'100%',overflow:'hidden',fontSize:el.fontSize,fontWeight:el.fontWeight,fontStyle:el.fontStyle??'normal',textDecoration:el.textDecoration==='underline'?'underline':'none',textAlign:el.textAlign,color:el.color,lineHeight:1.35,wordBreak:'break-word' }}>{!isEditing&&(el.text||'')}{isEditing&&(<textarea autoFocus defaultValue={el.text??''} onBlur={e=>{updateElement(el.id,{text:e.target.value});setEditingId(null)}} onKeyDown={e=>{if(e.key==='Escape'){setEditingId(null);e.preventDefault()}}} onMouseDown={e=>e.stopPropagation()} style={{width:'100%',height:'100%',background:'transparent',border:'none',outline:'none',resize:'none',padding:0,cursor:'text',fontSize:'inherit',fontWeight:'inherit',fontStyle:'inherit',textDecoration:'inherit',textAlign:'inherit',color:'inherit',lineHeight:'inherit'}}/>)}</div>)}
+                  {el.type === 'text' && (<div style={{ width:'100%',height:'100%',overflow:'hidden',fontSize:el.fontSize,fontFamily:el.fontFamily??'Inter, sans-serif',letterSpacing:el.letterSpacing?`${el.letterSpacing}px`:undefined,fontWeight:el.fontWeight,fontStyle:el.fontStyle??'normal',textDecoration:el.textDecoration==='underline'?'underline':'none',textAlign:el.textAlign,color:el.color,lineHeight:1.35,wordBreak:'break-word' }}>{!isEditing&&(el.text||'')}{isEditing&&(<textarea autoFocus defaultValue={el.text??''} onBlur={e=>{updateElement(el.id,{text:e.target.value});setEditingId(null)}} onKeyDown={e=>{if(e.key==='Escape'){setEditingId(null);e.preventDefault()}}} onMouseDown={e=>e.stopPropagation()} style={{width:'100%',height:'100%',background:'transparent',border:'none',outline:'none',resize:'none',padding:0,cursor:'text',fontSize:'inherit',fontWeight:'inherit',fontStyle:'inherit',textDecoration:'inherit',textAlign:'inherit',color:'inherit',lineHeight:'inherit'}}/>)}</div>)}
                   {el.type==='rect'&&(<div style={{width:'100%',height:'100%',background:el.fill??'#C8960C',borderRadius:el.borderRadius,border:el.strokeColor&&el.strokeWidth?`${el.strokeWidth}px solid ${el.strokeColor}`:undefined}}/>)}
                   {el.type==='circle'&&(<div style={{width:'100%',height:'100%',background:el.fill??'#2D6A4F',borderRadius:'50%',border:el.strokeColor&&el.strokeWidth?`${el.strokeWidth}px solid ${el.strokeColor}`:undefined}}/>)}
                   {el.type==='shape'&&renderShapeContent(el)}
