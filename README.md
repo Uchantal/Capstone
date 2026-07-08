@@ -86,18 +86,34 @@ DCIP is a self-directed digital learning platform built for identified talented 
 ## Architecture
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#1e2a3a",
+    "primaryTextColor": "#ffffff",
+    "primaryBorderColor": "#3b5068",
+    "lineColor": "#7a9bb5",
+    "secondaryColor": "#162030",
+    "tertiaryColor": "#1a2535",
+    "clusterBkg": "#0f1923",
+    "clusterBorder": "#3b5068",
+    "titleColor": "#ffffff",
+    "edgeLabelBackground": "#1e2a3a",
+    "fontFamily": "Inter, sans-serif"
+  }
+}}%%
 graph TB
     Student[Student Browser\nReact PWA] -->|HTTPS| Nginx
 
     subgraph VPS["DigitalOcean VPS — Ubuntu 22.04"]
         Nginx[Nginx\nReverse Proxy + TLS\ndcip-rw.online]
         Nginx -->|"/* static files"| React[React Build\n/var/www/dcip]
-        Nginx -->|"/api/* proxy"| Express[Express + Node.js\nPM2 — port 5000\nAuth · Curriculum · Studios · AI]
+        Nginx -->|"/api/* proxy"| Express[Express + Node.js\nPM2 — port 5000\nAuth · Disciplines · Studios · AI]
     end
 
     Express --> MongoDB[(MongoDB Atlas\nUsers · Progress · Works)]
     Express --> Cloudinary[Cloudinary\nImages · Audio Files]
-    Express --> Gemini[Google Gemini\nFlash Lite\nPrimary AI]
+    Express --> Gemini[Google Gemini 3.1\nFlash Lite\nPrimary AI]
     Gemini -->|fallback chain| OpenRouter[OpenRouter\nGemma 4 31B · Meta Llama · Qwen]
 
     Student -.->|offline cache| SW[Service Worker\nIndexedDB Queue]
