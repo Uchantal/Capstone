@@ -160,23 +160,23 @@ export default function AdminSchoolsPage() {
       <main className="max-w-5xl mx-auto px-6 py-8">
 
         {/* header row */}
-        <div className="flex items-start justify-between mb-6 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-6 gap-3">
           <div>
             <h1 className="text-text-primary font-bold text-2xl mb-1">Schools</h1>
             <p className="text-text-secondary text-sm">
               {activeCount} of {schools.length} school{schools.length !== 1 ? 's' : ''} active
             </p>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-3">
             <input
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               placeholder="Filter by name or district..."
-              className="border border-surface-border rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary w-56"
+              className="border border-surface-border rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary w-full sm:w-44 md:w-56"
             />
             <button
               onClick={openAdd}
-              className="bg-primary text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-primary-dark transition-colors whitespace-nowrap"
+              className="bg-primary text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-primary-dark transition-colors whitespace-nowrap flex-shrink-0"
             >
               Add School
             </button>

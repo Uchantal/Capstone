@@ -84,7 +84,7 @@ export default function AdminStudioPage() {
 
   const filtered = works.filter(w => {
     const matchDisc   = filterDisc === 'all' || w.discipline === filterDisc
-    const matchSearch = !search || w.title.toLowerCase().includes(search.toLowerCase()) || w.user.fullName.toLowerCase().includes(search.toLowerCase())
+    const matchSearch = !search || w.title.toLowerCase().includes(search.toLowerCase()) || w.user?.fullName?.toLowerCase().includes(search.toLowerCase())
     return matchDisc && matchSearch
   })
 
@@ -175,9 +175,9 @@ export default function AdminStudioPage() {
                         <p className="text-text-muted text-[10px] mt-0.5">{work.width} x {work.height}px</p>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-text-primary text-sm">{work.user.fullName}</p>
-                        <p className="text-text-muted text-[10px]">@{work.user.username}</p>
-                        {work.user.school && (
+                        <p className="text-text-primary text-sm">{work.user?.fullName ?? 'Unknown student'}</p>
+                        <p className="text-text-muted text-[10px]">@{work.user?.username ?? '-'}</p>
+                        {work.user?.school && (
                           <p className="text-text-muted text-[10px]">{work.user.school.name}</p>
                         )}
                       </td>

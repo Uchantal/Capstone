@@ -9,6 +9,11 @@ import PortfolioItem from '../models/PortfolioItem'
 import School from '../models/School'
 import EngagementScore from '../models/EngagementScore'
 import StudioWork from '../models/StudioWork'
+import VisualArtsDemonstrationProgress from '../models/VisualArtsDemonstrationProgress'
+import GDDemonstrationProgress from '../models/GDDemonstrationProgress'
+import GuitarDemonstrationProgress from '../models/GuitarDemonstrationProgress'
+import PianoDemonstrationProgress from '../models/PianoDemonstrationProgress'
+import VoiceDemonstrationProgress from '../models/VoiceDemonstrationProgress'
 
 const router = Router()
 
@@ -314,7 +319,7 @@ router.get('/studio', protect, requireRole('admin'), async (_req: AuthRequest, r
       .select('-fileData')
       .populate('user', 'fullName username school discipline')
       .sort({ createdAt: -1 })
-    res.json(works)
+    res.json(works.filter(w => w.user != null))
   } catch {
     res.status(500).json({ message: 'Could not fetch studio works' })
   }
@@ -350,6 +355,101 @@ router.delete('/studio/:id', protect, requireRole('admin'), async (req: AuthRequ
     res.json({ message: 'Deleted' })
   } catch {
     res.status(500).json({ message: 'Could not delete studio work' })
+  }
+})
+
+// === ANALYTICS ===
+
+router.get('/analytics', protect, requireRole('admin'), async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const DISCIPLINES = [
+      { key: 'visual-arts',    label: 'Visual Arts',    model: VisualArtsDemonstrationProgress },
+      { key: 'graphic-design', label: 'Graphic Design', model: GDDemonstrationProgress },
+      { key: 'guitar',         label: 'Guitar',         model: GuitarDemonstrationProgress },
+      { key: 'piano',          label: 'Piano',          model: PianoDemonstrationProgress },
+      { key: 'voice',          label: 'Voice',          model: VoiceDemonstrationProgress },
+    ]
+
+    // 1. Discipline popularity — how many students per discipline (engagement scores)
+    const disciplinePopularity = await Promise.all(
+      DISCIPLINES.map(async d => ({
+        discipline: d.label,
+        students: await EngagementScore.countDocuments({ discipline: d.key }),
+      }))
+    )
+
+    // 2. Level completion rates per discipline
+    const levelCompletion = await Promise.all(
+      DISCIPLINES.map(async d => {
+        const total = await d.model.countDocuments()
+        const l1    = await d.model.countDocuments({ level1DemonstrationPassed: true })
+        const l2    = await d.model.countDocuments({ level2DemonstrationPassed: true })
+        const l3    = await d.model.countDocuments({ level3DemonstrationPassed: true })
+        return {
+          discipline: d.label,
+          level1: total > 0 ? Math.round((l1 / total) * 100) : 0,
+          level2: total > 0 ? Math.round((l2 / total) * 100) : 0,
+          level3: total > 0 ? Math.round((l3 / total) * 100) : 0,
+        }
+      })
+    )
+
+    // 3. Average engagement score per discipline
+    const engagementByDiscipline = await Promise.all(
+      DISCIPLINES.map(async d => {
+        const docs = await EngagementScore.find({ discipline: d.key }).select('scores.overallEngagement')
+        const values = docs
+          .map(doc => doc.scores?.overallEngagement)
+          .filter((v): v is number => typeof v === 'number')
+        const avg = values.length > 0
+          ? Math.round(values.reduce((a, b) => a + b, 0) / values.length)
+          : 0
+        return { discipline: d.label, avgEngagement: avg }
+      })
+    )
+
+    // 4. Studio works saved over last 8 weeks
+    const now = new Date()
+    const weeklyStudio = await Promise.all(
+      Array.from({ length: 8 }, (_, i) => {
+        const weekStart = new Date(now)
+        weekStart.setDate(now.getDate() - (7 * (7 - i)))
+        const weekEnd = new Date(weekStart)
+        weekEnd.setDate(weekStart.getDate() + 7)
+        return StudioWork.countDocuments({ createdAt: { $gte: weekStart, $lt: weekEnd } })
+          .then(count => ({ week: `W${i + 1}`, works: count }))
+      })
+    )
+
+    // 5. Engagement score distribution (buckets 0-20, 21-40, 41-60, 61-80, 81-100)
+    const allEngagement = await EngagementScore.find().select('scores.overallEngagement')
+    const buckets = [
+      { range: '0-20',   count: 0 },
+      { range: '21-40',  count: 0 },
+      { range: '41-60',  count: 0 },
+      { range: '61-80',  count: 0 },
+      { range: '81-100', count: 0 },
+    ]
+    for (const doc of allEngagement) {
+      const v = doc.scores?.overallEngagement
+      if (typeof v !== 'number') continue
+      if (v <= 20)       buckets[0].count++
+      else if (v <= 40)  buckets[1].count++
+      else if (v <= 60)  buckets[2].count++
+      else if (v <= 80)  buckets[3].count++
+      else               buckets[4].count++
+    }
+
+    res.json({
+      disciplinePopularity,
+      levelCompletion,
+      engagementByDiscipline,
+      weeklyStudio,
+      engagementDistribution: buckets,
+    })
+  } catch (err) {
+    console.error('Analytics error:', err)
+    res.status(500).json({ message: 'Could not fetch analytics' })
   }
 })
 

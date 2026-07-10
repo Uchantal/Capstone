@@ -117,6 +117,7 @@ const AdminSchoolDetailPage = lazy(() => import('./pages/admin/AdminSchoolDetail
 const AdminFeedbackPage     = lazy(() => import('./pages/admin/AdminFeedbackPage'))
 const AdminPreviewPage      = lazy(() => import('./pages/admin/AdminPreviewPage'))
 const AdminStudioPage       = lazy(() => import('./pages/admin/AdminStudioPage'))
+const AdminAnalyticsPage    = lazy(() => import('./pages/admin/AdminAnalyticsPage'))
 
 // Glossaries
 const GlossaryPage              = lazy(() => import('./pages/guitar/GlossaryPage'))
@@ -312,6 +313,7 @@ function AppContent() {
         <Route path="/admin/schools/:id"    element={A(AdminSchoolDetailPage)} />
         <Route path="/admin/modules"        element={A(AdminModulesPage)} />
         <Route path="/admin/reports"        element={A(AdminReportsPage)} />
+        <Route path="/admin/analytics"      element={A(AdminAnalyticsPage)} />
         <Route path="/admin/supervisors"    element={A(AdminSupervisorsPage)} />
         <Route path="/admin/feedback"       element={A(AdminFeedbackPage)} />
         <Route path="/admin/preview"        element={A(AdminPreviewPage)} />

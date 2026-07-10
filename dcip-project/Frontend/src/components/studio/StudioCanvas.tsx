@@ -1036,7 +1036,7 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
         style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }} />
 
       {/* Left toolbar */}
-      <div className="w-48 flex-shrink-0 bg-white border-r border-surface-border flex flex-col overflow-y-auto">
+      <div className="w-40 md:w-44 lg:w-48 flex-shrink-0 bg-white border-r border-surface-border flex flex-col overflow-y-auto">
         <div className="px-3 pt-3 pb-2 border-b border-surface-border">
           <p className="text-text-muted text-[9px] uppercase tracking-wide font-semibold mb-1.5">Canvas Format</p>
           <select
@@ -1264,7 +1264,7 @@ const StudioCanvas = forwardRef<StudioCanvasHandle, Props>(function StudioCanvas
               onBlur={commitText}
               placeholder="Type and press Enter"
               style={{ fontFamily, fontSize: Math.round(fontSize * (displayW / format.width)), lineHeight: 1.2 }}
-              className="min-w-[120px] min-h-[40px] bg-white/90 border-2 border-primary rounded px-2 py-1 text-text-primary outline-none resize shadow-lg"
+              className="min-w-[120px] max-w-[calc(100vw-32px)] min-h-[40px] bg-white/90 border-2 border-primary rounded px-2 py-1 text-text-primary outline-none resize shadow-lg"
               rows={2}
             />
             <p className="text-[9px] text-text-muted mt-0.5 bg-white/80 px-1 rounded">Enter to place, Esc to cancel</p>

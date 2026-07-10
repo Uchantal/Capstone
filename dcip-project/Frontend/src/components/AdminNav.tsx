@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, useNavigate, Link } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 const NAV_LINKS = [
   { label: 'Overview',    to: '/admin/overview' },
-  { label: 'Supervisors', to: '/admin/supervisors' },
   { label: 'Schools',     to: '/admin/schools' },
   { label: 'Modules',     to: '/admin/modules' },
   { label: 'Reports',     to: '/admin/reports' },
+  { label: 'Analytics',   to: '/admin/analytics' },
   { label: 'Studio',      to: '/admin/studio' },
   { label: 'Feedback',    to: '/admin/feedback' },
   { label: 'Preview',     to: '/admin/preview' },
@@ -64,14 +64,13 @@ export default function AdminNav() {
                 Visit Site
               </p>
               {SITE_LINKS.map(link => (
-                <Link
+                <button
                   key={link.to}
-                  to={link.to}
-                  onClick={() => setMenuOpen(false)}
-                  className="block px-3 py-2 text-sm text-text-primary hover:bg-gray-50 hover:text-primary transition-colors"
+                  onClick={() => { setMenuOpen(false); navigate(link.to) }}
+                  className="block w-full text-left px-3 py-2 text-sm text-text-primary hover:bg-gray-50 hover:text-primary transition-colors"
                 >
                   {link.label}
-                </Link>
+                </button>
               ))}
             </div>
           )}

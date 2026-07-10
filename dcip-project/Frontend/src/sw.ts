@@ -41,41 +41,24 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   // Skip non-http(s) requests (e.g. chrome-extension://)
   if (!url.protocol.startsWith('http')) return
 
-  // Only cache GET; let POSTs/PATCHes pass through
+  // Only handle GET for caching strategies; let POSTs/PATCHes pass through
   if (req.method !== 'GET') return
 
+  // Network First for all other API requests
   if (url.href.includes('/api/')) {
     event.respondWith(networkFirst(req))
     return
   }
 
+  // Cache First for images and fonts
   if (req.destination === 'image' || req.destination === 'font') {
     event.respondWith(cacheFirst(req, ASSETS_CACHE))
     return
   }
 
-  // HTML navigations: network-first so bots and Lighthouse can read the response body; cache as fallback.
-  if (req.destination === 'document') {
-    event.respondWith(networkFirstHtml(req))
-    return
-  }
-
+  // Cache First from precache for app shell (HTML, JS, CSS)
   event.respondWith(precacheFirst(req))
 })
-
-async function networkFirstHtml(req: Request): Promise<Response> {
-  try {
-    const response = await fetch(req.clone())
-    if (response.ok) {
-      const cache = await caches.open(PRECACHE)
-      cache.put(req, response.clone())
-    }
-    return response
-  } catch {
-    const cached = await caches.match(req) ?? await caches.match('/index.html')
-    return cached ?? new Response('', { status: 503 })
-  }
-}
 
 async function networkFirst(req: Request): Promise<Response> {
   try {

@@ -529,8 +529,8 @@ const GuitarStudio = forwardRef<GuitarStudioHandle, { onDirty: () => void }>(({ 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-5">
 
-        {/* Fretboard + Chord Library side by side */}
-        <div className="flex gap-5 items-start">
+        {/* Fretboard + Chord Library side by side on large screens, stacked on smaller */}
+        <div className="flex flex-col lg:flex-row gap-5 items-start">
 
           {/* Physical fretboard */}
           <div className="bg-white rounded-2xl border border-surface-border p-6 shadow-sm flex-1 min-w-0">
@@ -555,7 +555,7 @@ const GuitarStudio = forwardRef<GuitarStudioHandle, { onDirty: () => void }>(({ 
           </div>
 
           {/* Chord Library — right panel, always visible beside the neck */}
-          <div className="bg-white rounded-2xl border border-surface-border p-5 shadow-sm flex-shrink-0" style={{ width: 256 }}>
+          <div className="bg-white rounded-2xl border border-surface-border p-5 shadow-sm w-full lg:w-64 lg:flex-shrink-0">
             <p className="text-text-primary font-bold text-sm mb-1">Chord Library</p>
             <p className="text-text-muted text-[10px] mb-4 leading-relaxed">
               Click a chord to strum it. Turn Recording on to add each chord to your progression.

@@ -169,7 +169,7 @@ function WaveformCanvas({ analyserRef, isLive, mode }: WaveformCanvasProps) {
 
   return (
     <div className="rounded-xl overflow-hidden" style={{ background: '#1A1A1A' }}>
-      <canvas ref={canvasRef} width={1200} height={200} className="w-full block" style={{ height: 200 }} />
+      <canvas ref={canvasRef} width={1200} height={200} className="w-full block" style={{ height: 120 }} />
     </div>
   )
 }

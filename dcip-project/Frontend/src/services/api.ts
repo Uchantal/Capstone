@@ -5,22 +5,10 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('token')
+  const token = localStorage.getItem('token')
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      sessionStorage.removeItem('token')
-      sessionStorage.removeItem('user')
-      window.location.href = '/login'
-    }
-    return Promise.reject(error)
-  }
-)
 
 // Auth
 export const registerUser = (data: {
@@ -49,6 +37,9 @@ export const forgotPassword = (email: string) =>
 
 export const resetPassword = (token: string, newPassword: string) =>
   api.post('/auth/reset-password', { token, newPassword })
+
+export const verifyEmail = (token: string) =>
+  api.post('/auth/verify-email', { token })
 
 export const updateUserSchool = (schoolId: string) =>
   api.patch('/auth/school', { schoolId })
@@ -79,9 +70,13 @@ export const deletePortfolioItem = (id: string) => api.delete(`/portfolio/${id}`
 
 // Admin
 export const getAdminStudents = () => api.get('/admin/students')
+
 export const toggleStudentStatus = (id: string) => api.patch(`/admin/students/${id}/toggle`)
+
 export const getAdminModules = () => api.get('/admin/modules')
+
 export const toggleModule = (id: string) => api.patch(`/admin/modules/${id}/toggle`)
+
 export const getAdminReports = (params?: { startDate?: string; endDate?: string }) => {
   const q = new URLSearchParams()
   if (params?.startDate) q.set('startDate', params.startDate)
@@ -89,7 +84,9 @@ export const getAdminReports = (params?: { startDate?: string; endDate?: string 
   const qs = q.toString()
   return api.get(`/admin/reports${qs ? `?${qs}` : ''}`)
 }
+
 export const getAdminSupervisors = () => api.get('/admin/supervisors')
+
 export const createSupervisor = (data: {
   fullName: string
   username: string
@@ -97,10 +94,8 @@ export const createSupervisor = (data: {
   password: string
   schoolId: string
 }) => api.post('/admin/supervisors', data)
-export const getAdminFeedback = () => api.get('/feedback')
-export const getAdminFeedbackCount = () => api.get('/feedback/count')
 
-// Progress
+// Sessions: progress and analytics
 export const fetchProgress = () => api.get('/sessions/progress')
 
 export const fetchProgressByDiscipline = (discipline: string) =>
@@ -110,6 +105,17 @@ export const fetchAnalytics = () => api.get('/sessions/analytics')
 
 export const fetchCurriculum = (discipline: string) =>
   api.get(`/sessions/curriculum/${discipline}`)
+
+// Supervisor
+export const getSupervisorActiveSessions = () => api.get('/supervisor/sessions/active')
+
+export const getSupervisorStudents = () => api.get('/supervisor/students')
+
+export const getSupervisorProgress = () => api.get('/supervisor/progress')
+
+export const getSupervisorLiveActivity = () => api.get('/supervisor/live-activity')
+
+export const getSupervisorSchoolAnalytics = (period?: string) => api.get(`/supervisor/school-analytics${period ? `?period=${period}` : ''}`)
 
 // Production
 export const saveProductionResult = (data: {
@@ -125,7 +131,7 @@ export const saveProductionResult = (data: {
 export const fetchMyProductionResults = (discipline?: string) =>
   api.get('/production/result/me', { params: discipline ? { discipline } : {} })
 
-// Visual Arts journey
+// Journey (Visual Arts structured progression)
 export const fetchJourneyProgress = (discipline: string) =>
   api.get('/journey/progress', { params: { discipline } })
 
@@ -142,7 +148,7 @@ export const saveVAProductionResult = (data: {
   }
 }) => api.post('/journey/va-production', data)
 
-// Graphic Design journey
+// Journey (Graphic Design structured progression)
 export const fetchGDLevelPoster = (level: number) =>
   api.get('/journey/gd-level-poster', { params: { level } })
 
@@ -176,7 +182,7 @@ export const saveGDProductionResult = (data: {
   }
 }) => api.post('/journey/gd-production', data)
 
-// Piano
+// Piano demonstration-based progression
 export const fetchPianoProgress = () =>
   api.get('/piano/progress')
 
@@ -186,35 +192,35 @@ export const completePianoDemonstration = (level: 1 | 2 | 3, passed: boolean) =>
 export const completePianoProduction = (passed: boolean) =>
   api.post('/piano/production/complete', { passed })
 
-// Guitar
+// Guitar demonstration-based progression
 export const fetchGuitarProgress = () => api.get('/guitar/progress')
 export const completeGuitarDemonstration = (level: 1 | 2 | 3, passed: boolean) =>
   api.post(`/guitar/demonstration/${level}/complete`, { passed })
 export const completeGuitarProduction = (passed: boolean) =>
   api.post('/guitar/production/complete', { passed })
 
-// Visual Arts
+// Visual Arts demonstration-based progression
 export const fetchVisualArtsProgress = () => api.get('/visual-arts/progress')
 export const completeVisualArtsDemonstration = (level: 1 | 2 | 3, passed: boolean, canvasSnapshot: string) =>
   api.post(`/visual-arts/demonstration/${level}/complete`, { passed, canvasSnapshot })
 export const completeVisualArtsProduction = (passed: boolean) =>
   api.post('/visual-arts/production/complete', { passed })
 
-// Graphic Design
+// Graphic Design demonstration-based progression
 export const fetchGDProgress = () => api.get('/graphic-design/progress')
 export const completeGDDemonstration = (level: 1 | 2 | 3, passed: boolean, posterSnapshot: string, imageData: string) =>
   api.post(`/graphic-design/demonstration/${level}/complete`, { passed, posterSnapshot, imageData })
 export const completeGDProduction = (passed: boolean) =>
   api.post('/graphic-design/production/complete', { passed })
 
-// Voice
+// Voice demonstration-based progression
 export const fetchVoiceProgress = () => api.get('/voice/progress')
 export const completeVoiceDemonstration = (level: 1 | 2 | 3, passed: boolean) =>
   api.post(`/voice/demonstration/${level}/complete`, { passed })
 export const completeVoiceProduction = (passed: boolean) =>
   api.post('/voice/production/complete', { passed })
 
-// Summary
+// Unified skill summary — all disciplines, stage-based skill levels
 export const fetchProgressSummary = () => api.get('/progress/summary')
 
 // Feedback
@@ -227,7 +233,10 @@ export const submitFeedback = (data: {
   screenshotData?: string
 }) => api.post('/feedback', data)
 
-// Engagement
+export const getAdminFeedback = () => api.get('/feedback')
+export const getAdminFeedbackCount = () => api.get('/feedback/count')
+
+// Engagement tracking
 export const saveEngagementScore = (discipline: string, stage: string, score: number) =>
   api.post(`/engagement/${discipline}/${stage}`, { score })
 
@@ -237,7 +246,7 @@ export const fetchEngagementScores = (discipline: string) =>
 export const fetchAdminStudentProfile = (id: string) =>
   api.get(`/admin/students/${id}/profile`)
 
-// Drafts
+// Drafts — one slot per student per discipline (VA and GD practise / production)
 export const saveDraft = (data: { discipline: string; snapshot: string; thumbnailData?: string }) =>
   api.post('/drafts', data)
 

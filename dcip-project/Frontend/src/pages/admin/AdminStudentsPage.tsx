@@ -225,7 +225,7 @@ export default function AdminStudentsPage() {
           <StudentDetail profile={selectedProfile} onBack={() => setSelectedProfile(null)} />
         ) : (
           <>
-            <div className="flex items-start justify-between mb-6 gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-6 gap-3">
               <div>
                 <h1 className="text-text-primary font-bold text-2xl mb-1">Students</h1>
                 <p className="text-text-secondary text-sm">
@@ -236,7 +236,7 @@ export default function AdminStudentsPage() {
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 placeholder="Filter by name or school…"
-                className="border border-surface-border rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary w-64 shrink-0"
+                className="border border-surface-border rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:border-primary w-full sm:w-48 md:w-64"
               />
             </div>
 

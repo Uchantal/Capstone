@@ -16,7 +16,7 @@ const generateToken = (id: string, role: string): string => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET as string, { expiresIn: '5h' })
 }
 
-const isStrongPassword = (pw: string): string | null => {
+export const isStrongPassword = (pw: string): string | null => {
   if (pw.length < 8)           return 'Password must be at least 8 characters.'
   if (!/[A-Z]/.test(pw))       return 'Password must contain at least one uppercase letter.'
   if (!/[0-9]/.test(pw))       return 'Password must contain at least one number.'

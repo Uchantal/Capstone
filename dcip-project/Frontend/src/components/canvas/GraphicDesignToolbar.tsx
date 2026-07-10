@@ -157,14 +157,14 @@ export default function GraphicDesignToolbar({
   }
 
   const iconBtn = (active = false, disabled = false) => {
-    const base = 'w-9 h-9 sm:w-8 sm:h-8 lg:w-10 lg:h-10 flex-shrink-0 flex items-center justify-center rounded-lg'
+    const base = 'w-10 h-10 lg:w-11 lg:h-11 flex-shrink-0 flex items-center justify-center rounded-lg'
     if (active)   return `${base} bg-primary text-white`
     if (disabled) return `${base} text-text-secondary opacity-30 cursor-not-allowed`
     return `${base} text-text-secondary hover:bg-surface-warm hover:text-text-primary transition-colors duration-150`
   }
 
   const redBtn = (disabled = false) => {
-    const base = 'w-9 h-9 sm:w-8 sm:h-8 lg:w-10 lg:h-10 flex-shrink-0 flex items-center justify-center rounded-lg'
+    const base = 'w-10 h-10 lg:w-11 lg:h-11 flex-shrink-0 flex items-center justify-center rounded-lg'
     return disabled
       ? `${base} text-accent opacity-30 cursor-not-allowed`
       : `${base} text-accent hover:bg-accent/10 transition-colors duration-150`

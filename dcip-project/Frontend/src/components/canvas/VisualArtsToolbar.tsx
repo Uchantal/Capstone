@@ -116,14 +116,14 @@ export default function VisualArtsToolbar({
   const isShapeTool = activeTool === 'rect' || activeTool === 'circle'
 
   const toolBtn = (active: boolean) => {
-    const base = 'w-9 h-9 sm:w-8 sm:h-8 lg:w-10 lg:h-10 flex-shrink-0 flex items-center justify-center rounded-lg transition-colors duration-150'
+    const base = 'w-10 h-10 lg:w-11 lg:h-11 flex-shrink-0 flex items-center justify-center rounded-lg transition-colors duration-150'
     return active
       ? `${base} bg-primary text-white`
       : `${base} text-text-secondary hover:bg-surface-warm hover:text-text-primary`
   }
 
-  const iconBtn = 'w-9 h-9 sm:w-8 sm:h-8 lg:w-10 lg:h-10 flex-shrink-0 flex items-center justify-center rounded-lg text-text-secondary hover:bg-surface-warm hover:text-text-primary transition-colors duration-150'
-  const redBtn  = 'w-9 h-9 sm:w-8 sm:h-8 lg:w-10 lg:h-10 flex-shrink-0 flex items-center justify-center rounded-lg text-accent hover:bg-accent/10 transition-colors duration-150'
+  const iconBtn = 'w-10 h-10 lg:w-11 lg:h-11 flex-shrink-0 flex items-center justify-center rounded-lg text-text-secondary hover:bg-surface-warm hover:text-text-primary transition-colors duration-150'
+  const redBtn  = 'w-10 h-10 lg:w-11 lg:h-11 flex-shrink-0 flex items-center justify-center rounded-lg text-accent hover:bg-accent/10 transition-colors duration-150'
   const popupBase = 'bg-white border border-surface-border rounded-xl shadow-xl'
 
   return (
