@@ -203,7 +203,7 @@ function AppContent() {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Public */}
-        <Route path="/"               element={<PublicRoute><HomePage /></PublicRoute>} />
+        <Route path="/"               element={<HomePage />} />
         <Route path="/register"       element={<PublicRoute><RegisterPage /></PublicRoute>} />
         <Route path="/login"          element={<PublicRoute><LoginPage /></PublicRoute>} />
         <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
