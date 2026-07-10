@@ -242,7 +242,7 @@ export default function AdminSchoolDetailPage() {
     <AdminLayout>
       <main className="max-w-5xl mx-auto px-6 py-8">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex flex-wrap items-center gap-4 mb-6">
           <button
             onClick={() => navigate('/admin/schools')}
             className="flex items-center gap-1.5 text-text-secondary text-sm hover:text-text-primary transition-colors shrink-0"

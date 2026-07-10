@@ -187,7 +187,7 @@ export default function AdminSchoolsPage() {
         {showAdd && (
           <div className="mb-6 bg-white border border-primary/30 rounded-2xl p-5">
             <h2 className="text-text-primary font-semibold text-base mb-4">Add new school</h2>
-            <div className="grid grid-cols-3 gap-4 mb-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-3">
               <div>
                 <label className="text-text-secondary text-xs font-medium block mb-1.5">School name</label>
                 <input

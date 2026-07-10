@@ -434,7 +434,7 @@ const PianoStudio = forwardRef<PianoStudioHandle, { onDirty: () => void }>(({ on
     <div className="flex-1 flex flex-col overflow-hidden bg-surface-warm">
 
       {/* Compact metadata row */}
-      <div className="flex-shrink-0 bg-white border-b border-surface-border px-6 py-3 flex items-end gap-4 flex-wrap">
+      <div className="flex-shrink-0 bg-white border-b border-surface-border px-3 sm:px-6 py-3 flex items-end gap-3 sm:gap-4 flex-wrap">
         <div>
           <label htmlFor="ps-title" className={lbl}>Title</label>
           <input id="ps-title" name="ps-title" className={`${field} w-56`} placeholder="Composition title" value={title} onChange={e => { setTitle(e.target.value); onDirty() }} />

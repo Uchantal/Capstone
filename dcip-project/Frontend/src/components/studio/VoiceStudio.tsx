@@ -432,7 +432,7 @@ const VoiceStudio = forwardRef<VoiceStudioHandle, { onDirty: () => void }>(({ on
     <div className="flex-1 flex flex-col overflow-hidden bg-surface-warm">
 
       {/* Metadata row */}
-      <div className="flex-shrink-0 bg-white border-b border-surface-border px-6 py-3 flex items-end gap-4 flex-wrap">
+      <div className="flex-shrink-0 bg-white border-b border-surface-border px-3 sm:px-6 py-3 flex items-end gap-3 sm:gap-4 flex-wrap">
         <div><label htmlFor="vs-title" className={lbl}>Title</label>
           <input id="vs-title" name="vs-title" className={`${field} w-48`} placeholder="Composition title" value={title} onChange={e => { setTitle(e.target.value); onDirty() }} /></div>
         <div><label htmlFor="vs-artist" className={lbl}>Artist</label>
