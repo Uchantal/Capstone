@@ -38,6 +38,7 @@ export default function VoiceLevel2Page() {
   const [noteIdx,      setNoteIdx]      = useState(0)
   const [phase,        setPhase]        = useState<'playing' | 'singing' | 'complete'>('playing')
   const [pitchStatus,  setPitchStatus]  = useState<PitchStatus>('none')
+  const [replaying,    setReplaying]    = useState(false)
 
   const rafRef          = useRef<number>(0)
   const phaseRef        = useRef<'playing' | 'singing' | 'complete'>('playing')
@@ -88,6 +89,13 @@ export default function VoiceLevel2Page() {
     }
     rafRef.current = requestAnimationFrame(runLoop)
   }, [analyserRef, markStageVisited])
+
+  const replayNote = useCallback(() => {
+    if (replaying) return
+    setReplaying(true)
+    playTone(SCALE[noteIdxRef.current].freq, 1.5)
+    setTimeout(() => setReplaying(false), 1700)
+  }, [replaying])
 
   const startExercise = useCallback(async () => {
     if (startedRef.current) return
@@ -192,7 +200,16 @@ export default function VoiceLevel2Page() {
               </div>
 
               {phase === 'singing' && (
-                <PitchIndicator status={pitchStatus} label="Hold green for 1.5 seconds to advance" />
+                <div className="space-y-3">
+                  <button
+                    onClick={replayNote}
+                    disabled={replaying}
+                    className="border border-primary/50 text-primary text-xs font-semibold px-4 py-2 rounded-lg hover:bg-primary/10 transition-colors disabled:opacity-40"
+                  >
+                    {replaying ? 'Playing...' : `Replay ${currentNote.note} (${currentNote.freq.toFixed(0)} Hz)`}
+                  </button>
+                  <PitchIndicator status={pitchStatus} label="Hold green for 1.5 seconds to advance" />
+                </div>
               )}
               {phase === 'playing' && !startedRef.current && (
                 <button

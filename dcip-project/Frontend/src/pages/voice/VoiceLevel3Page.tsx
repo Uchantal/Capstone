@@ -42,6 +42,7 @@ export default function VoiceLevel3Page() {
   const [ex2Rep,       setEx2Rep]       = useState(0)
   const [ex3Vowel,     setEx3Vowel]     = useState(0)
   const [started,      setStarted]      = useState(false)
+  const [replaying,    setReplaying]    = useState(false)
 
   const rafRef          = useRef<number>(0)
   const phaseRef        = useRef<ExercisePhase>('ex1-playing')
@@ -165,6 +166,22 @@ export default function VoiceLevel3Page() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analyserRef, transition, markStageVisited])
 
+  const replayNote = useCallback(() => {
+    if (replaying) return
+    const ph = phaseRef.current
+    const freqMap: Partial<Record<ExercisePhase, number>> = {
+      'ex1-singing': 440.00,
+      'ex2-singing-c': 261.63,
+      'ex2-singing-g': 392.00,
+      'ex3-singing': 329.63,
+    }
+    const freq = freqMap[ph]
+    if (!freq) return
+    setReplaying(true)
+    playTone(freq, 1.5)
+    setTimeout(() => setReplaying(false), 1700)
+  }, [replaying])
+
   const startExercise = useCallback(async () => {
     if (started) return
     setStarted(true)
@@ -248,7 +265,16 @@ export default function VoiceLevel3Page() {
                   <p className="text-text-primary font-semibold mb-1">Sustain A4 for 4 seconds</p>
                   <p className="text-text-secondary text-xs mb-4">Sing on "la" and hold the pitch steady. Hold green for 4 continuous seconds.</p>
                   {phase === 'ex1-singing' && (
-                    <PitchIndicator status={pitchStatus} label="A4, 440 Hz, hold for 4 seconds" />
+                    <div className="space-y-3">
+                      <button
+                        onClick={replayNote}
+                        disabled={replaying}
+                        className="border border-primary/50 text-primary text-xs font-semibold px-4 py-2 rounded-lg hover:bg-primary/10 transition-colors disabled:opacity-40"
+                      >
+                        {replaying ? 'Playing...' : 'Replay A4 (440 Hz)'}
+                      </button>
+                      <PitchIndicator status={pitchStatus} label="A4, 440 Hz, hold for 4 seconds" />
+                    </div>
                   )}
                   {phase === 'ex1-playing' && !started && (
                     <button onClick={startExercise}
@@ -278,10 +304,19 @@ export default function VoiceLevel3Page() {
                     </p>
                   )}
                   {(phase === 'ex2-singing-c' || phase === 'ex2-singing-g') && (
-                    <PitchIndicator
-                      status={pitchStatus}
-                      label={`Sing ${phase === 'ex2-singing-c' ? 'C4' : 'G4'}, hold for 1.5 seconds`}
-                    />
+                    <div className="space-y-3">
+                      <button
+                        onClick={replayNote}
+                        disabled={replaying}
+                        className="border border-primary/50 text-primary text-xs font-semibold px-4 py-2 rounded-lg hover:bg-primary/10 transition-colors disabled:opacity-40"
+                      >
+                        {replaying ? 'Playing...' : `Replay ${phase === 'ex2-singing-c' ? 'C4 (262 Hz)' : 'G4 (392 Hz)'}`}
+                      </button>
+                      <PitchIndicator
+                        status={pitchStatus}
+                        label={`Sing ${phase === 'ex2-singing-c' ? 'C4' : 'G4'}, hold for 1.5 seconds`}
+                      />
+                    </div>
                   )}
                   <div className="flex gap-2 mt-4">
                     {Array.from({ length: 3 }, (_, i) => (
@@ -305,10 +340,19 @@ export default function VoiceLevel3Page() {
                     <p className="text-text-muted text-sm">Reference tone, E4 playing...</p>
                   )}
                   {phase === 'ex3-singing' && (
-                    <PitchIndicator
-                      status={pitchStatus}
-                      label={`Sing vowel "${VOWELS[Math.min(ex3Vowel, VOWELS.length - 1)]}" on E4, 1.5 seconds`}
-                    />
+                    <div className="space-y-3">
+                      <button
+                        onClick={replayNote}
+                        disabled={replaying}
+                        className="border border-primary/50 text-primary text-xs font-semibold px-4 py-2 rounded-lg hover:bg-primary/10 transition-colors disabled:opacity-40"
+                      >
+                        {replaying ? 'Playing...' : 'Replay E4 (330 Hz)'}
+                      </button>
+                      <PitchIndicator
+                        status={pitchStatus}
+                        label={`Sing vowel "${VOWELS[Math.min(ex3Vowel, VOWELS.length - 1)]}" on E4, 1.5 seconds`}
+                      />
+                    </div>
                   )}
                   <div className="flex gap-1.5 mt-4">
                     {VOWELS.map((v, i) => (

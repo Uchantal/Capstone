@@ -243,17 +243,17 @@ export default function VoiceCourse2Page() {
           )}
           {micReady && (
             <div className="space-y-3">
-              <PitchIndicator status={pitchStatus} label="Sing C4 and hold for 1.5 seconds" />
-              {cardCPassed && (
-                <div className="bg-secondary/5 border border-secondary/30 rounded-xl px-4 py-3">
-                  <p className="text-secondary font-semibold text-sm">You matched the pitch.</p>
-                  <p className="text-secondary text-xs mt-0.5">You can now continue to Level 1.</p>
-                </div>
-              )}
+              <PitchIndicator status={pitchStatus} label="Sing C4 and hold for 1.5 seconds (practice only)" />
             </div>
           )}
           {!micReady && (
             <p className="text-text-muted text-xs">Start the microphone above to begin pitch matching.</p>
+          )}
+          {cardCPassed && (
+            <div className="bg-secondary/5 border border-secondary/30 rounded-xl px-4 py-3 mt-3">
+              <p className="text-secondary font-semibold text-sm">You matched the pitch.</p>
+              <p className="text-secondary text-xs mt-0.5">Great work — this exercise is just for practice.</p>
+            </div>
           )}
         </div>
 
@@ -265,8 +265,7 @@ export default function VoiceCourse2Page() {
           )}
           <button
             onClick={handleContinue}
-            disabled={!cardCPassed}
-            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="bg-primary text-white font-semibold px-8 py-3 rounded-xl hover:bg-primary-dark transition-colors"
           >
             Continue to Level 1
           </button>
