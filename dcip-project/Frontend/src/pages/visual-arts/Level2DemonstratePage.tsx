@@ -55,6 +55,7 @@ export default function VALevel2DemonstratePage() {
     useVAEngagement('visual-arts', 'level2Demonstrate')
   const { state: critiqueState, runCritique, submitExplanation, skipCritique } = useCritiqueAI()
   const pendingRef = useRef<{ imageData: string; combined: number } | null>(null)
+  const [submittedSnapshot, setSubmittedSnapshot] = useState<string | null>(null)
 
   function recordInteraction() {
     recordEngInteraction()
@@ -80,6 +81,8 @@ export default function VALevel2DemonstratePage() {
   const handleSubmit = async () => {
     if (isPreviewMode) { setPassed(true); return }
     setSubmitting(true)
+    const canvasSnapshot = moduleRef.current?.getSnapshot() ?? ''
+    setSubmittedSnapshot(canvasSnapshot)
     const snapshot = moduleRef.current?.captureCleanImage() ?? ''
     const score = await computeAndSave()
     setEngagementScore(score)
@@ -217,6 +220,7 @@ export default function VALevel2DemonstratePage() {
         onToolChange={recordTool}
         sidebarFooter={sidebarFooter}
         draftKey={`${user?.id ?? 'anon'}:va:level2-demonstrate`}
+        initialSnapshot={submittedSnapshot ?? undefined}
       />
 
       {critiqueState.status === 'loading' && (

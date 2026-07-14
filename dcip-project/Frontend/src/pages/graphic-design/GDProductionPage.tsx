@@ -1,9 +1,9 @@
-﻿import { useEffect, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { usePreviewMode } from '../../hooks/usePreviewMode'
 import DesignCanvas, { DEFAULT_BG_COLOR, DEFAULT_ELEMENTS, exportDesignToDataUrl, DesignElement } from '../../components/graphic-design/PosterSurface'
 import { useGDDemonstrationProgress } from '../../hooks/useGDDemonstrationProgress'
-import { saveGDProductionResult, savePortfolioItem, completeGDProduction, fetchDraft, deleteDraft } from '../../services/api'
+import { saveGDProductionResult, savePortfolioItem, completeGDProduction, fetchDraft, saveDraft, deleteDraft } from '../../services/api'
 import CanvasInstructionPanel from '../../components/canvas/CanvasInstructionPanel'
 import { useGDEngagement } from '../../hooks/useCanvasEngagement'
 import AskAIHint from '../../components/ai/AskAIHint'
@@ -63,6 +63,9 @@ export default function GDProductionPage() {
   const { recordInteraction, recordElementChange, computeAndSave } =
     useGDEngagement('graphic-design', 'production')
 
+  const currentElementsRef = useRef<DesignElement[]>(elements)
+  const currentBgColorRef = useRef<string>(bgColor)
+
   const [draftEls, setDraftEls] = useState<DesignElement[] | null>(null)
   const [draftBg, setDraftBg] = useState<string | null>(null)
   const [draftChecked, setDraftChecked] = useState(false)
@@ -76,6 +79,16 @@ export default function GDProductionPage() {
       })
       .catch(() => {})
       .finally(() => setDraftChecked(true))
+  }, [])
+
+  useEffect(() => {
+    const autoSave = () => {
+      if (document.visibilityState !== 'hidden') return
+      const snapshot = JSON.stringify({ elements: currentElementsRef.current, bgColor: currentBgColorRef.current })
+      saveDraft({ discipline: 'graphic-design', snapshot }).catch(() => {})
+    }
+    document.addEventListener('visibilitychange', autoSave)
+    return () => document.removeEventListener('visibilitychange', autoSave)
   }, [])
 
   const allChecked = CHECKLIST.every(item => checked.has(item.id))
@@ -338,7 +351,7 @@ export default function GDProductionPage() {
           key={canvasKey}
           defaultElements={editParsed?.elements ?? draftEls ?? DEFAULT_ELEMENTS}
           defaultBgColor={editParsed?.bgColor ?? draftBg ?? DEFAULT_BG_COLOR}
-          onChange={(els, bg) => { setElements(els); setBgColor(bg); recordElementChange(els) }}
+          onChange={(els, bg) => { setElements(els); setBgColor(bg); currentElementsRef.current = els; currentBgColorRef.current = bg; recordElementChange(els) }}
           onInteraction={recordInteraction}
           onDimensionsChange={(w, h) => { setExportW(w); setExportH(h) }}
         />

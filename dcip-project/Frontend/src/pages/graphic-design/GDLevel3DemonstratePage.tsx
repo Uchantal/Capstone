@@ -97,6 +97,8 @@ export default function GDLevel3DemonstratePage() {
   const interactionCount = useRef(0)
   const { state: critiqueState, runCritique, submitExplanation, skipCritique } = useCritiqueAI()
   const pendingRef = useRef<{ imageData: string; combined: number } | null>(null)
+  const [submittedElements, setSubmittedElements] = useState<DesignElement[] | null>(null)
+  const [submittedBgColor, setSubmittedBgColor] = useState<string | null>(null)
   const { recordInteraction: recordEngInteraction, recordElementChange, computeAndSave } =
     useGDEngagement('graphic-design', 'level3Demonstrate')
 
@@ -113,6 +115,8 @@ export default function GDLevel3DemonstratePage() {
   const handleSubmit = async () => {
     if (isPreviewMode) { setPassed(true); return }
     setSubmitting(true)
+    setSubmittedElements(elements)
+    setSubmittedBgColor(bgColor)
     const imageData = await exportDesignToDataUrl(elements, bgColor, exportW, exportH)
     const score = await computeAndSave(elements)
     setEngagementScore(score)
@@ -164,8 +168,8 @@ export default function GDLevel3DemonstratePage() {
     setPassed(false)
     setCheckResult(null)
     interactionCount.current = 0
-    setElements(DEFAULT_ELEMENTS)
-    setBgColor(DEFAULT_BG_COLOR)
+    setElements(submittedElements ?? DEFAULT_ELEMENTS)
+    setBgColor(submittedBgColor ?? DEFAULT_BG_COLOR)
     setCanvasKey(k => k + 1)
   }
 

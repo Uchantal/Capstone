@@ -60,6 +60,7 @@ export default function VALevel1DemonstratePage() {
   const [passed, setPassed] = useState(false)
   const [engagementScore, setEngagementScore] = useState<number | null>(null)
   const [combinedScore, setCombinedScore] = useState<number | null>(null)
+  const [submittedSnapshot, setSubmittedSnapshot] = useState<string | null>(null)
   const { recordInteraction: recordEngInteraction, recordColour: recordEngColour, recordTool, computeAndSave } =
     useVAEngagement('visual-arts', 'level1Demonstrate')
   const { state: critiqueState, runCritique, submitExplanation, skipCritique } = useCritiqueAI()
@@ -90,6 +91,8 @@ export default function VALevel1DemonstratePage() {
   const handleSubmit = async () => {
     if (isPreviewMode) { setPassed(true); return }
     setSubmitting(true)
+    const canvasSnapshot = moduleRef.current?.getSnapshot() ?? ''
+    setSubmittedSnapshot(canvasSnapshot)
     const snapshot = moduleRef.current?.captureCleanImage() ?? ''
     const score = await computeAndSave()
     setEngagementScore(score)
@@ -133,6 +136,7 @@ export default function VALevel1DemonstratePage() {
     interactionCount.current = 0
     coloursUsedRef.current = new Set()
     setResetKey(k => k + 1)
+    // submittedSnapshot is kept so the canvas restores to what was submitted
   }
 
   if (!isPreviewMode && loading) {
@@ -225,6 +229,7 @@ export default function VALevel1DemonstratePage() {
         onColourUsed={handleColourUsed}
         onToolChange={recordTool}
         sidebarFooter={sidebarFooter}
+        initialSnapshot={submittedSnapshot ?? undefined}
         draftKey={`${user?.id ?? 'anon'}:va:level1-demonstrate`}
       />
 

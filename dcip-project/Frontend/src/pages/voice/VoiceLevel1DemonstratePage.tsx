@@ -43,6 +43,7 @@ export default function VoiceLevel1DemonstratePage() {
   const submittedRef    = useRef(false)
   const onPitchSinceRef = useRef<number | null>(null)
   const waveformRef     = useRef<HTMLCanvasElement>(null)
+  const runLoopRef      = useRef<() => void>(() => {})
 
   useEffect(() => {
     return () => { activeRef.current = false; cancelAnimationFrame(rafRef.current) }
@@ -72,6 +73,7 @@ export default function VoiceLevel1DemonstratePage() {
       setPromptIdx(next)
       onPitchSinceRef.current = null
       setPitchStatus('none')
+      rafRef.current = requestAnimationFrame(runLoopRef.current)
     }
   }, [reload])
 
@@ -92,15 +94,17 @@ export default function VoiceLevel1DemonstratePage() {
     } else {
       onPitchSinceRef.current = null
     }
-    rafRef.current = requestAnimationFrame(runLoop)
+    rafRef.current = requestAnimationFrame(runLoopRef.current)
   }, [analyserRef, advance])
+
+  useEffect(() => { runLoopRef.current = runLoop }, [runLoop])
 
   const startDemo = useCallback(async () => {
     const ok = await initMic()
     if (!ok) return
     activeRef.current = true
-    rafRef.current = requestAnimationFrame(runLoop)
-  }, [initMic, runLoop])
+    rafRef.current = requestAnimationFrame(runLoopRef.current)
+  }, [initMic])
 
   const handleSkip = () => {
     if (!activeRef.current) return
@@ -120,7 +124,7 @@ export default function VoiceLevel1DemonstratePage() {
     setAiFeedback('')
     setPhase('testing')
     activeRef.current = true
-    rafRef.current = requestAnimationFrame(runLoop)
+    rafRef.current = requestAnimationFrame(runLoopRef.current)
   }
 
   useEffect(() => {

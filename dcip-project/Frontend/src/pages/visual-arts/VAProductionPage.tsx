@@ -4,7 +4,7 @@ import { usePreviewMode } from '../../hooks/usePreviewMode'
 import { useAuth } from '../../hooks/useAuth'
 import VisualArtsModule, { VisualArtsModuleHandle } from '../../components/modules/VisualArtsModule'
 import { useVisualArtsDemonstrationProgress } from '../../hooks/useVisualArtsDemonstrationProgress'
-import { saveVAProductionResult, savePortfolioItem, completeVisualArtsProduction, fetchDraft, deleteDraft } from '../../services/api'
+import { saveVAProductionResult, savePortfolioItem, completeVisualArtsProduction, fetchDraft, saveDraft, deleteDraft } from '../../services/api'
 import { useVAEngagement } from '../../hooks/useCanvasEngagement'
 import { useCritiqueAI } from '../../hooks/useCritiqueAI'
 import AICritiqueModal from '../../components/ai/AICritiqueModal'
@@ -40,12 +40,24 @@ export default function VAProductionPage() {
 
   const [draftSnapshot, setDraftSnapshot] = useState<string | null>(null)
   const [draftChecked, setDraftChecked] = useState(false)
+  const [submittedSnapshot, setSubmittedSnapshot] = useState<string | null>(null)
 
   useEffect(() => {
     fetchDraft('visual-arts')
       .then(res => setDraftSnapshot(res.data.snapshot))
       .catch(() => {})
       .finally(() => setDraftChecked(true))
+  }, [])
+
+  useEffect(() => {
+    const autoSave = () => {
+      if (!moduleRef.current || document.visibilityState !== 'hidden') return
+      const snapshot = moduleRef.current.getSnapshot()
+      const thumb = moduleRef.current.captureCleanImage()
+      saveDraft({ discipline: 'visual-arts', snapshot, ...(thumb ? { thumbnailData: thumb } : {}) }).catch(() => {})
+    }
+    document.addEventListener('visibilitychange', autoSave)
+    return () => document.removeEventListener('visibilitychange', autoSave)
   }, [])
 
   const allChecked = PRODUCTION_CHECKLIST.every(item => checked.has(item.id))
@@ -65,6 +77,7 @@ export default function VAProductionPage() {
     setSubmitting(true)
     const imageData = moduleRef.current?.captureCleanImage() ?? ''
     const snapshot = moduleRef.current?.getSnapshot() ?? ''
+    setSubmittedSnapshot(snapshot)
     const score = await computeAndSave()
     setEngagementScore(score)
     pendingRef.current = { imageData, snapshot, engScore: score }
@@ -385,7 +398,7 @@ export default function VAProductionPage() {
         onColourUsed={recordColour}
         onToolChange={recordTool}
         sidebarFooter={sidebarFooter}
-        initialSnapshot={editSnapshot ?? undefined}
+        initialSnapshot={submittedSnapshot ?? editSnapshot ?? undefined}
         draftKey={editSnapshot ? undefined : `${user?.id ?? 'anon'}:va:production`}
       />
       <AskAIHint discipline="Visual Arts" context="Visual Arts — Production (create a complete original composition with at least three elements, intentional colour choice, and visible shading on at least one element)" side="left" />

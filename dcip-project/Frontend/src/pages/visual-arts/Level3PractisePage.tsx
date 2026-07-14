@@ -33,6 +33,17 @@ export default function VALevel3PractisePage() {
       .catch(() => {})
   }, [])
 
+  useEffect(() => {
+    const autoSave = () => {
+      if (!moduleRef.current || document.visibilityState !== 'hidden') return
+      const snapshot = moduleRef.current.getSnapshot()
+      const thumb = moduleRef.current.captureCleanImage()
+      saveDraft({ discipline: 'visual-arts', snapshot, ...(thumb ? { thumbnailData: thumb } : {}) }).catch(() => {})
+    }
+    document.addEventListener('visibilitychange', autoSave)
+    return () => document.removeEventListener('visibilitychange', autoSave)
+  }, [])
+
   function recordInteraction() {
     recordEngInteraction()
   }

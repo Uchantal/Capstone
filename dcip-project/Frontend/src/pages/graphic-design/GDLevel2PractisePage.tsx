@@ -43,6 +43,16 @@ export default function GDLevel2PractisePage() {
       .finally(() => setDraftReady(true))
   }, [])
 
+  useEffect(() => {
+    const autoSave = () => {
+      if (document.visibilityState !== 'hidden') return
+      const snapshot = JSON.stringify({ elements: currentElementsRef.current, bgColor: currentBgColorRef.current })
+      saveDraft({ discipline: 'graphic-design', snapshot }).catch(() => {})
+    }
+    document.addEventListener('visibilitychange', autoSave)
+    return () => document.removeEventListener('visibilitychange', autoSave)
+  }, [])
+
   function recordInteraction() {
     recordEngInteraction()
   }
