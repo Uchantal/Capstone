@@ -46,6 +46,7 @@ export default function VoiceLevel2Page() {
   const onPitchSinceRef = useRef<number | null>(null)
   const waveformRef     = useRef<HTMLCanvasElement>(null)
   const startedRef      = useRef(false)
+  const runLoopRef      = useRef<() => void>(() => {})
 
   useEffect(() => {
     return () => { cancelAnimationFrame(rafRef.current) }
@@ -80,15 +81,17 @@ export default function VoiceLevel2Page() {
         setTimeout(() => {
           phaseRef.current = 'singing'
           setPhase('singing')
-          rafRef.current = requestAnimationFrame(runLoop)
+          rafRef.current = requestAnimationFrame(runLoopRef.current)
         }, 1700)
         return
       }
     } else {
       onPitchSinceRef.current = null
     }
-    rafRef.current = requestAnimationFrame(runLoop)
+    rafRef.current = requestAnimationFrame(runLoopRef.current)
   }, [analyserRef, markStageVisited])
+
+  useEffect(() => { runLoopRef.current = runLoop }, [runLoop])
 
   const replayNote = useCallback(() => {
     if (replaying) return
@@ -106,9 +109,9 @@ export default function VoiceLevel2Page() {
     setTimeout(() => {
       phaseRef.current = 'singing'
       setPhase('singing')
-      rafRef.current = requestAnimationFrame(runLoop)
+      rafRef.current = requestAnimationFrame(runLoopRef.current)
     }, 1700)
-  }, [initMic, runLoop])
+  }, [initMic])
 
   if (loading) {
     return (

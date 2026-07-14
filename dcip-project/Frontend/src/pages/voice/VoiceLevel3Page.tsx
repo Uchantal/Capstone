@@ -50,6 +50,7 @@ export default function VoiceLevel3Page() {
   const ex2RepRef       = useRef(0)
   const ex3VowelRef     = useRef(0)
   const waveformRef     = useRef<HTMLCanvasElement>(null)
+  const runLoopRef      = useRef<() => void>(() => {})
 
   const TARGET_FREQ: Record<string, number> = {
     'ex1-singing': 440.00,
@@ -102,7 +103,7 @@ export default function VoiceLevel3Page() {
           transition('ex2-playing-c')
           setTimeout(() => {
             transition('ex2-singing-c')
-            rafRef.current = requestAnimationFrame(runLoop)
+            rafRef.current = requestAnimationFrame(runLoopRef.current)
           }, 1700)
           return
         }
@@ -112,7 +113,7 @@ export default function VoiceLevel3Page() {
           transition('ex2-playing-g')
           setTimeout(() => {
             transition('ex2-singing-g')
-            rafRef.current = requestAnimationFrame(runLoop)
+            rafRef.current = requestAnimationFrame(runLoopRef.current)
           }, 1700)
           return
         }
@@ -126,7 +127,7 @@ export default function VoiceLevel3Page() {
             transition('ex2-playing-c')
             setTimeout(() => {
               transition('ex2-singing-c')
-              rafRef.current = requestAnimationFrame(runLoop)
+              rafRef.current = requestAnimationFrame(runLoopRef.current)
             }, 1700)
           } else {
             // Start exercise 3
@@ -134,7 +135,7 @@ export default function VoiceLevel3Page() {
             transition('ex3-playing')
             setTimeout(() => {
               transition('ex3-singing')
-              rafRef.current = requestAnimationFrame(runLoop)
+              rafRef.current = requestAnimationFrame(runLoopRef.current)
             }, 1700)
           }
           return
@@ -149,7 +150,7 @@ export default function VoiceLevel3Page() {
             transition('ex3-playing')
             setTimeout(() => {
               transition('ex3-singing')
-              rafRef.current = requestAnimationFrame(runLoop)
+              rafRef.current = requestAnimationFrame(runLoopRef.current)
             }, 1700)
           } else {
             transition('complete')
@@ -162,9 +163,11 @@ export default function VoiceLevel3Page() {
     } else {
       onPitchSinceRef.current = null
     }
-    rafRef.current = requestAnimationFrame(runLoop)
+    rafRef.current = requestAnimationFrame(runLoopRef.current)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analyserRef, transition, markStageVisited])
+
+  useEffect(() => { runLoopRef.current = runLoop }, [runLoop])
 
   const replayNote = useCallback(() => {
     if (replaying) return
@@ -191,9 +194,9 @@ export default function VoiceLevel3Page() {
     playTone(440.00, 2.0)
     setTimeout(() => {
       transition('ex1-singing')
-      rafRef.current = requestAnimationFrame(runLoop)
+      rafRef.current = requestAnimationFrame(runLoopRef.current)
     }, 2200)
-  }, [started, initMic, transition, runLoop])
+  }, [started, initMic, transition])
 
   if (loading) {
     return (

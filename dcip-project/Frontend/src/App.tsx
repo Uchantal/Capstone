@@ -4,7 +4,7 @@ import { fetchMe } from './services/api'
 import { useAuth, AuthProvider } from './hooks/useAuth'
 import PreviewNavBar from './components/PreviewNavBar'
 
-// Lazy-loaded pages
+
 
 // Public
 const HomePage             = lazy(() => import('./pages/HomePage'))
