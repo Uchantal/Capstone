@@ -367,7 +367,7 @@ router.get('/analytics', protect, requireRole('admin'), async (_req: AuthRequest
       { key: 'graphic-design', label: 'Graphic Design', model: GDDemonstrationProgress },
       { key: 'guitar',         label: 'Guitar',         model: GuitarDemonstrationProgress },
       { key: 'piano',          label: 'Piano',          model: PianoDemonstrationProgress },
-      { key: 'voice',          label: 'Voice',          model: VoiceDemonstrationProgress },
+      { key: 'voice',          label: 'Voice and Singing', model: VoiceDemonstrationProgress },
     ]
 
     // 1. Discipline popularity — how many students per discipline (engagement scores)
