@@ -17,7 +17,7 @@ interface PortfolioItem {
 }
 
 function getDisciplineGroup(d: string): 'music' | 'visual-arts' | 'graphic-design' | null {
-  if (['piano', 'guitar', 'voice', 'music'].includes(d)) return 'music'
+  if (['piano', 'guitar', 'voice', 'music', 'music-piano', 'music-guitar', 'music-voice'].includes(d)) return 'music'
   if (d === 'visual-arts') return 'visual-arts'
   if (d === 'graphic-design') return 'graphic-design'
   return null
