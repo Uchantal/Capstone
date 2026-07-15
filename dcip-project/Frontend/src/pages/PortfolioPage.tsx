@@ -392,109 +392,99 @@ export default function PortfolioPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div className="space-y-3">
-                      {displayedItems.length === 0 ? (
-                        <div className="bg-white border border-surface-border rounded-xl p-8 text-center">
-                          <p className="text-text-primary font-semibold text-sm mb-1">No saved work on this date</p>
-                          <p className="text-text-muted text-xs">Try selecting a different day or click Show all.</p>
-                        </div>
-                      ) : displayedItems.map(item => (
+                  {displayedItems.length === 0 ? (
+                    <div className="bg-white border border-surface-border rounded-xl p-8 text-center">
+                      <p className="text-text-primary font-semibold text-sm mb-1">No saved work on this date</p>
+                      <p className="text-text-muted text-xs">Try selecting a different day or click Show all.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {displayedItems.map(item => (
                         <div
                           key={item._id}
                           onClick={() => handleView(item._id)}
-                          className="bg-white border border-surface-border rounded-xl px-5 py-4 hover:border-primary transition-colors cursor-pointer"
+                          className={`bg-white border rounded-xl overflow-hidden cursor-pointer transition-all hover:shadow-md ${
+                            selected?._id === item._id ? 'border-primary shadow-md' : 'border-surface-border hover:border-primary'
+                          }`}
                         >
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1 min-w-0">
-                              <p className="text-text-primary font-semibold text-sm truncate">{item.title}</p>
-                              <p className="text-text-secondary text-xs mt-0.5">
-                                {disciplineLabel(item.discipline)}, {new Date(item.createdAt).toLocaleDateString('en', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                              </p>
-                              {item.syncStatus && (
-                                <span className={`inline-block mt-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                                  item.syncStatus === 'synced' ? 'bg-secondary/10 text-secondary' : 'bg-primary-light text-primary'
-                                }`}>
-                                  {item.syncStatus === 'synced' ? 'Synced' : 'Pending'}
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-primary text-xs font-semibold shrink-0">View</span>
+                          {/* Thumbnail */}
+                          <div className="aspect-square bg-[#F9F7F4] flex items-center justify-center overflow-hidden">
+                            {item.fileType?.startsWith('image') && item.fileData ? (
+                              <img src={item.fileData} alt={item.title} className="w-full h-full object-cover" />
+                            ) : item.fileType?.startsWith('audio') ? (
+                              <div className="flex flex-col items-center gap-1 text-text-muted">
+                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
+                                </svg>
+                                <span className="text-[10px]">Audio</span>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center gap-1 text-text-muted">
+                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span className="text-[10px]">Work</span>
+                              </div>
+                            )}
                           </div>
-                          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-surface-border">
-                            {(item.discipline === 'visual-arts' || item.discipline === 'graphic-design') && (
-                              <button
-                                onClick={e => handleEdit(item, e)}
-                                className="bg-secondary text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
-                              >
-                                Edit
-                              </button>
-                            )}
-                            {item.fileType?.startsWith('image') && (
-                              <button
-                                onClick={e => handleDownload(item, e)}
-                                className="border border-surface-border text-text-secondary text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
-                              >
-                                Download
-                              </button>
-                            )}
-                            {item.fileType?.startsWith('audio') && (
-                              <button
-                                onClick={e => handleDownload(item, e)}
-                                className="border border-surface-border text-text-secondary text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
-                              >
-                                Download
-                              </button>
+                          {/* Info */}
+                          <div className="p-3">
+                            <p className="text-text-primary font-semibold text-xs truncate">{item.title}</p>
+                            <p className="text-text-muted text-[10px] mt-0.5">
+                              {new Date(item.createdAt).toLocaleDateString('en', { day: 'numeric', month: 'short' })}
+                            </p>
+                            {item.syncStatus === 'pending' && (
+                              <span className="inline-block mt-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary-light text-primary">Pending</span>
                             )}
                           </div>
                         </div>
                       ))}
                     </div>
+                  )}
 
-                    {/* Preview panel */}
-                    {selected && (
-                      <div className="bg-white border border-surface-border rounded-xl p-5 sticky top-6 h-fit">
-                        <div className="flex items-start justify-between mb-4">
-                          <div>
-                            <p className="text-text-primary font-semibold text-sm">{selected.title}</p>
-                            <p className="text-text-secondary text-xs">
-                              {disciplineLabel(selected.discipline)} · {new Date(selected.createdAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <button onClick={() => setSelected(null)} className="text-text-secondary text-xl leading-none hover:text-text-primary">x</button>
+                  {/* Preview panel — shown below grid when item selected */}
+                  {selected && (
+                    <div className="mt-6 bg-white border border-surface-border rounded-xl p-5">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <p className="text-text-primary font-semibold text-sm">{selected.title}</p>
+                          <p className="text-text-secondary text-xs">
+                            {disciplineLabel(selected.discipline)} · {new Date(selected.createdAt).toLocaleDateString()}
+                          </p>
                         </div>
-
-                        {selected.fileType === 'result' && (
-                          <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-4 text-center mb-4">
-                            <p className="text-secondary font-semibold text-sm mb-1">Demonstration Passed</p>
-                            <p className="text-text-secondary text-xs">{selected.fileData}</p>
-                          </div>
-                        )}
-                        {selected.fileType?.startsWith('image') && (
-                          <img src={selected.fileData} alt={selected.title} className="w-full rounded-lg border border-surface-border mb-4" />
-                        )}
-                        {selected.fileType?.startsWith('audio') && (
-                          <audio controls src={selected.fileData} className="w-full mb-4" />
-                        )}
-                        {(!selected.fileType || selected.fileType === 'audio/wav') && !selected.fileData?.startsWith('data:') && (
-                          <div className="bg-surface-warm rounded-lg p-4 text-center text-text-secondary text-sm mb-4">
-                            Audio session recorded
-                          </div>
-                        )}
-
-                        <div className="flex items-center gap-4">
-                          {selected.fileType !== 'result' && (
-                            <button onClick={e => handleDownload(selected, e)} className="text-secondary text-xs font-semibold hover:underline">
-                              Download
-                            </button>
-                          )}
-                          <button onClick={() => handleDelete(selected._id)} disabled={deleting} className="text-accent text-xs hover:underline disabled:opacity-40">
-                            Delete this item
-                          </button>
-                        </div>
+                        <button onClick={() => setSelected(null)} className="text-text-secondary text-xl leading-none hover:text-text-primary">×</button>
                       </div>
-                    )}
-                  </div>
+
+                      {selected.fileType === 'result' && (
+                        <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-4 text-center mb-4">
+                          <p className="text-secondary font-semibold text-sm mb-1">Demonstration Passed</p>
+                          <p className="text-text-secondary text-xs">{selected.fileData}</p>
+                        </div>
+                      )}
+                      {selected.fileType?.startsWith('image') && (
+                        <img src={selected.fileData} alt={selected.title} className="w-full max-h-96 object-contain rounded-lg border border-surface-border mb-4" />
+                      )}
+                      {selected.fileType?.startsWith('audio') && (
+                        <audio controls src={selected.fileData} className="w-full mb-4" />
+                      )}
+
+                      <div className="flex items-center gap-4 flex-wrap">
+                        {(selected.discipline === 'visual-arts' || selected.discipline === 'graphic-design') && (
+                          <button onClick={e => handleEdit(selected, e)} className="bg-secondary text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity">
+                            Edit
+                          </button>
+                        )}
+                        {selected.fileType !== 'result' && (
+                          <button onClick={e => handleDownload(selected, e)} className="border border-surface-border text-text-secondary text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">
+                            Download
+                          </button>
+                        )}
+                        <button onClick={() => handleDelete(selected._id)} disabled={deleting} className="text-accent text-xs hover:underline disabled:opacity-40 ml-auto">
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </>
               )
             })()}

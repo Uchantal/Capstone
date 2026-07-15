@@ -58,6 +58,7 @@ export default function VALevel3DemonstratePage() {
   const { state: critiqueState, runCritique, submitExplanation, skipCritique } = useCritiqueAI()
   const pendingRef = useRef<{ imageData: string; combined: number } | null>(null)
   const [submittedSnapshot, setSubmittedSnapshot] = useState<string | null>(null)
+  const [retryFeedback, setRetryFeedback] = useState<{ score: number; feedback: string; suggestions: string[] } | null>(null)
 
   function recordInteraction() {
     recordEngInteraction()
@@ -114,11 +115,18 @@ export default function VALevel3DemonstratePage() {
     ;(async () => {
       const finalScore = aiScore !== null ? Math.round(aiScore * 0.7 + combined * 0.3) : combined
       setCombinedScore(finalScore)
-      try {
-        if (finalScore >= 60) await completeVisualArtsDemonstration(3, true, imageData)
-      } catch {}
-      moduleRef.current?.clearDraft()
-      setPassed(true)
+      if (finalScore >= 60) {
+        try { await completeVisualArtsDemonstration(3, true, imageData) } catch {}
+        moduleRef.current?.clearDraft()
+        setPassed(true)
+      } else {
+        setCheckResult(null)
+        if (s.status === 'done' && s.feedback) {
+          setRetryFeedback({ score: finalScore, feedback: s.feedback, suggestions: s.suggestions })
+        } else {
+          setRetryFeedback({ score: finalScore, feedback: 'Your score was below 60. Review your work and try again.', suggestions: [] })
+        }
+      }
     })()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [critiqueState.status])
@@ -144,6 +152,20 @@ export default function VALevel3DemonstratePage() {
       <p className="text-text-muted text-[9px] uppercase tracking-wide mb-1 font-medium">Level 3 Task</p>
       <p className="text-text-primary font-semibold text-xs mb-1">A Small Complete Scene</p>
       <p className="text-text-secondary text-xs leading-relaxed mb-3">{TASK}</p>
+
+      {retryFeedback && (
+        <div className="mb-3 p-2.5 bg-amber-50 rounded-lg border border-amber-200">
+          <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">AI Feedback — Score: {retryFeedback.score}/100</p>
+          <p className="text-xs text-text-secondary leading-relaxed mb-1">{retryFeedback.feedback}</p>
+          {retryFeedback.suggestions.length > 0 && (
+            <ul className="space-y-1">
+              {retryFeedback.suggestions.map((s, i) => (
+                <li key={i} className="text-xs text-amber-700 flex items-start gap-1"><span className="flex-shrink-0">•</span><span>{s}</span></li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {checkResult && !checkResult.passed && (
         <div className="mb-3">

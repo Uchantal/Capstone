@@ -103,7 +103,6 @@ function LogoMenu({ onNavigate }: { onNavigate: (url: string) => void }) {
   const go = (url: string) => { setOpen(false); onNavigate(url) }
 
   const items = [
-    { label: 'Home',              sub: 'Landing page',                  url: '/'              },
     { label: 'My Dashboard',      sub: 'Overview and quick access',      url: '/dashboard'     },
     { label: 'My Portfolio',      sub: 'All your saved creative work',   url: '/portfolio'     },
     { label: 'DCIP Studio',       sub: 'Professional creative workspace', url: '/studio'       },

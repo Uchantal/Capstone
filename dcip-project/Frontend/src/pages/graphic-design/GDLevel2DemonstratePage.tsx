@@ -94,6 +94,9 @@ export default function GDLevel2DemonstratePage() {
   const pendingRef = useRef<{ imageData: string; combined: number } | null>(null)
   const [submittedElements, setSubmittedElements] = useState<DesignElement[] | null>(null)
   const [submittedBgColor, setSubmittedBgColor] = useState<string | null>(null)
+  const [retryFeedback, setRetryFeedback] = useState<{ score: number; feedback: string; suggestions: string[] } | null>(null)
+  const resetElementsRef = useRef<DesignElement[]>(_draftInit.current?.elements ?? DEFAULT_ELEMENTS)
+  const resetBgColorRef = useRef<string>(_draftInit.current?.bgColor ?? DEFAULT_BG_COLOR)
 
   function recordInteraction() {
     recordEngInteraction()
@@ -142,26 +145,44 @@ export default function GDLevel2DemonstratePage() {
     ;(async () => {
       const finalScore = aiScore !== null ? Math.round(aiScore * 0.7 + combined * 0.3) : combined
       setCombinedScore(finalScore)
-      try {
-        if (finalScore >= 60) {
+      if (finalScore >= 60) {
+        try {
           const snapshot = JSON.stringify({ elements, bgColor })
           await completeGDDemonstration(2, true, snapshot, imageData)
           reload()
+        } catch {}
+        clearDraft()
+        setPassed(true)
+      } else {
+        const els = submittedElements ?? DEFAULT_ELEMENTS
+        const bg = submittedBgColor ?? DEFAULT_BG_COLOR
+        resetElementsRef.current = els
+        resetBgColorRef.current = bg
+        setElements(els)
+        setBgColor(bg)
+        setCanvasKey(k => k + 1)
+        setCheckResult(null)
+        if (s.status === 'done' && s.feedback) {
+          setRetryFeedback({ score: finalScore, feedback: s.feedback, suggestions: s.suggestions })
+        } else {
+          setRetryFeedback({ score: finalScore, feedback: 'Your score was below 60. Review your work and try again.', suggestions: [] })
         }
-      } catch {}
-      clearDraft()
-      setPassed(true)
+      }
     })()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [critiqueState.status])
 
   const handleReset = () => {
+    const els = submittedElements ?? DEFAULT_ELEMENTS
+    const bg = submittedBgColor ?? DEFAULT_BG_COLOR
+    resetElementsRef.current = els
+    resetBgColorRef.current = bg
     clearDraft()
     setPassed(false)
     setCheckResult(null)
     interactionCount.current = 0
-    setElements(submittedElements ?? DEFAULT_ELEMENTS)
-    setBgColor(submittedBgColor ?? DEFAULT_BG_COLOR)
+    setElements(els)
+    setBgColor(bg)
     setCanvasKey(k => k + 1)
   }
 
@@ -198,6 +219,20 @@ export default function GDLevel2DemonstratePage() {
               <p className="text-text-secondary text-sm leading-relaxed mb-4">
                 Create a poster with strong, readable contrast between text and background. The colour mood should match the tone of your announcement.
               </p>
+
+              {retryFeedback && (
+                <div className="mb-4 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                  <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">AI Feedback — Score: {retryFeedback.score}/100</p>
+                  <p className="text-xs text-text-secondary leading-relaxed mb-2">{retryFeedback.feedback}</p>
+                  {retryFeedback.suggestions.length > 0 && (
+                    <ul className="space-y-1">
+                      {retryFeedback.suggestions.map((s, i) => (
+                        <li key={i} className="text-xs text-amber-700 flex items-start gap-1"><span className="flex-shrink-0">•</span><span>{s}</span></li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
 
               {checkResult && !checkResult.passed && (
                 <div className="mb-4 space-y-1">
@@ -239,8 +274,8 @@ export default function GDLevel2DemonstratePage() {
 
         <DesignCanvas
           key={canvasKey}
-          defaultElements={_draftInit.current?.elements ?? DEFAULT_ELEMENTS}
-          defaultBgColor={_draftInit.current?.bgColor ?? DEFAULT_BG_COLOR}
+          defaultElements={resetElementsRef.current}
+          defaultBgColor={resetBgColorRef.current}
           onChange={(els, bg) => { setElements(els); setBgColor(bg); recordElementChange(els); saveDraft(els, bg) }}
           onInteraction={recordInteraction}
           onDimensionsChange={(w, h) => { setExportW(w); setExportH(h) }}
